@@ -797,12 +797,12 @@ class HeaderControlState extends State<HeaderControl>
     );
   }
 
-  static void showPlayerInfo(
+  static Future<void> showPlayerInfo(
     BuildContext context, {
     required NativePlayer player,
-  }) {
-    final hwdec = player.getProperty('hwdec-current');
-    final volume = player.getProperty('volume');
+  }) async {
+    final hwdec = await player.getProperty('hwdec-current');
+    final volume = player.state.volume.toStringAsFixed(0);
     showDialog(
       context: context,
       builder: (context) {

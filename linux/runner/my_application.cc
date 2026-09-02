@@ -1,5 +1,6 @@
 #include "my_application.h"
 
+#include <cstdlib>
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -10,6 +11,7 @@
 struct _MyApplication {
   GtkApplication parent_instance;
   char **dart_entrypoint_arguments;
+  FlMethodChannel *hdr_channel;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -29,6 +31,58 @@ static gboolean window_delete_event_cb(GtkWidget *widget, GdkEvent *event,
   }
   // Return TRUE to prevent further processing of the delete event.
   return TRUE;
+}
+
+// Keep Linux conservative: a Wayland session alone does not prove that the
+// compositor exposes HDR color management or that the player has an HDR
+// surface. The app therefore remains on the SDR tone-map path.
+static void hdr_method_call_cb(FlMethodChannel * /*channel*/,
+                               FlMethodCall *method_call,
+                               gpointer /*user_data*/) {
+  const gchar *method = fl_method_call_get_name(method_call);
+  if (g_strcmp0(method, "resetOutput") == 0) {
+    fl_method_call_respond_success(method_call, fl_value_new_bool(true), nullptr);
+    return;
+  }
+  if (g_strcmp0(method, "configureOutput") == 0) {
+    g_autoptr(FlValue) response = fl_value_new_map();
+    fl_value_set_string_take(response, "backend", fl_value_new_string("linux-wayland-color-management"));
+    fl_value_set_string_take(response, "appliedColorSpace", fl_value_new_string("sdr"));
+    fl_value_set_string_take(response, "active", fl_value_new_bool(false));
+    fl_value_set_string_take(response, "failureReason", fl_value_new_string("wayland-color-management-not-integrated"));
+    fl_method_call_respond_success(method_call, response, nullptr);
+    return;
+  }
+  if (g_strcmp0(method, "probe") != 0) {
+    fl_method_call_respond_not_implemented(method_call, nullptr);
+    return;
+  }
+
+  const bool wayland = std::getenv("WAYLAND_DISPLAY") != nullptr;
+  const char *backend = std::getenv("GDK_BACKEND");
+  const bool forced_x11 = backend != nullptr && g_strrstr(backend, "x11") != nullptr;
+  const bool software = std::getenv("LIBGL_ALWAYS_SOFTWARE") != nullptr;
+  const char *reason = software
+      ? "linux-software-renderer"
+      : (forced_x11 || !wayland ? "linux-no-wayland-color-management"
+                                : "wayland-color-management-not-proven");
+  g_autoptr(FlValue) response = fl_value_new_map();
+  fl_value_set_string_take(response, "platform",
+                           fl_value_new_string("linux"));
+  fl_value_set_string_take(response, "nativeBackend",
+                           fl_value_new_string("none"));
+  fl_value_set_string_take(response, "displayHdr", fl_value_new_bool(false));
+  fl_value_set_string_take(response, "decoderHdr", fl_value_new_bool(false));
+  fl_value_set_string_take(response, "nativeOutput",
+                           fl_value_new_bool(false));
+  fl_value_set_string_take(response, "nativeOutputCapable",
+                           fl_value_new_bool(false));
+  fl_value_set_string_take(response, "nativeOutputActive",
+                           fl_value_new_bool(false));
+  fl_value_set_string_take(response, "toneMapping", fl_value_new_bool(true));
+  fl_value_set_string_take(response, "unsupportedReason",
+                           fl_value_new_string(reason));
+  fl_method_call_respond_success(method_call, response, nullptr);
 }
 
 // Implements GApplication::activate.
@@ -102,6 +156,16 @@ static void my_application_activate(GApplication *application) {
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
+  g_autoptr(FlPluginRegistrar) registrar =
+      fl_plugin_registry_get_registrar_for_plugin(FL_PLUGIN_REGISTRY(view),
+                                                  "piliplusx_hdr");
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  self->hdr_channel = fl_method_channel_new(
+      fl_plugin_registrar_get_messenger(registrar),
+      "piliplusx/hdr_capabilities", FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(self->hdr_channel,
+                                            hdr_method_call_cb, self, nullptr);
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
@@ -147,6 +211,7 @@ static void my_application_shutdown(GApplication *application) {
 // Implements GObject::dispose.
 static void my_application_dispose(GObject *object) {
   MyApplication *self = MY_APPLICATION(object);
+  g_clear_object(&self->hdr_channel);
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
@@ -160,7 +225,9 @@ static void my_application_class_init(MyApplicationClass *klass) {
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 
-static void my_application_init(MyApplication *self) {}
+static void my_application_init(MyApplication *self) {
+  self->hdr_channel = nullptr;
+}
 
 MyApplication *my_application_new() {
   // Set the program name to the application ID, which helps various systems

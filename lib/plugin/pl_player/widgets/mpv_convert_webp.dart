@@ -7,16 +7,15 @@ import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:ffi/ffi.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:media_kit/ffi/src/allocation.dart';
-import 'package:media_kit/ffi/src/utf8.dart';
 import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
-import 'package:media_kit/media_kit.dart';
 import 'package:media_kit/src/player/native/core/initializer.dart';
+import 'package:media_kit/src/player/native/core/native_library.dart';
 
 class MpvConvertWebp {
-  final _mpv = NativePlayer.mpv;
+  final _mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path));
   late final Pointer<generated.mpv_handle> _ctx;
   final _completer = Completer<bool>();
 
@@ -40,8 +39,7 @@ class MpvConvertWebp {
 
   Future<void> _init() async {
     final enableHA = Pref.enableHA;
-    _ctx = await Initializer.create(
-      _mpv,
+    _ctx = await Initializer(_mpv).create(
       _onEvent,
       options: {
         'o': outFile,
@@ -55,22 +53,26 @@ class MpvConvertWebp {
         if (enableHA) 'hwdec': '${Pref.hardwareDecoding},auto-copy', // transcode only support copy
       },
     );
-    NativePlayer.setHeader(
-      _mpv,
+    final name = 'http-header-fields'.toNativeUtf8();
+    final headers =
+        'User-Agent: ${BrowserUa.pc}\\nReferer: ${HttpString.baseUrl}'.toNativeUtf8();
+    _mpv.mpv_set_property_string(
       _ctx,
-      userAgent: BrowserUa.pc,
-      referer: HttpString.baseUrl,
+      name.cast(),
+      headers.cast(),
     );
+    calloc.free(name);
+    calloc.free(headers);
     if (progress != null) {
       _observeProperty('time-pos');
     }
     final level = (kDebugMode ? 'info' : 'error').toNativeUtf8();
-    _mpv.mpv_request_log_messages(_ctx, level);
+    _mpv.mpv_request_log_messages(_ctx, level.cast());
     calloc.free(level);
   }
 
   void dispose() {
-    Initializer.dispose(_ctx);
+    Initializer(_mpv).dispose(_ctx);
     _mpv.mpv_terminate_destroy(_ctx);
     if (!_completer.isCompleted) _completer.complete(false);
   }
@@ -81,11 +83,11 @@ class MpvConvertWebp {
     return _completer.future;
   }
 
-  Future<void>? _onEvent(Pointer<generated.mpv_event> event) {
+  Future<void> _onEvent(Pointer<generated.mpv_event> event) {
     switch (event.ref.event_id) {
       case generated.mpv_event_id.MPV_EVENT_PROPERTY_CHANGE:
         final prop = event.ref.data.cast<generated.mpv_event_property>().ref;
-        if (prop.name.toDartString() == 'time-pos' &&
+        if (prop.name.cast<Utf8>().toDartString() == 'time-pos' &&
             prop.format == generated.mpv_format.MPV_FORMAT_DOUBLE) {
           progress!.value = (prop.data.cast<Double>().value - start) / duration;
         }
@@ -95,9 +97,9 @@ class MpvConvertWebp {
         break;
       case generated.mpv_event_id.MPV_EVENT_LOG_MESSAGE:
         final log = event.ref.data.cast<generated.mpv_event_log_message>().ref;
-        final prefix = log.prefix.toDartString().trim();
-        final level = log.level.toDartString().trim();
-        final text = log.text.toDartString().trim();
+        final prefix = log.prefix.cast<Utf8>().toDartString().trim();
+        final level = log.level.cast<Utf8>().toDartString().trim();
+        final text = log.text.cast<Utf8>().toDartString().trim();
         debugPrint('WebpConvert: $level $prefix : $text');
         if (kDebugMode) {
           if (level == 'error' || level == 'fatal') _success = false;
@@ -112,14 +114,14 @@ class MpvConvertWebp {
         dispose();
         break;
     }
-    return null;
+    return Future.value();
   }
 
   void _command(List<String> args) {
     final pointers = args.map((e) => e.toNativeUtf8()).toList();
-    final arr = calloc<Pointer<Uint8>>(pointers.length + 1);
+    final arr = calloc<Pointer<Int8>>(pointers.length + 1);
     for (int i = 0; i < args.length; i++) {
-      arr[i] = pointers[i];
+      arr[i] = pointers[i].cast();
     }
 
     _mpv.mpv_command(_ctx, arr);
@@ -133,7 +135,7 @@ class MpvConvertWebp {
     _mpv.mpv_observe_property(
       _ctx,
       property.hashCode,
-      name,
+      name.cast(),
       generated.mpv_format.MPV_FORMAT_DOUBLE,
     );
 

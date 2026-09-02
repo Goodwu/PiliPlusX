@@ -1403,10 +1403,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               ignoring: !plPlayerController.enableDragSubtitle,
               child: Obx(
                 () => SubtitleView(
-                  controller: videoController,
+                  controller: plPlayerController.videoController!,
                   configuration: plPlayerController.subtitleConfig.value,
-                  enableDragSubtitle: plPlayerController.enableDragSubtitle,
-                  onUpdatePadding: plPlayerController.onUpdatePadding,
                 ),
               ),
             ),
@@ -2072,17 +2070,36 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             key: _videoKey,
             child: Obx(
               () {
+                final _ = plPlayerController.hdrSurfaceGeneration.value;
                 final videoFit = plPlayerController.videoFit.value;
+                final videoController = plPlayerController.videoController;
+                if (videoController == null) {
+                  return const SizedBox.expand();
+                }
+                // Keep the macOS texture on a plain render path.  The
+                // desktop Flutter texture backend can lose pixel-buffer
+                // frames when the native texture is nested under the flip /
+                // FittedBox transform chain; SDR playback does not need that
+                // transform path.
+                if (Platform.isMacOS) {
+                  return Video(
+                    controller: videoController,
+                    fill: widget.fill,
+                    aspectRatio: videoFit.aspectRatio,
+                    controls: null,
+                  );
+                }
                 return Transform.flip(
                   flipX: plPlayerController.flipX.value,
                   flipY: plPlayerController.flipY.value,
                   child: FittedBox(
                     fit: videoFit.boxFit,
                     alignment: widget.alignment,
-                    child: SimpleVideo(
-                      controller: plPlayerController.videoController!,
+                    child: Video(
+                      controller: videoController,
                       fill: widget.fill,
                       aspectRatio: videoFit.aspectRatio,
+                      controls: null,
                     ),
                   ),
                 );

@@ -160,9 +160,12 @@ class LiveRoomController extends GetxController {
   void _startSizeSub() {
     if (isPortrait.value) return;
     _stopSizeSub();
-    _sizeSub = plPlayerController.videoPlayerController?.stream.size.listen(
-      _onSizeChanged,
-    );
+    _sizeSub = plPlayerController.videoPlayerController?.stream.videoParams
+        .listen((params) {
+      final w = params.w;
+      final h = params.h;
+      if (w != null && h != null) _onSizeChanged((w, h));
+    });
   }
 
   void _stopSizeSub() {

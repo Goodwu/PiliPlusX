@@ -1,0 +1,14 @@
+{
+  "platform": "android",
+  "device": "<model and OS version>",
+  "displayMode": "<HDR10 / HLG / EDR / SDR>",
+  "systemColorSpace": "<system-reported output color space>",
+  "source": {
+    "primaries": "bt.2020",
+    "transfer": "smpte2084",
+    "matrix": "bt.2020-ncl"
+  },
+  "playerLog": "<path or immutable log identifier>",
+  "hdrSdrRatio": 0.0,
+  "notes": "Replace placeholders with measurements from the same device and playback session."
+}

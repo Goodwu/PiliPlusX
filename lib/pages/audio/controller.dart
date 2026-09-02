@@ -340,13 +340,14 @@ class AudioController extends GetxController
   }) async {
     await _initPlayerIfNeeded();
     final extras = audioFilterExtras(volume);
-    player
-      ?..setMediaHeader(
-        userAgent: ua,
-        // mpv cannot clear referer option
-        headers: {'Referer': ?referer},
-      )
-      ..open(Media(url, start: _start, extras: extras));
+    await player?.setProperty(
+      'http-header-fields',
+      [
+        'User-Agent: $ua',
+        if (referer != null) 'Referer: $referer',
+      ].join('\\n'),
+    );
+    await player?.open(Media(url, start: _start, extras: extras));
     _start = null;
   }
 

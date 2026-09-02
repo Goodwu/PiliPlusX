@@ -33,6 +33,7 @@ import 'package:PiliPlus/plugin/pl_player/models/audio_output_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/hwdec_type.dart';
+import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
@@ -268,6 +269,18 @@ abstract final class Pref {
         ? HwDecType.androidDefault
         : HwDecType.auto.hwdec,
   );
+
+  static HdrMode get hdrMode {
+    final value = _setting.get(
+      SettingBoxKey.hdrMode,
+      defaultValue: HdrMode.off.name,
+    );
+    final name = value is String ? value : HdrMode.off.name;
+    return HdrMode.values.firstWhere(
+      (mode) => mode.name == name,
+      orElse: () => HdrMode.off,
+    );
+  }
 
   static String get videoSync =>
       _setting.get(SettingBoxKey.videoSync, defaultValue: 'display-resample');
@@ -1115,12 +1128,7 @@ abstract final class Pref {
   static bool get enableDocProvider =>
       _setting.get(SettingBoxKey.enableDocProvider, defaultValue: false);
 
-  static Map<String, String> get customAppFont => Map<String, String>.from(
-    _setting.get(
-      SettingBoxKey.customAppFont,
-      defaultValue: const <String, String>{},
-    ),
-  );
+  static String? get appFont => _setting.get(SettingBoxKey.appFont);
 
   static bool get enableLandscapeAutoFullscreen =>
       _setting.get(

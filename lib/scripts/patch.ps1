@@ -2,6 +2,29 @@ param(
     [string]$platform = ""
 )
 
+function Apply-RequiredPatch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PatchPath
+    )
+
+    git apply --check $PatchPath
+    if ($LASTEXITCODE -eq 0) {
+        git apply $PatchPath
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "$PatchPath applied"
+            return
+        }
+    }
+
+    git apply --reverse --check $PatchPath
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "$PatchPath already applied"
+        return
+    }
+    throw "Unable to apply required patch: $PatchPath"
+}
+
 git config --global user.name "ci"
 git config --global user.email "example@example.com"
 
@@ -102,18 +125,8 @@ $MouseCursorPatch = "lib/scripts/mouse_cursor.patch"
 $GeetestIOSPatch = "lib/scripts/geetest_ios.patch"
 
 if ($platform.ToLower() -eq "ios") {
-    git apply $BottomSheetIOSPiliPlusPatch
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$BottomSheetIOSPiliPlusPatch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
-    git apply $GeetestIOSPatch
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$GeetestIOSPatch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch $BottomSheetIOSPiliPlusPatch
+    Apply-RequiredPatch $GeetestIOSPatch
 }
 
 Set-Location $env:FLUTTER_ROOT
@@ -176,12 +189,7 @@ foreach ($revert in $reverts) {
 }
 
 foreach ($patch in $patches) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }
 
 Set-Location $env:GITHUB_WORKSPACE
@@ -202,6 +210,8 @@ $TextFieldPatchMaterial = "lib/scripts/material/text_field.patch"
 
 $ScaffoldPatchMaterial = "lib/scripts/material/scaffold.patch"
 
+$ScaffoldAndroidPatchMaterial = "lib/scripts/material/scaffold_android.patch"
+
 $RefreshIndicatorPatchMaterial = "lib/scripts/material/refresh_indicator.patch"
 
 $TabsPatchMaterial = "lib/scripts/material/tabs.patch"
@@ -215,6 +225,7 @@ $PubCacheDir = "~/.pub-cache"
 switch ($platform.ToLower()) {
     "android" {
         $patches_material += $BottomSheetAndroidPatchMaterial
+        $patches_material += $ScaffoldAndroidPatchMaterial
     }
     "ios" {
         $patches_material += $BottomSheetIOSFlutterMaterialPatchMaterial
@@ -240,7 +251,7 @@ try {
 } catch {
 }
 
-flutter pub get
+flutter pub get --enforce-lockfile
 
 $MaterialUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
     Where-Object { $_.Name -like "material_ui-*" } |
@@ -260,12 +271,7 @@ Get-ChildItem -Path "$env:GITHUB_WORKSPACE/lib/scripts/material" -Filter *.patch
 cd $MaterialUiDir.FullName
 
 foreach ($patch in $patches_material) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }
 
 $BottomSheetIOSFlutterPatchCupertino = "lib/scripts/cupertino/bottom_sheet_ios_flutter.patch"
@@ -305,10 +311,5 @@ Get-ChildItem -Path "$env:GITHUB_WORKSPACE/lib/scripts/cupertino" -Filter *.patc
 cd $CupertinoUiDir.FullName
 
 foreach ($patch in $patches_cupertino) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }

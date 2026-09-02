@@ -1,0 +1,147 @@
+# HDR 验证账本
+
+更新时间：2026-09-02
+
+这份账本只记录已经执行的验证。构建成功、显示器能力探测或单元测试，均
+不能替代真实设备上的原生 HDR 验收。
+
+## 已验证
+
+| 项目 | 证据 | 结果 |
+| --- | --- | --- |
+| media-kit 来源固定 | `verify_media_kit_lock.py pubspec.lock --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b` | 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA |
+| workflow 引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b` | 7 个 workflow、8 个 lock 检查和 7 个发布 manifest 引用均使用同一完整 SHA |
+| HDR 决策 | `flutter test test/plugin/pl_player/hdr_test.dart` | 21 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
+| HDR channel 契约 | `python3 scripts/verify_hdr_channel.py` | Android、Pink、iOS、macOS、Windows、Linux、OHOS 共 7 个端点统一使用 `piliplusx/hdr_capabilities`，并检查结构化输出和能力拆分字段 |
+| 原生输出生命周期契约 | `python3 scripts/verify_hdr_channel.py`、`flutter test test/plugin/pl_player/hdr_test.dart` | 7 个端点均提供 `probe`、`configureOutput`、`resetOutput`；配置结果未获系统/播放器确认时统一 active=false；Dart 分离 capable/active 状态 |
+| Dart 静态检查 | `flutter analyze`（HDR 相关 3 个文件） | 无问题 |
+| Android patch 可应用 | material patch 链按 `patch.ps1` 顺序在临时副本应用 | 已内置 patch 会安全跳过，`scaffold_android.patch` 可应用，真实冲突仍阻断 |
+| 远端 fork | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-08b` | 当前提交 `0dd1535ec622c0e8560551b15800c75c3a07da95` |
+| 公共 HDR 生命周期分支 | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-public-api` | `ad22c36a9986a8418c81829821962009425cf5e5`，提供跨平台默认安全接口、Android PlatformView surface/dataspace 生命周期，以及 Linux system-libmpv ABI 回退；PiliPlusX 已加入兼容桥接，待各平台后端实现后再统一更新 lock |
+| 公共 API CI | GitHub Actions run `33548127882` | 16 个构建 job 和 4 个 package test job 全部成功（含 Android、iOS、Windows x64/ARM64、macOS、Linux、Web），1 个发布 manifest job 按分支条件跳过；仅记录为编译证据，不作为原生 HDR 验收 |
+| 公共 API 最新 CI | GitHub Actions run `33555639764` | 提交 `ad22c36a9986a8418c81829821962009425cf5e5` 的 17 个构建/打包 job 与 Linux、macOS、Web、Windows 四个长时 package-test job 全部成功；仅记录为编译/测试证据，不作为原生 HDR 验收 |
+| Android controller 重建修复 | `Goodwu/media-kit#2` 验证分支 | `cc7b62b239af113e1eb4d41ea0e7820128908b4b`，PR 仍为 draft，尚未合并 |
+
+## 未完成或证据不足
+
+- 本机 Android APK 编译已应用 `material_ui` 的已记录 API patch；仍受 Java 26
+  `jlink` 转换失败和第三方插件工具链问题影响，不能作为本机整包通过证据。
+- Apple、Windows、Linux、OHOS 的原生 HDR 输出尚未接通或证明；当前保持
+  Texture tone-map，并在能力状态中报告回退原因。
+- 尚未取得 Android HDR 真机与 SDR 设备的系统色彩空间、播放器元数据和
+  HDR/SDR ratio 记录；因此不能开启全局 `HdrMode.auto`。
+- 完整播放矩阵（DASH、缓存、切换、分 P、旋转、全屏、PiP、后台、字幕、
+  弹幕、截图）尚未完成逐平台真机验收。
+
+## 当前环境复核（2026-09-02）
+
+- 本机已检测到 Xcode 26.6、Flutter 3.47.2 和 macOS desktop target；`flutter
+  devices` 没有 Android 或 iOS 真机，`adb devices` 为空。
+- 本机 `flutter build macos --release` 已启动，但 Xcode 在
+  `-resolvePackageDependencies` 阶段等待 remote Swift packages；采样显示主线程
+  停留在 `waitForRemoteSourcePackagesToFinishLoading`，未进入源码编译，因此不能
+  记为 macOS 构建通过。
+- `dev` SSH 目标已确认是 x86_64 Ubuntu 22.04；GTK、mpv、Wayland headers、
+  Clang 和 Flutter 3.47.2 已安装，并同步了本机可用的 Git/hosted pub 缓存。
+  `flutter pub get --offline --enforce-lockfile` 已成功完成；该主机没有可见 GPU、
+  `DISPLAY` 或 `WAYLAND_DISPLAY`，因此当前仍不能做 Linux native HDR 验收。Lima
+  当前为 aarch64，不能替代 Linux x64 目标；VMware Fusion 已安装但未启动
+  Windows 客户机。
+- 在补齐依赖并应用 Flutter framework patches 后，Linux release 构建已进入
+  Ninja C++ 阶段；项目自身 `linux/runner/my_application.cc` 成功编译，随后第三方
+  `desktop_webview_window` 在 Ubuntu 22.04 的 libsoup 2.4 头文件下失败：
+  `g_date_time_get_seconds(SoupDate*)` 类型不匹配。该错误来自依赖版本兼容性，
+  不是 HDR channel 或 runner 代码错误；CI Linux 构建仍作为独立编译证据保留。
+- 在远程临时目录修正该第三方兼容调用后，34 个 Ninja 编译/插件链接步骤均通过，
+  但最终链接被 media-kit 下载的 `libmpv.so.2` 阻断：该二进制要求
+  `GLIBC_2.38/GLIBCXX_3.4.32`，而 Ubuntu 22.04 提供较旧运行时。该结果证明项目
+  runner、Linux channel 和 media-kit 插件源码已编译，剩余是预编译 libmpv 的发行版
+  ABI 兼容问题，未将临时依赖修改写回仓库。
+- media-kit 公共分支随后提交 `201617c6dd093f854c1753b03ccc17c1b3faebe6`，加入
+  `MEDIA_KIT_USE_SYSTEM_LIBMPV=ON` 选项；在 `dev` Ubuntu 22.04 以该选项构建后，
+  `flutter build linux --release --no-pub` 成功生成 x86_64 bundle。对应 CI run
+  `33555423714` 已触发（随后因 concurrency 被新提交取消）；随后自动选择旧 glibc
+  system-libmpv 的提交 `ad22c36a9986a8418c81829821962009425cf5e5` 已触发 CI run
+  `33555639764`，该 run 已完整成功。
+- 在 `dev` 的最终复验中清除 CMake 选项后，media-kit 自动检测到 `glibc 2.35` 并
+  选择系统 `/usr/lib/x86_64-linux-gnu/libmpv.so`；Linux x86_64 ELF binary 已成功
+  生成。该验证使用远程临时工作目录，不改变 PiliPlusX 本地工作树。
+- 该 SSH 会话没有 `DISPLAY` 或 `WAYLAND_DISPLAY`；启动 bundle 得到 GTK
+  `cannot open display`，因此远程环境只能证明构建，不能执行桌面启动或 HDR/SDR
+  运行时验收。
+
+## 复验入口
+
+```sh
+python3 scripts/verify_media_kit_lock.py pubspec.lock \
+  --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+python3 scripts/verify_workflow_media_kit_refs.py \
+  --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+flutter test test/plugin/pl_player/hdr_test.dart
+flutter analyze lib/plugin/pl_player/models/hdr.dart \
+  lib/plugin/pl_player/hdr_android.dart test/plugin/pl_player/hdr_test.dart
+```
+
+真实设备记录须先通过 `python3 scripts/verify_hdr_evidence.py <record.json>`；
+模板见 `docs/hdr-device-evidence.example.json`。模板中的占位值不能作为验收证据。
+
+## CI 长测试说明
+
+`media_kit/test/src/player/player_test.dart` 不是只做快速单元测试：当前文件有
+81 个 test declaration 和 102 个显式 `Future.delayed`，覆盖真实媒体打开、
+播放、HTTP header、playlist、seek 和状态切换等测试；其中 56 个测试声明了
+显式 timeout，最大为 5 分钟。测试中存在多处 30 秒、45 秒、1 分钟及更长的等待；
+CI 还分别在 Linux、macOS、Windows 和 Web runner 上执行完整测试集合。因此
+单个 package test 超过 30/45 分钟并不能单独证明 runner 卡死。应以 job
+handle、测试步骤是否仍为 `in_progress`、以及最终日志为准；不得用未经测量的
+workflow timeout 截断该测试集合。
+
+### Run 33521950254 的实际结果
+
+远端 `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-08b`、提交
+`dc72c14f4ef1b61ec4dede9a53e7d0ce55a827e5` 的完整日志已取得：
+
+| Job | 开始 | 结束 | 结果 |
+| --- | --- | --- | --- |
+| Web | 14:51:08Z | 15:22:13Z | 57 passed, 30 skipped |
+| Linux | 14:51:08Z | 15:27:41Z | 77 passed, 18 skipped |
+| Windows | 14:51:09Z | 15:28:45Z | 77 passed, 18 skipped |
+| macOS | 14:51:10Z | 15:29:54Z | 77 passed, 18 skipped |
+
+整条 workflow 为 `success`，20 个 job 成功、0 个失败或取消；发布 metadata
+job 因非默认分支条件而跳过。上述证据说明该测试集合在不同平台确实可能运行
+超过 30 分钟，但本次没有因 30/45 分钟限制中断。
+
+OHOS run `33526479029` 使用旧工具链时在依赖解析阶段失败：Flutter OHOS
+commit `3162ec7f` 内置 Dart `3.9.2`，而 `file_picker 12.1.3` 要求 Dart
+`>=3.10.0`；将其降级到 `11.0.3` 又会与 `media_kit_video` 的 `win32 ^6`
+约束冲突。修复提交 `6393db1a` 已改用固定的 OHOS Flutter commit
+`aa76d9bb`（Flutter tool 要求 Dart `^3.10.0-0`），并保留 `file_picker 12.1.3`。
+验证 PR `Goodwu/media-kit#1` 的首次 run `33527854415` 已失败在依赖解析：
+OHOS Flutter fork 的浅检出没有 release tag，Flutter 报告版本为
+`0.0.0-unknown`，因此 `file_picker 12.1.3` 被拒绝。提交 `4f154b66` 已在
+固定 commit 上创建本地 `3.44.9+ohos` build-metadata tag；后续 run 已确认依赖
+解析通过。该 PR 只包含 OHOS HAP job，主 CI 的完整矩阵已限定为 `main/dev`
+目标 PR。
+
+后续验证显示 `3.44.9+ohos` 的依赖解析已成功，但使用 OHOS SDK
+`5.1.0.125 (API 18)` 构建时出现 29 个 ArkTS API 编译错误，使用
+`6.1.1.125 (API 24)` 仍有 15 个错误；最终固定到 CLI `26.0.0.621` 后构建通过。
+
+最终 OHOS 验证 PR 已合并到 `integration/piliplusx-hdr-08b`，合并提交为
+`0dd1535e`。run `33534063631` 完整成功：使用固定 Flutter OHOS commit
+`aa76d9bbeee7806a87dbd202d2550dfd11550b82`（CI 标记为 `3.44.9+ohos`）和
+HarmonyOS CLI `26.0.0.621`，严格解析 `pubspec.ohos.lock`，以
+`--no-codesign` 生成 `entry-default-unsigned.hap`，并验证 HAP 内的
+`libs/arm64-v8a`、manifest 和 SHA256。manifest 中记录的 HAP SHA256 为
+`fdeeb31b16d8ea7d5ff17465bf7770d87d26b899e30e00f564a0c6c8474f8aab`。
+
+Windows ARM64 的首次失败 run `33534958536` 已定位为 Flutter detached checkout
+报告 `0.0.0-unknown`，并非 ARM64 编译失败。提交 `09b8fa4a` 在固定 Flutter
+commit `d3b14c876900e553bc736ca19295fc09e3853e8e` 上创建本地 `3.47.2` tag；
+修复 run `33536180435` 已验证依赖解析、Windows ARM64 构建、打包和 artifact
+上传均成功。该 run 后续因重复 package tests 被取消，不影响上述已完成 job。
+
+远端 fork 的手动构建 run `33537336517` 使用 `run_package_tests=false`，四组
+长 package tests 均为 `skipped`，构建矩阵独立运行；对应改动已提交到 draft PR
+`Goodwu/media-kit#2`。

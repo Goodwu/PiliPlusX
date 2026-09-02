@@ -1,0 +1,32 @@
+// Unsigned CI profile. Keep signingConfigs empty so CI cannot publish a
+// misleadingly signed artifact. Device-specific signing stays local.
+{
+  app: {
+    signingConfigs: [],
+    products: [
+      {
+        name: "default",
+        compatibleSdkVersion: "5.0.3(15)",
+        runtimeOS: "HarmonyOS",
+        targetSdkVersion: "5.0.3(15)",
+      },
+    ],
+    buildModeSet: [
+      {
+        name: "release",
+      },
+    ],
+  },
+  modules: [
+    {
+      name: "entry",
+      srcPath: "./entry",
+      targets: [
+        {
+          name: "default",
+          applyToProducts: ["default"],
+        },
+      ],
+    },
+  ],
+}

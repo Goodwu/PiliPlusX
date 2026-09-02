@@ -76,7 +76,7 @@ import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:media_kit/media_kit.dart' hide Subtitle;
+import 'package:media_kit/media_kit.dart';
 
 class VideoDetailController extends GetxController
     with GetTickerProviderStateMixin, BlockMixin {
@@ -753,6 +753,8 @@ class VideoDetailController extends GetxController
       width: firstVideo.width,
       height: firstVideo.height,
       volume: volume,
+      initialVideoQuality: firstVideo.quality.code,
+      initialVideoCodec: firstVideo.codecs,
       autoFullScreenFlag: autoFullScreenFlag,
     );
 

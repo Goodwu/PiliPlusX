@@ -33,6 +33,8 @@ abstract final class SettingBoxKey {
       playerVolume = 'playerVolume',
       maxVolume = 'maxVolume';
 
+  static const String hdrMode = 'hdrMode';
+
   static const String enableVerticalExpand = 'enableVerticalExpand',
       feedBackEnable = 'feedBackEnable',
       enableLongShowControl = 'enableLongShowControl',

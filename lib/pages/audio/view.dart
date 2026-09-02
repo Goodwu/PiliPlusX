@@ -641,7 +641,7 @@ class _AudioPageState extends State<AudioPage> {
                     dense: true,
                     leading: const Icon(Icons.volume_up, size: 20),
                     title: Text(
-                      '播放器音量: ${player.getProperty('volume').subLength(3)}%',
+                      '播放器音量: ${player.state.volume.toStringAsFixed(0)}%',
                       style: const TextStyle(fontSize: 14),
                     ),
                     onTap: () {

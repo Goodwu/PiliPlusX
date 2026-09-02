@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription, Timer;
+import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:convert' show ascii, utf8;
 import 'dart:io' show Platform;
 import 'dart:math' show max, min;
@@ -26,10 +26,12 @@ import 'package:PiliPlus/plugin/pl_player/models/double_tap_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/duration.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
+import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:PiliPlus/plugin/pl_player/hdr_android.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/android/android_helper.dart';
@@ -51,7 +53,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/services.dart' show HapticFeedback, DeviceOrientation;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -233,8 +235,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
     final Size size;
     final state = videoPlayerController!.state;
-    int width = state.width;
-    int height = state.height;
+    int width = state.width ?? 0;
+    int height = state.height ?? 0;
     if (width == 0) {
       width = this.width ?? 16;
     }
@@ -366,6 +368,30 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   late int cacheAudioQa = Pref.defaultAudioQa;
   bool enableHeart = true;
   late final String? hwdec = Pref.enableHA ? Pref.hardwareDecoding : null;
+  HdrCapabilities _hdrCapabilities = const HdrCapabilities(
+    unsupportedReason: 'not-probed',
+  );
+  HdrSourceMetadata _hdrSource = const HdrSourceMetadata(
+    kind: HdrSourceKind.unknown,
+  );
+  String? _hdrCodecHint;
+  String? _hdrProbedCodec;
+  HdrPlaybackDecision _hdrDecision = const HdrPlaybackDecision(
+    output: HdrOutputMode.sdr,
+    vo: 'gpu-next',
+    hwdec: 'auto',
+    surface: 'texture',
+    reason: 'source-not-detected',
+  );
+  final hdrSurfaceGeneration = 0.obs;
+  bool _hdrOutputRebuildInFlight = false;
+  bool? _queuedHdrOutputRebuildHcpp;
+  bool? _queuedHdrOutputRebuildSurfaceView;
+  String? _lastHdrDiagnostic;
+
+  HdrCapabilities get hdrCapabilities => _hdrCapabilities;
+  HdrSourceMetadata get hdrSource => _hdrSource;
+  HdrPlaybackDecision get hdrDecision => _hdrDecision;
 
   late final progressType = Pref.btmProgressBehavior;
   late final enableQuickDouble = Pref.enableQuickDouble;
@@ -399,8 +425,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   SubtitleViewConfiguration get getSubConfig {
     final subTitleStyle = this.subTitleStyle;
     return SubtitleViewConfiguration(
-      style: subTitleStyle,
-      strokeStyle: subtitleBgOpacity == 0
+      style: subtitleBgOpacity == 0
           ? subTitleStyle.copyWith(
               color: null,
               background: null,
@@ -410,13 +435,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = subtitleStrokeWidth,
             )
-          : null,
+          : subTitleStyle,
       padding: EdgeInsets.only(
         left: subtitlePaddingH.toDouble(),
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
-      textScaleFactor: 1,
+      textScaler: TextScaler.noScaling,
     );
   }
 
@@ -513,7 +538,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     switch (orientation) {
       case .portraitUp:
         if (!_isVertical && controlsLock.value) return;
-        if (!_isVertical && isFullScreen &&
+        if (!_isVertical &&
+            isFullScreen &&
             (!horizontalScreen || enableLandscapeAutoFullscreen)) {
           if (!isManualFS) {
             triggerFullScreen(status: false, orientation: orientation);
@@ -613,9 +639,26 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     VoidCallback? onInit,
     Volume? volume,
     bool autoFullScreenFlag = false,
+    int? initialVideoQuality,
+    String? initialVideoCodec,
   }) async {
     try {
       _processing = true;
+      _hdrCodecHint = initialVideoCodec;
+      _hdrProbedCodec = null;
+      _queuedHdrOutputRebuildHcpp = null;
+      _queuedHdrOutputRebuildSurfaceView = null;
+      _hdrSource = HdrSourceMetadata.fromBilibiliHints(
+        quality: initialVideoQuality,
+        codec: initialVideoCodec,
+      );
+      _hdrDecision = const HdrPlaybackDecision(
+        output: HdrOutputMode.sdr,
+        vo: 'gpu-next',
+        hwdec: 'auto',
+        surface: 'texture',
+        reason: 'source-not-detected',
+      );
       this.isLive = isLive;
       _videoType = videoType ?? VideoType.ugc;
       this.width = width;
@@ -736,6 +779,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     assert(_videoPlayerController == null);
     final opt = {
       'video-sync': Pref.videoSync,
+      if (Pref.hdrMode == HdrMode.off) ...{
+        'target-prim': 'bt.709',
+        'target-trc': 'bt.1886',
+      },
       if (Platform.isAndroid) 'ao': Pref.audioOutput,
       'volume':
           (PlatformUtils.isMobile ? Pref.playerVolume : volume.value * 100)
@@ -756,20 +803,331 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
     assert(_videoController == null);
 
-    _videoController = await VideoController.create(
-      player,
-      configuration: VideoControllerConfiguration(
-        enableHardwareAcceleration: hwdec != null,
-        androidAttachSurfaceAfterVideoParameters: false,
-        hwdec: hwdec,
-      ),
+    _hdrCapabilities = await HdrAndroid.probe(codec: _hdrCodecHint);
+    _hdrProbedCodec = _hdrCodecHint;
+    _hdrDecision = HdrDecision.choose(
+      mode: Pref.hdrMode,
+      source: _hdrSource,
+      capabilities: _hdrCapabilities,
+      hwdec: hwdec ?? 'auto',
     );
+    if (Platform.isAndroid && !_hdrDecision.useHcpp) {
+      await HdrAndroid.setWindowHdrMode(hdr: false);
+    }
+    debugPrint(
+      'HDR capabilities: platform=${_hdrCapabilities.platform}, '
+      'display=${_hdrCapabilities.displayHdr}, '
+      'decoder=${_hdrCapabilities.decoderHdr}, '
+      'vulkan=${_hdrCapabilities.vulkan}, '
+      'hcpp=${_hdrCapabilities.canHcpp}, '
+      'reason=${_hdrCapabilities.unsupportedReason}',
+    );
+    // The device capability alone must not force HCPP for SDR or an unknown
+    // source. The decision also includes the source metadata and user mode.
+    final useHcpp = _hdrDecision.useHcpp;
 
-    player.setMediaHeader(userAgent: BrowserUa.pc, referer: HttpString.baseUrl);
+    try {
+      _videoController = await VideoController.create(
+        player,
+        configuration: _videoConfiguration(hcpp: useHcpp),
+      );
+    } on Object catch (error) {
+      if (!useHcpp) {
+        _hdrCapabilities = _hdrCapabilities.copyWith(
+          unsupportedReason: 'surface-init-failed:${error.runtimeType}',
+        );
+        _videoController = await VideoController.create(
+          player,
+          configuration: _videoConfiguration(hcpp: false, texture: true),
+        );
+      } else {
+        _hdrCapabilities = _hdrCapabilities.copyWith(
+          hcpp: false,
+          unsupportedReason: 'hcpp-init-failed:${error.runtimeType}',
+        );
+        _refreshHdrDecision();
+        if (kDebugMode) {
+          debugPrint(
+            'HCPP initialization failed; falling back to SurfaceView: $error',
+          );
+        }
+        try {
+          _videoController = await VideoController.create(
+            player,
+            configuration: _videoConfiguration(
+              hcpp: false,
+              surfaceView: true,
+            ),
+          );
+        } catch (surfaceError) {
+          _hdrCapabilities = _hdrCapabilities.copyWith(
+            unsupportedReason:
+                'surface-init-failed:${surfaceError.runtimeType}',
+          );
+          _videoController = await VideoController.create(
+            player,
+            configuration: _videoConfiguration(hcpp: false, texture: true),
+          );
+        }
+      }
+    }
 
     _startListeners(player);
 
     return player;
+  }
+
+  VideoControllerConfiguration _videoConfiguration({
+    required bool hcpp,
+    bool texture = false,
+    bool surfaceView = false,
+  }) => VideoControllerConfiguration(
+    vo: Platform.isAndroid
+        ? hcpp
+              ? 'gpu'
+              : surfaceView
+              ? 'mediacodec_embed'
+              : null
+        : null,
+    enableHardwareAcceleration: hwdec != null,
+    androidAttachSurfaceAfterVideoParameters: false,
+    hwdec: hwdec,
+    enableAndroidSurfaceProducer: !hcpp && !texture,
+    usePlatformView: hcpp,
+    useHCPP: hcpp,
+  );
+
+  Future<void> _rebuildVideoOutput({
+    required bool hcpp,
+    bool surfaceView = false,
+  }) async {
+    final player = _videoPlayerController;
+    final old = _videoController;
+    if (player == null || old == null) return;
+    final reapplyNativeColorSpace =
+        hcpp &&
+        _hdrCapabilities.nativeOutput &&
+        _hdrSource.hasNativeColorMetadata;
+    if (Platform.isAndroid && !hcpp) {
+      await HdrAndroid.setWindowHdrMode(hdr: false);
+    }
+    try {
+      final platform = await old.platform.future;
+      await platform.disposeForRebuild();
+    } catch (error) {
+      debugPrint('HDR output dispose failed: $error');
+    }
+    _videoController = null;
+    hdrSurfaceGeneration.value++;
+    try {
+      _videoController = await VideoController.create(
+        player,
+        configuration: _videoConfiguration(
+          hcpp: hcpp,
+          surfaceView: surfaceView,
+        ),
+      );
+      hdrSurfaceGeneration.value++;
+      if (reapplyNativeColorSpace) {
+        final applied = await _setHdrColorSpace(player);
+        if (!applied) {
+          _hdrCapabilities = _hdrCapabilities.copyWith(
+            nativeOutput: false,
+            nativeOutputCapable: false,
+            nativeOutputActive: false,
+            hcpp: false,
+            unsupportedReason: 'hdr-dataspace-reapply-failed',
+          );
+          _refreshHdrDecision();
+          _requestHdrOutputRebuild(hcpp: false, surfaceView: true);
+          return;
+        }
+        debugPrint('HDR dataspace reapplied after output rebuild');
+      }
+    } catch (error) {
+      Object failure = error;
+      if (hcpp) {
+        _hdrCapabilities = _hdrCapabilities.copyWith(
+          hcpp: false,
+          unsupportedReason: 'hcpp-rebuild-failed:${error.runtimeType}',
+        );
+        _refreshHdrDecision();
+        try {
+          _videoController = await VideoController.create(
+            player,
+            configuration: _videoConfiguration(
+              hcpp: false,
+              surfaceView: true,
+            ),
+          );
+          hdrSurfaceGeneration.value++;
+          await HdrAndroid.setWindowHdrMode(hdr: false);
+          debugPrint('HDR output fallback: HCPP -> SurfaceView');
+          return;
+        } catch (surfaceError) {
+          failure = surfaceError;
+        }
+      }
+      _hdrCapabilities = _hdrCapabilities.copyWith(
+        unsupportedReason: 'surface-rebuild-failed:${failure.runtimeType}',
+      );
+      try {
+        _videoController = await VideoController.create(
+          player,
+          configuration: _videoConfiguration(hcpp: false, texture: true),
+        );
+        hdrSurfaceGeneration.value++;
+        debugPrint('HDR output fallback: SurfaceView -> Texture');
+        return;
+      } catch (textureError) {
+        failure = textureError;
+      }
+      _hdrCapabilities = _hdrCapabilities.copyWith(
+        hcpp: false,
+        unsupportedReason: 'output-rebuild-failed:${failure.runtimeType}',
+      );
+      _refreshHdrDecision();
+      await HdrAndroid.setWindowHdrMode(hdr: false);
+      debugPrint('HDR output rebuild failed: $failure');
+    }
+  }
+
+  void _requestHdrOutputRebuild({
+    required bool hcpp,
+    bool surfaceView = false,
+  }) {
+    if (_hdrOutputRebuildInFlight) {
+      _queuedHdrOutputRebuildHcpp = hcpp;
+      _queuedHdrOutputRebuildSurfaceView = surfaceView;
+      return;
+    }
+    _hdrOutputRebuildInFlight = true;
+    unawaited(
+      _rebuildVideoOutput(hcpp: hcpp, surfaceView: surfaceView).whenComplete(
+        () {
+          _hdrOutputRebuildInFlight = false;
+          final queued = _queuedHdrOutputRebuildHcpp;
+          final queuedSurfaceView = _queuedHdrOutputRebuildSurfaceView ?? false;
+          _queuedHdrOutputRebuildHcpp = null;
+          _queuedHdrOutputRebuildSurfaceView = null;
+          if (queued != null) {
+            _requestHdrOutputRebuild(
+              hcpp: queued,
+              surfaceView: queuedSurfaceView,
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  String _hdrOutputSignature(HdrPlaybackDecision decision) =>
+      '${decision.output.name}:${decision.surface}:${decision.useHcpp}';
+
+  void _refreshHdrDecision() {
+    _hdrDecision = HdrDecision.choose(
+      mode: Pref.hdrMode,
+      source: _hdrSource,
+      capabilities: _hdrCapabilities,
+      hwdec: hwdec ?? 'auto',
+    );
+  }
+
+  Future<void> _refreshHdrCapabilitiesForCodec(String codec) async {
+    if (!Platform.isAndroid || codec == _hdrProbedCodec) return;
+    final previousDecision = _hdrDecision;
+    final capabilities = await HdrAndroid.probe(codec: codec);
+    _hdrProbedCodec = codec;
+    _hdrCapabilities = capabilities;
+    _refreshHdrDecision();
+    debugPrint(
+      'HDR capabilities refreshed for codec=$codec: '
+      'decoder=${capabilities.decoderHdr}, '
+      'profiles=${capabilities.decoderProfiles.join(",")}, '
+      'reason=${capabilities.unsupportedReason}',
+    );
+    if (_hdrOutputSignature(previousDecision) !=
+            _hdrOutputSignature(_hdrDecision) &&
+        _videoController != null) {
+      _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
+    }
+  }
+
+  Future<bool> _setHdrColorSpace(Player player) async {
+    if (!Platform.isAndroid || !_hdrSource.hasNativeColorMetadata) {
+      return false;
+    }
+    if (!await HdrAndroid.setWindowHdrMode(hdr: true)) {
+      return false;
+    }
+    final handle = await player.handle;
+    final applied = await HdrAndroid.setColorSpace(
+      handle: handle,
+      transfer: _hdrSource.transfer,
+    );
+    if (!applied) return false;
+    // Newer media-kit revisions own the native-output lifecycle. Keep a
+    // dynamic compatibility bridge so older locked revisions still use the
+    // legacy channel path while the public API branch can verify the actual
+    // surface and renderer configuration.
+    final videoController = _videoController;
+    if (videoController != null) {
+      try {
+        final platform = await videoController.platform.future;
+        final dynamic nativePlatform = platform;
+        final created = await nativePlatform.createNativeOutput(
+          surfaceId: handle.toString(),
+          windowHandle: handle,
+        );
+        if (created != true) return false;
+        final configured = await nativePlatform.configureHdrOutput(
+          HdrOutputConfiguration(
+            transfer: _hdrSource.transfer,
+            primaries: _hdrSource.primaries,
+            matrix: _hdrSource.matrix,
+            surfaceId: handle.toString(),
+            surfaceGeneration: hdrSurfaceGeneration.value,
+          ).toMap(),
+        );
+        if (configured is! Map || configured['active'] != true) return false;
+      } on NoSuchMethodError {
+        // The currently locked media-kit may predate the public lifecycle API.
+      } catch (error) {
+        debugPrint('media-kit native output configuration failed: $error');
+        return false;
+      }
+    }
+    final output = await HdrAndroid.configureOutput(
+      HdrOutputConfiguration(
+        transfer: _hdrSource.transfer,
+        primaries: _hdrSource.primaries,
+        matrix: _hdrSource.matrix,
+        surfaceId: handle.toString(),
+        surfaceGeneration: hdrSurfaceGeneration.value,
+      ),
+    );
+    return output.active;
+  }
+
+  Future<void> _applyHdrOutputParameters(Player player) async {
+    final native = _hdrDecision.output == HdrOutputMode.nativeHdr;
+    final transfer = switch (_hdrSource.transfer) {
+      HdrTransfer.hlg => 'arib-std-b67',
+      HdrTransfer.pq => 'pq',
+      _ => 'bt.1886',
+    };
+    final values = <String, String>{
+      'target-prim': native ? 'bt.2020' : 'bt.709',
+      'target-trc': native ? transfer : 'bt.1886',
+      'tone-mapping': native ? 'no' : 'bt.2390',
+    };
+    try {
+      for (final entry in values.entries) {
+        await player.setProperty(entry.key, entry.value);
+      }
+    } catch (error) {
+      debugPrint('HDR output parameter update failed: $error');
+    }
   }
 
   late final buffer = Pref.initBuffer(_playbackSpeed.value);
@@ -833,6 +1191,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       Media(
         video,
         start: seekTo,
+        httpHeaders: {
+          'User-Agent': BrowserUa.pc,
+          'Referer': HttpString.baseUrl,
+        },
         extras: extras.isEmpty ? null : extras,
       ),
       play: false,
@@ -956,6 +1318,115 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       stream.duration.listen(updateDuration),
       stream.buffer.listen((Duration buffer) {
         buffered.value = buffer.inSeconds;
+      }),
+      stream.tracks.listen((tracks) {
+        // Track metadata carries the decoder's codec name, which is the
+        // earliest reliable correction to the Bilibili quality/codec guess.
+        for (final track in tracks.video) {
+          final codec = track.codec;
+          if (codec != null && codec.isNotEmpty) {
+            _hdrCodecHint = codec;
+            if (Platform.isAndroid && codec != _hdrProbedCodec) {
+              unawaited(_refreshHdrCapabilitiesForCodec(codec));
+            }
+            break;
+          }
+        }
+      }),
+      stream.videoParams.listen((params) {
+        final previousDecision = _hdrDecision;
+        final corrected = HdrSourceMetadata.fromMpvProperties({
+          ...?(_hdrCodecHint == null ? null : {'codec': _hdrCodecHint!}),
+          if (params.primaries != null) 'primaries': params.primaries!,
+          if (params.gamma != null) 'transfer': params.gamma!,
+          if (params.colormatrix != null) 'matrix': params.colormatrix!,
+        });
+        // Some native versions emit videoParams before color metadata is
+        // available. Preserve the Bilibili quality hint until mpv provides a
+        // real correction instead of briefly downgrading HDR to SDR.
+        if (corrected.kind != HdrSourceKind.unknown ||
+            corrected.transfer != HdrTransfer.unknown ||
+            corrected.primaries != HdrPrimaries.unknown ||
+            corrected.matrix != HdrMatrix.unknown) {
+          _hdrSource = corrected;
+        }
+        _hdrDecision = HdrDecision.choose(
+          mode: Pref.hdrMode,
+          source: _hdrSource,
+          capabilities: _hdrCapabilities,
+          hwdec: hwdec ?? 'auto',
+        );
+        if (_hdrOutputSignature(previousDecision) !=
+                _hdrOutputSignature(_hdrDecision) &&
+            _videoController != null) {
+          _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
+        }
+        unawaited(_applyHdrOutputParameters(player));
+        final diagnostic =
+            'HDR decision: source=${_hdrSource.kind.name}, '
+            'primaries=${_hdrSource.primaries.name}, '
+            'transfer=${_hdrSource.transfer.name}, '
+            'matrix=${_hdrSource.matrix.name}, '
+            'output=${_hdrDecision.output.name}, '
+            'surface=${_hdrDecision.surface}, '
+            'vo=${_hdrDecision.vo}, hwdec=${_hdrDecision.hwdec}, '
+            'reason=${_hdrDecision.reason}';
+        if (_lastHdrDiagnostic != diagnostic) {
+          _lastHdrDiagnostic = diagnostic;
+          debugPrint(diagnostic);
+        }
+        if (_hdrCapabilities.canHcpp && _hdrSource.hasNativeColorMetadata) {
+          unawaited(
+            _setHdrColorSpace(player).then((applied) {
+              if (applied) {
+                final previousDecision = _hdrDecision;
+                _hdrCapabilities = _hdrCapabilities.copyWith(
+                  nativeOutput: true,
+                  nativeOutputCapable: true,
+                  nativeOutputActive: true,
+                  unsupportedReason: 'native-dataspace-applied',
+                );
+                _hdrDecision = HdrDecision.choose(
+                  mode: Pref.hdrMode,
+                  source: _hdrSource,
+                  capabilities: _hdrCapabilities,
+                  hwdec: hwdec ?? 'auto',
+                );
+                unawaited(_applyHdrOutputParameters(player));
+                if (_hdrOutputSignature(previousDecision) !=
+                        _hdrOutputSignature(_hdrDecision) &&
+                    _videoController != null) {
+                  // Dataspace commit is the proof boundary. Recreate
+                  // the output so the renderer and decoder cannot keep
+                  // an SDR surface after native HDR becomes valid.
+                  _requestHdrOutputRebuild(
+                    hcpp: _hdrDecision.useHcpp,
+                    surfaceView: !_hdrDecision.useHcpp,
+                  );
+                }
+              } else if (_hdrDecision.useHcpp) {
+                _hdrCapabilities = _hdrCapabilities.copyWith(
+                  hcpp: false,
+                  unsupportedReason: 'hcpp-dataspace-failed',
+                );
+                _hdrDecision = HdrDecision.choose(
+                  mode: Pref.hdrMode,
+                  source: _hdrSource,
+                  capabilities: _hdrCapabilities,
+                  hwdec: hwdec ?? 'auto',
+                );
+                _requestHdrOutputRebuild(
+                  hcpp: false,
+                  surfaceView: true,
+                );
+              }
+              debugPrint(
+                'HDR dataspace ${applied ? 'applied' : 'fallback'}: '
+                '${_hdrSource.transfer.name}',
+              );
+            }),
+          );
+        }
       }),
       stream.buffering.listen((bool buffering) {
         isBuffering.value = buffering;
@@ -1538,6 +2009,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       return;
     }
 
+    // Window color mode is process-wide on Android. Do not leave a disposed
+    // HDR player forcing the next page's SDR content through HDR output.
+    unawaited(HdrAndroid.resetOutput());
+    unawaited(HdrAndroid.setWindowHdrMode(hdr: false));
     _playerCount = 0;
     if (removeSafeArea) {
       showSystemBar();
@@ -1646,8 +2121,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final time = DurationUtils.formatDuration(
       positionInMilliseconds / 1000,
     ).replaceAll(':', '-');
-    final image = await videoPlayerController?.screenshot();
-    if (image != null) {
+    final imageBytes = await videoPlayerController?.screenshot();
+    if (imageBytes != null) {
+      final codec = await ui.instantiateImageCodec(imageBytes);
+      final frame = await codec.getNextFrame();
+      codec.dispose();
+      final image = frame.image;
       SmartDialog.showToast('点击弹窗保存截图');
       showDialog(
         context: Get.context!,

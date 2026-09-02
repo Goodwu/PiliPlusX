@@ -51,13 +51,62 @@ on:
                 default: true
                 type: boolean
 
+            build_linux_arm64:
+                description: "Build Linux-arm64"
+                required: false
+                default: true
+                type: boolean
+
+            run_hdr_unit_tests:
+                description: "Run HDR decision unit tests"
+                required: false
+                default: false
+                type: boolean
+
             tag:
                 description: "tag"
                 required: false
                 default: ""
                 type: string
 
+concurrency:
+    group: piliplusx-build-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
+    hdr_unit_tests:
+        if: ${{ github.event_name == 'pull_request' || inputs.run_hdr_unit_tests == true }}
+        name: HDR decision tests
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - name: 代码迁出
+              uses: actions/checkout@v7
+
+            - name: 安装Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
+                  flutter-version-file: pubspec.yaml
+                  cache: true
+
+            - name: Resolve locked dependencies
+              run: flutter pub get --enforce-lockfile
+
+            - name: Verify media-kit lock
+              run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+
+            - name: Verify workflow media-kit references
+              run: python3 scripts/verify_workflow_media_kit_refs.py --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+
+            - name: Verify HDR channel contract
+              run: python3 scripts/verify_hdr_channel.py
+
+            - name: Run HDR decision tests
+              run: flutter test test/plugin/pl_player/hdr_test.dart
+
     android:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_android == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         name: Release Android
@@ -91,7 +140,15 @@ jobs:
             - name: Apply Patch
               shell: pwsh
               run: lib/scripts/patch.ps1 android
-              continue-on-error: true
+
+            - name: Resolve locked dependencies
+              run: flutter pub get --enforce-lockfile
+
+            - name: Verify media-kit lock
+              run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+
+            - name: Verify workflow media-kit references
+              run: python3 scripts/verify_workflow_media_kit_refs.py --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
 
             - name: Write key
               if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
@@ -111,18 +168,37 @@ jobs:
 
             - name: Flutter Build Release Apk
               if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
-              run: flutter build apk --release --target-platform android-arm64 --dart-define-from-file=pili_release.json --pub
+              run: flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=pili_release.json --no-pub
 
             - name: Flutter Build Dev Apk
               if: ${{ github.event_name == 'pull_request' }}
               run: |
-                flutter build apk --release --target-platform android-arm64 --android-project-arg dev=1 --pub
+                flutter build apk --release --split-per-abi --target-platform android-arm64 --android-project-arg dev=1 --no-pub
 
             - name: Rename
               run: |
                   tag_name=${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
-                  mv build/app/outputs/flutter-apk/app-release.apk "PiliPlusX_android_${tag_name}_arm64-v8a.apk"
+                  mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "PiliPlusX_android_${tag_name}_arm64-v8a.apk"
               shell: bash
+
+            - name: Verify Android ABI
+              run: |
+                  apk=$(find . -maxdepth 1 -name 'PiliPlusX_android_*_arm64-v8a.apk' -print -quit)
+                  python3 scripts/verify_artifact.py "$apk" --platform android --abi arm64-v8a
+
+            - name: Generate Android release manifest
+              run: |
+                  apk=$(find . -maxdepth 1 -name 'PiliPlusX_android_*_arm64-v8a.apk' -print -quit)
+                  mkdir -p release-metadata/android
+                  cp "$apk" release-metadata/android/
+                  python3 scripts/release_manifest.py release-metadata/android \
+                    --platform android --abi arm64-v8a \
+                    --media-kit-commit cc7b62b239af113e1eb4d41ea0e7820128908b4b \
+                    --hdr-backend android-hcpp-platform-view \
+                    --native-library-version media_kit_libs_android_video@1.3.6
+                  python3 scripts/verify_release_manifest.py release-metadata/android
+                  mv release-metadata/android/manifest.json "${apk%.apk}.manifest.json"
+                  mv release-metadata/android/SHA256SUMS "${apk%.apk}.SHA256SUMS"
 
             - name: Release
               if: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '' && !contains(github.event.inputs.tag, 'test')) || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, 'test')) }}
@@ -134,6 +210,8 @@ jobs:
                   prerelease: true
                   files: |
                       PiliPlusX_android_*.apk
+                      PiliPlusX_android_*.manifest.json
+                      PiliPlusX_android_*.SHA256SUMS
 
             - name: 上传
               uses: actions/upload-artifact@v7
@@ -142,6 +220,8 @@ jobs:
                   name: Android_arm64-v8a
                   path: |
                       PiliPlusX_android_*_arm64-v8a.apk
+                      PiliPlusX_android_*_arm64-v8a.manifest.json
+                      PiliPlusX_android_*_arm64-v8a.SHA256SUMS
 
     pink:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_pink == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
@@ -149,6 +229,33 @@ jobs:
         permissions: write-all
         with:
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
+
+    verify_android_native_parity:
+        if: ${{ needs.android.result == 'success' && needs.pink.result == 'success' }}
+        needs: [android, pink]
+        name: Verify Android/Pink native parity
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout verification scripts
+              uses: actions/checkout@v7
+
+            - name: Download Android artifact
+              uses: actions/download-artifact@v7
+              with:
+                  name: Android_arm64-v8a
+                  path: android-artifact
+
+            - name: Download Pink artifact
+              uses: actions/download-artifact@v7
+              with:
+                  name: Android_Pink
+                  path: pink-artifact
+
+            - name: Verify identical arm64 native libraries
+              run: |
+                  android_apk=$(find android-artifact -name '*.apk' -print -quit)
+                  pink_apk=$(find pink-artifact -name '*.apk' -print -quit)
+                  python3 scripts/verify_android_native_parity.py "$android_apk" "$pink_apk"
 
     ios:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_ios == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
@@ -172,8 +279,15 @@ jobs:
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
 
     linux_x64:
-        if: ${{ github.event.inputs.build_linux_x64 == 'true' }}
+        if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_linux_x64 == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         uses: ./.github/workflows/linux_x64.yml
+        permissions: write-all
+        with:
+            tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
+
+    linux_arm64:
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_linux_arm64 == true || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        uses: ./.github/workflows/linux_arm64.yml
         permissions: write-all
         with:
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}

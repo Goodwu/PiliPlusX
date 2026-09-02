@@ -10,6 +10,7 @@ import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
+import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/services/service_locator.dart';
@@ -24,6 +25,15 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get playSettings => [
+  PopupModel(
+    title: 'HDR 播放',
+    leading: const Icon(Icons.hdr_auto_outlined),
+    value: () => Pref.hdrMode,
+    items: HdrMode.values,
+    onSelected: (value, setState) => GStorage.setting
+        .put(SettingBoxKey.hdrMode, value.name)
+        .whenComplete(setState),
+  ),
   const SwitchModel(
     title: '弹幕开关',
     subtitle: '是否展示弹幕',
