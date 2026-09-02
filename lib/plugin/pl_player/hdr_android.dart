@@ -1,55 +1,15 @@
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 import 'package:PiliPlus/platform/platform_features.dart';
+import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 import 'package:flutter/services.dart';
 
+/// Android-only Window and video-surface HDR operations.
 abstract final class HdrAndroid {
-  static const _channel = MethodChannel(
-    'piliplusx/hdr_capabilities',
-  );
-
-  static Future<HdrCapabilities> probe({String? codec}) async {
-    try {
-      final result = await _channel.invokeMethod<Map<Object?, Object?>>(
-        'probe',
-        <String, Object?>{'codec': codec},
-      );
-      return result == null
-          ? HdrCapabilities(
-              platform: _platformName,
-              unsupportedReason: 'probe-returned-null',
-            )
-          : HdrCapabilities.fromMap(result);
-    } on PlatformException catch (error) {
-      return HdrCapabilities(
-        platform: _platformName,
-        unsupportedReason: 'probe-failed:${error.code}',
-      );
-    } on MissingPluginException {
-      return HdrCapabilities(
-        platform: _platformName,
-        unsupportedReason: 'probe-not-implemented:$_platformName',
-      );
-    } on Object catch (error) {
-      return HdrCapabilities(
-        platform: _platformName,
-        unsupportedReason: 'probe-failed:${error.runtimeType}',
-      );
-    }
-  }
-
-  static String get _platformName {
-    if (PlatformFeatureSupport.isAndroid) return 'android';
-    if (PlatformFeatureSupport.isIOS) return 'ios';
-    if (PlatformFeatureSupport.isMacOS) return 'macos';
-    if (PlatformFeatureSupport.isWindows) return 'windows';
-    if (PlatformFeatureSupport.isLinux) return 'linux';
-    return 'unknown';
-  }
-
   static Future<bool> setWindowHdrMode({required bool hdr}) async {
     if (!PlatformFeatureSupport.isAndroid) return false;
     try {
-      return await _channel.invokeMethod<bool>(
+      return await const MethodChannel(
+            'piliplusx/hdr_capabilities',
+          ).invokeMethod<bool>(
             'setWindowHdrMode',
             <String, Object?>{'hdr': hdr},
           ) ??
@@ -93,31 +53,5 @@ abstract final class HdrAndroid {
       }
     }
     return false;
-  }
-
-  static Future<HdrOutputResult> configureOutput(
-    HdrOutputConfiguration configuration,
-  ) async {
-    try {
-      final result = await _channel.invokeMethod<Map<Object?, Object?>>(
-        'configureOutput',
-        configuration.toMap(),
-      );
-      return result == null
-          ? const HdrOutputResult(failureReason: 'configure-returned-null')
-          : HdrOutputResult.fromMap(result);
-    } on Object catch (error) {
-      return HdrOutputResult(
-        failureReason: 'configure-failed:${error.runtimeType}',
-      );
-    }
-  }
-
-  static Future<bool> resetOutput() async {
-    try {
-      return await _channel.invokeMethod<bool>('resetOutput') ?? false;
-    } on Object {
-      return false;
-    }
   }
 }

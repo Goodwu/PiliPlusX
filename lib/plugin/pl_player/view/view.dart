@@ -131,7 +131,6 @@ class PLVideoPlayer extends StatefulWidget {
 class _PLVideoPlayerState extends State<PLVideoPlayer>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   late AnimationController _animationController;
-  late VideoController videoController;
   late final CommonIntroController introController = widget.introController!;
   late final VideoDetailController videoDetailController =
       widget.videoDetailController!;
@@ -265,8 +264,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    videoController = plPlayerController.videoController!;
-
     if (PlatformUtils.isMobile) {
       Future.microtask(() {
         try {
@@ -1402,10 +1399,17 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             child: IgnorePointer(
               ignoring: !plPlayerController.enableDragSubtitle,
               child: Obx(
-                () => SubtitleView(
-                  controller: plPlayerController.videoController!,
-                  configuration: plPlayerController.subtitleConfig.value,
-                ),
+                () {
+                  final _ = plPlayerController.hdrSurfaceGeneration.value;
+                  final videoController = plPlayerController.videoController;
+                  if (videoController == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return SubtitleView(
+                    controller: videoController,
+                    configuration: plPlayerController.subtitleConfig.value,
+                  );
+                },
               ),
             ),
           ),
@@ -1909,6 +1913,25 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         ],
 
         Obx(() {
+          final outputError = plPlayerController.hdrOutputError.value;
+          if (outputError != null) {
+            return Center(
+              child: GestureDetector(
+                onTap: plPlayerController.retryVideoOutput,
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.refresh, color: Colors.white, size: 28),
+                    SizedBox(height: 8),
+                    Text(
+                      '视频输出初始化失败，点击重试',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           if (plPlayerController.dataStatus.loading ||
               (plPlayerController.isBuffering.value &&
                   plPlayerController.playerStatus.isPlaying)) {
@@ -2076,31 +2099,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 if (videoController == null) {
                   return const SizedBox.expand();
                 }
-                // Keep the macOS texture on a plain render path.  The
-                // desktop Flutter texture backend can lose pixel-buffer
-                // frames when the native texture is nested under the flip /
-                // FittedBox transform chain; SDR playback does not need that
-                // transform path.
-                if (Platform.isMacOS) {
-                  return Video(
-                    controller: videoController,
-                    fill: widget.fill,
-                    aspectRatio: videoFit.aspectRatio,
-                    controls: null,
-                  );
-                }
                 return Transform.flip(
                   flipX: plPlayerController.flipX.value,
                   flipY: plPlayerController.flipY.value,
-                  child: FittedBox(
+                  child: Video(
+                    controller: videoController,
                     fit: videoFit.boxFit,
+                    fill: widget.fill,
                     alignment: widget.alignment,
-                    child: Video(
-                      controller: videoController,
-                      fill: widget.fill,
-                      aspectRatio: videoFit.aspectRatio,
-                      controls: null,
-                    ),
+                    aspectRatio: videoFit.aspectRatio,
+                    controls: null,
                   ),
                 );
               },

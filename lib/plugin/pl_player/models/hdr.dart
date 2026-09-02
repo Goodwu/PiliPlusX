@@ -260,6 +260,12 @@ class HdrPlaybackDecision {
   });
 
   bool get isNativeHdr => output == HdrOutputMode.nativeHdr;
+
+  /// Identifies the native output carrier, excluding color-processing state.
+  /// SDR and tone-mapped HDR share one texture, while HCPP uses a platform
+  /// view. A color metadata update must not rebuild an unchanged carrier.
+  String get outputTopologySignature =>
+      useHcpp ? 'android-hcpp-platform-view' : 'flutter-texture';
 }
 
 /// Metadata submitted to a native video output. Native implementations must

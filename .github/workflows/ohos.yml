@@ -17,6 +17,9 @@ jobs:
   build-ohos:
     name: Build OHOS arm64 unsigned HAP
     runs-on: ubuntu-latest
+    env:
+      OHOS_WORKSPACE: ${{ runner.temp }}/PiliPlusX-ohos
+      PUB_CACHE: ${{ runner.temp }}/pub-cache-ohos
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -54,23 +57,28 @@ jobs:
           set -euo pipefail
           flutter --version
           dart --version
+          test "$(git -C "$RUNNER_TEMP/flutter-ohos" rev-parse HEAD)" = "aa76d9bbeee7806a87dbd202d2550dfd11550b82"
+          dart --version 2>&1 | grep -F '3.12.2'
+          # This fork intentionally has no upstream release tag and reports
+          # 0.0.0-unknown to pub. Stamp the verified compatibility version in
+          # the local SDK cache so dependency constraints remain enforceable.
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path(__import__("os").environ["RUNNER_TEMP"]) / "flutter-ohos/bin/cache/flutter.version.json"
+          data = json.loads(p.read_text())
+          data["frameworkVersion"] = data["flutterVersion"] = "3.44.9"
+          p.write_text(json.dumps(data, indent=2) + "\n")
+          PY
+
+      - name: Apply OHOS Flutter compatibility patches
+        run: python3 scripts/prepare_ohos_flutter.py --flutter-root "$RUNNER_TEMP/flutter-ohos" --workspace "$GITHUB_WORKSPACE"
+
+      - name: Prepare isolated OHOS source copy
+        run: python3 scripts/prepare_ohos_build.py --workspace "$GITHUB_WORKSPACE" --output "$OHOS_WORKSPACE"
 
       - name: Prepare unsigned build profile
-        run: cp ohos/关于build-profile.json5 ohos/build-profile.json5
-
-      - name: Normalize package name for OHOS toolchain
-        run: |
-          # The pinned OHOS fork is Flutter 3.44.9 / Dart 3.12.2. Relax only
-          # the CI copy of the app manifest; desktop/mobile builds keep the
-          # project baseline at Flutter 3.47.2 and Dart 3.13+.
-          sed -i 's/^  sdk: ">=3.13.0"$/  sdk: ">=3.12.0 <4.0.0"/' pubspec.yaml
-          sed -i 's/^  flutter: 3.47.2$/  flutter: ">=3.44.9 <3.45.0"/' pubspec.yaml
-          sed -i 's/^name: PiliPlus$/name: piliplus/' pubspec.yaml
-          # The pinned OHOS fork uses Dart 3.12; these dependency constraints
-          # otherwise select releases that require Dart 3.13+.
-          sed -i 's/^  flex_seed_scheme: \^5.0.0$/  flex_seed_scheme: ^4.0.1/' pubspec.yaml
-          sed -i 's/^  material_ui: \^1.0.0$/  material_ui: 1.0.0/' pubspec.yaml
-          find lib -type f -name '*.dart' -exec sed -i "s/package:PiliPlus/package:piliplus/g" {} +
+        run: cp "$OHOS_WORKSPACE/ohos/关于build-profile.json5" "$OHOS_WORKSPACE/ohos/build-profile.json5"
 
       - name: Resolve locked dependencies
         run: |
@@ -78,23 +86,29 @@ jobs:
           # The OHOS fork has a separate Dart/toolchain resolver from the
           # desktop baseline lock; retain the media-kit SHA gate below while
           # resolving the compatible OHOS dependency graph.
+          cd "$OHOS_WORKSPACE"
           flutter pub get
+          python3 "$GITHUB_WORKSPACE/scripts/prepare_ohos_material_ui.py" --workspace "$OHOS_WORKSPACE"
 
       - name: Verify media-kit lock
-        run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+        run: |
+          cd "$OHOS_WORKSPACE"
+          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
       - name: Verify workflow media-kit references
-        run: python3 scripts/verify_workflow_media_kit_refs.py --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+        run: python3 "$GITHUB_WORKSPACE/scripts/verify_workflow_media_kit_refs.py" --workflow-dir "$OHOS_WORKSPACE/.github/workflows" --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
       - name: Build unsigned HAP
         run: |
           set -euo pipefail
+          cd "$OHOS_WORKSPACE"
           grep -F '"enableSignTask": false' ohos/hvigor/hvigor-config.json5
           flutter build hap --release --no-codesign
 
       - name: Verify HAP ABI
         run: |
           set -euo pipefail
+          cd "$OHOS_WORKSPACE"
           hap=$(find build ohos/entry/build -type f -name '*unsigned.hap' -print -quit 2>/dev/null || true)
           test -n "$hap"
           unzip -l "$hap" | tee "$RUNNER_TEMP/hap-contents.txt"
@@ -104,13 +118,14 @@ jobs:
       - name: Generate HAP manifest
         run: |
           set -euo pipefail
+          cd "$OHOS_WORKSPACE"
           hap=$(find build ohos/entry/build -type f -name '*unsigned.hap' -print -quit 2>/dev/null || true)
           test -n "$hap"
           mkdir -p release-metadata/ohos
           cp "$hap" release-metadata/ohos/
           python3 scripts/release_manifest.py release-metadata/ohos \
             --platform ohos --abi arm64-v8a \
-            --media-kit-commit cc7b62b239af113e1eb4d41ea0e7820128908b4b \
+            --media-kit-commit 73536efdda482f2d5eefe2feb7038db419944b96 \
             --hdr-backend texture-tone-map \
             --native-library-version media_kit_libs_ohos@1.0.0
           python3 scripts/verify_release_manifest.py release-metadata/ohos
@@ -121,6 +136,6 @@ jobs:
           archive: false
           name: OHOS-arm64-unsigned
           path: |
-            release-metadata/ohos/*.hap
-            release-metadata/ohos/manifest.json
-            release-metadata/ohos/SHA256SUMS
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/*.hap
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/manifest.json
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/SHA256SUMS

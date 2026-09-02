@@ -1,4 +1,9 @@
-# OHOS 适配记录（2025-12-16）
+# OHOS 适配记录
+
+更新时间：2026-09-03
+
+当前构建与运行状态见 [OHOS 开发总结](../status/ohos-development-summary.md)。本文件
+只记录长期适配边界和依赖策略。
 
 记录 Flutter -> OHOS 过程中各三方插件的可用性及处理建议，便于后续协同。
 
@@ -31,6 +36,15 @@ Flutter 组件中 3.47 才有的 API；不要修改主平台的公共实现，�
 1. 在代码中对 OHOS 平台条件编译/禁用：`flutter_displaymode`、`floating`、`window_manager`、`tray_manager`、`gt3_flutter_plugin`、`live_photo_maker`；对已声明 OHOS 实现的插件保留真机回归。
 2. 如需裁剪功能，加入 `imagecropper_ohos` 并验证接口兼容性。
 3. 若业务需要后台音频或系统音量控制，评估自研 OHOS 插件或采用 OHOS 原生媒体服务能力。
+
+### 可重复构建准备
+
+OHOS 构建副本使用 `python3 scripts/prepare_ohos_build.py --workspace
+<checkout> --output <checkout外的临时目录>`。脚本先复制源码，再在输出目录中校验并转换包名、Dart/Flutter 约束及两个 Dart 依赖版本，
+并在预期内容漂移或没有发现包名导入时失败；OHOS fork 对 pub 报告
+`0.0.0-unknown`，因此隔离副本中的 Flutter SDK 约束设为 `any`，实际版本由
+固定 revision 校验保证。OHOS 同时使用独立 `PUB_CACHE`，因此主平台源文件、锁文件
+和依赖缓存不会被该步骤修改；CI 与本地 `dev` 构建使用同一脚本。
 
 ## HDR 边界
 

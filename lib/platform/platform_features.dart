@@ -14,6 +14,7 @@ abstract final class PlatformFeatureSupport {
   static bool get isMacOS => impl.isMacOS;
   static bool get isWindows => impl.isWindows;
   static bool get isLinux => impl.isLinux;
+  static bool get isOhos => impl.isOhos;
 
   static bool get offlineDownload => impl.offlineDownload;
   static bool get fileExport => impl.fileExport;

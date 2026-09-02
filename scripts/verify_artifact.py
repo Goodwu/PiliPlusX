@@ -34,6 +34,21 @@ def verify_android_archive(path: Path, abi: str) -> None:
         raise ValueError(f"artifact has no native libraries for {abi}: {path}")
 
 
+def verify_ohos_hap(path: Path, abi: str) -> None:
+    if not path.is_file():
+        raise ValueError(f"artifact does not exist: {path}")
+    with zipfile.ZipFile(path) as archive:
+        names = archive.namelist()
+        if not any(name.endswith("module.json") or name.endswith("module.json5") for name in names):
+            raise ValueError("HAP has no module manifest")
+        native = [name for name in names if name.endswith((".so", ".a"))]
+        if not native:
+            raise ValueError("HAP contains no native libraries")
+        expected = f"/{abi}/"
+        if not any(expected in f"/{name}" for name in native):
+            raise ValueError(f"HAP has no native libraries for {abi}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("artifact", type=Path)
@@ -42,7 +57,10 @@ def main() -> None:
     args = parser.parse_args()
     if args.abi not in ANDROID_ABIS:
         parser.error(f"unsupported Android-family ABI: {args.abi}")
-    verify_android_archive(args.artifact, args.abi)
+    if args.platform == "ohos":
+        verify_ohos_hap(args.artifact, args.abi)
+    else:
+        verify_android_archive(args.artifact, args.abi)
     print(f"artifact ABI: OK ({args.platform}, {args.abi}, {args.artifact})")
 
 

@@ -1,6 +1,6 @@
 # HDR 验证账本
 
-更新时间：2026-09-02
+更新时间：2026-09-03
 
 这份账本只记录已经执行的验证。构建成功、显示器能力探测或单元测试，均
 不能替代真实设备上的原生 HDR 验收。
@@ -9,23 +9,63 @@
 
 | 项目 | 证据 | 结果 |
 | --- | --- | --- |
-| media-kit 来源固定 | `verify_media_kit_lock.py pubspec.lock --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b` | 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA |
-| workflow 引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b` | 7 个 workflow、8 个 lock 检查和 7 个发布 manifest 引用均使用同一完整 SHA |
-| HDR 决策 | `flutter test test/plugin/pl_player/hdr_test.dart` | 21 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
+| media-kit 来源固定 | `verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA |
+| workflow 引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 8 个 workflow、9 个 lock 检查和 8 个发布 manifest 引用均使用同一完整 SHA |
+| HDR 决策 | `flutter test test/plugin/pl_player/hdr_test.dart` | 22 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
 | HDR channel 契约 | `python3 scripts/verify_hdr_channel.py` | Android、Pink、iOS、macOS、Windows、Linux、OHOS 共 7 个端点统一使用 `piliplusx/hdr_capabilities`，并检查结构化输出和能力拆分字段 |
 | 原生输出生命周期契约 | `python3 scripts/verify_hdr_channel.py`、`flutter test test/plugin/pl_player/hdr_test.dart` | 7 个端点均提供 `probe`、`configureOutput`、`resetOutput`；配置结果未获系统/播放器确认时统一 active=false；Dart 分离 capable/active 状态 |
-| Dart 静态检查 | `flutter analyze`（HDR 相关 3 个文件） | 无问题 |
+| Dart 静态检查 | `flutter analyze`（HDR controller、model、两个 channel、view 和测试共 6 个文件） | 无问题 |
+| 发布校验脚本 | `python3 -m unittest discover -s test -p '*_test.py'` | 5 项通过，覆盖 manifest/hash、Android native parity、Android/OHOS ABI 包结构及错误架构拒绝 |
 | Android patch 可应用 | material patch 链按 `patch.ps1` 顺序在临时副本应用 | 已内置 patch 会安全跳过，`scaffold_android.patch` 可应用，真实冲突仍阻断 |
 | 远端 fork | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-08b` | 当前提交 `0dd1535ec622c0e8560551b15800c75c3a07da95` |
 | 公共 HDR 生命周期分支 | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-public-api` | `ad22c36a9986a8418c81829821962009425cf5e5`，提供跨平台默认安全接口、Android PlatformView surface/dataspace 生命周期，以及 Linux system-libmpv ABI 回退；PiliPlusX 已加入兼容桥接，待各平台后端实现后再统一更新 lock |
 | 公共 API CI | GitHub Actions run `33548127882` | 16 个构建 job 和 4 个 package test job 全部成功（含 Android、iOS、Windows x64/ARM64、macOS、Linux、Web），1 个发布 manifest job 按分支条件跳过；仅记录为编译证据，不作为原生 HDR 验收 |
 | 公共 API 最新 CI | GitHub Actions run `33555639764` | 提交 `ad22c36a9986a8418c81829821962009425cf5e5` 的 17 个构建/打包 job 与 Linux、macOS、Web、Windows 四个长时 package-test job 全部成功；仅记录为编译/测试证据，不作为原生 HDR 验收 |
-| Android controller 重建修复 | `Goodwu/media-kit#2` 验证分支 | `cc7b62b239af113e1eb4d41ea0e7820128908b4b`，PR 仍为 draft，尚未合并 |
+| Darwin 输出重建屏障 | `Goodwu/media-kit` 分支 `fix/darwin-video-output-rebuild-barrier` | `73536efdda482f2d5eefe2feb7038db419944b96`；同 handle 的 Create/Dispose 已串行化，macOS 最终压力切换已通过，iOS 仍缺运行时回归 |
+| OHOS unsigned HAP | SSH `dev`：`flutter build hap --release --no-codesign` + `verify_artifact.py` | 完整 kernel snapshot 与 arm64 HAP 通过；包内含 `libflutter.so`、`libapp.so`、`libmpv.so`；SHA-256 `7134be623545a6061b6035fdb424811b8fe7be4d1eb47dd044b5cfc76ad225dc` |
+| 主平台回归 | `flutter test test/plugin/pl_player/hdr_test.dart`; `python3 scripts/verify_hdr_channel.py`; Web/macOS/iOS/Android 构建命令 | HDR 22 项、channel contract、Web release、macOS debug、iOS device 无签名和 Android arm64 release 构建均通过 |
+
+### macOS 连续换源黑屏与崩溃（2026-09-02）
+
+在 macOS debug App 中连续切换 Linksphotograph 的相关视频（片源以 Dolby
+Vision/HLG 为主）完成了交互式复现与修复验证：
+
+- 黑屏时 mpv 仍报告 `playing=true`、`vo-configured=yes`，播放位置继续增长，且
+  `showControls=true`；因此故障不是解码停止，而是 Flutter 播放器表面失效。
+- 画面、进度条和视频内信息总是一起消失。原因是 HDR 元数据从 SDR、HLG、Dolby
+  Vision 之间变化时，Android 原生 HDR surface 专用的 `_rebuildVideoOutput` 也在
+  macOS 被调用。重建期间 `_videoController` 会暂时为 `null`，并反复注销、注册
+  Flutter texture；累积后表现为整层黑屏，严重时触发 native 崩溃。
+- 重建判断现在只比较输出载体。macOS 的 SDR 与 HDR tone-map 都使用同一 Texture，
+  因此只更新 mpv 的 target primaries、transfer 和 tone mapping 参数；Android 在
+  Texture 与 HCPP 拓扑真正变化时仍可重建。原有相关视频切换逻辑保持不变。
+
+该结果只证明 macOS texture tone-map 路径。Darwin 根因修复已下沉到
+`Goodwu/media-kit` 提交 `73536efdda482f2d5eefe2feb7038db419944b96`：旧
+`VideoOutput` 的 worker、Flutter texture 注销和 native texture 释放现在有可等待的
+完成屏障，同一 handle 的 Create/Dispose 通过队列串行执行。PiliPlusX 已移除 macOS
+特殊渲染与平台延时等临时规避；视频缩放统一交给 media-kit `Video` 自身的
+`fit/alignment`，不再使用外层 `FittedBox` 制造无界约束。重建期间仍保留跨平台
+nullable controller 防护，避免合法的短暂无输出状态导致整层构建失败。依赖已锁定到
+该提交。Android/Pink 的 HCPP/SurfaceView
+可能需要在原生 HDR surface 或 dataspace 改变时重建，不能据此删除 Android 重建。
+当前 Android 重建已串行化，HCPP dataspace 也改为等待新 controller 创建完成后在
+同一事务内提交；candidate 变为 active 时因载体未变，不再重复重建。但尚无 HDR 真机连续执行
+`SDR -> HDR10/PQ -> HLG -> Dolby Vision -> SDR` 的运行证据；需要同时记录
+`nativeOutputActive`、实际 dataspace、系统 HDR 指示、画面、进度控制层和崩溃日志，
+通过后才能声明 Android 该路径已验收。
+
+2026-09-03 又以当前最终代码全新构建并启动 macOS debug App。快速连续切换
+Linksphotograph 的 SDR、HLG 与 Dolby Vision 视频期间，player handle 与 texture ID
+始终保持不变，没有输出 Dispose/Create 或 `_videoController=null` 重建，进程持续存活；
+运行中的窗口快照同时确认了实际视频帧，以及包含当前位置和总时长的进度条。该结果
+覆盖了统一 `Video.fit/alignment` 布局与最终依赖 SHA，但仍只属于 macOS Texture
+tone-map 路径，不替代 Android HDR 真机验收。
 
 ## 未完成或证据不足
 
-- 本机 Android APK 编译已应用 `material_ui` 的已记录 API patch；仍受 Java 26
-  `jlink` 转换失败和第三方插件工具链问题影响，不能作为本机整包通过证据。
+- 本机使用 OpenJDK 17 构建当前 Android arm64 release APK 成功，并通过 ABI
+  校验；现有 compileSdk 与 Kotlin 迁移信息是第三方插件预警，不影响本次产物。
 - Apple、Windows、Linux、OHOS 的原生 HDR 输出尚未接通或证明；当前保持
   Texture tone-map，并在能力状态中报告回退原因。
 - 尚未取得 Android HDR 真机与 SDR 设备的系统色彩空间、播放器元数据和
@@ -37,10 +77,9 @@
 
 - 本机已检测到 Xcode 26.6、Flutter 3.47.2 和 macOS desktop target；`flutter
   devices` 没有 Android 或 iOS 真机，`adb devices` 为空。
-- 本机 `flutter build macos --release` 已启动，但 Xcode 在
-  `-resolvePackageDependencies` 阶段等待 remote Swift packages；采样显示主线程
-  停留在 `waitForRemoteSourcePackagesToFinishLoading`，未进入源码编译，因此不能
-  记为 macOS 构建通过。
+- 本机 `flutter build macos --debug` 已完成，生成 `build/macos/Build/Products/Debug/PiliPlusX.app`；
+  Swift/InAppWebView 仅有上游弃用警告。此前 release 的 Swift package resolution
+  等待记录保留为历史限制，不覆盖本次 debug 成功证据。
 - `dev` SSH 目标已确认是 x86_64 Ubuntu 22.04；GTK、mpv、Wayland headers、
   Clang 和 Flutter 3.47.2 已安装，并同步了本机可用的 Git/hosted pub 缓存。
   `flutter pub get --offline --enforce-lockfile` 已成功完成；该主机没有可见 GPU、
@@ -69,21 +108,23 @@
 - 该 SSH 会话没有 `DISPLAY` 或 `WAYLAND_DISPLAY`；启动 bundle 得到 GTK
   `cannot open display`，因此远程环境只能证明构建，不能执行桌面启动或 HDR/SDR
   运行时验收。
+- `dev` 的 OHOS SDK 自带 `hdc` 可执行文件，但 `hdc list targets` 返回 `[Empty]`；
+  SDK Emulator 启动时报告 `libQt5Core.so.5` 动态库加载失败，故 HAP 尚未安装运行。
 
 ## 复验入口
 
 ```sh
 python3 scripts/verify_media_kit_lock.py pubspec.lock \
-  --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+  --commit 73536efdda482f2d5eefe2feb7038db419944b96
 python3 scripts/verify_workflow_media_kit_refs.py \
-  --commit cc7b62b239af113e1eb4d41ea0e7820128908b4b
+  --commit 73536efdda482f2d5eefe2feb7038db419944b96
 flutter test test/plugin/pl_player/hdr_test.dart
 flutter analyze lib/plugin/pl_player/models/hdr.dart \
   lib/plugin/pl_player/hdr_android.dart test/plugin/pl_player/hdr_test.dart
 ```
 
 真实设备记录须先通过 `python3 scripts/verify_hdr_evidence.py <record.json>`；
-模板见 `docs/hdr-device-evidence.example.json`。模板中的占位值不能作为验收证据。
+模板见 `docs/examples/hdr-device-evidence.example.json`。模板中的占位值不能作为验收证据。
 
 ## CI 长测试说明
 

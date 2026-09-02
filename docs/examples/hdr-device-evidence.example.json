@@ -1,4 +1,6 @@
 {
+  "schemaVersion": 1,
+  "template": true,
   "platform": "android",
   "device": "<model and OS version>",
   "displayMode": "<HDR10 / HLG / EDR / SDR>",

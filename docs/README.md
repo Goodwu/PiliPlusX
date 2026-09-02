@@ -1,0 +1,31 @@
+# PiliPlusX 文档索引
+
+文档按用途分为四类；所有“已通过”均指有命令、日志或产物证据支持的状态。
+
+## 当前状态与证据
+
+- [HDR 后端状态矩阵](status/hdr-backend-status.md)：各平台原生 HDR、能力探测和 SDR 回退边界。
+- [HDR 验证账本](status/hdr-verification.md)：可复核的 channel、依赖、测试和设备证据。
+- [SDR 跨平台构建证据](status/platform-sdr-build-status.md)：平台构建、产物、ABI、运行门和工具链限制。
+- [OHOS 开发总结](status/ohos-development-summary.md)：OHOS 3.44 兼容实现、HAP 产物和剩余运行验收。
+
+## 计划与设计
+
+- [非 HDR 全平台可用计划](plans/sdr-cross-platform-plan.md)：SDR 构建、启动、播放和资源释放的验收顺序。
+- [全平台原生 HDR 计划](plans/native-hdr-development-plan.md)：原生 surface、色彩空间、解码器和真机证据要求。
+
+## 平台适配
+
+- [OHOS 适配记录](platforms/ohos-adaptation.md)：工具链、插件边界、准备脚本和 fail-closed HDR 策略。
+- [OHOS Emulator/hdc 排障记录](platforms/ohos-emulator-hdc.md)：Qt 启动修复、镜像准备和容器 hdc 限制。
+
+## 评审与决策
+
+- [HDR Issue #11 评审结论](reviews/hdr-issue-11-review.md)：HDR 解码与原生输出边界及合入原则。
+- [media-kit PR #2 审查摘要](reviews/media-kit-pr-2-review.md)：依赖分支、CI 和生命周期变更审查。
+
+## 示例
+
+- [HDR 设备证据模板](examples/hdr-device-evidence.example.json)：真实设备记录格式；占位值不能作为验收证据。
+
+历史文档若不再代表当前状态，统一放在 `docs/backup/`，不作为当前验收依据。
