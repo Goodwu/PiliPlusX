@@ -18,6 +18,16 @@
 
 ## 后续建议
 
+### Flutter 工具链策略
+
+OHOS Flutter 的发布节奏滞后于源社区 Flutter，当前不应等待或强行升级到
+3.47。主平台继续固定 Flutter 3.47.2；OHOS 固定
+`aa76d9bbeee7806a87dbd202d2550dfd11550b82`（Flutter 3.44.9 / Dart 3.12.2）。
+
+OHOS 兼容工作应通过条件导入和 OHOS 专用适配文件完成，优先回移自定义
+Flutter 组件中 3.47 才有的 API；不要修改主平台的公共实现，也不要用精简
+入口绕过完整应用编译。待 OHOS 3.47 发布后，再评估移除这些兼容层。
+
 1. 在代码中对 OHOS 平台条件编译/禁用：`flutter_displaymode`、`floating`、`window_manager`、`tray_manager`、`gt3_flutter_plugin`、`live_photo_maker`；对已声明 OHOS 实现的插件保留真机回归。
 2. 如需裁剪功能，加入 `imagecropper_ohos` 并验证接口兼容性。
 3. 若业务需要后台音频或系统音量控制，评估自研 OHOS 插件或采用 OHOS 原生媒体服务能力。
