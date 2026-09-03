@@ -37,6 +37,15 @@ def main() -> None:
             for field in ("active", "failureReason"):
                 if field not in text:
                     failures.append(f"{name}: missing output result field {field}")
+            for field in (
+                "sourceProcessing",
+                "outputEncoding",
+                "dynamicMetadataApplied",
+                "supportedInputFormats",
+                "supportedOutputFormats",
+            ):
+                if field not in text:
+                    failures.append(f"{name}: missing structured output field {field}")
     android_helper = Path("lib/plugin/pl_player/hdr_android.dart").read_text(
         encoding="utf-8"
     )

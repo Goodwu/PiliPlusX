@@ -52,6 +52,17 @@ bool FlutterWindow::OnCreate() {
               flutter::EncodableValue("sdr");
           response[flutter::EncodableValue("active")] =
               flutter::EncodableValue(false);
+          response[flutter::EncodableValue("sourceProcessing")] =
+              flutter::EncodableValue("tone-map");
+          response[flutter::EncodableValue("outputEncoding")] =
+              flutter::EncodableValue("sdr");
+          response[flutter::EncodableValue("dynamicMetadataApplied")] =
+              flutter::EncodableValue(false);
+          response[flutter::EncodableValue("supportedInputFormats")] =
+              flutter::EncodableValue(flutter::EncodableList{});
+          response[flutter::EncodableValue("supportedOutputFormats")] =
+              flutter::EncodableValue(flutter::EncodableList{
+                  flutter::EncodableValue("sdr")});
           response[flutter::EncodableValue("failureReason")] =
               flutter::EncodableValue("native-swapchain-not-integrated");
           result->Success(flutter::EncodableValue(std::move(response)));

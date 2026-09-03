@@ -39,6 +39,11 @@ class MainActivity : AudioServiceActivity() {
                             arguments?.get("transfer") as? String ?: "unknown"
                         } else "sdr",
                         "active" to configured,
+                        "sourceProcessing" to if (configured) "native" else "tone-map",
+                        "outputEncoding" to if (configured) "pq-or-hlg" else "sdr",
+                        "dynamicMetadataApplied" to false,
+                        "supportedInputFormats" to listOf("hdr10", "hlg"),
+                        "supportedOutputFormats" to if (configured) listOf("pq", "hlg") else listOf("sdr"),
                         "failureReason" to if (configured) "" else
                             "surface-dataspace-not-acknowledged",
                     ))

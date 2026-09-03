@@ -898,6 +898,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     enableAndroidSurfaceProducer: !hcpp && !texture,
     usePlatformView: hcpp,
     useHCPP: hcpp,
+    // Darwin keeps a stable native candidate across SDR/HDR source changes;
+    // the media-kit backend still reports active=false until all probes pass.
+    useNativeSurface: !texture &&
+        Pref.hdrMode == HdrMode.auto &&
+        (Platform.isIOS || Platform.isMacOS),
   );
 
   Future<void> _rebuildVideoOutput({
@@ -1081,18 +1086,22 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<bool> _setHdrColorSpace(Player player) async {
-    if (!Platform.isAndroid || !_hdrSource.hasNativeColorMetadata) {
+    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS) ||
+        !_hdrSource.hasNativeColorMetadata) {
       return false;
     }
-    if (!await HdrAndroid.setWindowHdrMode(hdr: true)) {
-      return false;
+    if (Platform.isAndroid) {
+      if (!await HdrAndroid.setWindowHdrMode(hdr: true)) {
+        return false;
+      }
+      final handle = await player.handle;
+      final applied = await HdrAndroid.setColorSpace(
+        handle: handle,
+        transfer: _hdrSource.transfer,
+      );
+      if (!applied) return false;
     }
     final handle = await player.handle;
-    final applied = await HdrAndroid.setColorSpace(
-      handle: handle,
-      transfer: _hdrSource.transfer,
-    );
-    if (!applied) return false;
     // Newer media-kit revisions own the native-output lifecycle. Keep a
     // dynamic compatibility bridge so older locked revisions still use the
     // legacy channel path while the public API branch can verify the actual
@@ -1106,12 +1115,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           surfaceId: handle.toString(),
           windowHandle: handle,
         );
-        if (created != true) return false;
+        final createdCapable = created == true ||
+            (created is Map && created['capable'] == true);
+        if (!createdCapable) return false;
         final configured = await nativePlatform.configureHdrOutput(
           HdrOutputConfiguration(
             transfer: _hdrSource.transfer,
             primaries: _hdrSource.primaries,
             matrix: _hdrSource.matrix,
+            dolbyVisionProfile: _hdrSource.dolbyVisionProfile,
+            rpuPresent: _hdrSource.rpuPresent,
+            baseLayerPresent: _hdrSource.baseLayerPresent,
+            enhancementLayerPresent: _hdrSource.enhancementLayerPresent,
+            dvEnhancement: _hdrSource.dvEnhancement,
+            dynamicMetadataPresent: _hdrSource.dynamicMetadataPresent,
+            masteringMetadata: _hdrSource.masteringMetadata,
             surfaceId: handle.toString(),
             surfaceGeneration: hdrSurfaceGeneration.value,
           ).toMap(),
@@ -1129,6 +1147,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         transfer: _hdrSource.transfer,
         primaries: _hdrSource.primaries,
         matrix: _hdrSource.matrix,
+        dolbyVisionProfile: _hdrSource.dolbyVisionProfile,
+        rpuPresent: _hdrSource.rpuPresent,
+        baseLayerPresent: _hdrSource.baseLayerPresent,
+        enhancementLayerPresent: _hdrSource.enhancementLayerPresent,
+        dvEnhancement: _hdrSource.dvEnhancement,
+        dynamicMetadataPresent: _hdrSource.dynamicMetadataPresent,
+        masteringMetadata: _hdrSource.masteringMetadata,
         surfaceId: handle.toString(),
         surfaceGeneration: hdrSurfaceGeneration.value,
       ),
@@ -1404,6 +1429,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             'primaries=${_hdrSource.primaries.name}, '
             'transfer=${_hdrSource.transfer.name}, '
             'matrix=${_hdrSource.matrix.name}, '
+            'dvProfile=${_hdrSource.dolbyVisionProfile ?? 'none'}, '
+            'rpu=${_hdrSource.rpuPresent}, el=${_hdrSource.enhancementLayerPresent}, '
+            'dvEnhancement=${_hdrSource.dvEnhancement.name}, '
+            'dynamicMetadata=${_hdrSource.dynamicMetadataPresent}, '
             'output=${_hdrDecision.output.name}, '
             'surface=${_hdrDecision.surface}, '
             'vo=${_hdrDecision.vo}, hwdec=${_hdrDecision.hwdec}, '

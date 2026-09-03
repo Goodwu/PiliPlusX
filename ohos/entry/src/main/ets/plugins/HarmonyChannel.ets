@@ -117,6 +117,11 @@ export class HdrCapabilitiesChannel implements FlutterPlugin, MethodCallHandler 
         "backend": "ohos-nativewindow",
         "appliedColorSpace": "sdr",
         "active": false,
+        "sourceProcessing": "tone-map",
+        "outputEncoding": "sdr",
+        "dynamicMetadataApplied": false,
+        "supportedInputFormats": [],
+        "supportedOutputFormats": ["sdr"],
         "failureReason": "ohos-nativewindow-hdr-not-integrated",
       });
       return;

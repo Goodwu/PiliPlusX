@@ -28,6 +28,11 @@ import UIKit
           "backend": "ios-cametalayer",
           "appliedColorSpace": "sdr",
           "active": false,
+          "sourceProcessing": "tone-map",
+          "outputEncoding": "sdr",
+          "dynamicMetadataApplied": false,
+          "supportedInputFormats": [],
+          "supportedOutputFormats": ["sdr"],
           "failureReason": "native-hdr-layer-not-integrated"
         ])
         return

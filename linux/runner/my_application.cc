@@ -49,6 +49,13 @@ static void hdr_method_call_cb(FlMethodChannel * /*channel*/,
     fl_value_set_string_take(response, "backend", fl_value_new_string("linux-wayland-color-management"));
     fl_value_set_string_take(response, "appliedColorSpace", fl_value_new_string("sdr"));
     fl_value_set_string_take(response, "active", fl_value_new_bool(false));
+    fl_value_set_string_take(response, "sourceProcessing", fl_value_new_string("tone-map"));
+    fl_value_set_string_take(response, "outputEncoding", fl_value_new_string("sdr"));
+    fl_value_set_string_take(response, "dynamicMetadataApplied", fl_value_new_bool(false));
+    fl_value_set_string_take(response, "supportedInputFormats", fl_value_new_list());
+    g_autoptr(FlValue) output_formats = fl_value_new_list();
+    fl_value_append(output_formats, fl_value_new_string("sdr"));
+    fl_value_set_string_take(response, "supportedOutputFormats", g_steal_pointer(&output_formats));
     fl_value_set_string_take(response, "failureReason", fl_value_new_string("wayland-color-management-not-integrated"));
     fl_method_call_respond_success(method_call, response, nullptr);
     return;

@@ -407,4 +407,71 @@ void main() {
       expect(decision.reason, 'windows-native-swapchain-not-integrated');
     },
   );
+
+  test('mpv metadata records Dolby Vision layers and bit depth', () {
+    final source = HdrSourceMetadata.fromMpvProperties({
+      'codec': 'hevc',
+      'dolby-vision-profile': '7.6',
+      'transfer': 'smpte2084',
+      'primaries': 'bt.2020',
+      'matrix': 'bt.2020-ncl',
+      'rpu-present': 'true',
+      'el': 'present',
+      'dv-enhancement': 'FEL',
+      'bit-depth': '10',
+    });
+    expect(source.kind, HdrSourceKind.dolbyVision);
+    expect(source.isDolbyVisionP7, isTrue);
+    expect(source.requiresHdr10BaseLayerFallback, isTrue);
+    expect(source.dvEnhancement, DvEnhancementType.fel);
+    expect(source.rpuPresent, isTrue);
+    expect(source.enhancementLayerPresent, isTrue);
+    expect(source.bitDepth, 10);
+  });
+
+  test('P7 is explicitly labelled as HDR10 base-layer fallback', () {
+    final decision = HdrDecision.choose(
+      mode: HdrMode.auto,
+      source: const HdrSourceMetadata(
+        kind: HdrSourceKind.dolbyVision,
+        dolbyVisionProfile: '7.6',
+        transfer: HdrTransfer.pq,
+        primaries: HdrPrimaries.bt2020,
+        enhancementLayerPresent: true,
+        dvEnhancement: DvEnhancementType.fel,
+      ),
+      capabilities: const HdrCapabilities(
+        displayHdr: true,
+        decoderHdr: true,
+        nativeOutput: true,
+      ),
+    );
+    expect(decision.output, HdrOutputMode.toneMappedSdr);
+    expect(decision.reason, 'dolby-vision-p7-hdr10-bl-fallback');
+  });
+
+  test(
+    'HDR10+ dynamic metadata is recorded but not treated as passthrough',
+    () {
+      final source = HdrSourceMetadata.fromMpvProperties({
+        'transfer': 'pq',
+        'primaries': 'bt2020',
+        'hdr10plus-present': 'true',
+        'max-cll': '1000',
+      });
+      expect(source.kind, HdrSourceKind.hdr10Plus);
+      expect(source.dynamicMetadataPresent, isTrue);
+      expect(source.masteringMetadata['max-cll'], '1000');
+      final decision = HdrDecision.choose(
+        mode: HdrMode.auto,
+        source: source,
+        capabilities: const HdrCapabilities(
+          displayHdr: true,
+          decoderHdr: true,
+          nativeOutput: true,
+        ),
+      );
+      expect(decision.output, HdrOutputMode.toneMappedSdr);
+    },
+  );
 }
