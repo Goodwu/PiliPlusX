@@ -2104,6 +2104,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   flipY: plPlayerController.flipY.value,
                   child: Video(
                     controller: videoController,
+                    width: maxWidth,
+                    height: maxHeight,
                     fit: videoFit.boxFit,
                     fill: widget.fill,
                     alignment: widget.alignment,
