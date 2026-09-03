@@ -2,6 +2,11 @@
 
 更新时间：2026-09-02
 
+> 当前状态（2026-09-04）：本机已有可连接的 OHOS arm64 模拟器
+> `127.0.0.1:5555`，已完成 HAP 安装和首页启动验证。此前“hdc 为空、无法安装”的
+> 结论仅适用于 SSH 容器内的旧 Emulator 环境；最新运行限制和 HAP 证据见
+> [OHOS 运行状态与近期回归记录](../status/ohos-runtime-status.md)。
+
 ## 已修复的启动问题
 
 SSH `dev` 上 SDK Emulator 的实际文件名是 `emulator/Emulator`。其自带的

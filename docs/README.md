@@ -8,6 +8,7 @@
 - [HDR 验证账本](status/hdr-verification.md)：可复核的 channel、依赖、测试和设备证据。
 - [SDR 跨平台构建证据](status/platform-sdr-build-status.md)：平台构建、产物、ABI、运行门和工具链限制。
 - [OHOS 开发总结](status/ohos-development-summary.md)：OHOS 3.44 兼容实现、HAP 产物和剩余运行验收。
+- [OHOS 运行状态与近期回归记录](status/ohos-runtime-status.md)：白屏、图标、播放器触摸路径、签名 profile 和设备运行证据。
 
 ## 计划与设计
 

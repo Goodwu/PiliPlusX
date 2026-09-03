@@ -1,12 +1,12 @@
 # OHOS 开发总结
 
-更新时间：2026-09-03
+更新时间：2026-09-04
 
 ## 当前结论
 
-PiliPlusX 已在 SSH `dev` 上用完整 `lib/main.dart` 生成 unsigned arm64 HAP，状态为
-“构建通过，运行待验证”。`hdc list targets` 返回 `[Empty]`，SDK 自带 Emulator
-目前也无法启动，因此没有把安装、启动或 SDR 播放写成已验收。
+PiliPlusX 已在 SSH `dev` 上用完整 `lib/main.dart` 生成 unsigned arm64 HAP，并在本机
+签名后完成 OHOS 模拟器和实体手机的安装、启动：首页实际绘制正常。近期白屏回归的
+原因和修复证据见 [OHOS 运行状态与近期回归记录](ohos-runtime-status.md)。
 
 ## 固定基线
 
@@ -42,10 +42,10 @@ HAP 构建完成。该压缩包只保留在远端构建缓存，不作为仓库�
 
 | 验收项 | 当前状态 | 缺口 |
 | --- | --- | --- |
-| HAP 安装 | 未验证 | `hdc list targets` 为空 |
-| Ability/首页启动 | 未验证 | 无设备或可运行模拟器 |
+| HAP 安装 | 已验证 | 模拟器与实体手机分别使用匹配 profile 安装成功 |
+| Ability/首页启动 | 已验证 | 模拟器与实体手机截图均显示首页 |
 | XComponent/NativeWindow 生命周期 | 未验证 | 无图形运行环境 |
-| SDR 首帧、暂停、seek、切集、错误源 | 未验证 | 无设备 |
+| SDR 首帧、暂停、seek、切集、错误源 | 部分验证 | 实体机此前已验证视频首帧；当前模拟器不支持 media-kit OHOS 播放 |
 | 前后台恢复、重复销毁、资源释放 | 未验证 | 无设备 |
 | HDR probe 不报告 `nativeHdr` | 代码契约已固定 | 仍需运行日志确认 |
 
@@ -67,5 +67,19 @@ flutter build hap --release --no-codesign
 python3 "$OLDPWD/scripts/verify_artifact.py" build/ohos/hap/entry-default-unsigned.hap --platform ohos --abi arm64-v8a
 ```
 
-下一步只有在获得可用 OHOS 模拟器或真机后，才继续安装和 SDR 播放运行门；运行证据
-齐全前不启用 OHOS 原生 HDR。
+下一步继续在实体机验证当前包的视频首帧、暂停、seek、切集、错误源以及左右滑动
+亮度/音量效果；运行证据齐全前不启用 OHOS 原生 HDR。
+
+## 2026-09-04 手势回归阶段记录
+
+实体机验证发现视频区域的垂直滑动会被 `ExtendedNestedScrollView` 的外层垂直
+recognizer 抢走，导致列表滚动而播放器亮度/音量不响应。arena 日志确认播放器
+recognizer 已加入但被外层 recognizer 拒绝，因此此前对音量节流或 raw pointer 的
+怀疑不是根因。
+
+当前阶段性实现是在播放器内注册专用
+`PlayerVerticalDragGestureRecognizer`，并复用原有 pan 回调。实体机手工验证通过，
+视频区域不再滚动列表，列表区域仍可滚动。该实现仍属于过渡性的 gesture arena
+抢占方案；最终应将播放器交互层从嵌套滚动 hit-test/gesture 路径中隔离，或在
+`ExtendedNestedScrollView` 层按 pointer 起点决定是否注册外层拖拽。详细证据、当前
+阈值风险和后续方案见 [OHOS 运行状态与近期回归记录](ohos-runtime-status.md)。

@@ -1,6 +1,6 @@
 # 非 HDR 全平台可用：主要事项
 
-更新时间：2026-09-02。当前证据汇总见
+更新时间：2026-09-04。当前证据汇总见
 [SDR 跨平台构建证据](../status/platform-sdr-build-status.md)；本文件只保留计划、
 验收口径和未解除阻塞，不重复粘贴构建日志。
 
@@ -47,8 +47,9 @@ Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建�
    会话分别验证 x64 与 arm64 的首帧、音画同步、seek、全屏和退出。
 5. **补齐 Windows**：启动 Windows 11 ARM VMware，安装 Flutter/VS C++/SDK，交叉
    构建 x64，并在模拟层验证安装、SDR 播放、DPI、最小化和全屏。
-6. **补齐 OHOS**：取得模拟器或真机后安装 unsigned HAP，验证 XComponent/
-   NativeWindow 生命周期、点播、前后台切换和 SDR 回退。
+6. **补齐 OHOS**：安装并启动已签名 HAP 已完成；继续在实体机验证 XComponent/
+   NativeWindow 生命周期、点播、前后台切换、SDR 回退和亮度/音量手势。模拟器仅
+   用于安装、启动和基础输入验证，不用于 media-kit 视频首帧验收。
 7. **补齐 Web**：本地 HTTP server + Chrome 验证首页、登录态、SDR 点播/直播、
    弹幕、暂停、seek、画质切换和错误源恢复。
 8. **最终集成**：将全部 media-kit 条目切换到同一候选 SHA，重跑 lock、workflow、
@@ -74,7 +75,9 @@ Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建�
   Windows runner 后解除。
 - **Linux x64/arm64**：现有环境没有真实图形输出；取得带 GPU 的 X11/Wayland
   会话后解除视频呈现阻塞。
-- **OHOS**：没有可用模拟器或真机；设备可安装 HAP 后解除。
+- **OHOS**：模拟器和实体机的 HAP 安装、Ability/首页启动已解除；模拟器不能作为
+  media-kit 视频播放设备，实体机仍需补齐当前包的完整 SDR 播放矩阵和亮度/音量手势
+  实测。
 - **HDR**：继续作为独立后续阶段；需系统色彩空间、播放器元数据、原生输出成功和
   HDR/SDR 亮度比证据同时成立，才允许启用 `nativeHdr`。
 

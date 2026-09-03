@@ -5,6 +5,10 @@ abstract final class PlatformUtils {
   static final bool isMobile = Platform.isAndroid || Platform.isIOS;
 
   @pragma("vm:platform-const")
+  static final bool isTouchDevice =
+      isMobile || Platform.operatingSystem == 'ohos';
+
+  @pragma("vm:platform-const")
   static final bool isDesktop =
       Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 

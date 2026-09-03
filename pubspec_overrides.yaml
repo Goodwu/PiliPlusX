@@ -1,0 +1,24 @@
+# Local media-kit integration override. Remove before publishing a release.
+dependency_overrides:
+  # Resolve the two existing git-source declarations to the cached package
+  # while testing the local media-kit path override.
+  cached_network_image_ce:
+    path: /Users/wuweiwei1/.pub-cache/git/flutter_cached_network_image_ce-dacec4de669b4c52c59576509db069e3194408ac/cached_network_image
+  media_kit:
+    path: ../media-kit/media_kit
+  media_kit_video:
+    path: ../media-kit/media_kit_video
+  media_kit_libs_android_video:
+    path: ../media-kit/libs/android/media_kit_libs_android_video
+  media_kit_libs_ios_video:
+    path: ../media-kit/libs/ios/media_kit_libs_ios_video
+  media_kit_libs_macos_video:
+    path: ../media-kit/libs/macos/media_kit_libs_macos_video
+  media_kit_libs_linux:
+    path: ../media-kit/libs/linux/media_kit_libs_linux
+  media_kit_libs_ohos:
+    path: ../media-kit/libs/ohos/media_kit_libs_ohos
+  media_kit_libs_video:
+    path: ../media-kit/libs/universal/media_kit_libs_video
+  media_kit_libs_windows_video:
+    path: ../media-kit/libs/windows/media_kit_libs_windows_video

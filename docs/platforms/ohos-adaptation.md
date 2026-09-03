@@ -1,6 +1,6 @@
 # OHOS 适配记录
 
-更新时间：2026-09-03
+更新时间：2026-09-04
 
 当前构建与运行状态见 [OHOS 开发总结](../status/ohos-development-summary.md)。本文件
 只记录长期适配边界和依赖策略。
@@ -52,3 +52,14 @@ OHOS 构建副本使用 `python3 scripts/prepare_ohos_build.py --workspace
 `nativeOutput=false` 和 `ohos-hdr-capability-not-proven`。在 XComponent/
 NativeWindow 能够报告显示色彩空间、解码 profile 并完成真实设备验证前，
 播放器只允许使用 Texture tone-map SDR，不宣称原生 HDR。
+
+## 平台判定边界
+
+OHOS 不应直接加入全局 `PlatformUtils.isMobile`：该判定会触发方向、系统 UI 和
+`setupServiceLocator()` 等 Android/iOS 专属启动初始化，曾导致 OHOS 应用白屏。
+播放器触摸交互使用独立的 `PlatformUtils.isTouchDevice`，该判定包含 Android、iOS
+和 OHOS；全局移动端能力仍只表示 Android/iOS。
+
+图标资源应与 Android/macOS 的绿色 `P` 品牌资源保持一致。OHOS 的 AppScope 和
+entry 图标均需同步更新；远端 Hvigor 增量构建可能保留旧 SVG，资源变更后要清理
+`build/ohos` 和 `ohos/entry/build` 再构建。

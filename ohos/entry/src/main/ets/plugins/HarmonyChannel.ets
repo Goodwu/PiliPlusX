@@ -52,6 +52,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         await this.autoRotateLandscape();
         result.success(true);
         break;
+      case "setWindowBrightness":
+        const brightness: number = call.argument("value") ?? -1;
+        this.lastWindow ??= await window.getLastWindow(getContext());
+        await this.lastWindow.setWindowBrightness(brightness);
+        result.success(true);
+        break;
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));

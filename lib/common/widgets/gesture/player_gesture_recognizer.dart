@@ -1,5 +1,10 @@
 import 'package:flutter/gestures.dart'
-    show ScaleGestureRecognizer, RecognizerCallback, GestureRecognizer;
+    show
+        GestureRecognizer,
+        PointerDeviceKind,
+        RecognizerCallback,
+        ScaleGestureRecognizer,
+        VerticalDragGestureRecognizer;
 
 mixin PlayerGestureMixin on GestureRecognizer {
   bool isPosAllowed = true;
@@ -25,4 +30,19 @@ class PlayerScaleGestureRecognizer extends ScaleGestureRecognizer
     super.trackpadScrollCausesScale,
     super.trackpadScrollToScaleFactor,
   });
+}
+
+class PlayerVerticalDragGestureRecognizer
+    extends VerticalDragGestureRecognizer {
+  PlayerVerticalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  });
+
+  @override
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double? deviceTouchSlop,
+  ) => globalDistanceMoved.abs() > 1;
 }

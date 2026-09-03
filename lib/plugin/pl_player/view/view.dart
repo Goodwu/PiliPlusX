@@ -264,7 +264,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    if (PlatformUtils.isMobile) {
+    if (PlatformUtils.isTouchDevice) {
       Future.microtask(() {
         try {
           FlutterVolumeController.updateShowSystemUI(true);
@@ -323,6 +323,40 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       ),
       trackpadScrollCausesScale: false,
     );
+
+    _verticalDragGestureRecognizer =
+        PlayerVerticalDragGestureRecognizer(
+            debugOwner: this,
+            allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
+          )
+          ..onStart = (details) {
+            _onPanStart(
+              ScaleStartDetails(
+                focalPoint: details.globalPosition,
+                localFocalPoint: details.localPosition,
+                pointerCount: 1,
+              ),
+            );
+          }
+          ..onUpdate = (details) {
+            _onPanUpdate(
+              ScaleUpdateDetails(
+                focalPoint: details.globalPosition,
+                localFocalPoint: details.localPosition,
+                focalPointDelta: details.delta,
+                pointerCount: 1,
+              ),
+            );
+          }
+          ..onEnd = (details) {
+            _onPanEnd(
+              ScaleEndDetails(
+                velocity: details.velocity,
+                pointerCount: 1,
+              ),
+            );
+          }
+          ..onCancel = () => _onPanEnd(ScaleEndDetails(pointerCount: 1));
   }
 
   @override
@@ -346,7 +380,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   Future<void> setBrightness(double value) async {
     _brightnessValue.value = value;
     try {
-      if (Platform.isIOS || plPlayerController.setSystemBrightness) {
+      if (Platform.operatingSystem == 'ohos') {
+        await const MethodChannel('harmonyChannel').invokeMethod<void>(
+          'setWindowBrightness',
+          {'value': value},
+        );
+      } else if (Platform.isIOS || plPlayerController.setSystemBrightness) {
         await ScreenBrightnessPlatform.instance.setSystemScreenBrightness(
           value,
         );
@@ -374,12 +413,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
     _scaleGestureRecognizer.dispose();
+    _verticalDragGestureRecognizer.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
     _animationController.dispose();
     _transformationController.dispose();
     _removeDmAction();
-    if (PlatformUtils.isMobile) {
+    if (PlatformUtils.isTouchDevice) {
       FlutterVolumeController.removeListener();
     }
     super.dispose();
@@ -538,7 +578,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 Feedback.forLongPress(context);
                 videoDetailController.showVP.toggle();
               },
-              onSecondaryTap: PlatformUtils.isMobile
+              onSecondaryTap: PlatformUtils.isTouchDevice
                   ? null
                   : () => videoDetailController.showVP.toggle(),
             );
@@ -1047,6 +1087,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
         final double tapPosition = details.localFocalPoint.dx;
         final double sectionWidth = maxWidth / 3;
+        if (MediaQuery.orientationOf(context) == Orientation.portrait &&
+            (tapPosition < sectionWidth || tapPosition >= sectionWidth * 2)) {
+          return;
+        }
         if (tapPosition < sectionWidth) {
           if (!plPlayerController.enableSlideVolumeBrightness) {
             return;
@@ -1252,6 +1296,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
+  late final VerticalDragGestureRecognizer _verticalDragGestureRecognizer;
 
   StreamSubscription<bool>? _danmakuListener;
 
@@ -1286,13 +1331,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
 
     final controlsUnlock = !plPlayerController.controlsLock.value;
-    if (PlatformUtils.isMobile) {
+    if (PlatformUtils.isTouchDevice) {
       _tapGestureRecognizer.addPointer(event);
       if (controlsUnlock) {
         if (!plPlayerController.isLive) {
           _doubleTapGestureRecognizer.addPointer(event);
           longPressRecognizer.addPointer(event);
         }
+        _verticalDragGestureRecognizer.addPointer(event);
         _scaleGestureRecognizer
           ..isPosAllowed = _isPositionAllowed(event.localPosition)
           ..addPointer(event);
@@ -1795,7 +1841,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           padding: const .only(bottom: 4.25),
                           child: ViewPointSegmentProgressBar(
                             segments: videoDetailController.viewPointList,
-                            onSeek: PlatformUtils.isMobile
+                            onSeek: PlatformUtils.isTouchDevice
                                 ? (position) {
                                     if (!plPlayerController
                                         .controlsLock
