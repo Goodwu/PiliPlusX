@@ -14,12 +14,19 @@
 | SDR 视频播放 | 最新 Debug App 实际播放截图 | 已验证：画面正常，无黑屏 |
 | SDR 上 HDR 画质保护 | 播放器画质菜单和详情页菜单 | 已验证：杜比视界、HDR 真彩置灰且不可点击 |
 | SDR 默认画质降级 | `queryVideoUrl` 的最终 `targetVideoQa` 保护 | 已实现：默认 HDR 画质在 SDR 上选择最高可用 SDR 源 |
-| HDR 显示器原生输出 | M27P20 实际播放 BV1uZ4y1U7h8；`CAMetalLayer` `rgba16Float`/BT.2020，日志 `drawn=true`，EDR headroom=2.03048 | 通过 |
+| HDR 显示器原生输出 | 最新 Debug App 实际播放 BV1uZ4y1U7h8；`CAMetalLayer` `active=true`，`rgba16Float`/BT.2020，实际画面可见，播放中 EDR headroom=2.03048 | 通过 |
 | HDR/SDR 跨屏移动 | 无跨屏实测证据 | 未验证 |
 | 显示器变化通知 | macOS 原生屏幕变化通知 -> `EventChannel` -> Dart | 已实现，待 HDR/SDR 实机验证 |
 | media-kit 双目标过渡渲染 | `Goodwu/media-kit` 当前工作树 | 已实现：同时维护 Texture 回退帧与 native half-float 帧，surface 按 active 选择 |
 | PiliPlusX macOS Debug 构建 | `flutter build macos --debug --no-pub` | 成功，产物为 `build/macos/Build/Products/Debug/PiliPlusX.app` |
 | HDR 决策测试 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart` | 25 项通过 |
+
+### 帧节奏复核
+
+在 23e4646（避免 macOS HDR 双重渲染）之后重新构建并播放上述视频。native
+surface 保持激活且画面连续；渲染器每次 mpv 更新只选择一个目标，不再同时执行
+Flutter Texture 和 half-float Metal 两次 libplacebo 渲染。该结果作为当前帧率抖动
+修复后的实机证据；尚未建立独立的 FPS/Present 间隔采样器。
 
 当前阶段仍需在 HDR/SDR 跨屏和全屏生命周期中验证：事件只触发一次有效换源，
 HDR 输出状态、画面、帧率和播放进度均保持正常；返回 HDR 屏幕后不能出现黑屏
