@@ -1200,8 +1200,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.1.11"
@@ -1209,8 +1209,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/android/media_kit_libs_android_video"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.3.6"
@@ -1218,8 +1218,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/ios/media_kit_libs_ios_video"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1227,8 +1227,8 @@ packages:
     dependency: transitive
     description:
       path: "libs/linux/media_kit_libs_linux"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.1.3"
@@ -1236,8 +1236,8 @@ packages:
     dependency: transitive
     description:
       path: "libs/macos/media_kit_libs_macos_video"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1245,8 +1245,8 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/ohos/media_kit_libs_ohos"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.0.0"
@@ -1254,8 +1254,8 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/universal/media_kit_libs_video"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.0.5"
@@ -1263,8 +1263,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/windows/media_kit_libs_windows_video"
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.0.10"
@@ -1272,8 +1272,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: "73536efdda482f2d5eefe2feb7038db419944b96"
-      resolved-ref: "73536efdda482f2d5eefe2feb7038db419944b96"
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      resolved-ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
       url: "https://github.com/Goodwu/media-kit.git"
     source: git
     version: "1.2.5"

@@ -385,7 +385,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     reason: 'source-not-detected',
   );
   final hdrSurfaceGeneration = 0.obs;
+  final hdrDisplaySupportsHdr = false.obs;
   final hdrOutputError = RxnString();
+  StreamSubscription<Object?>? _hdrDisplaySubscription;
+  void Function(bool displayHdr)? onHdrDisplayChanged;
   bool _hdrOutputRebuildInFlight = false;
   bool? _queuedHdrOutputRebuildHcpp;
   bool? _queuedHdrOutputRebuildSurfaceView;
@@ -807,6 +810,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     assert(_videoController == null);
 
     _hdrCapabilities = await HdrPlatform.probe(codec: _hdrCodecHint);
+    hdrDisplaySupportsHdr.value = _hdrCapabilities.displayHdr;
     _hdrProbedCodec = _hdrCodecHint;
     _hdrDecision = HdrDecision.choose(
       mode: Pref.hdrMode,
@@ -876,6 +880,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     _startListeners(player);
+    if (Platform.isMacOS) {
+      _hdrDisplaySubscription = HdrPlatform.displayChanges.listen(
+        (_) => unawaited(refreshHdrDisplayCapabilities()),
+        onError: (_) {},
+      );
+    }
 
     return player;
   }
@@ -900,7 +910,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     useHCPP: hcpp,
     // Darwin keeps a stable native candidate across SDR/HDR source changes;
     // the media-kit backend still reports active=false until all probes pass.
-    useNativeSurface: !texture &&
+    useNativeSurface:
+        !texture &&
         Pref.hdrMode == HdrMode.auto &&
         (Platform.isIOS || Platform.isMacOS),
   );
@@ -1085,6 +1096,24 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
+  Future<void> refreshHdrDisplayCapabilities() async {
+    final capabilities = await HdrPlatform.probe(codec: _hdrCodecHint);
+    final displayHdrChanged =
+        capabilities.displayHdr != _hdrCapabilities.displayHdr;
+    _hdrCapabilities = _hdrCapabilities.copyWith(
+      displayHdr: capabilities.displayHdr,
+      nativeOutput: displayHdrChanged ? false : null,
+      nativeOutputActive: displayHdrChanged ? false : null,
+    );
+    hdrDisplaySupportsHdr.value = capabilities.displayHdr;
+    if (displayHdrChanged) {
+      onHdrDisplayChanged?.call(capabilities.displayHdr);
+    }
+    if (!displayHdrChanged || _videoPlayerController == null) return;
+    _refreshHdrDecision();
+    unawaited(_applyHdrOutputParameters(_videoPlayerController!));
+  }
+
   Future<bool> _setHdrColorSpace(Player player) async {
     if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS) ||
         !_hdrSource.hasNativeColorMetadata) {
@@ -1115,8 +1144,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           surfaceId: handle.toString(),
           windowHandle: handle,
         );
-        final createdCapable = created == true ||
-            (created is Map && created['capable'] == true);
+        final createdCapable =
+            created == true || (created is Map && created['capable'] == true);
         if (!createdCapable) return false;
         final configured = await nativePlatform.configureHdrOutput(
           HdrOutputConfiguration(
@@ -1135,6 +1164,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           ).toMap(),
         );
         if (configured is! Map || configured['active'] != true) return false;
+        if (Platform.isMacOS || Platform.isIOS) {
+          // The media-kit native surface is authoritative on Darwin. The app
+          // channel still reports false because it only probes the Flutter
+          // window, not the CAMetalLayer that owns HDR output.
+          return true;
+        }
       } on NoSuchMethodError {
         // The currently locked media-kit may predate the public lifecycle API.
       } catch (error) {
@@ -1420,7 +1455,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         final outputTopologyChanged =
             _hdrOutputSignature(previousDecision) !=
             _hdrOutputSignature(_hdrDecision);
-        if (outputTopologyChanged && _videoController != null) {
+        final darwinNativeCandidate =
+            (Platform.isMacOS || Platform.isIOS) &&
+            Pref.hdrMode == HdrMode.auto &&
+            _videoController != null;
+        if (outputTopologyChanged &&
+            _videoController != null &&
+            !darwinNativeCandidate) {
           _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
         }
         unawaited(_applyHdrOutputParameters(player));
@@ -1441,9 +1482,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _lastHdrDiagnostic = diagnostic;
           debugPrint(diagnostic);
         }
-        if (_hdrCapabilities.canHcpp &&
+        if ((_hdrCapabilities.canHcpp || darwinNativeCandidate) &&
             _hdrSource.hasNativeColorMetadata &&
-            !outputTopologyChanged &&
+            (!outputTopologyChanged || darwinNativeCandidate) &&
             !_hdrOutputRebuildInFlight) {
           unawaited(
             _setHdrColorSpace(player).then((applied) {
@@ -1452,6 +1493,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                   nativeOutput: true,
                   nativeOutputCapable: true,
                   nativeOutputActive: true,
+                  decoderHdr: true,
                   unsupportedReason: 'native-dataspace-applied',
                 );
                 _hdrDecision = HdrDecision.choose(
@@ -2056,6 +2098,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   void dispose() {
+    _hdrDisplaySubscription?.cancel();
+    _hdrDisplaySubscription = null;
     // 每次减1，最后销毁
     resetScreenRotation();
     cancelLongPressTimer();

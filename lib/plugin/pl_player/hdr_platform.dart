@@ -8,6 +8,10 @@ import 'package:flutter/services.dart';
 /// endpoint reports inactive output instead of being interpreted as HDR.
 abstract final class HdrPlatform {
   static const _channel = MethodChannel('piliplusx/hdr_capabilities');
+  static const _displayChanges = EventChannel('piliplusx/hdr_display_changes');
+
+  static Stream<void> get displayChanges =>
+      _displayChanges.receiveBroadcastStream().map((_) {});
 
   static Future<HdrCapabilities> probe({String? codec}) async {
     try {

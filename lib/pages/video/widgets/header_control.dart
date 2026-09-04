@@ -922,7 +922,6 @@ class HeaderControlState extends State<HeaderControl>
         usefulQaSam++;
       }
     }
-
     showBottomSheet(
       (context, setState) {
         final theme = Theme.of(context);
@@ -956,55 +955,64 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                   ),
                 ),
-                SliverList.builder(
-                  itemCount: totalQaSam,
-                  itemBuilder: (context, index) {
-                    final item = videoFormat[index];
-                    final isCurr = currentVideoQa.code == item.quality;
-                    return ListTile(
-                      dense: true,
-                      onTap: () async {
-                        if (isCurr) {
-                          return;
-                        }
-                        Get.back();
-                        final int quality = item.quality!;
-                        final newQa = VideoQuality.fromCode(quality);
-                        videoDetailCtr
-                          ..plPlayerController.cacheVideoQa = newQa.code
-                          ..currentVideoQa.value = newQa
-                          ..updatePlayer();
+                Obx(() {
+                  final displaySupportsHdr =
+                      plPlayerController.hdrDisplaySupportsHdr.value;
+                  return SliverList.builder(
+                    itemCount: totalQaSam,
+                    itemBuilder: (context, index) {
+                      final item = videoFormat[index];
+                      final isCurr = currentVideoQa.code == item.quality;
+                      final isHdrQuality =
+                          item.quality == VideoQuality.dolbyVision.code ||
+                          item.quality == VideoQuality.hdr.code;
+                      return ListTile(
+                        dense: true,
+                        onTap: () async {
+                          if (isCurr) {
+                            return;
+                          }
+                          Get.back();
+                          final int quality = item.quality!;
+                          final newQa = VideoQuality.fromCode(quality);
+                          videoDetailCtr
+                            ..plPlayerController.cacheVideoQa = newQa.code
+                            ..currentVideoQa.value = newQa
+                            ..updatePlayer();
 
-                        SmartDialog.showToast("画质已变为：${newQa.desc}");
+                          SmartDialog.showToast("画质已变为：${newQa.desc}");
 
-                        // update
-                        if (!plPlayerController.tempPlayerConf) {
-                          setting.put(
-                            await ConnectivityUtils.isWiFi
-                                ? SettingBoxKey.defaultVideoQa
-                                : SettingBoxKey.defaultVideoQaCellular,
-                            quality,
-                          );
-                        }
-                      },
-                      // 可能包含会员解锁画质
-                      enabled: index >= totalQaSam - usefulQaSam,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                      ),
-                      title: Text(item.newDesc!),
-                      trailing: isCurr
-                          ? Icon(
-                              Icons.done,
-                              color: theme.colorScheme.primary,
-                            )
-                          : Text(
-                              item.format!,
-                              style: subTitleStyle,
-                            ),
-                    );
-                  },
-                ),
+                          // update
+                          if (!plPlayerController.tempPlayerConf) {
+                            setting.put(
+                              await ConnectivityUtils.isWiFi
+                                  ? SettingBoxKey.defaultVideoQa
+                                  : SettingBoxKey.defaultVideoQaCellular,
+                              quality,
+                            );
+                          }
+                        },
+                        // 可能包含会员解锁画质
+                        enabled:
+                            index >= totalQaSam - usefulQaSam &&
+                            (!isHdrQuality || displaySupportsHdr),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        title: Text(item.newDesc!),
+                        trailing: isCurr
+                            ? Icon(
+                                Icons.done,
+                                color: theme.colorScheme.primary,
+                              )
+                            : Text(
+                                item.format!,
+                                style: subTitleStyle,
+                              ),
+                      );
+                    },
+                  );
+                }),
               ],
             ),
           ),

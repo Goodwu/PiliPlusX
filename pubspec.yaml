@@ -209,37 +209,37 @@ dependency_overrides:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: media_kit
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_libs_android_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/android/media_kit_libs_android_video
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_libs_ios_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/ios/media_kit_libs_ios_video
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_libs_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/universal/media_kit_libs_video
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_libs_ohos:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/ohos/media_kit_libs_ohos
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_libs_windows_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   media_kit_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: media_kit_video
-      ref: 73536efdda482f2d5eefe2feb7038db419944b96
+      ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63
   cached_network_image_ce:
     git:
       url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git

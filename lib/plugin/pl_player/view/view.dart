@@ -885,6 +885,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               .map((i) => i.id)
               .toSet()
               .length;
+          final displaySupportsHdr =
+              plPlayerController.hdrDisplaySupportsHdr.value;
           return PopupMenuButton<int>(
             tooltip: '画质',
             requestFocus: false,
@@ -895,7 +897,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 totalQaSam,
                 (index) {
                   final item = videoFormat[index];
-                  final enabled = index >= totalQaSam - usefulQaSam;
+                  final isHdrQuality =
+                      item.quality == VideoQuality.dolbyVision.code ||
+                      item.quality == VideoQuality.hdr.code;
+                  final enabled =
+                      index >= totalQaSam - usefulQaSam &&
+                      (!isHdrQuality || displaySupportsHdr);
                   return PopupMenuItem<int>(
                     enabled: enabled,
                     height: 35,

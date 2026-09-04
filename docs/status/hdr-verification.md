@@ -1,9 +1,30 @@
 # HDR 验证账本
 
-更新时间：2026-09-03
+更新时间：2026-09-04
 
 这份账本只记录已经执行的验证。构建成功、显示器能力探测或单元测试，均
 不能替代真实设备上的原生 HDR 验收。
+
+## 2026-09-04 阶段性验证
+
+本阶段完成 macOS 播放路径的 SDR 稳定性和 HDR 画质选择保护，仍未完成 HDR
+显示器上的原生输出验收。
+
+| 项目 | 证据 | 结果 |
+| --- | --- | --- |
+| SDR 视频播放 | 最新 Debug App 实际播放截图 | 已验证：画面正常，无黑屏 |
+| SDR 上 HDR 画质保护 | 播放器画质菜单和详情页菜单 | 已验证：杜比视界、HDR 真彩置灰且不可点击 |
+| SDR 默认画质降级 | `queryVideoUrl` 的最终 `targetVideoQa` 保护 | 已实现：默认 HDR 画质在 SDR 上选择最高可用 SDR 源 |
+| HDR 显示器原生输出 | 无 HDR 显示器实测证据 | 未验证 |
+| HDR/SDR 跨屏移动 | 无跨屏实测证据 | 未验证 |
+| 显示器变化通知 | macOS 原生屏幕变化通知 -> `EventChannel` -> Dart | 已实现，待 HDR/SDR 实机验证 |
+| media-kit 单路渲染 | `Goodwu/media-kit` `0fa6afe9cd9af8d8437919257d81a27c643f2f63` | 已实现：按 active surface 只渲染一个目标 |
+| PiliPlusX macOS Debug 构建 | `flutter build macos --debug --no-pub` | 成功，产物为 `build/macos/Build/Products/Debug/PiliPlusX.app` |
+| HDR 决策测试 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart` | 25 项通过 |
+
+当前阶段不能宣称 HDR native 输出已验收。下一步应在 HDR 显示器上验证：窗口
+移动到 HDR/SDR 屏幕时，事件只触发一次有效换源，HDR 输出状态、画面、帧率和
+播放进度均保持正常；返回 HDR 屏幕后不能出现黑屏或重复重载。
 
 ## 已验证
 

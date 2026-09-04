@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' show min;
 import 'dart:ui';
 
@@ -126,6 +127,8 @@ class VideoDetailController extends GetxController
 
   final plPlayerController = PlPlayerController.getInstance()
     ..brightness.value = -1;
+  late final void Function(bool) _hdrDisplayChangedCallback =
+      _onHdrDisplayChanged;
   bool get setSystemBrightness => plPlayerController.setSystemBrightness;
   bool get removeSafeArea => plPlayerController.removeSafeArea;
   double get uiScale => plPlayerController.uiScale;
@@ -352,6 +355,7 @@ class VideoDetailController extends GetxController
   @override
   void onInit() {
     super.onInit();
+    plPlayerController.onHdrDisplayChanged = _hdrDisplayChangedCallback;
     args = Get.arguments;
     videoType = args['videoType'];
     if (videoType == VideoType.pgc) {
@@ -389,6 +393,28 @@ class VideoDetailController extends GetxController
       initialIndex: Pref.defaultShowComment ? 1 : 0,
     );
   }
+
+  void _onHdrDisplayChanged(bool displayHdr) {
+    if (displayHdr || isFileSource || data.dash == null) return;
+    final current = currentVideoQa.value;
+    if (current == null || !_isHdrQuality(current.code)) return;
+
+    final fallback = data.dash!.video!.firstWhereOrNull(
+      (item) => !_isHdrQuality(item.id),
+    );
+    if (fallback == null || fallback.quality.code == current.code) return;
+
+    final newQuality = fallback.quality;
+    plPlayerController.cacheVideoQa = newQuality.code;
+    currentVideoQa.value = newQuality;
+    updatePlayer();
+    SmartDialog.showToast('当前显示器不支持 HDR，已切换到：${newQuality.desc}');
+  }
+
+  bool _isHdrQuality(int? code) =>
+      code == VideoQuality.dolbyVision.code ||
+      code == VideoQuality.hdr.code ||
+      code == VideoQuality.hdrVivid.code;
 
   Future<void> getMediaList({
     bool isReverse = false,
@@ -806,6 +832,9 @@ class VideoDetailController extends GetxController
       return;
     }
     isQuerying = true;
+    if (Platform.isMacOS || Platform.isIOS) {
+      await plPlayerController.refreshHdrDisplayCapabilities();
+    }
     if (plPlayerController.enableSponsorBlock && isBlock && !fromReset) {
       querySponsorBlock(bvid: bvid, cid: cid.value);
     }
@@ -911,13 +940,48 @@ class VideoDetailController extends GetxController
       final curHighestVideoQa = videoList.first.quality.code;
       // 预设的画质为null，则当前可用的最高质量
       int targetVideoQa = curHighestVideoQa;
-      final cacheVideoQa = plPlayerController.cacheVideoQa!;
+      var cacheVideoQa = plPlayerController.cacheVideoQa!;
+      if (!plPlayerController.hdrDisplaySupportsHdr.value &&
+          _isHdrQuality(cacheVideoQa)) {
+        final sdrVideos = videoList
+            .where((item) => !_isHdrQuality(item.id))
+            .toList();
+        if (sdrVideos.isNotEmpty) {
+          final fallbackVideo = sdrVideos.reduce(
+            (a, b) => a.quality.code > b.quality.code ? a : b,
+          );
+          cacheVideoQa = fallbackVideo.quality.code;
+          plPlayerController.cacheVideoQa = cacheVideoQa;
+        }
+      }
       if (data.acceptQuality?.isNotEmpty == true &&
           cacheVideoQa <= curHighestVideoQa) {
         // 如果预设的画质低于当前最高
         targetVideoQa = data.acceptQuality!.findClosestTarget(
           (e) => e <= cacheVideoQa,
           (a, b) => a > b ? a : b,
+        );
+      }
+      if (!plPlayerController.hdrDisplaySupportsHdr.value &&
+          _isHdrQuality(targetVideoQa)) {
+        final sdrVideos = videoList
+            .where((item) => !_isHdrQuality(item.id))
+            .toList();
+        if (sdrVideos.isNotEmpty) {
+          targetVideoQa = sdrVideos
+              .reduce(
+                (a, b) => a.quality.code > b.quality.code ? a : b,
+              )
+              .quality
+              .code;
+          plPlayerController.cacheVideoQa = targetVideoQa;
+        }
+      }
+      if (kDebugMode) {
+        debugPrint(
+          'Video quality selection: displayHdr='
+          '${plPlayerController.hdrDisplaySupportsHdr.value}, '
+          'cached=$cacheVideoQa, target=$targetVideoQa',
         );
       }
       currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
@@ -1237,6 +1301,12 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    if (identical(
+      plPlayerController.onHdrDisplayChanged,
+      _hdrDisplayChangedCallback,
+    )) {
+      plPlayerController.onHdrDisplayChanged = null;
+    }
     cid.close();
     if (isFileSource) {
       cacheLocalProgress();

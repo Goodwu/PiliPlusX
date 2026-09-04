@@ -1,9 +1,28 @@
 import Cocoa
 import FlutterMacOS
 
-class MainFlutterWindow: NSWindow {
-  private var hdrScreen: NSScreen?
+private final class HdrDisplayEventHandler: NSObject, FlutterStreamHandler {
+  private var eventSink: FlutterEventSink?
 
+  func onListen(
+    withArguments arguments: Any?,
+    eventSink events: @escaping FlutterEventSink
+  ) -> FlutterError? {
+    eventSink = events
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    eventSink = nil
+    return nil
+  }
+
+  func emit() {
+    eventSink?(nil)
+  }
+}
+
+class MainFlutterWindow: NSWindow {
   private func applyOpaqueWindowAppearance() {
     // 恢复系统默认的不透明窗口背景
     self.isOpaque = true
@@ -21,7 +40,6 @@ class MainFlutterWindow: NSWindow {
     // 先不显示窗口
     self.isReleasedWhenClosed = false
     self.contentViewController = flutterViewController
-    hdrScreen = screen ?? NSScreen.main
     self.setFrame(self.frame, display: true)
 
     applyOpaqueWindowAppearance()
@@ -55,8 +73,8 @@ class MainFlutterWindow: NSWindow {
         result(FlutterMethodNotImplemented)
         return
       }
-      let activeScreen = self.hdrScreen ?? self.screen ?? NSScreen.main
-      let edr = (activeScreen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0) > 1.0
+      let activeScreen = self.screen ?? NSScreen.main
+      let edr = (activeScreen?.maximumExtendedDynamicRangeColorComponentValue ?? 1.0) > 1.0
       result([
         "platform": "macos",
         "nativeBackend": "none",
@@ -71,6 +89,12 @@ class MainFlutterWindow: NSWindow {
       ])
     }
 
+    let displayEventHandler = HdrDisplayEventHandler()
+    FlutterEventChannel(
+      name: "piliplusx/hdr_display_changes",
+      binaryMessenger: flutterViewController.engine.binaryMessenger
+    ).setStreamHandler(displayEventHandler)
+
     // Keep capability probing tied to the screen that actually contains the
     // window. Moving between HDR and SDR displays must not leave stale EDR
     // state behind, even while native output remains fail-closed.
@@ -78,15 +102,15 @@ class MainFlutterWindow: NSWindow {
       forName: NSWindow.didChangeScreenNotification,
       object: self, queue: .main
     ) { [weak self] notification in
-      guard let self else { return }
-      self.hdrScreen = (notification.object as? NSWindow)?.screen ?? NSScreen.main
+      guard self != nil else { return }
+      displayEventHandler.emit()
     }
     NotificationCenter.default.addObserver(
       forName: NSApplication.didChangeScreenParametersNotification,
       object: nil, queue: .main
     ) { [weak self] _ in
-      guard let self else { return }
-      self.hdrScreen = self.screen ?? NSScreen.main
+      guard self != nil else { return }
+      displayEventHandler.emit()
     }
 
     // 监听首帧渲染完成再显示窗口
