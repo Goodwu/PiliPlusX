@@ -17,7 +17,7 @@ fail-closed，平台后端完成后才能将对应 lock 条目提升到该集成
 | --- | --- | --- | --- |
 | Android / Pink | 先以 HCPP `SurfaceView` 承载 tone-map，dataspace 提交确认后才切为 native HDR；输出重建后重新提交 dataspace；失败时回退 SurfaceView，再回退 Texture | 已实现显示 HDR 类型、当前 track 对应的 MediaCodec HEVC Main10/VP9 Profile 2/AV1 Main10、Vulkan 和 API 门槛探测；track 到达后会重探测；dataspace 设置失败或重建后重提失败均回退。重建已串行化，但 SDR/HDR/HLG/Dolby Vision 连续切换仍无真机证据 | 真机确认 PQ/HLG dataspace 生效，并压力验证连续格式切换时画面、进度控制层和 native 生命周期稳定 |
 | iOS | Flutter texture tone-map | 仅探测 EDR；`configureOutput` 已接入但 fail-closed，原生 HDR layer 尚未接入 | 使用 HDR-capable `UIView`/`CAMetalLayer`，并验证设备解码 profile 与 EDR 输出 |
-| macOS | Flutter texture tone-map；native surface 按 active 状态单路渲染 | 能力探测绑定窗口实际所在 `NSScreen`；显示器变化通过原生通知和 `EventChannel` 推送到 Dart；SDR 上杜比视界/HDR 画质选项置灰，默认 HDR 画质自动降级到最高可用 SDR 源；HDR native layer 仍需真实 HDR 显示器验证 | 使用窗口内 `CAMetalLayer`，设置 EDR 色彩空间/像素格式并验证 HDR 输出、帧率及 HDR/SDR 跨屏切换 |
+| macOS | `NSView` + `CAMetalLayer` 原生 surface；Flutter Texture 保留回退 | 已在 M27P20 HDR 显示器实测：native surface `active=true`，`rgba16Float`、extended-linear BT.2020，实际绘制 `drawn=true`，播放期间 EDR headroom=2.03；SDR 屏仍走 Texture/SDR 回退 | 继续验证 HDR/SDR 跨屏、全屏和显示器变化后的自动回退 |
 | Windows x64 | D3D11 mailbox → Flutter `GpuSurfaceTexture`（BGRA8） | 已接入只读 DXGI 当前输出探测和统一 `configureOutput`/`resetOutput` 契约；nativeOutput 仍为 false，保持 tone-map | 增加独立视频子窗口与真实 flip-model swapchain，检测输出并调用 DXGI 色彩空间接口 |
 | Linux x64 | Flutter texture / OpenGL | 已接入保守能力 channel 和统一输出契约；Wayland、X11 与软件渲染会明确记录回退原因，不宣称 HDR；保持 tone-map | 接入 Wayland color-management 协议，仅在 compositor、驱动和输出均可证明时启用 |
 | OHOS | Texture tone-map | capability channel 和统一输出契约明确返回 `nativeOutput=false` | 完成 XComponent/NativeWindow HDR 查询、输出路径和真机验证 |
