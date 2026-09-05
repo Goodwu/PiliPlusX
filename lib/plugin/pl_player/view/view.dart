@@ -139,6 +139,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   final _videoKey = GlobalKey();
 
   final RxDouble _brightnessValue = 0.0.obs;
+  bool _brightnessReady = false;
   final RxBool _brightnessIndicator = false.obs;
   Timer? _brightnessTimer;
 
@@ -148,6 +149,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   GestureType? _gestureType;
   Offset? _initialFocalPoint;
+  double? _gestureStartBrightness;
+  double? _gestureStartVolume;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
 
@@ -155,21 +158,38 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   void _onBrightnessChanged(double value) {
     if (mounted && _gestureType != .left) {
       _brightnessValue.value = value;
+      _brightnessReady = true;
     }
   }
 
   void _getSystemBrightness() {
     ScreenBrightnessPlatform.instance.system.then((res) {
-      if (mounted) {
+      if (mounted && _gestureType != .left) {
         _brightnessValue.value = res;
+        _brightnessReady = true;
       }
     });
   }
 
+  Future<void> _getOhosBrightness() async {
+    try {
+      final value = await const MethodChannel('harmonyChannel')
+          .invokeMethod<num>(
+            'getWindowBrightness',
+          );
+      if (mounted && value != null && value >= 0 && value <= 1) {
+        if (_gestureType == .left) return;
+        _brightnessValue.value = value.toDouble();
+        _brightnessReady = true;
+      }
+    } catch (_) {}
+  }
+
   void _getAppBrightness() {
     ScreenBrightnessPlatform.instance.application.then((res) {
-      if (mounted) {
+      if (mounted && _gestureType != .left) {
         _brightnessValue.value = res;
+        _brightnessReady = true;
       }
     });
   }
@@ -276,7 +296,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         } catch (_) {}
 
         try {
-          if (Platform.isIOS || plPlayerController.setSystemBrightness) {
+          if (Platform.operatingSystem == 'ohos') {
+            _getOhosBrightness();
+          } else if (Platform.isIOS || plPlayerController.setSystemBrightness) {
             _getSystemBrightness();
             _brightnessListener = ScreenBrightnessPlatform
                 .instance
@@ -881,10 +903,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           }
           final videoFormat = videoInfo.supportFormats!;
           final totalQaSam = videoFormat.length;
-          final usefulQaSam = videoInfo.dash!.video!
+          final availableQualityIds = videoInfo.dash!.video!
               .map((i) => i.id)
-              .toSet()
-              .length;
+              .whereType<int>()
+              .toSet();
           final displaySupportsHdr =
               plPlayerController.hdrDisplaySupportsHdr.value;
           return PopupMenuButton<int>(
@@ -899,9 +921,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   final item = videoFormat[index];
                   final isHdrQuality =
                       item.quality == VideoQuality.dolbyVision.code ||
-                      item.quality == VideoQuality.hdr.code;
+                      item.quality == VideoQuality.hdr.code ||
+                      item.quality == VideoQuality.hdrVivid.code;
                   final enabled =
-                      index >= totalQaSam - usefulQaSam &&
+                      availableQualityIds.contains(item.quality) &&
                       (!isHdrQuality || displaySupportsHdr);
                   return PopupMenuItem<int>(
                     enabled: enabled,
@@ -1035,6 +1058,17 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   void _onPanStart(ScaleStartDetails details) {
     _gestureType = null;
     _initialFocalPoint = details.localFocalPoint;
+    _gestureStartBrightness = _brightnessGestureBaseline();
+    _gestureStartVolume = plPlayerController.volume.value;
+  }
+
+  double _brightnessGestureBaseline() {
+    if (_brightnessReady) return _brightnessValue.value;
+    final cached = plPlayerController.brightness.value;
+    final baseline = cached >= 0 && cached <= 1 ? cached : 1.0;
+    _brightnessValue.value = baseline;
+    _brightnessReady = true;
+    return baseline;
   }
 
   void _onScaleUpdate(double scale) {
@@ -1108,6 +1142,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           } else {
             _gestureType = .left;
           }
+          _gestureStartBrightness = _brightnessGestureBaseline();
         } else if (tapPosition < sectionWidth * 2) {
           if (!plPlayerController.enableSlideFS) {
             return;
@@ -1120,6 +1155,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           }
           // 右边区域
           _gestureType = .right;
+        }
+        if (_gestureType == .right) {
+          _gestureStartVolume = plPlayerController.volume.value;
         }
       }
       return;
@@ -1171,8 +1209,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     } else if (_gestureType == .left) {
       // 左边区域 👈
       final double level = maxHeight * 3;
-      final double brightness = (_brightnessValue.value - delta.dy / level)
-          .clamp(0.0, 1.0);
+      final double cumulativeDy =
+          details.localFocalPoint.dy - _initialFocalPoint!.dy;
+      final double brightness =
+          ((_gestureStartBrightness ?? _brightnessValue.value) -
+                  cumulativeDy / level)
+              .clamp(0.0, 1.0);
       setBrightness(brightness);
     } else if (_gestureType == .center) {
       // 全屏
@@ -1205,8 +1247,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         'setVolume',
         const Duration(milliseconds: 20),
         () {
+          final double cumulativeDy =
+              details.localFocalPoint.dy - _initialFocalPoint!.dy;
           final double volume = clampDouble(
-            plPlayerController.volume.value - delta.dy / level,
+            (_gestureStartVolume ?? plPlayerController.volume.value) -
+                cumulativeDy / level,
             0.0,
             plPlayerController.maxVolume,
           );
@@ -1221,6 +1266,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       _onHorizontalDragEnd();
     }
     _initialFocalPoint = null;
+    _gestureStartBrightness = null;
+    _gestureStartVolume = null;
     _gestureType = null;
   }
 

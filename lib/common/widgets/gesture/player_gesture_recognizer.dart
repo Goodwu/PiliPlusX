@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart'
     show
+        kTouchSlop,
         GestureRecognizer,
         PointerDeviceKind,
         RecognizerCallback,
@@ -44,5 +45,5 @@ class PlayerVerticalDragGestureRecognizer
   bool hasSufficientGlobalDistanceToAccept(
     PointerDeviceKind pointerDeviceKind,
     double? deviceTouchSlop,
-  ) => globalDistanceMoved.abs() > 1;
+  ) => globalDistanceMoved.abs() > (deviceTouchSlop ?? kTouchSlop);
 }

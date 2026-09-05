@@ -1,8 +1,16 @@
 # OHOS 运行状态与近期回归记录
 
-更新时间：2026-09-04
+更新时间：2026-09-05
 
-本文件记录 2026-09-04 在 OHOS 模拟器和实体手机上的实际运行证据，以及图标、播放器手势和白屏回归的最终结论。
+本文件主要保留 2026-09-04 在 OHOS 模拟器和实体手机上的白屏、图标、手势和
+Texture 播放回归证据。最新 HDR/native surface 状态见
+[OHOS 开发总结](ohos-development-summary.md) 和
+[HDR 后端状态矩阵](hdr-backend-status.md)。
+
+> 2026-09-05 增量结论：Texture 路径已在实体机确认 SDR 首帧；XComponent
+> PlatformView 能创建，但随后 Flutter OHOS 渲染线程触发 `SIGSEGV`。当前
+> `useNativeSurface` 暂时关闭以保护可播放性。这个 native surface 崩溃与下文已经
+> 修复的 Flutter 尺寸约束黑屏不是同一个问题。
 
 ## 当前结论
 
@@ -12,6 +20,8 @@
 - 播放器触摸代码路径已恢复：左侧上下滑动调节亮度，右侧上下滑动调节音量；实际调节效果仍需在实体机播放视频时专项回归。
 - 播放器视频区域的黑屏布局问题已修复：`media-kit_video` 的 `Video` 显式接收播放器区域的宽高约束。
 - 本次白屏不是本地与 `dev` 的关键源码不同步，而是平台判定范围过大造成的启动回归。
+- 新 native surface 路径仍因 XComponent/PlatformView 生命周期崩溃而不可启用；
+  当前稳定回退是 Texture SDR，不能据此宣称 OHOS 原生 HDR 已完成。
 
 ### 侧滑亮度/音量调试结论
 
@@ -105,10 +115,14 @@ tool/ohos/build_sign_hap_test.sh --help
 `ohos/entry/build`，避免 Hvigor 增量缓存继续使用旧资源。脚本默认只临时处理测试
 权限，远端 `module.json5` 会在退出时恢复。
 
-实际产物：
+当日实际产物：
 
-- 模拟器：[PiliPlusX-ohos-green-p-fixed-white-screen.hap](../../../../Downloads/PiliPlusX-ohos-green-p-fixed-white-screen.hap)（本机下载目录产物）
-- 实体机：[PiliPlusX-ohos-green-p-fixed-white-screen-physical.hap](../../../../Downloads/PiliPlusX-ohos-green-p-fixed-white-screen-physical.hap)（本机下载目录产物）
+- 模拟器：`PiliPlusX-ohos-green-p-fixed-white-screen.hap`（本机临时下载产物）
+- 实体机：`PiliPlusX-ohos-green-p-fixed-white-screen-physical.hap`（本机临时下载产物）
+
+`~/Downloads` 不是可移植的仓库证据位置，不能作为后续任务输入。长期证据应使用版本号、
+HAP SHA-256、构建 manifest、签名 profile 类型和可重建命令；需要保留产物时应发布到
+明确的 Release 或归档位置，而不是从文档链接个人下载目录。
 
 证据：
 

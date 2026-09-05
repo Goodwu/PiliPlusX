@@ -1,6 +1,6 @@
 # 非 HDR 全平台可用：主要事项
 
-更新时间：2026-09-04。当前证据汇总见
+更新时间：2026-09-05。当前证据汇总见
 [SDR 跨平台构建证据](../status/platform-sdr-build-status.md)；本文件只保留计划、
 验收口径和未解除阻塞，不重复粘贴构建日志。
 
@@ -27,13 +27,13 @@ Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建�
 - iOS simulator 与无签名 device app 已构建，仍缺运行验收。
 - Linux x64 已在 `dev` 生成 tar.gz、deb、rpm；Linux arm64 已在 Lima 生成
   aarch64 ELF、tar.gz 和 deb，并完成架构及摘要校验。
-- OHOS unsigned arm64 HAP 已构建并通过内容、ABI、manifest 和未签名检查；`hdc`
-  无在线目标，运行门未解除。
-- Windows x64、OHOS、Linux 实际视频呈现仍缺可用图形/来宾设备环境。
-- media-kit 当前继续统一锁定到
-  `73536efdda482f2d5eefe2feb7038db419944b96`；公共 API 候选
-  `ad22c36a9986a8418c81829821962009425cf5e5` 已通过完整 CI，但须在全平台
-  SDR 回归后再统一切换。
+- OHOS signed arm64 HAP 已在模拟器和实体机安装/启动；实体机 Texture SDR 首帧已
+  通过，完整控制与生命周期矩阵仍未完成。native surface 是独立 HDR 后续路径。
+- Windows x64 和 Linux 实际视频呈现仍缺可用图形/来宾设备环境；OHOS 已解除
+  “无设备”阻塞，但 native surface 当前会触发 `SIGSEGV`。
+- `pubspec.lock` 的 9 个 media-kit 包当前统一锁定到
+  `0fa6afe9cd9af8d8437919257d81a27c643f2f63`；8 个 workflow 和发布 manifest 仍引用
+  `73536ef...`，必须另行完成一致性迁移和回归，不能声称当前发布链已经固定。
 
 ## 实施顺序
 

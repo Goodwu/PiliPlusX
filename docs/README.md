@@ -1,6 +1,6 @@
 # PiliPlusX 文档索引
 
-文档按用途分为四类；所有“已通过”均指有命令、日志或产物证据支持的状态。
+文档按用途分类；所有“已通过”均指有命令、日志或产物证据支持的状态。
 
 ## 当前状态与证据
 
@@ -8,6 +8,7 @@
 - [HDR 验证账本](status/hdr-verification.md)：可复核的 channel、依赖、测试和设备证据。
 - [SDR 跨平台构建证据](status/platform-sdr-build-status.md)：平台构建、产物、ABI、运行门和工具链限制。
 - [OHOS 开发总结](status/ohos-development-summary.md)：OHOS 3.44 兼容实现、HAP 产物和剩余运行验收。
+- [OHOS HDR 实机调试基线](status/ohos-hdr-debug-baseline.md)：真机/模拟器边界、DV tone-map 证据、统一 HDR 画质门控和剩余 native HDR 验收。
 - [OHOS 运行状态与近期回归记录](status/ohos-runtime-status.md)：白屏、图标、播放器触摸路径、签名 profile 和设备运行证据。
 
 ## 计划与设计
@@ -26,6 +27,10 @@
 
 - [HDR Issue #11 评审结论](reviews/hdr-issue-11-review.md)：HDR 解码与原生输出边界及合入原则。
 - [media-kit PR #2 审查摘要](reviews/media-kit-pr-2-review.md)：依赖分支、CI 和生命周期变更审查。
+
+## 依赖参考
+
+- [media-kit 原生依赖来源与跟踪基线](reference/media-kit-native-dependencies.md)：官方与当前 fork 的 libmpv、ANGLE、mimalloc 下载链接、摘要、OHOS 缺口和持续审计规则。
 
 ## 示例
 

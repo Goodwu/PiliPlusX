@@ -29,9 +29,11 @@ USAGE
 }
 
 ssh_wrapper=${SSH_REMOTE_EXEC_WRAPPER:-/Users/wuweiwei1/.codex/skills/ssh-remote-exec/scripts/ssh-remote-exec.sh}
+sync_script=${OHOS_SYNC_SCRIPT:-$(dirname "$0")/sync_ohos_workspace.sh}
 hdc=${HDC:-/Users/wuweiwei1/bin/hdc}
 remote_host=${REMOTE_HOST:-dev}
 remote_project=${REMOTE_PROJECT:-/home/wuweiwei1/PiliPlusX-ohos-344}
+remote_media_kit=${REMOTE_MEDIA_KIT:-/home/wuweiwei1/media-kit-ohos}
 version=${HAP_VERSION:-2.1.3}
 build_number=${HAP_BUILD_NUMBER:-$(date +%s)}
 build_mode=${HAP_BUILD_MODE:-debug}
@@ -76,6 +78,9 @@ done
 for required in "$ssh_wrapper" "$signer" "$cert" "$profile" "$key" "$config"; do
   [[ -e $required ]] || { echo "missing required file: $required" >&2; exit 1; }
 done
+[[ -x $sync_script ]] || { echo "OHOS sync script is not executable: $sync_script" >&2; exit 1; }
+
+"$sync_script" --remote-host "$remote_host" --remote-project "$remote_project"
 
 mkdir -p "$(dirname "$output")"
 work_dir=$(mktemp -d "${TMPDIR:-/tmp}/piliplusx-hap.XXXXXX")
@@ -84,20 +89,35 @@ unsigned="$work_dir/entry-default-unsigned.hap"
 rm -f "$output"
 
 echo "[1/3] build unsigned HAP on $remote_host: $version/$build_number" >&2
-"$ssh_wrapper" --ssh-opt '-oClearAllForwardings=yes' "$remote_host" -- "$remote_project" "$version" "$build_number" "$keep_permission" "$build_mode" >"$unsigned" <<'REMOTE'
+"$ssh_wrapper" --ssh-opt '-oClearAllForwardings=yes' "$remote_host" -- "$remote_project" "$version" "$build_number" "$keep_permission" "$build_mode" "$remote_media_kit" >"$unsigned" <<'REMOTE'
 set -euo pipefail
 src=$1
 version=$2
 build_number=$3
 keep_permission=$4
 build_mode=$5
-module="$src/ohos/entry/src/main/module.json5"
-backup="$module.codex-hap-test-backup"
+remote_media_kit=$6
+build_parent=$(mktemp -d "${TMPDIR:-/tmp}/piliplusx-ohos-build.XXXXXX")
+ build_root="$build_parent/workspace"
+ cleanup() { rm -rf "$build_parent"; }
+ trap cleanup EXIT
+
+python3 "$src/scripts/prepare_ohos_build.py" \
+  --workspace "$src" \
+  --output "$build_root" \
+  --media-kit-source "$remote_media_kit" >&2
+python3 "$src/scripts/prepare_ohos_flutter.py" \
+  --flutter-root /home/wuweiwei1/tools/flutter-ohos \
+  --workspace "$src" >&2
+ module="$build_root/ohos/entry/src/main/module.json5"
+ backup="$module.codex-hap-test-backup"
 
 [[ -d $src && -f $module ]] || { echo "remote project/module not found" >&2; exit 1; }
 cp "$module" "$backup"
 restore() { if [[ -f $backup ]]; then mv "$backup" "$module"; fi; }
-trap restore EXIT
+# Keep both cleanup actions: replacing the earlier trap leaked the complete
+# remote build tree after every successful or failed build.
+trap 'restore; cleanup' EXIT
 
 if [[ $keep_permission != 1 ]]; then
   python3 - "$module" <<'PY'
@@ -118,10 +138,14 @@ fi
 export http_proxy=http://127.0.0.1:7890
 export https_proxy=http://127.0.0.1:7890
 export HOS_SDK_HOME=/home/wuweiwei1/ohos-sdk/command-line-tools/sdk
+export OHOS_SDK_HOME=$HOS_SDK_HOME
 export PATH=/home/wuweiwei1/tools/flutter-ohos/bin:/home/wuweiwei1/flutter/bin:/home/wuweiwei1/ohos-sdk/command-line-tools/bin:/home/wuweiwei1/ohos-sdk/hvigor/bin:/home/wuweiwei1/ohos-sdk/hvigor/bin:/home/wuweiwei1/ohos-sdk/command-line-tools/tool/node/bin:$PATH
-cd "$src"
-flutter build hap --"$build_mode" --no-codesign --build-name "$version" --build-number "$build_number" >&2
-hap="$src/build/ohos/hap/entry-default-unsigned.hap"
+ cd "$build_root"
+export PUB_CACHE=/home/wuweiwei1/.pub-cache-ohos-build
+ flutter pub get >&2
+ python3 "$src/scripts/prepare_ohos_material_ui.py" --workspace "$build_root" >&2
+ flutter build hap --"$build_mode" --no-codesign --build-name "$version" --build-number "$build_number" >&2
+ hap="$build_root/build/ohos/hap/entry-default-unsigned.hap"
 [[ -s $hap ]] || { echo "unsigned HAP was not produced" >&2; exit 1; }
 cat "$hap"
 REMOTE

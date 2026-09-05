@@ -1,9 +1,28 @@
 # HDR 验证账本
 
-更新时间：2026-09-04
+更新时间：2026-09-05
 
 这份账本只记录已经执行的验证。构建成功、显示器能力探测或单元测试，均
 不能替代真实设备上的原生 HDR 验收。
+
+## 2026-09-05 依赖一致性复核
+
+当前 `pubspec.lock` 的 9 个 media-kit 包均指向
+`Goodwu/media-kit@0fa6afe9cd9af8d8437919257d81a27c643f2f63`，但 8 个 workflow
+中的 lock 校验和发布 manifest 仍固定为
+`73536efdda482f2d5eefe2feb7038db419944b96`。只读复核结果：
+
+| 检查 | 结果 | 结论 |
+| --- | --- | --- |
+| `verify_media_kit_lock.py ... --commit 0fa6afe9...` | 通过 | 当前 lock 内 9 个包来源一致 |
+| `verify_media_kit_lock.py ... --commit 73536ef...` | 失败 | `73536ef...` 不再是当前产品 lock |
+| `verify_workflow_media_kit_refs.py --commit 73536ef...` | 通过 | 当前 8 个 workflow 仍一致引用历史 SHA |
+| `verify_workflow_media_kit_refs.py --commit 0fa6afe9...` | 失败 | 当前 lock 与 workflow/manifest 尚未完成一致性迁移 |
+
+因此当前只能声明“lock 内部一致”，不能声明“lock、workflow 和发布 manifest 一致”。
+更新 CI SHA、重跑对应构建和生成新发布 manifest 应作为独立实现任务；本次文档完善
+不修改 workflow。原生依赖下载来源另见
+[media-kit 原生依赖来源与跟踪基线](../reference/media-kit-native-dependencies.md)。
 
 ## 2026-09-04 阶段性验证
 
@@ -32,17 +51,18 @@ Flutter Texture 和 half-float Metal 两次 libplacebo 渲染。该结果作为�
 HDR 输出状态、画面、帧率和播放进度均保持正常；返回 HDR 屏幕后不能出现黑屏
 或重复重载。
 
-## 已验证
+## 历史及分阶段已验证
 
 | 项目 | 证据 | 结果 |
 | --- | --- | --- |
-| media-kit 来源固定 | `verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA |
-| workflow 引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 8 个 workflow、9 个 lock 检查和 8 个发布 manifest 引用均使用同一完整 SHA |
-| HDR 决策 | `flutter test test/plugin/pl_player/hdr_test.dart` | 22 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
+| 2026-09-02 media-kit 历史来源固定 | `verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 该阶段 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA；不代表 2026-09-05 当前 lock |
+| 2026-09-02 workflow 历史引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 8 个 workflow、9 个 lock 检查和 8 个发布 manifest 引用均使用该历史 SHA；当前 workflow 仍未迁移到 `0fa6afe9...` |
+| HDR 决策 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart`（2026-09-06） | 25 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
 | HDR channel 契约 | `python3 scripts/verify_hdr_channel.py` | Android、Pink、iOS、macOS、Windows、Linux、OHOS 共 7 个端点统一使用 `piliplusx/hdr_capabilities`，并检查结构化输出和能力拆分字段 |
 | 原生输出生命周期契约 | `python3 scripts/verify_hdr_channel.py`、`flutter test test/plugin/pl_player/hdr_test.dart` | 7 个端点均提供 `probe`、`configureOutput`、`resetOutput`；配置结果未获系统/播放器确认时统一 active=false；Dart 分离 capable/active 状态 |
 | Dart 静态检查 | `flutter analyze`（HDR controller、model、两个 channel、view 和测试共 6 个文件） | 无问题 |
 | 发布校验脚本 | `python3 -m unittest discover -s test -p '*_test.py'` | 5 项通过，覆盖 manifest/hash、Android native parity、Android/OHOS ABI 包结构及错误架构拒绝 |
+| 全平台探测改动回归 | `python3 scripts/verify_hdr_channel.py`; `python3 -m unittest discover -s test -p '*_test.py'`（2026-09-06） | 7 个 HDR channel 端点通过；发布校验 5 项通过 |
 | Android patch 可应用 | material patch 链按 `patch.ps1` 顺序在临时副本应用 | 已内置 patch 会安全跳过，`scaffold_android.patch` 可应用，真实冲突仍阻断 |
 | 远端 fork | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-08b` | 当前提交 `0dd1535ec622c0e8560551b15800c75c3a07da95` |
 | 公共 HDR 生命周期分支 | `Goodwu/media-kit` 分支 `integration/piliplusx-hdr-public-api` | `ad22c36a9986a8418c81829821962009425cf5e5`，提供跨平台默认安全接口、Android PlatformView surface/dataspace 生命周期，以及 Linux system-libmpv ABI 回退；PiliPlusX 已加入兼容桥接，待各平台后端实现后再统一更新 lock |
@@ -73,8 +93,8 @@ Vision/HLG 为主）完成了交互式复现与修复验证：
 完成屏障，同一 handle 的 Create/Dispose 通过队列串行执行。PiliPlusX 已移除 macOS
 特殊渲染与平台延时等临时规避；视频缩放统一交给 media-kit `Video` 自身的
 `fit/alignment`，不再使用外层 `FittedBox` 制造无界约束。重建期间仍保留跨平台
-nullable controller 防护，避免合法的短暂无输出状态导致整层构建失败。依赖已锁定到
-该提交。Android/Pink 的 HCPP/SurfaceView
+nullable controller 防护，避免合法的短暂无输出状态导致整层构建失败。该阶段依赖
+曾锁定到该提交；当前产品 lock 已更新为 `0fa6afe9...`。Android/Pink 的 HCPP/SurfaceView
 可能需要在原生 HDR surface 或 dataspace 改变时重建，不能据此删除 Android 重建。
 当前 Android 重建已串行化，HCPP dataspace 也改为等待新 controller 创建完成后在
 同一事务内提交；candidate 变为 active 时因载体未变，不再重复重建。但尚无 HDR 真机连续执行
@@ -100,7 +120,11 @@ tone-map 路径，不替代 Android HDR 真机验收。
 - 完整播放矩阵（DASH、缓存、切换、分 P、旋转、全屏、PiP、后台、字幕、
   弹幕、截图）尚未完成逐平台真机验收。
 
-## 当前环境复核（2026-09-02）
+## 历史环境复核（2026-09-02）
+
+本节保留当日环境快照，不代表当前 OHOS 设备状态。2026-09-05 已有模拟器和实体机
+运行证据，当前结论见 [OHOS 开发总结](ohos-development-summary.md) 和
+[OHOS 运行状态](ohos-runtime-status.md)。
 
 - 本机已检测到 Xcode 26.6、Flutter 3.47.2 和 macOS desktop target；`flutter
   devices` 没有 Android 或 iOS 真机，`adb devices` 为空。
@@ -141,10 +165,17 @@ tone-map 路径，不替代 Android HDR 真机验收。
 ## 复验入口
 
 ```sh
+# 当前 lock：应通过，证明 9 个 package 的 resolved-ref 一致。
 python3 scripts/verify_media_kit_lock.py pubspec.lock \
-  --commit 73536efdda482f2d5eefe2feb7038db419944b96
+  --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+
+# 当前 workflow 的历史固定值：应通过，但不证明与当前 lock 一致。
 python3 scripts/verify_workflow_media_kit_refs.py \
   --commit 73536efdda482f2d5eefe2feb7038db419944b96
+
+# 目标一致性检查：在 workflow 完成迁移前预期失败。
+python3 scripts/verify_workflow_media_kit_refs.py \
+  --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
 flutter test test/plugin/pl_player/hdr_test.dart
 flutter analyze lib/plugin/pl_player/models/hdr.dart \
   lib/plugin/pl_player/hdr_android.dart test/plugin/pl_player/hdr_test.dart

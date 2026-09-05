@@ -911,15 +911,13 @@ class HeaderControlState extends State<HeaderControl>
     /// 总质量分类
     final int totalQaSam = videoFormat.length;
 
-    /// 可用的质量分类
-    int usefulQaSam = 0;
+    /// 可用的质量分类 ID
     final List<VideoItem> video = videoInfo.dash!.video!;
     final Set<int> idSet = {};
     for (final VideoItem item in video) {
       final int id = item.id!;
       if (!idSet.contains(id)) {
         idSet.add(id);
-        usefulQaSam++;
       }
     }
     showBottomSheet(
@@ -965,7 +963,8 @@ class HeaderControlState extends State<HeaderControl>
                       final isCurr = currentVideoQa.code == item.quality;
                       final isHdrQuality =
                           item.quality == VideoQuality.dolbyVision.code ||
-                          item.quality == VideoQuality.hdr.code;
+                          item.quality == VideoQuality.hdr.code ||
+                          item.quality == VideoQuality.hdrVivid.code;
                       return ListTile(
                         dense: true,
                         onTap: () async {
@@ -993,8 +992,12 @@ class HeaderControlState extends State<HeaderControl>
                           }
                         },
                         // 可能包含会员解锁画质
+                        // The API can return available qualities in a
+                        // different order from support_formats. Positional
+                        // slicing incorrectly greys out 1080P+ when the DASH
+                        // list is ordered high-to-low; use the actual IDs.
                         enabled:
-                            index >= totalQaSam - usefulQaSam &&
+                            idSet.contains(item.quality) &&
                             (!isHdrQuality || displaySupportsHdr),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,

@@ -14,6 +14,12 @@ import shutil
 from pathlib import Path
 
 
+# The OHOS build cache is intentionally pinned to the media-kit revision that
+# is already provisioned on the build host.  The normal checkout may move to
+# a newer/private revision that is not available to the older OHOS pub fork.
+OHOS_MEDIA_KIT_REF = "0dd1535ec622c0e8560551b15800c75c3a07da95"
+
+
 def replace_once(path: Path, old: str, new: str) -> None:
     text = path.read_text(encoding="utf-8")
     count = text.count(old)
@@ -118,6 +124,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--media-kit-source",
+        type=Path,
+        help="Use the synchronized local media-kit checkout for the OHOS HDR bridge.",
+    )
     args = parser.parse_args()
     source = args.workspace.resolve()
     root = args.output.resolve()
@@ -135,10 +146,17 @@ def main() -> None:
             ".git",
             ".dart_tool",
             "build",
+            ".symlinks",
+            "ephemeral",
             "remote-release-linux",
             "remote-release-linux-arm64",
         ),
     )
+    # This is a developer-local media-kit path override.  It is deliberately
+    # not part of the reproducible OHOS dependency graph.
+    local_overrides = root / "pubspec_overrides.yaml"
+    if local_overrides.exists():
+        local_overrides.unlink()
     pubspec = root / "pubspec.yaml"
 
     replacements = (
@@ -156,6 +174,89 @@ def main() -> None:
     if not already_prepared:
         for old, new in replacements:
             replace_once(pubspec, old, new)
+
+    # The Windows override is useful to the desktop build, but it makes the
+    # OHOS Dart 3.12 solver require a non-existent desktop path.  OHOS uses
+    # the universal and OHOS media-kit packages only.
+    pubspec_text = pubspec.read_text(encoding="utf-8")
+    for package in ("media_kit_libs_windows_video", "media_kit_libs_video"):
+        pubspec_text, removed = re.subn(
+            rf"\n  {package}:\n(?: {{4,}}.*\n)*",
+            "\n",
+            pubspec_text,
+        )
+        if removed != 1:
+            raise SystemExit(
+                f"OHOS preparation expected one {package} entry, found {removed}"
+            )
+    pubspec_text, removed = re.subn(
+        r"\n  media_kit_libs_video: 1\.0\.5\n",
+        "\n",
+        pubspec_text,
+    )
+    if removed != 1:
+        raise SystemExit(
+            "OHOS preparation expected one direct media_kit_libs_video dependency, "
+            f"found {removed}"
+        )
+    pubspec_text = pubspec_text.replace(
+        "ref: 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+        f"ref: {OHOS_MEDIA_KIT_REF}",
+    )
+    if args.media_kit_source is not None:
+        media_kit_source = args.media_kit_source.resolve()
+        required_media_kit_paths = {
+            "media_kit": media_kit_source / "media_kit",
+            "media_kit_video": media_kit_source / "media_kit_video",
+            "media_kit_libs_ohos": media_kit_source / "libs/ohos/media_kit_libs_ohos",
+        }
+        missing = [str(path) for path in required_media_kit_paths.values() if not path.is_dir()]
+        if missing:
+            raise SystemExit(f"media-kit source is incomplete: {', '.join(missing)}")
+        for package, path in required_media_kit_paths.items():
+            pattern = rf"  {package}:\n    git:\n(?:      .*\n)+"
+            replacement = f"  {package}:\n    path: {path}\n"
+            pubspec_text, replaced = re.subn(pattern, replacement, pubspec_text)
+            if replaced != 1:
+                raise SystemExit(
+                    f"OHOS preparation expected one git override for {package}, found {replaced}"
+                )
+        ohos_platform_view = (
+            media_kit_source
+            / "media_kit_video/lib/src/video/platform_view_video_ohos.dart"
+        )
+        ohos_platform_view_target = (
+            required_media_kit_paths["media_kit_video"]
+            / "lib/src/video/platform_view_video.dart"
+        )
+        if not ohos_platform_view.is_file():
+            raise SystemExit(
+                f"OHOS preparation requires the OHOS platform view source: {ohos_platform_view}"
+            )
+        shutil.copy2(ohos_platform_view, ohos_platform_view_target)
+        print(
+            "OHOS preparation: selected media-kit OHOS platform view implementation",
+            flush=True,
+        )
+    pubspec.write_text(pubspec_text, encoding="utf-8")
+
+    # The OHOS build uses the synchronized media-kit source.  Keep the
+    # native-surface configuration because OHOS now consumes that API; only
+    # retain the dispose compatibility rewrite for older platform controllers.
+    controller = root / "lib/plugin/pl_player/controller.dart"
+    if controller.is_file():
+        controller_text = controller.read_text(encoding="utf-8")
+        controller_text, dispose_removed = re.subn(
+            r"await platform\.disposeForRebuild\(\);",
+            "platform.dispose();",
+            controller_text,
+        )
+        if dispose_removed != 1:
+            raise SystemExit(
+                "OHOS preparation expected one media-kit dispose compatibility rewrite, "
+                f"found {dispose_removed}"
+            )
+        controller.write_text(controller_text, encoding="utf-8")
 
     dart_files = sorted((root / "lib").rglob("*.dart"))
     changed = 0
@@ -206,6 +307,10 @@ def main() -> None:
         module_text = module_profile.read_text(encoding="utf-8")
         module_text = module_text.replace('"$media:icon.svg"', '"$media:icon"')
         module_profile.write_text(module_text, encoding="utf-8")
+    root_build_profile = root / "ohos/build-profile.json5"
+    legacy_build_profile = root / "ohos/关于build-profile.json5"
+    if not root_build_profile.exists() and legacy_build_profile.is_file():
+        shutil.copyfile(legacy_build_profile, root_build_profile)
 
     # The OHOS fork adds TargetPlatform.ohos.  These vendored Flutter widgets
     # are shared with the 3.47 implementation, so reference that enum value

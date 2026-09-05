@@ -273,12 +273,12 @@ abstract final class Pref {
   static HdrMode get hdrMode {
     final value = _setting.get(
       SettingBoxKey.hdrMode,
-      defaultValue: HdrMode.off.name,
+      defaultValue: HdrMode.auto.name,
     );
-    final name = value is String ? value : HdrMode.off.name;
+    final name = value is String ? value : HdrMode.auto.name;
     return HdrMode.values.firstWhere(
       (mode) => mode.name == name,
-      orElse: () => HdrMode.off,
+      orElse: () => HdrMode.auto,
     );
   }
 

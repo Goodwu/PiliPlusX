@@ -393,6 +393,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   bool? _queuedHdrOutputRebuildHcpp;
   bool? _queuedHdrOutputRebuildSurfaceView;
   String? _lastHdrDiagnostic;
+  String? _lastHdrNativeOutputAttempt;
+  bool _hdrNativeOutputAttemptInFlight = false;
 
   HdrCapabilities get hdrCapabilities => _hdrCapabilities;
   HdrSourceMetadata get hdrSource => _hdrSource;
@@ -543,6 +545,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     switch (orientation) {
       case .portraitUp:
         if (!_isVertical && controlsLock.value) return;
+        // A manually entered OHOS fullscreen video must keep its landscape
+        // orientation. The native orientation stream can emit a transient
+        // portrait event while the phone is being held, which otherwise
+        // exits the fullscreen layout and shrinks the native surface back to
+        // its portrait buffer size.
+        if (Platform.operatingSystem == 'ohos' &&
+            isFullScreen &&
+            !_isVertical &&
+            isManualFS) {
+          return;
+        }
         if (!_isVertical &&
             isFullScreen &&
             (!horizontalScreen || enableLandscapeAutoFullscreen)) {
@@ -907,13 +920,22 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     hwdec: hwdec,
     enableAndroidSurfaceProducer: !hcpp && !texture,
     usePlatformView: hcpp,
-    useHCPP: hcpp,
-    // Darwin keeps a stable native candidate across SDR/HDR source changes;
-    // the media-kit backend still reports active=false until all probes pass.
+    // OHOS native HDR must remain a compositor layer. The default surface
+    // platform-view path turns the XComponent into a Flutter texture, which
+    // lands in the SDR root BufferQueue and loses HDR metadata. HCPP keeps
+    // the XComponent as a RenderService layer; enable it only for the native
+    // OHOS surface path and leave ordinary texture output unchanged.
+    useHCPP: hcpp || (Platform.operatingSystem == 'ohos' && !texture),
+    // Keep a native candidate stable across SDR/HDR source changes. OHOS is
+    // enabled for the native HDR A/B now that its output size is clamped to
+    // the current display orientation; activation remains fail-closed until
+    // the backend reports a verified native HDR output.
     useNativeSurface:
         !texture &&
         Pref.hdrMode == HdrMode.auto &&
-        (Platform.isIOS || Platform.isMacOS),
+        (Platform.isIOS ||
+            Platform.isMacOS ||
+            Platform.operatingSystem == 'ohos'),
   );
 
   Future<void> _rebuildVideoOutput({
@@ -943,6 +965,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _videoController = null;
     hdrOutputError.value = null;
     hdrSurfaceGeneration.value++;
+    _lastHdrNativeOutputAttempt = null;
     if (Platform.isAndroid && !hcpp) {
       await HdrAndroid.setWindowHdrMode(hdr: false);
     }
@@ -1107,6 +1130,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     );
     hdrDisplaySupportsHdr.value = capabilities.displayHdr;
     if (displayHdrChanged) {
+      _lastHdrNativeOutputAttempt = null;
+
       onHdrDisplayChanged?.call(capabilities.displayHdr);
     }
     if (!displayHdrChanged || _videoPlayerController == null) return;
@@ -1115,7 +1140,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<bool> _setHdrColorSpace(Player player) async {
-    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS) ||
+    if (!(Platform.isAndroid ||
+            Platform.isIOS ||
+            Platform.isMacOS ||
+            Platform.operatingSystem == 'ohos') ||
         !_hdrSource.hasNativeColorMetadata) {
       return false;
     }
@@ -1140,9 +1168,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       try {
         final platform = await videoController.platform.future;
         final dynamic nativePlatform = platform;
+        final int? ohosSurfaceId = Platform.operatingSystem == 'ohos'
+            ? (nativePlatform.wid.value as int?)
+            : null;
+        final surfaceHandle = ohosSurfaceId ?? handle;
         final created = await nativePlatform.createNativeOutput(
-          surfaceId: handle.toString(),
-          windowHandle: handle,
+          surfaceId: surfaceHandle.toString(),
+          windowHandle: surfaceHandle,
         );
         final createdCapable =
             created == true || (created is Map && created['capable'] == true);
@@ -1159,15 +1191,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             dvEnhancement: _hdrSource.dvEnhancement,
             dynamicMetadataPresent: _hdrSource.dynamicMetadataPresent,
             masteringMetadata: _hdrSource.masteringMetadata,
-            surfaceId: handle.toString(),
+            surfaceId: surfaceHandle.toString(),
             surfaceGeneration: hdrSurfaceGeneration.value,
           ).toMap(),
         );
         if (configured is! Map || configured['active'] != true) return false;
-        if (Platform.isMacOS || Platform.isIOS) {
+        if (Platform.isMacOS ||
+            Platform.isIOS ||
+            Platform.operatingSystem == 'ohos') {
           // The media-kit native surface is authoritative on Darwin. The app
           // channel still reports false because it only probes the Flutter
-          // window, not the CAMetalLayer that owns HDR output.
+          // window, not the native surface that owns HDR output.
           return true;
         }
       } on NoSuchMethodError {
@@ -1198,6 +1232,23 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> _applyHdrOutputParameters(Player player) async {
     final native = _hdrDecision.output == HdrOutputMode.nativeHdr;
+    if (!native &&
+        Platform.operatingSystem == 'ohos' &&
+        _hdrCapabilities.nativeOutputActive) {
+      try {
+        final platform = await _videoController?.platform.future;
+        if (platform != null) {
+          await (platform as dynamic).resetHdrOutput();
+        }
+        _hdrCapabilities = _hdrCapabilities.copyWith(
+          nativeOutput: false,
+          nativeOutputActive: false,
+          unsupportedReason: 'native-window-reset-for-sdr',
+        );
+      } catch (error) {
+        debugPrint('OHOS HDR output reset failed: $error');
+      }
+    }
     final transfer = switch (_hdrSource.transfer) {
       HdrTransfer.hlg => 'arib-std-b67',
       HdrTransfer.pq => 'pq',
@@ -1206,7 +1257,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final values = <String, String>{
       'target-prim': native ? 'bt.2020' : 'bt.709',
       'target-trc': native ? transfer : 'bt.1886',
-      'tone-mapping': native ? 'no' : 'bt.2390',
+      'target-colorspace-hint': native ? 'yes' : 'auto',
+      // mpv does not accept `no` for this enum option. `auto` preserves the
+      // native HDR target without forcing an SDR tone-map path.
+      'tone-mapping': native ? 'auto' : 'bt.2390',
     };
     try {
       for (final entry in values.entries) {
@@ -1422,6 +1476,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           final codec = track.codec;
           if (codec != null && codec.isNotEmpty) {
             _hdrCodecHint = codec;
+            if (kDebugMode) {
+              debugPrint(
+                'Video track codec=$codec, id=${track.id}, title=${track.title}',
+              );
+            }
             if (Platform.isAndroid && codec != _hdrProbedCodec) {
               unawaited(_refreshHdrCapabilitiesForCodec(codec));
             }
@@ -1459,6 +1518,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             (Platform.isMacOS || Platform.isIOS) &&
             Pref.hdrMode == HdrMode.auto &&
             _videoController != null;
+        // OHOS may expose an XComponent/native-window candidate, but a
+        // display HDR probe and a surface ID alone are not proof of native
+        // HDR output. Promotion still requires the backend's active report.
+        final ohosNativeCandidate =
+            Platform.operatingSystem == 'ohos' &&
+            _videoController?.nativeSurfaceCandidate == true &&
+            _videoController?.nativeSurfaceActive == true;
         if (outputTopologyChanged &&
             _videoController != null &&
             !darwinNativeCandidate) {
@@ -1482,48 +1548,65 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _lastHdrDiagnostic = diagnostic;
           debugPrint(diagnostic);
         }
-        if ((_hdrCapabilities.canHcpp || darwinNativeCandidate) &&
+        final nativeOutputAttempt = [
+          _hdrSource.kind.name,
+          _hdrSource.transfer.name,
+          _hdrSource.primaries.name,
+          _hdrSource.matrix.name,
+          hdrSurfaceGeneration.value,
+        ].join(':');
+        if ((_hdrCapabilities.canHcpp ||
+                darwinNativeCandidate ||
+                ohosNativeCandidate) &&
             _hdrSource.hasNativeColorMetadata &&
             (!outputTopologyChanged || darwinNativeCandidate) &&
-            !_hdrOutputRebuildInFlight) {
+            !_hdrOutputRebuildInFlight &&
+            !_hdrNativeOutputAttemptInFlight &&
+            _lastHdrNativeOutputAttempt != nativeOutputAttempt) {
+          _lastHdrNativeOutputAttempt = nativeOutputAttempt;
+          _hdrNativeOutputAttemptInFlight = true;
           unawaited(
-            _setHdrColorSpace(player).then((applied) {
-              if (applied) {
-                _hdrCapabilities = _hdrCapabilities.copyWith(
-                  nativeOutput: true,
-                  nativeOutputCapable: true,
-                  nativeOutputActive: true,
-                  decoderHdr: true,
-                  unsupportedReason: 'native-dataspace-applied',
-                );
-                _hdrDecision = HdrDecision.choose(
-                  mode: Pref.hdrMode,
-                  source: _hdrSource,
-                  capabilities: _hdrCapabilities,
-                  hwdec: hwdec ?? 'auto',
-                );
-                unawaited(_applyHdrOutputParameters(player));
-              } else if (_hdrDecision.useHcpp) {
-                _hdrCapabilities = _hdrCapabilities.copyWith(
-                  hcpp: false,
-                  unsupportedReason: 'hcpp-dataspace-failed',
-                );
-                _hdrDecision = HdrDecision.choose(
-                  mode: Pref.hdrMode,
-                  source: _hdrSource,
-                  capabilities: _hdrCapabilities,
-                  hwdec: hwdec ?? 'auto',
-                );
-                _requestHdrOutputRebuild(
-                  hcpp: false,
-                  surfaceView: true,
-                );
-              }
-              debugPrint(
-                'HDR dataspace ${applied ? 'applied' : 'fallback'}: '
-                '${_hdrSource.transfer.name}',
-              );
-            }),
+            _setHdrColorSpace(player)
+                .then((applied) {
+                  if (applied) {
+                    _hdrCapabilities = _hdrCapabilities.copyWith(
+                      nativeOutput: true,
+                      nativeOutputCapable: true,
+                      nativeOutputActive: true,
+                      decoderHdr: true,
+                      unsupportedReason: 'native-dataspace-applied',
+                    );
+                    _hdrDecision = HdrDecision.choose(
+                      mode: Pref.hdrMode,
+                      source: _hdrSource,
+                      capabilities: _hdrCapabilities,
+                      hwdec: hwdec ?? 'auto',
+                    );
+                    unawaited(_applyHdrOutputParameters(player));
+                  } else if (_hdrDecision.useHcpp) {
+                    _hdrCapabilities = _hdrCapabilities.copyWith(
+                      hcpp: false,
+                      unsupportedReason: 'hcpp-dataspace-failed',
+                    );
+                    _hdrDecision = HdrDecision.choose(
+                      mode: Pref.hdrMode,
+                      source: _hdrSource,
+                      capabilities: _hdrCapabilities,
+                      hwdec: hwdec ?? 'auto',
+                    );
+                    _requestHdrOutputRebuild(
+                      hcpp: false,
+                      surfaceView: true,
+                    );
+                  }
+                  debugPrint(
+                    'HDR dataspace ${applied ? 'applied' : 'fallback'}: '
+                    '${_hdrSource.transfer.name}',
+                  );
+                })
+                .whenComplete(() {
+                  _hdrNativeOutputAttemptInFlight = false;
+                }),
           );
         }
       }),

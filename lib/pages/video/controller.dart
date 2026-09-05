@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:math' show min;
 import 'dart:ui';
 
@@ -832,9 +831,10 @@ class VideoDetailController extends GetxController
       return;
     }
     isQuerying = true;
-    if (Platform.isMacOS || Platform.isIOS) {
-      await plPlayerController.refreshHdrDisplayCapabilities();
-    }
+    // Display capability is a cross-platform input to quality selection.
+    // Each platform owns the channel implementation; the selection gate must
+    // not depend on which platform happens to be running.
+    await plPlayerController.refreshHdrDisplayCapabilities();
     if (plPlayerController.enableSponsorBlock && isBlock && !fromReset) {
       querySponsorBlock(bvid: bvid, cid: cid.value);
     }
@@ -850,12 +850,28 @@ class VideoDetailController extends GetxController
       preferCodecs = isWiFi ? Pref.preferCodecs : Pref.preferCodecsCellular;
     }
 
+    final hdrRequest =
+        plPlayerController.hdrDisplaySupportsHdr.value &&
+        plPlayerController.cacheVideoQa! >= VideoQuality.hdr.code;
     final result = await VideoHttp.videoUrl(
       cid: cid.value,
       bvid: bvid,
+      // Request the user's HDR-capable quality preference from Bilibili.
+      // Leaving qn unset hardcodes the API default (80), so the response can
+      // omit DV/HDR tiers before the menu has a chance to select them.
+      qn:
+          plPlayerController.hdrDisplaySupportsHdr.value &&
+              plPlayerController.cacheVideoQa! >= VideoQuality.hdr.code
+          ? (plPlayerController.cacheVideoQa! == 127
+                ? VideoQuality.dolbyVision.code
+                : plPlayerController.cacheVideoQa)
+          : null,
       epid: epId,
       seasonId: seasonId,
-      tryLook: plPlayerController.tryLook,
+      // try_look responses are limited to ordinary qualities and can strip
+      // DV/HDR even when qn requests an HDR tier. Ask for the real HDR stream
+      // whenever the display and user preference permit it.
+      tryLook: hdrRequest ? false : plPlayerController.tryLook,
       videoType: _actualVideoType ?? videoType,
       language: currLang.value,
       voiceBalance: plPlayerController.enableAudioNormalization,
@@ -941,16 +957,18 @@ class VideoDetailController extends GetxController
       // 预设的画质为null，则当前可用的最高质量
       int targetVideoQa = curHighestVideoQa;
       var cacheVideoQa = plPlayerController.cacheVideoQa!;
+      // Display capability has been probed above, so this is a real negative
+      // result rather than the controller's initial unknown=false state.
       if (!plPlayerController.hdrDisplaySupportsHdr.value &&
           _isHdrQuality(cacheVideoQa)) {
         final sdrVideos = videoList
             .where((item) => !_isHdrQuality(item.id))
             .toList();
         if (sdrVideos.isNotEmpty) {
-          final fallbackVideo = sdrVideos.reduce(
-            (a, b) => a.quality.code > b.quality.code ? a : b,
-          );
-          cacheVideoQa = fallbackVideo.quality.code;
+          cacheVideoQa = sdrVideos
+              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+              .quality
+              .code;
           plPlayerController.cacheVideoQa = cacheVideoQa;
         }
       }
@@ -962,6 +980,23 @@ class VideoDetailController extends GetxController
           (a, b) => a > b ? a : b,
         );
       }
+      // Bilibili may report ordinary 4K (80) as the first/maximum entry in
+      // accept_quality even when the DASH list also contains HDR tiers.  On
+      // an HDR-capable display, a "highest" preference (127) must resolve to
+      // the best available HDR tier instead of silently opening ordinary 4K.
+      if (plPlayerController.hdrDisplaySupportsHdr.value &&
+          cacheVideoQa >= VideoQuality.hdr.code) {
+        final hdrVideos = videoList
+            .where((item) => _isHdrQuality(item.quality.code))
+            .where((item) => item.quality.code <= cacheVideoQa)
+            .toList();
+        if (hdrVideos.isNotEmpty) {
+          targetVideoQa = hdrVideos
+              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+              .quality
+              .code;
+        }
+      }
       if (!plPlayerController.hdrDisplaySupportsHdr.value &&
           _isHdrQuality(targetVideoQa)) {
         final sdrVideos = videoList
@@ -969,9 +1004,7 @@ class VideoDetailController extends GetxController
             .toList();
         if (sdrVideos.isNotEmpty) {
           targetVideoQa = sdrVideos
-              .reduce(
-                (a, b) => a.quality.code > b.quality.code ? a : b,
-              )
+              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
               .quality
               .code;
           plPlayerController.cacheVideoQa = targetVideoQa;
@@ -981,7 +1014,8 @@ class VideoDetailController extends GetxController
         debugPrint(
           'Video quality selection: displayHdr='
           '${plPlayerController.hdrDisplaySupportsHdr.value}, '
-          'cached=$cacheVideoQa, target=$targetVideoQa',
+          'cached=$cacheVideoQa, target=$targetVideoQa, '
+          'available=${videoList.map((item) => item.quality.code).join(",")}',
         );
       }
       currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);

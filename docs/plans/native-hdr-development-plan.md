@@ -1,6 +1,10 @@
 # 全平台原生 HDR 开发主要事项
 
-更新时间：2026-09-02
+更新时间：2026-09-06
+
+本文件保留原生 HDR 的总体路线和验收门槛。早期环境与 SHA 只作为历史快照；各平台
+当前状态以 [HDR 后端状态矩阵](../status/hdr-backend-status.md) 和
+[HDR 验证账本](../status/hdr-verification.md) 为准。
 
 ## 目标与完成定义
 
@@ -20,8 +24,9 @@ HAP 构建，但仍停留在“运行待验证”，不应误读为原生 HDR �
 [HDR 后端状态矩阵](../status/hdr-backend-status.md) 和
 [HDR 验证账本](../status/hdr-verification.md)。
 
-- PiliPlusX 当前 9 个 media-kit 包仍固定到 `Goodwu/media-kit` 完整提交
-  `73536efdda482f2d5eefe2feb7038db419944b96`。
+- 2026-09-02 初始快照中的 9 个 media-kit 包固定到 `73536ef...`；2026-09-05
+  `pubspec.lock` 已统一到 `Goodwu/media-kit@0fa6afe9...`，但 workflow/manifest 仍为
+  `73536ef...`，两者尚未完成一致性迁移。
 - media-kit 公共 HDR 生命周期位于
   `integration/piliplusx-hdr-public-api`，当前提交为
   `ad22c36a9986a8418c81829821962009425cf5e5`；其全平台构建和长 package tests
@@ -64,16 +69,19 @@ GPU 渲染策略。其实际播放器来自外部 `@ohpg/player`/FinPlayer，公
 
 ## 可用执行环境与下一步
 
-- Apple：本机 macOS debug build 已通过；iOS simulator/device 产物已有，仍需
-  Simulator/真机运行和 EDR 设备证据。
+- Apple：macOS 已在 HDR 显示器验证 `NSView`/`CAMetalLayer`、BT.2020 和 EDR 输出，
+  仍缺 HDR/SDR 跨屏及全屏回归；iOS simulator/device 产物已有，仍需真机 EDR 证据。
 - Windows：先用 GitHub Actions `windows-latest` 构建标准 x64；随后启动本机
   VMware Fusion ARM Windows，安装或复用 Flutter、Visual Studio C++ 和 Windows
   SDK，交叉构建并通过 x64 模拟层验证子窗口、布局、生命周期和 SDR 回退。
 - Linux：SSH `dev` 已完成 Ubuntu 22.04 x86_64 release 构建，但没有 DISPLAY、
   Wayland 或 GPU。继续用它做 x64 编译；实际 HDR 运行必须寻找带 Wayland HDR
   compositor 的图形主机。Lima aarch64 只用于接口和 ARM 编译检查。
-- OHOS：SSH `dev` 已成功生成完整 unsigned arm64 HAP；`hdc` 无在线目标，SDK
-  Emulator 因 Qt 动态库加载失败，需获得可用设备后验证 Ability、XComponent 和 SDR 播放。
+- OHOS：模拟器和实体机均已完成签名 HAP 安装/启动；实体机 Texture SDR 与 Dolby Vision
+  tone-map 首帧已通过，XComponent/native Surface candidate 也已显示 DV tone-map。
+  当前缺口是窗口几何、EGL/BufferQueue 和 Surface 生命周期稳定性，以及 PQ/HLG
+  NativeWindow 色彩空间和 `nativeOutputActive` 的实体机证据；完成前继续保持
+  native HDR fail-closed。
 - Android/Pink：已有 Java 17 release 产物证据；本机当前仅有 Java 26，debug
   JdkImageTransform 失败，仍需 CI/Java 17 环境补齐 Pink parity 和运行矩阵。
 

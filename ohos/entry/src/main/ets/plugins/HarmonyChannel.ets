@@ -1,4 +1,6 @@
 import window from "@ohos.window";
+import display from "@ohos.display";
+import hdrCapability from "@ohos.graphics.hdrCapability";
 import {
   FlutterPlugin,
   FlutterPluginBinding,
@@ -58,6 +60,11 @@ export default class HarmonyChannel implements FlutterPlugin {
         await this.lastWindow.setWindowBrightness(brightness);
         result.success(true);
         break;
+      case "getWindowBrightness":
+        this.lastWindow ??= await window.getLastWindow(getContext());
+        const properties = await this.lastWindow.getWindowProperties();
+        result.success(properties.brightness);
+        break;
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -113,7 +120,7 @@ export class HdrCapabilitiesChannel implements FlutterPlugin, MethodCallHandler 
     this.channel = null;
   }
 
-  onMethodCall(call: MethodCall, result: MethodResult): void {
+  async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     if (call.method == "resetOutput") {
       result.success(true);
       return;
@@ -136,16 +143,28 @@ export class HdrCapabilitiesChannel implements FlutterPlugin, MethodCallHandler 
       result.notImplemented();
       return;
     }
+    let displayHdr = false;
+    let displayFormats: Array<string> = [];
+    try {
+      const hdrFormats = display.getDefaultDisplaySync().hdrFormats;
+      const supportedFormats = hdrFormats.filter(
+        (format) => format != hdrCapability.HDRFormat.NONE
+      );
+      displayHdr = supportedFormats.length > 0;
+      displayFormats = supportedFormats.map((format) => format.toString());
+    } catch (_) {
+      displayHdr = false;
+    }
     result.success({
       "platform": "ohos",
       "nativeBackend": "none",
-      "displayHdr": false,
+      "displayHdr": displayHdr,
       "decoderHdr": false,
       "nativeOutput": false,
       "nativeOutputCapable": false,
       "nativeOutputActive": false,
       "toneMapping": true,
-      "displayFormats": [],
+      "displayFormats": displayFormats,
       "decoderProfiles": [],
       "unsupportedReason": "ohos-hdr-capability-not-proven",
     });

@@ -1,7 +1,7 @@
 # 上游重建、功能迁移与社区贡献计划
 
 状态：待方案评审，禁止执行
-更新时间：2026-09-04
+更新时间：2026-09-05
 适用仓库：PiliPlusX、media-kit、libmpv-ohos-build
 
 ## 1. 文档目的
@@ -25,7 +25,8 @@
 ### 2.1 目标
 
 1. 把 `bggRGjQaUbCoE/PiliPlus` 设为应用代码的主要跟踪上游。
-2. 把 `media-kit/media-kit` 设为播放框架的主要跟踪上游。
+2. 把 `media-kit/media-kit` 设为播放框架的主要跟踪上游；在 OHOS 正式合入前，
+   只维护从官方最新主分支派生的最小 OHOS fork。
 3. 把 `mpv-ohos/libmpv-ohos-build` 及其真实源码、补丁和产物链设为 OHOS
    libmpv 的独立依赖层。
 4. 保留现有仓库和提交历史，作为迁移来源、产品回滚基线和证据档案。
@@ -42,9 +43,9 @@
 - 不把 `media-kit` OHOS 支持、HDR、Darwin 生命周期和 libmpv 更新放进同一个 PR。
 - 不直接把 GPL-3.0 的 PiliPlusX 代码复制进 MIT 的 media-kit 或 libmpv 构建仓库。
 
-## 3. 当前事实基线
+## 3. 方案编写与复核基线
 
-### 3.1 本地 PiliPlusX
+### 3.1 本地 PiliPlusX 编写快照
 
 截至 2026-09-04：
 
@@ -55,6 +56,10 @@
 - 当前工作树在本计划编写前为空。
 - `pubspec.yaml` 中 media-kit 相关 git 依赖统一指向
   `Goodwu/media-kit@0fa6afe9cd9af8d8437919257d81a27c643f2f63`。
+
+以上是计划编写快照，不是执行时自动更新的状态。进入 `INV-01`、`INV-02` 或任何
+仓库变更任务前，执行者必须重新记录当前分支、HEAD、工作树、remote、`pubspec.yaml`
+和 `pubspec.lock`；不得因为本文仍显示旧 HEAD 就覆盖新提交或清理现有工作树。
 
 现有状态文档中仍有 `73536ef...` 或 `ad22c36a...` 等历史候选 SHA。它们是阶段性
 证据，不得直接作为新基线。任务 `INV-03` 必须解释每个 SHA 的祖先关系、有效改动和
@@ -81,7 +86,8 @@ ErBWs/mpv:feat-ohos-support   PR #1326 提到的 mpv 源码/补丁来源之一
 
 ### 3.3 media-kit PR #1326 快照
 
-截至本计划编写时，`media-kit/media-kit#1326`：
+截至 2026-09-05 复核，官方 `media-kit/media-kit:main` 为
+`c533e446755f51cf53c7e57aea873f2aa5355f81`，`media-kit/media-kit#1326`：
 
 - 状态为 Open；目标为 `media-kit/media-kit:main`。
 - 包含 20 个提交、63 个文件、约 1255 行新增。
@@ -93,9 +99,29 @@ ErBWs/mpv:feat-ohos-support   PR #1326 提到的 mpv 源码/补丁来源之一
 - 下载产物来自独立的 `libmpv-ohos-build` release，因此 media-kit PR 的可复现性、
   ABI、许可证和供应链完整性依赖该外部项目。
 - 当前路径只覆盖 ARM64；不能据此宣称 OHOS x86_64 模拟器可播放。
+- 官方 `main` 不存在 `media_kit_libs_ohos`，因此官方发布包不能直接替代当前 OHOS
+  依赖；非 OHOS 平台切回官方也不能据此宣称已完成整个项目的官方切换。
 
 PR #1326 是必须对齐的已有社区工作，不应在没有沟通的情况下提交一份内容重叠的
 巨型替代 PR。
+
+### 3.4 原生依赖基线
+
+各平台实际下载 URL、固定版本、摘要和当前 fork 差异见
+[media-kit 原生依赖来源与跟踪基线](../reference/media-kit-native-dependencies.md)。
+截至本次复核：
+
+- 官方 Android main 消费 `media-kit/libmpv-android-video-build v1.1.7`，即使该构建
+  仓库已有更新 Release，也不能自动视为 media-kit 已采用；
+- 官方 iOS/macOS 消费 `media-kit/libmpv-darwin-build v0.7.2`；
+- 官方 Windows 消费 `media-kit/libmpv-win32-video-cmake 20241021`，并额外下载
+  非 media-kit 组织下的 ANGLE `v1.0.1`；
+- 官方 Linux 使用系统 `libmpv`/`libepoxy`，另下载 mimalloc 源码；
+- 官方没有 OHOS libmpv 下载链，当前 fork 则依赖独立的 OHOS Release。
+
+版本跟踪必须区分“media-kit 构建声明”“构建仓库最新 Release”“产品 lock”和
+“本地未发布候选”四种状态。任何 URL 与摘要不匹配的本地产物都不得作为社区 PR、CI
+或干净环境的输入。
 
 ## 4. 目标仓库拓扑与命名
 
@@ -122,6 +148,11 @@ Goodwu/media-kit-legacy
 `<contribution-owner>` 优先使用新的组织。原因是仅重命名现有 fork 不会改变 fork
 父仓库，也通常不会释放同一 fork network 下的第二个 fork 名额。使用新的组织可以
 在不删除历史仓库的情况下建立直接 fork。
+
+在 OHOS 被官方合入前，推荐让产品需要的 media-kit 子包都来自同一个、紧跟官方
+`main` 的最小 fork SHA。不要临时拼接多个互不对应的官方和第三方 package 版本；若
+确需只 override OHOS 包，必须先证明 `media_kit`、`media_kit_video` 与平台 libs 的
+API/版本约束可组合，并提供整组一键回滚。
 
 ### 4.2 仓库角色约束
 
@@ -359,8 +390,9 @@ format check、analyze、tests 和一个风险最低的 release build。
 
 依赖：`REPO-02`。
 操作：按官方工作区结构运行 CI 中等价的 format、analyze、test 和可用平台构建；记录
-Flutter/Dart、native 工具链和主分支 SHA。
-输出：官方 main 基线报告。
+Flutter/Dart、native 工具链和主分支 SHA。逐平台审计实际下载 URL、摘要算法、固定
+版本、构建仓库最新 Release、许可证和是否使用系统库；OHOS 缺失也必须作为基线结果。
+输出：官方 main 基线报告和原生依赖差异表。
 验收：后续每个 media-kit PR 都能与同一基线比较。
 
 ### BASE-MPV-01：libmpv 构建基线审计
@@ -436,7 +468,9 @@ Linux x86_64 库；构建并检查 ELF machine、动态依赖和 HAP 路径。
 操作：使用不可变 tag 发布；资产名包含版本和 ABI；release 附 SHA256、SBOM、许可证、
 构建 manifest、源码/patch commit；定义 media-kit CMake 如何选择 ABI 和校验。
 输出：可供社区引用的 release。
-验收：删除本地缓存后 media-kit 能按 manifest 下载并验证；校验失败必须 fail closed。
+验收：下载 URL 对应资产的实算摘要与声明一致；删除本地缓存后 media-kit 能按
+manifest 下载并验证；校验失败必须 fail closed。本地 archive 与公开 URL 不一致时
+不得标记完成。
 
 ### MK-01：与 media-kit #1326 对齐
 
@@ -469,7 +503,7 @@ barrier、幂等 dispose 或 handle 串行化中真正必要的部分。
 操作：新增最小 package；按 ABI 下载不可变 release；校验 SHA256；准确描述包用途；
 补 CHANGELOG、README、LICENSE/第三方许可证和离线缓存行为。
 验收：ARM64 包构建、库路径/SONAME/依赖检查通过；不支持 ABI 明确失败，不静默打包
-错误架构。
+错误架构；空缓存能从公开 URL 获取与声明 SHA256 一致的资产。
 
 ### MK-05：OHOS video controller 和 texture 输出
 
@@ -497,7 +531,8 @@ surface 创建失败向 Dart 返回明确错误；不得吞掉错误后伪装成
 
 依赖：`MK-02` 或 `MK-05` 对应候选已 review。
 操作：所有 media-kit 子包一次性固定到同一完整 SHA；更新 lock；禁止部分包跨 SHA；
-运行应用层回归。
+运行应用层回归。在 OHOS 未上游化期间，该 SHA 应来自直接基于官方 main 的最小 fork；
+“官方 hosted package + OHOS fork package”的混用必须另建兼容性任务证明，不能默认采用。
 验收：依赖来源、resolved-ref、包版本一致；旧 SHA 可一键回滚。
 
 ### APP-OHOS-01：迁移 OHOS 应用兼容层
@@ -576,6 +611,8 @@ PR，则仍保持上述提交序列，并保证每个提交可 review、可回�
 - 新行为有测试，平台特有行为有目标构建；
 - PR 描述列出已验证与未验证内容；
 - 二进制依赖有来源、版本、SHA256、许可证、SBOM 和重建方法；
+- 同时记录框架实际消费版本和构建仓库最新 Release；二者不一致时解释为何不升级；
+- 在空缓存中验证每个 Release URL 与摘要，禁止依赖开发机残留 archive；
 - 对破坏性 API、额外依赖和包体积变化明确说明；
 - 维护者未回复时不反复开重复 PR 催促。
 
@@ -650,6 +687,8 @@ PR/issue（如授权创建）：
 5. 与 PR #1326 的协作方式：向原 PR 贡献、共同重写，或经维护者同意后提交拆分 PR；
 6. 首批应用迁移功能的优先级；
 7. 哪些现有 HDR/OHOS 改动确定只保留在产品层。
+8. OHOS 合入前是否采用“全部相关子包统一指向最小 fork SHA”的推荐过渡策略；若否，
+   需要批准混合官方/分叉 package 的兼容性与回滚设计。
 
 ## 13. 关联资料
 
@@ -662,6 +701,7 @@ PR/issue（如授权创建）：
 - [OHOS 适配记录](../platforms/ohos-adaptation.md)
 - [OHOS 开发总结](../status/ohos-development-summary.md)
 - [HDR 验证账本](../status/hdr-verification.md)
+- [media-kit 原生依赖来源与跟踪基线](../reference/media-kit-native-dependencies.md)
 
 外部基线：
 

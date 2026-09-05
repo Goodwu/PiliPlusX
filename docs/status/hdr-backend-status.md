@@ -1,17 +1,20 @@
 # HDR 后端状态矩阵
 
-更新时间：2026-09-04
+更新时间：2026-09-06
 
-构建与设备证据索引见 [HDR 验证账本](hdr-verification.md)；OHOS HAP 当前已构建，
-但因 `hdc` 无在线目标仍未进入运行验收。
+构建与设备证据索引见 [HDR 验证账本](hdr-verification.md)。OHOS 当前已有模拟器和
+实体机证据：Texture 与 XComponent/native Surface 的 DV 首帧均已通过；0621 已出现
+native HDR 决策和 PQ dataspace 应用。native HDR 仍未通过完整生命周期验收。
 
 这份记录区分“能力探测”“原生输出”和“SDR tone-map 回退”。构建成功或
 检测到 HDR 显示器，不能单独作为原生 HDR 已启用的证据。
 
-media-kit 公共输出生命周期已在 `Goodwu/media-kit` 的
-`integration/piliplusx-hdr-public-api`（`ad22c36a9986a8418c81829821962009425cf5e5`）提供；PiliPlusX
-通过兼容桥接调用该生命周期，旧 lock 仍可回退到原 channel 路径。各平台默认实现
-fail-closed，平台后端完成后才能将对应 lock 条目提升到该集成 SHA。
+PiliPlusX 当前 9 个 media-kit 包统一锁定到
+`Goodwu/media-kit@0fa6afe9cd9af8d8437919257d81a27c643f2f63`。公共输出生命周期
+历史候选 `integration/piliplusx-hdr-public-api`（`ad22c36a...`）保留为差异审查来源，
+不能再称为当前 lock。当前 lock 与 workflow 中的历史 `73536ef...` 尚未完成一致性迁移，
+详见 [HDR 验证账本](hdr-verification.md)。各平台仍须 fail closed，平台后端完成并取得
+真实设备证据后才能提升状态。
 
 | 平台 | 当前输出路径 | 当前能力状态 | 原生 HDR 解锁条件 |
 | --- | --- | --- | --- |
@@ -20,7 +23,7 @@ fail-closed，平台后端完成后才能将对应 lock 条目提升到该集成
 | macOS | `NSView` + `CAMetalLayer` 原生 surface；Flutter Texture 保留回退 | 已在 M27P20 HDR 显示器实测：native surface `active=true`，`rgba16Float`、extended-linear BT.2020，实际画面可见，播放期间 EDR headroom=2.03；23e4646 后每次 mpv 更新只渲染一个目标；SDR 屏仍走 Texture/SDR 回退 | 继续验证 HDR/SDR 跨屏、全屏和显示器变化后的自动回退 |
 | Windows x64 | D3D11 mailbox → Flutter `GpuSurfaceTexture`（BGRA8） | 已接入只读 DXGI 当前输出探测和统一 `configureOutput`/`resetOutput` 契约；nativeOutput 仍为 false，保持 tone-map | 增加独立视频子窗口与真实 flip-model swapchain，检测输出并调用 DXGI 色彩空间接口 |
 | Linux x64 | Flutter texture / OpenGL | 已接入保守能力 channel 和统一输出契约；Wayland、X11 与软件渲染会明确记录回退原因，不宣称 HDR；保持 tone-map | 接入 Wayland color-management 协议，仅在 compositor、驱动和输出均可证明时启用 |
-| OHOS | Texture tone-map | capability channel 和统一输出契约明确返回 `nativeOutput=false` | 完成 XComponent/NativeWindow HDR 查询、输出路径和真机验证 |
+| OHOS | Texture + tone-map 回退；XComponent/native Surface native HDR A/B | 实体机 `display=true`（`hdrFormats=[1,2,3]`）；0621 的 DV 测试画面全宽可见，日志出现 `output=nativeHdr` 和 `HDR dataspace applied: pq`；native view 尺寸已修正，仍有 `40601000` BufferQueue/external-texture 日志 | 完成暂停、seek、重播、销毁重建压力回归；确认 HLG 色彩空间、Surface 重连和资源释放稳定后，才把 OHOS native HDR 作为默认交付路径 |
 
 ## 回退不变量
 
