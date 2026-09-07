@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
 
@@ -18,6 +20,99 @@ void main() {
     expect(decision.output, HdrOutputMode.sdr);
     expect(decision.hwdec, 'mediacodec-copy');
   });
+
+  test(
+    'no-op display probe does not treat native output as a display change',
+    () {
+      const active = HdrCapabilities(
+        displayHdr: true,
+        headroom: 2.03,
+        potentialHeadroom: 10.15,
+        nativeOutput: true,
+        nativeOutputCapable: true,
+        nativeOutputActive: true,
+      );
+      const probe = HdrCapabilities(
+        displayHdr: true,
+        headroom: 2.03,
+        potentialHeadroom: 10.15,
+      );
+      expect(probe.displayStateChangedFrom(active), isFalse);
+      expect(active.nativeOutputActive, isTrue);
+      expect(
+        const HdrCapabilities(
+          displayHdr: true,
+          headroom: 1,
+          potentialHeadroom: 10.15,
+        ).displayStateChangedFrom(active),
+        isTrue,
+      );
+    },
+  );
+
+  test(
+    'HDR transaction gate serializes same-generation interleaving',
+    () async {
+      final gate = HdrOutputTransactionGate();
+      final firstStarted = Completer<void>();
+      final releaseFirst = Completer<void>();
+      final order = <String>[];
+      var current = true;
+
+      final first = gate.run<void>(
+        isCurrent: () => current,
+        action: () async {
+          order.add('first-start');
+          firstStarted.complete();
+          await releaseFirst.future;
+          order.add('first-end');
+        },
+      );
+      await firstStarted.future;
+      final second = gate.run<void>(
+        isCurrent: () => current,
+        action: () async => order.add('second'),
+      );
+
+      expect(order, ['first-start']);
+      releaseFirst.complete();
+      await Future.wait([first, second]);
+      expect(order, ['first-start', 'first-end', 'second']);
+    },
+  );
+
+  test(
+    'HDR transaction gate drops stale completion and recovers after failure',
+    () async {
+      final gate = HdrOutputTransactionGate();
+      var current = true;
+      final release = Completer<void>();
+      final stale = gate.run<String>(
+        isCurrent: () => current,
+        action: () async {
+          await release.future;
+          return 'old-surface';
+        },
+      );
+      current = false;
+      release.complete();
+      expect(await stale, isNull);
+
+      current = true;
+      final failed = gate.run<void>(
+        isCurrent: () => current,
+        action: () async => throw StateError('native-config-failed'),
+      );
+      await expectLater(failed, throwsStateError);
+      expect(
+        await gate.run<String>(
+          isCurrent: () => current,
+          action: () async => 'next-surface',
+        ),
+        'next-surface',
+      );
+    },
+  );
 
   test('auto selects native HDR only with complete capability proof', () {
     final decision = HdrDecision.choose(
@@ -256,6 +351,18 @@ void main() {
     expect(capabilities.decoderProfiles, contains('video/hevc:profile=2'));
   });
 
+  test('capability map preserves current and potential display headroom', () {
+    final capabilities = HdrCapabilities.fromMap({
+      'platform': 'macos',
+      'displayHdr': true,
+      'headroom': 1.0,
+      'potentialHeadroom': 10.1524076461792,
+    });
+    expect(capabilities.headroom, 1.0);
+    expect(capabilities.potentialHeadroom, 10.1524076461792);
+    expect(capabilities.canNativeHdr, isFalse);
+  });
+
   test('capability state separates attemptability from active output', () {
     final capabilities = HdrCapabilities.fromMap({
       'platform': 'android',
@@ -314,6 +421,105 @@ void main() {
     expect(source.matrix, HdrMatrix.bt2020);
   });
 
+  test('mpv PQ base-layer params preserve a Dolby Vision source hint', () {
+    const initial = HdrSourceMetadata(
+      kind: HdrSourceKind.dolbyVision,
+      transfer: HdrTransfer.pq,
+      primaries: HdrPrimaries.bt2020,
+      dolbyVisionProfile: '8.4',
+    );
+    final correction = HdrSourceMetadata.fromMpvProperties({
+      'codec': 'hevc',
+      'primaries': 'bt.2020',
+      'transfer': 'smpte2084',
+      'matrix': 'bt.2020-ncl',
+    });
+    final merged = initial.mergeMpvCorrection(correction);
+    expect(merged.kind, HdrSourceKind.dolbyVision);
+    expect(merged.dolbyVisionProfile, '8.4');
+    expect(merged.hasNativeColorMetadata, isTrue);
+  });
+
+  test('reliable SDR params can correct an obsolete HDR hint', () {
+    const initial = HdrSourceMetadata(
+      kind: HdrSourceKind.dolbyVision,
+      transfer: HdrTransfer.pq,
+      primaries: HdrPrimaries.bt2020,
+    );
+    final merged = initial.mergeMpvCorrection(
+      HdrSourceMetadata.fromMpvProperties({
+        'primaries': 'bt.709',
+        'transfer': 'bt.1886',
+        'matrix': 'bt.709',
+      }),
+    );
+    expect(merged.kind, HdrSourceKind.sdr);
+    expect(merged.transfer, HdrTransfer.sdr);
+  });
+
+  test('mpv HLG BT.2020 params preserve a Dolby Vision source hint', () {
+    const initial = HdrSourceMetadata(
+      kind: HdrSourceKind.dolbyVision,
+      transfer: HdrTransfer.pq,
+      primaries: HdrPrimaries.bt2020,
+    );
+    final correction = HdrSourceMetadata.fromMpvProperties({
+      'transfer': 'hlg',
+      'primaries': 'bt.2020',
+      'matrix': 'bt.2020-ncl',
+    });
+
+    final merged = initial.mergeMpvCorrection(correction);
+
+    expect(merged.kind, HdrSourceKind.dolbyVision);
+    expect(merged.transfer, HdrTransfer.hlg);
+    expect(merged.primaries, HdrPrimaries.bt2020);
+    expect(merged.matrix, HdrMatrix.bt2020);
+  });
+
+  test('missing mpv booleans do not erase source metadata', () {
+    const initial = HdrSourceMetadata(
+      kind: HdrSourceKind.dolbyVision,
+      rpuPresent: true,
+      baseLayerPresent: true,
+      enhancementLayerPresent: true,
+      dynamicMetadataPresent: true,
+      bitDepth: 10,
+    );
+    final correction = HdrSourceMetadata.fromMpvProperties({
+      'transfer': 'smpte2084',
+      'primaries': 'bt.2020',
+    });
+    final merged = initial.mergeMpvCorrection(correction);
+    expect(merged.rpuPresent, isTrue);
+    expect(merged.baseLayerPresent, isTrue);
+    expect(merged.enhancementLayerPresent, isTrue);
+    expect(merged.dynamicMetadataPresent, isTrue);
+    expect(merged.bitDepth, 10);
+  });
+
+  test('explicit mpv false values override source metadata', () {
+    const initial = HdrSourceMetadata(
+      rpuPresent: true,
+      baseLayerPresent: true,
+      enhancementLayerPresent: true,
+      dynamicMetadataPresent: true,
+    );
+    final correction = HdrSourceMetadata.fromMpvProperties({
+      'rpu-present': 'false',
+      'base-layer-present': 'absent',
+      'enhancement-layer-present': '0',
+      'hdr10plus-present': 'disabled',
+      'bit-depth': '8',
+    });
+    final merged = initial.mergeMpvCorrection(correction);
+    expect(merged.rpuPresent, isFalse);
+    expect(merged.baseLayerPresent, isFalse);
+    expect(merged.enhancementLayerPresent, isFalse);
+    expect(merged.dynamicMetadataPresent, isFalse);
+    expect(merged.bitDepth, 8);
+  });
+
   test('Bilibili HDR quality tiers provide an initial hint', () {
     expect(
       HdrSourceMetadata.fromBilibiliHints(quality: 125).kind,
@@ -369,7 +575,7 @@ void main() {
       platformView: true,
       hcpp: true,
     );
-    for (final kind in [HdrSourceKind.dolbyVision, HdrSourceKind.hdrVivid]) {
+    for (final kind in [HdrSourceKind.hdrVivid]) {
       final decision = HdrDecision.choose(
         mode: HdrMode.auto,
         source: HdrSourceMetadata(
@@ -382,6 +588,21 @@ void main() {
       expect(decision.output, HdrOutputMode.toneMappedSdr);
       expect(decision.surface, 'texture');
     }
+    final hlgDolbyVisionDecision = HdrDecision.choose(
+      mode: HdrMode.auto,
+      source: const HdrSourceMetadata(
+        kind: HdrSourceKind.dolbyVision,
+        transfer: HdrTransfer.hlg,
+        primaries: HdrPrimaries.bt2020,
+      ),
+      capabilities: capabilities,
+    );
+    expect(hlgDolbyVisionDecision.output, HdrOutputMode.nativeHdr);
+    expect(hlgDolbyVisionDecision.surface, 'native-hdr');
+    expect(
+      hlgDolbyVisionDecision.sourceProcessing,
+      'dolby-vision-converted-to-hdr',
+    );
   });
 
   test(

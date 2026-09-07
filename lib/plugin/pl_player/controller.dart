@@ -77,6 +77,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   static PlPlayerController? _instance;
 
+  bool get _allowDiagnosticDolbyVisionNative =>
+      kDebugMode &&
+      Platform.isMacOS &&
+      Platform.environment['PILIPLUSX_FORCE_NATIVE_HDR'] == '1';
+
   final playerStatus = PlPlayerStatus(.playing);
 
   final Rx<DataStatus> dataStatus = Rx(.none);
@@ -377,6 +382,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   );
   String? _hdrCodecHint;
   String? _hdrProbedCodec;
+  int _hdrSourceGeneration = 0;
   HdrPlaybackDecision _hdrDecision = const HdrPlaybackDecision(
     output: HdrOutputMode.sdr,
     vo: 'gpu-next',
@@ -390,9 +396,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   StreamSubscription<Object?>? _hdrDisplaySubscription;
   void Function(bool displayHdr)? onHdrDisplayChanged;
   bool _hdrOutputRebuildInFlight = false;
+  int _hdrDisplayRefreshGeneration = 0;
+  final _hdrOutputTransactionGate = HdrOutputTransactionGate();
   bool? _queuedHdrOutputRebuildHcpp;
   bool? _queuedHdrOutputRebuildSurfaceView;
   String? _lastHdrDiagnostic;
+  String? _lastHdrVideoParamsDiagnostic;
+  String? _lastHdrParameterReadback;
   String? _lastHdrNativeOutputAttempt;
   bool _hdrNativeOutputAttemptInFlight = false;
 
@@ -662,6 +672,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }) async {
     try {
       _processing = true;
+      final sourceGeneration = ++_hdrSourceGeneration;
       _hdrCodecHint = initialVideoCodec;
       _hdrProbedCodec = null;
       _queuedHdrOutputRebuildHcpp = null;
@@ -729,6 +740,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         triggerFullScreen(status: true);
       }
 
+      if (sourceGeneration != _hdrSourceGeneration) return;
       await _initializePlayer();
       onInit?.call();
     } catch (err, stackTrace) {
@@ -830,6 +842,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       source: _hdrSource,
       capabilities: _hdrCapabilities,
       hwdec: hwdec ?? 'auto',
+      allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
     );
     if (Platform.isAndroid && !_hdrDecision.useHcpp) {
       await HdrAndroid.setWindowHdrMode(hdr: false);
@@ -837,6 +850,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     debugPrint(
       'HDR capabilities: platform=${_hdrCapabilities.platform}, '
       'display=${_hdrCapabilities.displayHdr}, '
+      'headroom=${_hdrCapabilities.headroom}, '
+      'potentialHeadroom=${_hdrCapabilities.potentialHeadroom}, '
       'decoder=${_hdrCapabilities.decoderHdr}, '
       'vulkan=${_hdrCapabilities.vulkan}, '
       'hcpp=${_hdrCapabilities.canHcpp}, '
@@ -892,7 +907,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       }
     }
 
-    _startListeners(player);
+    _startListeners(player, sourceGeneration: _hdrSourceGeneration);
     if (Platform.isMacOS) {
       _hdrDisplaySubscription = HdrPlatform.displayChanges.listen(
         (_) => unawaited(refreshHdrDisplayCapabilities()),
@@ -1096,6 +1111,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       source: _hdrSource,
       capabilities: _hdrCapabilities,
       hwdec: hwdec ?? 'auto',
+      allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
     );
   }
 
@@ -1120,45 +1136,125 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<void> refreshHdrDisplayCapabilities() async {
+    final refreshGeneration = ++_hdrDisplayRefreshGeneration;
     final capabilities = await HdrPlatform.probe(codec: _hdrCodecHint);
-    final displayHdrChanged =
+    if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
+    final displayHdrFlagChanged =
         capabilities.displayHdr != _hdrCapabilities.displayHdr;
+    final displayStateChanged = capabilities.displayStateChangedFrom(
+      _hdrCapabilities,
+    );
+    if (!displayStateChanged) return;
+    final player = _videoPlayerController;
+    final hadNativeOutput = _hdrCapabilities.nativeOutputActive;
     _hdrCapabilities = _hdrCapabilities.copyWith(
       displayHdr: capabilities.displayHdr,
-      nativeOutput: displayHdrChanged ? false : null,
-      nativeOutputActive: displayHdrChanged ? false : null,
+      headroom: capabilities.headroom,
+      potentialHeadroom: capabilities.potentialHeadroom,
+      nativeOutput: false,
+      nativeOutputCapable: false,
+      nativeOutputActive: false,
     );
     hdrDisplaySupportsHdr.value = capabilities.displayHdr;
-    if (displayHdrChanged) {
+    if (displayHdrFlagChanged) {
       _lastHdrNativeOutputAttempt = null;
 
       onHdrDisplayChanged?.call(capabilities.displayHdr);
     }
-    if (!displayHdrChanged || _videoPlayerController == null) return;
     _refreshHdrDecision();
-    unawaited(_applyHdrOutputParameters(_videoPlayerController!));
+    if (player == null) return;
+    if (hadNativeOutput) {
+      try {
+        final platform = await _videoController?.platform.future;
+        if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
+        if (platform != null) {
+          await (platform as dynamic).resetHdrOutput();
+          if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
+        }
+      } catch (error) {
+        debugPrint('HDR display-change reset failed: $error');
+      }
+    }
+    await _applyHdrOutputParameters(player);
+    if (refreshGeneration != _hdrDisplayRefreshGeneration ||
+        _hdrSource.kind == HdrSourceKind.dolbyVision ||
+        _hdrSource.kind == HdrSourceKind.hdrVivid ||
+        _hdrSource.kind == HdrSourceKind.hdr10Plus ||
+        !_hdrSource.hasNativeColorMetadata ||
+        Pref.hdrMode != HdrMode.auto) {
+      return;
+    }
+    final applied = await _setHdrColorSpace(
+      player,
+      sourceGeneration: _hdrSourceGeneration,
+    );
+    if (refreshGeneration != _hdrDisplayRefreshGeneration || !applied) return;
+    _hdrCapabilities = _hdrCapabilities.copyWith(
+      nativeOutput: true,
+      nativeOutputCapable: true,
+      nativeOutputActive: true,
+      decoderHdr: true,
+      unsupportedReason: 'native-dataspace-applied',
+    );
+    _refreshHdrDecision();
+    await _applyHdrOutputParameters(player);
   }
 
-  Future<bool> _setHdrColorSpace(Player player) async {
+  Future<bool> _setHdrColorSpace(
+    Player player, {
+    int? sourceGeneration,
+  }) {
+    final generation = sourceGeneration ?? _hdrSourceGeneration;
+    final surfaceGeneration = hdrSurfaceGeneration.value;
+    final transaction = _hdrOutputTransactionGate.run<bool>(
+      isCurrent: () =>
+          generation == _hdrSourceGeneration &&
+          identical(player, _videoPlayerController) &&
+          surfaceGeneration == hdrSurfaceGeneration.value,
+      action: () => _setHdrColorSpaceSerial(
+        player,
+        sourceGeneration: generation,
+        surfaceGeneration: surfaceGeneration,
+      ),
+    );
+    return transaction.then((applied) => applied == true);
+  }
+
+  Future<bool> _setHdrColorSpaceSerial(
+    Player player, {
+    required int sourceGeneration,
+    required int surfaceGeneration,
+  }) async {
+    final generation = sourceGeneration;
+    bool isCurrent() =>
+        generation == _hdrSourceGeneration &&
+        identical(player, _videoPlayerController) &&
+        surfaceGeneration == hdrSurfaceGeneration.value;
+    final source = _hdrSource;
     if (!(Platform.isAndroid ||
             Platform.isIOS ||
             Platform.isMacOS ||
             Platform.operatingSystem == 'ohos') ||
-        !_hdrSource.hasNativeColorMetadata) {
+        !source.hasNativeColorMetadata ||
+        !isCurrent()) {
       return false;
     }
     if (Platform.isAndroid) {
       if (!await HdrAndroid.setWindowHdrMode(hdr: true)) {
         return false;
       }
+      if (!isCurrent()) return false;
       final handle = await player.handle;
+      if (!isCurrent()) return false;
       final applied = await HdrAndroid.setColorSpace(
         handle: handle,
-        transfer: _hdrSource.transfer,
+        transfer: source.transfer,
       );
       if (!applied) return false;
+      if (!isCurrent()) return false;
     }
     final handle = await player.handle;
+    if (!isCurrent()) return false;
     // Newer media-kit revisions own the native-output lifecycle. Keep a
     // dynamic compatibility bridge so older locked revisions still use the
     // legacy channel path while the public API branch can verify the actual
@@ -1167,6 +1263,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (videoController != null) {
       try {
         final platform = await videoController.platform.future;
+        if (!isCurrent()) return false;
         final dynamic nativePlatform = platform;
         final int? ohosSurfaceId = Platform.operatingSystem == 'ohos'
             ? (nativePlatform.wid.value as int?)
@@ -1176,25 +1273,53 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           surfaceId: surfaceHandle.toString(),
           windowHandle: surfaceHandle,
         );
+        if (!isCurrent()) return false;
         final createdCapable =
             created == true || (created is Map && created['capable'] == true);
         if (!createdCapable) return false;
-        final configured = await nativePlatform.configureHdrOutput(
+        var configured = await nativePlatform.configureHdrOutput(
           HdrOutputConfiguration(
-            transfer: _hdrSource.transfer,
-            primaries: _hdrSource.primaries,
-            matrix: _hdrSource.matrix,
-            dolbyVisionProfile: _hdrSource.dolbyVisionProfile,
-            rpuPresent: _hdrSource.rpuPresent,
-            baseLayerPresent: _hdrSource.baseLayerPresent,
-            enhancementLayerPresent: _hdrSource.enhancementLayerPresent,
-            dvEnhancement: _hdrSource.dvEnhancement,
-            dynamicMetadataPresent: _hdrSource.dynamicMetadataPresent,
-            masteringMetadata: _hdrSource.masteringMetadata,
+            transfer: source.transfer,
+            primaries: source.primaries,
+            matrix: source.matrix,
+            dolbyVisionProfile: source.dolbyVisionProfile,
+            rpuPresent: source.rpuPresent,
+            baseLayerPresent: source.baseLayerPresent,
+            enhancementLayerPresent: source.enhancementLayerPresent,
+            dvEnhancement: source.dvEnhancement,
+            dynamicMetadataPresent: source.dynamicMetadataPresent,
+            masteringMetadata: source.masteringMetadata,
             surfaceId: surfaceHandle.toString(),
-            surfaceGeneration: hdrSurfaceGeneration.value,
+            surfaceGeneration: surfaceGeneration,
           ).toMap(),
         );
+        if (!isCurrent()) return false;
+        // The Darwin layer can receive its first drawable/provider callback a
+        // few frames after the controller is created. The media-kit Ready
+        // callback configures the saved payload at that point, so retry the
+        // same transaction once before declaring HDR unavailable.
+        if ((Platform.isMacOS || Platform.isIOS) &&
+            (configured is! Map || configured['active'] != true)) {
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          if (!isCurrent()) return false;
+          configured = await nativePlatform.configureHdrOutput(
+            HdrOutputConfiguration(
+              transfer: source.transfer,
+              primaries: source.primaries,
+              matrix: source.matrix,
+              dolbyVisionProfile: source.dolbyVisionProfile,
+              rpuPresent: source.rpuPresent,
+              baseLayerPresent: source.baseLayerPresent,
+              enhancementLayerPresent: source.enhancementLayerPresent,
+              dvEnhancement: source.dvEnhancement,
+              dynamicMetadataPresent: source.dynamicMetadataPresent,
+              masteringMetadata: source.masteringMetadata,
+              surfaceId: surfaceHandle.toString(),
+              surfaceGeneration: surfaceGeneration,
+            ).toMap(),
+          );
+          if (!isCurrent()) return false;
+        }
         if (configured is! Map || configured['active'] != true) return false;
         if (Platform.isMacOS ||
             Platform.isIOS ||
@@ -1213,40 +1338,71 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
     final output = await HdrPlatform.configureOutput(
       HdrOutputConfiguration(
-        transfer: _hdrSource.transfer,
-        primaries: _hdrSource.primaries,
-        matrix: _hdrSource.matrix,
-        dolbyVisionProfile: _hdrSource.dolbyVisionProfile,
-        rpuPresent: _hdrSource.rpuPresent,
-        baseLayerPresent: _hdrSource.baseLayerPresent,
-        enhancementLayerPresent: _hdrSource.enhancementLayerPresent,
-        dvEnhancement: _hdrSource.dvEnhancement,
-        dynamicMetadataPresent: _hdrSource.dynamicMetadataPresent,
-        masteringMetadata: _hdrSource.masteringMetadata,
+        transfer: source.transfer,
+        primaries: source.primaries,
+        matrix: source.matrix,
+        dolbyVisionProfile: source.dolbyVisionProfile,
+        rpuPresent: source.rpuPresent,
+        baseLayerPresent: source.baseLayerPresent,
+        enhancementLayerPresent: source.enhancementLayerPresent,
+        dvEnhancement: source.dvEnhancement,
+        dynamicMetadataPresent: source.dynamicMetadataPresent,
+        masteringMetadata: source.masteringMetadata,
         surfaceId: handle.toString(),
-        surfaceGeneration: hdrSurfaceGeneration.value,
+        surfaceGeneration: surfaceGeneration,
       ),
     );
+    if (!isCurrent()) return false;
     return output.active;
   }
 
-  Future<void> _applyHdrOutputParameters(Player player) async {
+  Future<void> _applyHdrOutputParameters(
+    Player player, {
+    int? sourceGeneration,
+  }) {
+    final generation = sourceGeneration ?? _hdrSourceGeneration;
+    final surfaceGeneration = hdrSurfaceGeneration.value;
+    final run = _hdrOutputTransactionGate.run<void>(
+      isCurrent: () =>
+          generation == _hdrSourceGeneration &&
+          identical(player, _videoPlayerController) &&
+          surfaceGeneration == hdrSurfaceGeneration.value,
+      action: () => _applyHdrOutputParametersSerial(
+        player,
+        sourceGeneration: generation,
+      ),
+    );
+    return run.then<void>((_) {});
+  }
+
+  Future<void> _applyHdrOutputParametersSerial(
+    Player player, {
+    int? sourceGeneration,
+  }) async {
+    final generation = sourceGeneration ?? _hdrSourceGeneration;
+    final surfaceGeneration = hdrSurfaceGeneration.value;
+    bool isCurrent() =>
+        generation == _hdrSourceGeneration &&
+        identical(player, _videoPlayerController) &&
+        surfaceGeneration == hdrSurfaceGeneration.value;
+
+    if (!isCurrent()) return;
     final native = _hdrDecision.output == HdrOutputMode.nativeHdr;
-    if (!native &&
-        Platform.operatingSystem == 'ohos' &&
-        _hdrCapabilities.nativeOutputActive) {
+    if (!native && _hdrCapabilities.nativeOutputActive) {
       try {
         final platform = await _videoController?.platform.future;
+        if (!isCurrent()) return;
         if (platform != null) {
           await (platform as dynamic).resetHdrOutput();
+          if (!isCurrent()) return;
         }
         _hdrCapabilities = _hdrCapabilities.copyWith(
           nativeOutput: false,
           nativeOutputActive: false,
-          unsupportedReason: 'native-window-reset-for-sdr',
+          unsupportedReason: 'native-output-reset-for-sdr',
         );
       } catch (error) {
-        debugPrint('OHOS HDR output reset failed: $error');
+        debugPrint('HDR native output reset failed: $error');
       }
     }
     final transfer = switch (_hdrSource.transfer) {
@@ -1254,21 +1410,90 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       HdrTransfer.pq => 'pq',
       _ => 'bt.1886',
     };
+    // The Darwin native surface consumes extended-linear BT.2020 samples.
+    // Reapplying pq here would make the layer interpret PQ code values as
+    // linear light, which visibly washes out Dolby Vision/HDR highlights.
+    // The verified producer/display contract exists only for macOS. Do not
+    // silently apply the macOS 400-nit mapping to iOS without an equivalent
+    // native-surface and display-output measurement.
+    final darwinNative = native && Platform.isMacOS;
     final values = <String, String>{
       'target-prim': native ? 'bt.2020' : 'bt.709',
-      'target-trc': native ? transfer : 'bt.1886',
+      'target-trc': darwinNative ? 'linear' : (native ? transfer : 'bt.1886'),
       'target-colorspace-hint': native ? 'yes' : 'auto',
-      // mpv does not accept `no` for this enum option. `auto` preserves the
-      // native HDR target without forcing an SDR tone-map path.
-      'tone-mapping': native ? 'auto' : 'bt.2390',
+      // The Darwin native surface consumes display-referred linear BT.2020.
+      // Keep mpv's tone-mapping stage enabled so a 1000-nit source is mapped
+      // to the same 400-nit reference used by the verified brew-mpv setup
+      // before it reaches the linear EDR buffer. This is producer mapping,
+      // not a post-render gain. Non-Darwin native outputs retain their
+      // platform-specific default.
+      'tone-mapping': darwinNative ? 'bt.2390' : (native ? 'auto' : 'bt.2390'),
+      // Always restore this property. The same Player can be reused across
+      // HDR and SDR sources, and mpv properties survive a native-output reset.
+      'target-peak': darwinNative ? '400' : 'auto',
     };
+    // Local A/B only. These overrides are deliberately debug-only and are
+    // never used as production defaults; they isolate whether the remaining
+    // difference is caused by the producer transfer/peak contract.
+    if (kDebugMode) {
+      final diagnosticTargetTrc =
+          Platform.environment['PILIPLUSX_HDR_TARGET_TRC'];
+      final diagnosticToneMapping =
+          Platform.environment['PILIPLUSX_HDR_TONE_MAPPING'];
+      final diagnosticTargetPeak =
+          Platform.environment['PILIPLUSX_HDR_TARGET_PEAK'];
+      for (final entry in <String, String?>{
+        'target-trc': diagnosticTargetTrc,
+        'tone-mapping': diagnosticToneMapping,
+        'target-peak': diagnosticTargetPeak,
+      }.entries) {
+        if (entry.value != null && entry.value!.isNotEmpty) {
+          values[entry.key] = entry.value!;
+          debugPrint('HDR diagnostic ${entry.key} override: ${entry.value}');
+        }
+      }
+    }
     try {
       for (final entry in values.entries) {
+        if (!isCurrent()) return;
         await player.setProperty(entry.key, entry.value);
+        if (!isCurrent()) return;
+      }
+      if (kDebugMode) {
+        final handle = await player.handle;
+        if (!isCurrent()) return;
+        final readback = <String, String>{};
+        // Read the effective peak without writing it. The shipped Darwin
+        // mpv has libplacebo disabled, so this is diagnostic evidence only;
+        // do not guess or force a target peak from another mpv build.
+        for (final property in <String>[...values.keys, 'target-peak']) {
+          if (!isCurrent()) return;
+          try {
+            readback[property] = await player.getProperty(property);
+          } catch (error) {
+            readback[property] = '<unavailable:${error.runtimeType}>';
+          }
+          if (!isCurrent()) return;
+        }
+        final diagnostic =
+            'HDR mpv parameter readback: generation=$generation, '
+            'handle=$handle, requested=$values, actual=$readback';
+        if (_lastHdrParameterReadback != diagnostic) {
+          _lastHdrParameterReadback = diagnostic;
+          debugPrint(diagnostic);
+        }
       }
     } catch (error) {
       debugPrint('HDR output parameter update failed: $error');
     }
+  }
+
+  Future<void> _applyHdrOutputParametersIfCurrent(
+    Player player,
+    int sourceGeneration,
+  ) async {
+    if (sourceGeneration != _hdrSourceGeneration) return;
+    await _applyHdrOutputParameters(player, sourceGeneration: sourceGeneration);
   }
 
   late final buffer = Pref.initBuffer(_playbackSpeed.value);
@@ -1397,7 +1622,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   final Set<ValueChanged<PlayerStatus>> _statusListeners = {};
 
   /// 播放事件监听
-  void _startListeners(NativePlayer player) {
+  void _startListeners(
+    NativePlayer player, {
+    required int sourceGeneration,
+  }) {
     assert(_subscriptions == null);
     final stream = player.stream;
     _subscriptions = [
@@ -1470,6 +1698,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         buffered.value = buffer.inSeconds;
       }),
       stream.tracks.listen((tracks) {
+        if (sourceGeneration != _hdrSourceGeneration) return;
         // Track metadata carries the decoder's codec name, which is the
         // earliest reliable correction to the Bilibili quality/codec guess.
         for (final track in tracks.video) {
@@ -1489,6 +1718,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         }
       }),
       stream.videoParams.listen((params) {
+        if (sourceGeneration != _hdrSourceGeneration) return;
+        if (kDebugMode) {
+          final diagnostic =
+              'HDR videoParams: generation=$sourceGeneration, '
+              'handle=${player.hashCode}, params=$params';
+          if (_lastHdrVideoParamsDiagnostic != diagnostic) {
+            _lastHdrVideoParamsDiagnostic = diagnostic;
+            debugPrint(diagnostic);
+          }
+        }
         final previousDecision = _hdrDecision;
         final corrected = HdrSourceMetadata.fromMpvProperties({
           ...?(_hdrCodecHint == null ? null : {'codec': _hdrCodecHint!}),
@@ -1503,13 +1742,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             corrected.transfer != HdrTransfer.unknown ||
             corrected.primaries != HdrPrimaries.unknown ||
             corrected.matrix != HdrMatrix.unknown) {
-          _hdrSource = corrected;
+          _hdrSource = _hdrSource.mergeMpvCorrection(corrected);
         }
         _hdrDecision = HdrDecision.choose(
           mode: Pref.hdrMode,
           source: _hdrSource,
           capabilities: _hdrCapabilities,
           hwdec: hwdec ?? 'auto',
+          allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
         );
         final outputTopologyChanged =
             _hdrOutputSignature(previousDecision) !=
@@ -1517,7 +1757,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         final darwinNativeCandidate =
             (Platform.isMacOS || Platform.isIOS) &&
             Pref.hdrMode == HdrMode.auto &&
-            _videoController != null;
+            _videoController != null &&
+            (_hdrSource.kind != HdrSourceKind.dolbyVision ||
+                _allowDiagnosticDolbyVisionNative ||
+                _hdrSource.supportsConvertedHdrOutput) &&
+            _hdrSource.kind != HdrSourceKind.hdrVivid &&
+            _hdrSource.kind != HdrSourceKind.hdr10Plus &&
+            _hdrSource.hasNativeColorMetadata;
         // OHOS may expose an XComponent/native-window candidate, but a
         // display HDR probe and a surface ID alone are not proof of native
         // HDR output. Promotion still requires the backend's active report.
@@ -1530,16 +1776,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             !darwinNativeCandidate) {
           _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
         }
-        unawaited(_applyHdrOutputParameters(player));
+        unawaited(
+          _applyHdrOutputParametersIfCurrent(player, sourceGeneration),
+        );
         final diagnostic =
             'HDR decision: source=${_hdrSource.kind.name}, '
             'primaries=${_hdrSource.primaries.name}, '
             'transfer=${_hdrSource.transfer.name}, '
             'matrix=${_hdrSource.matrix.name}, '
-            'dvProfile=${_hdrSource.dolbyVisionProfile ?? 'none'}, '
-            'rpu=${_hdrSource.rpuPresent}, el=${_hdrSource.enhancementLayerPresent}, '
-            'dvEnhancement=${_hdrSource.dvEnhancement.name}, '
-            'dynamicMetadata=${_hdrSource.dynamicMetadataPresent}, '
+            'dvProfile=${_hdrSource.observed('dolbyVisionProfile') ? (_hdrSource.dolbyVisionProfile ?? 'none') : 'unknown'}, '
+            'rpu=${_hdrSource.observed('rpuPresent') ? _hdrSource.rpuPresent : 'unknown'}, '
+            'el=${_hdrSource.observed('enhancementLayerPresent') ? _hdrSource.enhancementLayerPresent : 'unknown'}, '
+            'dvEnhancement=${_hdrSource.observed('dvEnhancement') ? _hdrSource.dvEnhancement.name : 'unknown'}, '
+            'dynamicMetadata=${_hdrSource.observed('dynamicMetadataPresent') ? _hdrSource.dynamicMetadataPresent : 'unknown'}, '
             'output=${_hdrDecision.output.name}, '
             'surface=${_hdrDecision.surface}, '
             'vo=${_hdrDecision.vo}, hwdec=${_hdrDecision.hwdec}, '
@@ -1566,8 +1815,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _lastHdrNativeOutputAttempt = nativeOutputAttempt;
           _hdrNativeOutputAttemptInFlight = true;
           unawaited(
-            _setHdrColorSpace(player)
+            _setHdrColorSpace(player, sourceGeneration: sourceGeneration)
                 .then((applied) {
+                  if (sourceGeneration != _hdrSourceGeneration) return;
                   if (applied) {
                     _hdrCapabilities = _hdrCapabilities.copyWith(
                       nativeOutput: true,
@@ -1581,6 +1831,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                       source: _hdrSource,
                       capabilities: _hdrCapabilities,
                       hwdec: hwdec ?? 'auto',
+                      allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
+                    );
+                    debugPrint(
+                      'HDR native decision applied: '
+                      'output=${_hdrDecision.output.name}, '
+                      'surface=${_hdrDecision.surface}, '
+                      'sourceProcessing=${_hdrDecision.sourceProcessing}, '
+                      'nativeOutputActive=${_hdrCapabilities.nativeOutputActive}',
                     );
                     unawaited(_applyHdrOutputParameters(player));
                   } else if (_hdrDecision.useHcpp) {
@@ -1593,6 +1851,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                       source: _hdrSource,
                       capabilities: _hdrCapabilities,
                       hwdec: hwdec ?? 'auto',
+                      allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
                     );
                     _requestHdrOutputRebuild(
                       hcpp: false,
@@ -1605,7 +1864,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                   );
                 })
                 .whenComplete(() {
-                  _hdrNativeOutputAttemptInFlight = false;
+                  if (sourceGeneration == _hdrSourceGeneration) {
+                    _hdrNativeOutputAttemptInFlight = false;
+                  }
                 }),
           );
         }

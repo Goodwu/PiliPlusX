@@ -1111,6 +1111,27 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
+  void _onProgressDragStart(ThumbDragDetails details) {
+    feedBack();
+    plPlayerController
+      ..position.value = details.seconds
+      ..isSeeking.value = true;
+  }
+
+  void _onProgressDragUpdate(ThumbDragDetails details) {
+    if (!plPlayerController.isFileSource &&
+        plPlayerController.showSeekPreview) {
+      plPlayerController.updatePreviewIndex(details.seconds);
+    }
+    plPlayerController.position.value = details.seconds;
+  }
+
+  void _onProgressSeek(int milliseconds) {
+    plPlayerController
+      ..onSeekEnd()
+      ..seekTo(Duration(milliseconds: milliseconds), isSeek: false);
+  }
+
   void _onPanUpdate(ScaleUpdateDetails details) {
     if (_gestureType == null) {
       final cumulativeDelta = details.localFocalPoint - _initialFocalPoint!;
@@ -1876,6 +1897,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           thumbGlowColor: thumbGlowColor,
                           barHeight: 3.5,
                           thumbRadius: 2.5,
+                          onDragStart: _onProgressDragStart,
+                          onDragUpdate: _onProgressDragUpdate,
+                          onSeek: _onProgressSeek,
                         ),
                       ),
                       if (plPlayerController.enableBlock &&

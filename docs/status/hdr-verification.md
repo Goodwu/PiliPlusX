@@ -1,9 +1,173 @@
 # HDR 验证账本
 
-更新时间：2026-09-05
+更新时间：2026-09-07
 
 这份账本只记录已经执行的验证。构建成功、显示器能力探测或单元测试，均
 不能替代真实设备上的原生 HDR 验收。
+
+## 平台边界
+
+本账本后续的 macOS HDR 条目不包含 OHOS 模拟器结论。OHOS 的 E1–E4 证据只在
+`docs/status/ohos-emulator-e*.md` 和 `docs/status/ohos-emulator-recovery.md` 中解释；
+它们的“软件解码 + RGBA”约束、`40601000` external texture 错误和模拟器 BufferQueue
+失败，不能被 macOS 的 EDR/native-surface 证据替代。反过来，macOS 固定 PQ 应用的
+`active=true`、`rgba16Float` 和 headroom 也不能外推为 OHOS 播放通过。
+
+## 2026-09-07 macOS native 输出已激活，但亮度验收未通过
+
+按用户要求，本轮验收目标是直接打通 HDR，不把 SDR 回退或普通产品可用性作为前置条件。
+通过最新 Debug 构建在真实 macOS 窗口回放 `BV1vY4y1N7TY`，取得同一回放的完整闭环：
+
+```text
+HDR native decision applied: output=nativeHdr, surface=native-hdr,
+sourceProcessing=dolby-vision-converted-to-hdr, nativeOutputActive=true
+HDR dataspace applied: hlg
+target-prim=bt.2020, target-trc=linear
+NativeSurfaceView drawn=true pixelFormat=rgba16Float size=3840x1920
+EDR headroom=2.0304815769195557
+```
+
+这证明 macOS native HDR/EDR 输出层已 active 且有可见帧，但不证明光度/亮度正确。用户在
+同一文件约 `00:15` 处确认：B站官方 App、Chrome 网页、`/opt/homebrew/bin/mpv`
+（mpv 0.41.0 + libplacebo 7.360.1、`target-trc=pq`、`target-peak=400`、
+`tone-mapping=bt.2390`）和 media-kit_test 亮度基本接近，而 PiliPlusX 明显偏暗。由于
+media-kit_test 实际使用的是另一份 mpv 0.41/libplacebo/Vulkan producer，不能据此证明
+PiliPlusX 的 B3/native surface 或 Metal/EDR 层是唯一根因。DV 结论限定为“Dolby Vision
+输入转换为普通 HDR 输出”；当前没有把它写成原生 Dolby Vision metadata passthrough。
+候选 surface 的 Flutter texture/native 切换和首次 configure 时序也已修正：候选层先隐藏
+挂载，native layer active 前显示 texture，首次配置未 active 时在同一事务内重试 300ms。
+
+回归命令：`flutter test test/plugin/pl_player/hdr_test.dart`（34 项通过）、
+`flutter build macos --debug --no-pub`（通过）、`git diff --check`（通过）。这些是代码/输出
+状态证据，不足以关闭亮度验收；OHOS 仍按自身的软件解码、RGBA-only 和 native surface 约束
+单独验收，不能与本节互相外推。
+
+## 2026-09-06 当前 macOS 复测边界
+
+当前工作树重新执行了：
+
+```text
+flutter build macos --debug --no-pub
+```
+
+构建成功，产物为
+`build/macos/Build/Products/Debug/PiliPlusX.app`。通过该最新 Debug App 实际打开
+`BV1uZ4y1U7h8`（标题为“【4K HDR】原来动漫里的世界真实存在！｜Links 杜比视界”），
+窗口中可见视频帧、控制条和约 04:02 的时长，播放位置从 00:10 推进到约 00:24。
+这证明当前构建仍能实际播放该来源；它不单独证明原生 HDR 输出。
+
+本轮重新取到的 UI 状态显示播放器画质标识为“杜比”，页面标题和 BV 号分别为
+“【4K HDR】原来动漫里的世界真实存在！｜Links 杜比视界”和 `BV1uZ4y1U7h8`，
+播放时长 04:02，复测时位置从 00:05 推进到约 00:24。随后同一会话取得了实际
+编码尺寸、位深、颜色参数、player generation、mpv `video-params` 和 `target-*`
+回读；这些证据仍不等于已验证 DV profile/RPU 或动态元数据，不把“杜比”菜单标签
+单独写成 DV 动态元数据证明。
+
+本次复测实际取得了 `NativeSurface.Ready`、完整 `VideoParams`、player generation、
+mpv `target-*` 回读和可见视频帧。该流的 mpv 参数为 `videotoolbox/p010`、3840x2160、
+BT.2020、HLG、`sigPeak=4.926108360290527`；但来源仍被保留为杜比视界，最终决策是
+`toneMappedSdr + texture`，`NativeSurface.Ready` 保持 `active=false`。因此这次运行
+证明了 fail-closed 决策和实际播放，不证明原生 HDR 输出。`sourceProcessing` 当前报告
+为 `mpv-gpu-native-surface`，不再把内嵌 mpv 宣称为 libplacebo。
+`system_profiler SPDisplaysDataType` 当前只报告 Apple M4 外接 `M27P20`、1920x1080@60，
+没有 HDR/EDR 字段；2026-09-04 的 `active=true` 与 headroom 2.03 仍只作为历史记录，
+待在实际 EDR 已启用的显示环境中完成固定 PQ 同帧验证。2026-09-06 AppKit 查询
+当前 `M27P20`：`maximumExtendedDynamicRangeColorComponentValue=1.0`，
+`maximumPotentialExtendedDynamicRangeColorComponentValue=10.1524076461792`；
+当前配置仍是 SDR，但潜在 EDR 能力存在，不能把当前配置当作永久硬件限制；idle
+`maxEDR=1.0` 也不是继续代码诊断的全局 blocker。BetterDisplay 的持久化记录需按
+显示记录 ID 分开解释，未建立 `Display:111` 与 `Display:114` 对应关系前不合并其值。
+Darwin native 输出门控已相应修正为用潜在 EDR 能力允许首次尝试；当前 headroom、
+native 输出报告和可见高光仍是验收条件，潜在 EDR 不单独构成 HDR 通过证据。
+
+本轮还在 Dart HDR 诊断路径加入了默认仅 Debug 生效的回读：记录完整 `VideoParams`
+（像素格式、尺寸、色彩参数和 `sigPeak` 等），并在每个 `target-*` 写入后读取
+`target-prim`、`target-trc`、`target-colorspace-hint` 和 `tone-mapping`，每个 await
+后检查 source generation。最新 Debug App 已重新构建，主可执行文件 SHA-256 为
+`0f38ec05334474a4aa406debbf8619d89fed7f930dad047c073abd4575e1a267`；实际窗口仍能
+播放该 BV。本次 `flutter run` 会话已捕获到新增诊断行；详细日志见
+[macOS native HDR 实际运行记录](macos-native-hdr-run-20260906.md)。
+
+同一 Debug App 另以 `PILIPLUSX_HDR_SAMPLE=1` 运行，取得六个固定横向区域的 Metal
+前后采样：当前 `active=false` 回退路径输入为 `bgra8Unorm`，输出为
+`rgba16Float`，每 300 帧记录归一化输入及线性输出的 p50/p95/max。采样默认关闭；
+native 激活时的 half-float 输入仍待真实 EDR 条件验证。
+
+同时，Dart HDR 来源合并已补齐“字段实际观测”语义：缺失的 mpv 字段不会清除
+Bilibili 来源提示，显式 `false` 会覆盖旧值，并以 source generation 丢弃旧播放器的
+`tracks/videoParams` 回调；HLG+BT.2020 也不会清除 DV/HDR Vivid 身份。HDR 单测 34 项
+通过，定向 `flutter analyze` 无问题；新增的 2 项是可交错事务门测试，不是实际
+控制器或设备生命周期验收。
+
+本次 BV 回退路径只记录为“replay observed；seek not verified”：此前点击过程出现
+工具切换应用后的 re-query 边界，不能把 `04:02 → 00:10` 的后续可见画面写成 seek
+通过。当前 videoParams 未提供 DV profile、RPU、BL/EL 字段时，这些字段统一为
+unknown/not-observed，不写成 `dvProfile=none` 或 `rpu=false`。
+
+### 固定 PQ 高光测试片与 macOS 原生依赖基线
+
+为定位 SDR 白点以上的亮度损失，已生成固定的 1920x1080、2 秒、30 fps、HEVC
+Main10 测试片：
+
+```text
+/Users/wuweiwei1/Downloads/test-clips/luna-pq-six-bands.mp4
+SHA-256 45da67b82cc14d0f903d6af6c416d205658840baff301361518c7e20827af931
+```
+
+画面为六个等宽垂直区域，区域按左至右使用 PQ 归一化编码值
+`0.508078422`、`0.580688881`、`0.652578598`、`0.751827096`、`0.827424645`、
+`0.902572393`，对应生成目标约 100、203、400、1000、2000、4000 cd/m²；这只是
+编码目标，不是亮度计测量结果。ffprobe 实际确认：`hevc`、`1920x1080`、
+`yuv420p10le`、limited range、`bt2020nc`、`smpte2084`、BT.2020、30 fps、2 秒。
+
+由 `scripts/generate_pq_bands.py` 按 SMPTE ST 2084 逆 EOTF 写入六个区域，再以 x265
+Main10 写入 BT.2020/SMPTE ST 2084 元数据；脚本保留了区域定义和生成参数。此前的
+`luna-pq-highlight-test.mp4` 实际复核为单色绿色帧，不再作为本轮 PQ 亮度基准。当前还没有
+完成同一帧在 App、独立 mpv 和实际 EDR 屏幕上的可见亮度对照，因此该片是诊断输入，
+不是 HDR 亮度通过证据。
+
+可复现命令如下：
+
+```sh
+python3 scripts/generate_pq_bands.py \
+  /Users/wuweiwei1/Downloads/test-clips/luna-pq-six-bands.mp4
+```
+
+当前 Debug App 包内实物核对结果：
+
+| 项目 | 实际结果 | 结论 |
+| --- | --- | --- |
+| media-kit Dart lock | `Goodwu/media-kit@0fa6afe9cd9af8d8437919257d81a27c643f2f63` | lock 内 9 个包一致；workflow 仍未迁移 |
+| macOS 原生资产 | `Predidit/libmpv-darwin-build` `0.6.8`；归档 SHA-256 `c396976a267eaaa64bc603f3cc1a2ee02d27c7d5d57935d2458f364afdf0f3cb` | 来源可追溯 |
+| App 内 `Mpv.framework` | universal `arm64` + `x86_64`；字符串显示 `mpv 0.36.0` | 已核对实际打包架构与版本 |
+| App 内 mpv 构建能力 | 构建字符串含 `-Dlibplacebo=disabled`，并含 `-Dvideotoolbox-gl=enabled` | native surface 状态已改报 `mpv-gpu-native-surface`；不再宣称 libplacebo |
+| `CAEDRMetadata` | macOS native surface 使用 `hdr10(... opticalOutputScale: 100.0)`，metadata 缺省峰值 1000.0 | 单位/显示效果仍需实际 EDR 同帧验证，不能据此推导绝对亮度 |
+
+补充核对：media-kit 的 artifact 更新脚本默认目标
+`media-kit/libmpv-darwin-build@v0.7.0`，该 release 虽提供 macOS universal XCFramework，
+但其 `Mpv.framework` 仍为 mpv 0.36.0 且 `libplacebo/vulkan` disabled；它不是现代
+libplacebo/gpu-next 目标包，也没有改变当前 App 的 0.6.8 依赖基线。
+
+因此，当前 macOS 仍只能报告“实际可播放、参数契约和依赖基线已核对”；PQ 高光保持、
+linear 参考白、EDR headroom 和最终亮度效果仍未完成同帧可见验收。
+
+独立 mpv 对照命令、实际版本、GPU/HDR surface 枚举和限制已记录在
+[macOS PQ 对照播放器证据](macos-pq-mpv-reference-evidence-20260906.md)；该对照明确
+显示系统 mpv 与 App 内嵌 mpv 的 libplacebo 能力不同，不能直接替代 App 验收。
+
+## 2026-09-06 macOS Dolby Vision 发白修复
+
+实际回放 `BV1uZ4y1U7h8` 复现了高光和浅色区域整体发白。根因是 Darwin
+native surface 已声明 `extended-linear-bt2020`，但 native 输出配置完成后，
+Dart 侧又把 mpv 的 `target-trc` 从 `linear` 改回 `pq`；PQ 编码样本因此被
+extended-linear layer 当作线性光处理。
+
+修复内容：Darwin native surface 的 media-kit 配置与播放器参数均保持
+`target-prim=bt.2020`、`target-trc=linear`；PQ/HLG 仅保留在源元数据和 EDR
+显示配置中，OHOS 的 PQ/HLG native-window 路径不变。
+
+验证：重新构建 macOS Debug App 后再次播放同一 BV，夜景画面暗部和灯笼高光
+恢复正常，未再出现此前的整体泛白；HDR 单测 27 项通过，macOS Debug 构建成功。
 
 ## 2026-09-05 依赖一致性复核
 
@@ -26,19 +190,20 @@
 
 ## 2026-09-04 阶段性验证
 
-本阶段已完成 macOS HDR 显示器上的原生输出验收；跨屏和全屏生命周期仍需补测。
+以下为 2026-09-04 的历史阶段记录；不覆盖 2026-09-06 的重新复测结论。当前
+EDR 显示环境下原生 HDR 仍未完成亮度验收，跨屏和全屏生命周期仍需补测。
 
 | 项目 | 证据 | 结果 |
 | --- | --- | --- |
 | SDR 视频播放 | 最新 Debug App 实际播放截图 | 已验证：画面正常，无黑屏 |
 | SDR 上 HDR 画质保护 | 播放器画质菜单和详情页菜单 | 已验证：杜比视界、HDR 真彩置灰且不可点击 |
 | SDR 默认画质降级 | `queryVideoUrl` 的最终 `targetVideoQa` 保护 | 已实现：默认 HDR 画质在 SDR 上选择最高可用 SDR 源 |
-| HDR 显示器原生输出 | 最新 Debug App 实际播放 BV1uZ4y1U7h8；`CAMetalLayer` `active=true`，`rgba16Float`/BT.2020，实际画面可见，播放中 EDR headroom=2.03048 | 通过 |
+| HDR 显示器原生输出 | 历史 Debug App 实际播放 BV1uZ4y1U7h8；`CAMetalLayer` `active=true`，`rgba16Float`/BT.2020，实际画面可见，播放中 EDR headroom=2.03048 | 历史记录，未作为当前通过证据 |
 | HDR/SDR 跨屏移动 | 无跨屏实测证据 | 未验证 |
 | 显示器变化通知 | macOS 原生屏幕变化通知 -> `EventChannel` -> Dart | 已实现，待 HDR/SDR 实机验证 |
 | media-kit 双目标过渡渲染 | `Goodwu/media-kit` 当前工作树 | 已实现：同时维护 Texture 回退帧与 native half-float 帧，surface 按 active 选择 |
 | PiliPlusX macOS Debug 构建 | `flutter build macos --debug --no-pub` | 成功，产物为 `build/macos/Build/Products/Debug/PiliPlusX.app` |
-| HDR 决策测试 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart` | 25 项通过 |
+| HDR 决策测试 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart` | 27 项通过 |
 
 ### 帧节奏复核
 
@@ -57,7 +222,7 @@ HDR 输出状态、画面、帧率和播放进度均保持正常；返回 HDR �
 | --- | --- | --- |
 | 2026-09-02 media-kit 历史来源固定 | `verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 该阶段 9 个 media-kit 包均指向 `Goodwu/media-kit` 同一验证 SHA；不代表 2026-09-05 当前 lock |
 | 2026-09-02 workflow 历史引用固定 | `python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96` | 8 个 workflow、9 个 lock 检查和 8 个发布 manifest 引用均使用该历史 SHA；当前 workflow 仍未迁移到 `0fa6afe9...` |
-| HDR 决策 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart`（2026-09-06） | 25 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
+| HDR 决策 | `flutter test --no-pub test/plugin/pl_player/hdr_test.dart`（2026-09-06） | 27 项通过，覆盖 SDR、HDR10、HLG、Dolby Vision、HDR Vivid、DV 元数据合并、元数据不完整回退、HCPP 门槛、能力解析、生命周期状态拆分和输出配置序列化 |
 | HDR channel 契约 | `python3 scripts/verify_hdr_channel.py` | Android、Pink、iOS、macOS、Windows、Linux、OHOS 共 7 个端点统一使用 `piliplusx/hdr_capabilities`，并检查结构化输出和能力拆分字段 |
 | 原生输出生命周期契约 | `python3 scripts/verify_hdr_channel.py`、`flutter test test/plugin/pl_player/hdr_test.dart` | 7 个端点均提供 `probe`、`configureOutput`、`resetOutput`；配置结果未获系统/播放器确认时统一 active=false；Dart 分离 capable/active 状态 |
 | Dart 静态检查 | `flutter analyze`（HDR controller、model、两个 channel、view 和测试共 6 个文件） | 无问题 |
@@ -113,8 +278,9 @@ tone-map 路径，不替代 Android HDR 真机验收。
 
 - 本机使用 OpenJDK 17 构建当前 Android arm64 release APK 成功，并通过 ABI
   校验；现有 compileSdk 与 Kotlin 迁移信息是第三方插件预警，不影响本次产物。
-- Apple（iOS）、Windows、Linux、OHOS 的原生 HDR 输出尚未接通或证明；当前保持
-  Texture tone-map，并在能力状态中报告回退原因。
+- macOS native 输出层已接通，但同一文件/同一帧的亮度契约尚未通过；iOS、Windows、Linux、
+  OHOS 的原生 HDR 输出尚未接通或证明。macOS 仍需先完成 mpv 映射、参考白、Metal 传递和
+  系统合成的分层对照，再做跨屏、全屏和显示器变化回归。
 - 尚未取得 Android HDR 真机与 SDR 设备的系统色彩空间、播放器元数据和
   HDR/SDR ratio 记录；因此不能开启全局 `HdrMode.auto`。
 - 完整播放矩阵（DASH、缓存、切换、分 P、旋转、全屏、PiP、后台、字幕、
@@ -244,3 +410,60 @@ commit `d3b14c876900e553bc736ca19295fc09e3853e8e` 上创建本地 `3.47.2` tag�
 远端 fork 的手动构建 run `33537336517` 使用 `run_package_tests=false`，四组
 长 package tests 均为 `skipped`，构建矩阵独立运行；对应改动已提交到 draft PR
 `Goodwu/media-kit#2`。
+## 2026-09-07 同宿主 producer 实验：DV Profile 8 的 source interpretation 不一致
+
+测试文件经 `ffprobe` 核对为 HEVC Main 10，静态基础流标记为 BT.2020 HLG，同时包含：
+
+```text
+DOVI configuration record
+dv_profile=8
+rpu_present_flag=1
+el_present_flag=0
+bl_present_flag=1
+dv_bl_signal_compatibility_id=4
+```
+
+将 PiliPlusX 当前打包的 mpv 0.36 及其 FFmpeg/framework 依赖临时注入 media-kit_test 的
+B3/native-surface 测试包后，同一个文件实际回读为：
+
+```text
+videotoolbox + p010
+colormatrix=bt.2020-ncl
+gamma=hlg
+light=hlg
+sig-peak=4.926108
+```
+
+此前同一文件由 brew mpv 0.41 回读为：
+
+```text
+videotoolbox + p010
+colormatrix=dolbyvision
+gamma=pq
+light=display
+sig-peak=4.929096
+max-luma≈1000.6
+```
+
+因此当前差异不是简单的“两个 App 都使用 B3 但 EDR 亮度不同”：旧 producer 走的是
+HLG-compatible base-layer interpretation，brew/现代 producer 走的是 DV Profile 8 到
+PQ 的处理路径。该证据尚不能单独证明 0.36 的具体内部缺陷，但足以把“同一 producer
+下先查 Metal/EDR”降级为后续步骤；首选先在同一 media-kit B3 宿主中完成 modern stock
+libmpv 与旧 0.36 的视觉 A/B，再决定依赖升级和分发方案。
+
+## 2026-09-07 HDR 显示器重新连接后的 0.41 产品验证
+
+重新连接 HDR 显示器后，AppKit 运行时读取到：
+
+```text
+screen=M27P20 maxEDR=2.0304815769195557 maxPotentialEDR=10.1524076461792
+```
+
+同一素材 `蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4`
+经 `ffprobe` 确认为 HEVC Main 10、BT.2020、HLG，并包含 Dolby Vision Profile 8、RPU
+和 BL。使用已注入 libmpv 0.41 的临时 PiliPlusX 副本，通过搜索并播放 `BV1vY4y1N7TY`
+取得实际视频帧；画面可播放，但用户观察为“整体偏亮发白”。
+
+因此本次结论是：HDR 显示器/EDR 条件已成立，0.41 播放链路也已实际运行，但该产品
+HDR 画质验收失败。不能把本次结果写成 HDR 已打通；后续应优先检查产品输出 surface
+与源的 HLG/DV Profile 8 色彩解释及 target transfer 配置，而不是继续怀疑显示器未开启 HDR。

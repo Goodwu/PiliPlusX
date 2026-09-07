@@ -17,6 +17,8 @@
 - [非 HDR 全平台可用计划](plans/sdr-cross-platform-plan.md)：SDR 构建、启动、播放和资源释放的验收顺序。
 - [全平台原生 HDR 计划](plans/native-hdr-development-plan.md)：原生 surface、色彩空间、解码器和真机证据要求。
 - [media-kit 输出重建修复计划](plans/media-kit-output-rebuild-plan.md)：输出载体切换、dispose/create 完成屏障和应用侧重建事务。
+- [跨平台播放器固定操作说明](plans/player-interaction-operation-sop.md)：macOS、OHOS 等自动隐藏控制条播放器的连续操作协议。
+- [macOS 产品 DV/HDR 固定测试操作说明](plans/macos-product-dv-test-sop.md)：唯一应用、BV 输入、目标条目确认和解码/输出证据采集顺序。
 
 ## 平台适配
 

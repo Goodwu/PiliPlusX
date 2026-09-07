@@ -52,6 +52,10 @@ class HdrSourceMetadata {
   final Map<String, Object?> masteringMetadata;
   final bool dynamicMetadataPresent;
 
+  /// Fields actually observed from a decoder callback.  Empty/default values
+  /// in an mpv callback must not erase a stronger source hint.
+  final Set<String> observedFields;
+
   const HdrSourceMetadata({
     this.kind = HdrSourceKind.unknown,
     this.transfer = HdrTransfer.unknown,
@@ -66,7 +70,10 @@ class HdrSourceMetadata {
     this.bitDepth = 8,
     this.masteringMetadata = const <String, Object?>{},
     this.dynamicMetadataPresent = false,
+    this.observedFields = const <String>{},
   });
+
+  bool observed(String field) => observedFields.contains(field);
 
   bool get isHdr =>
       kind != HdrSourceKind.sdr &&
@@ -93,6 +100,17 @@ class HdrSourceMetadata {
           dvEnhancement == DvEnhancementType.mel ||
           dvEnhancement == DvEnhancementType.fel ||
           dvEnhancement == DvEnhancementType.unknown);
+
+  /// Whether decoded DV can be converted to ordinary HDR output.
+  ///
+  /// This is not Dolby Vision metadata passthrough. A non-P7 stream with a
+  /// usable base layer and PQ/HLG + BT.2020 metadata can use the ordinary HDR
+  /// output once the platform surface is proven.
+  bool get supportsConvertedHdrOutput =>
+      kind == HdrSourceKind.dolbyVision &&
+      !isDolbyVisionP7 &&
+      baseLayerPresent &&
+      hasNativeColorMetadata;
 
   /// Bilibili exposes HDR as a quality tier before the file is opened. This
   /// is only an initial hint; [fromMpvProperties] remains authoritative once
@@ -177,6 +195,57 @@ class HdrSourceMetadata {
         HdrSourceKind.sdr,
       _ => HdrSourceKind.unknown,
     };
+    final observedFields = <String>{};
+    if (transfer != HdrTransfer.unknown) observedFields.add('transfer');
+    if (primaries != HdrPrimaries.unknown) observedFields.add('primaries');
+    if (matrix != HdrMatrix.unknown) observedFields.add('matrix');
+    if (kind != HdrSourceKind.unknown) observedFields.add('kind');
+    if (values['dolby-vision-profile'] != null ||
+        values['dv-profile'] != null) {
+      observedFields.add('dolbyVisionProfile');
+    }
+    if (values['dolby-vision-level'] != null || values['dv-level'] != null) {
+      observedFields.add('dolbyVisionLevel');
+    }
+    if (_hasRecognizedBool(values, const [
+      'rpu',
+      'rpu-present',
+      'dolby-vision-rpu',
+    ])) {
+      observedFields.add('rpuPresent');
+    }
+    if (_hasRecognizedBool(values, const [
+      'bl',
+      'base-layer',
+      'base-layer-present',
+    ])) {
+      observedFields.add('baseLayerPresent');
+    }
+    if (_hasRecognizedBool(values, const [
+      'el',
+      'enhancement-layer',
+      'enhancement-layer-present',
+    ])) {
+      observedFields.add('enhancementLayerPresent');
+    }
+    if (values.containsKey('dolby-vision-enhancement') ||
+        values.containsKey('dv-enhancement') ||
+        _hasRecognizedBool(values, const ['el', 'enhancement-layer'])) {
+      observedFields.add('dvEnhancement');
+    }
+    final parsedBitDepth = int.tryParse(
+      values['bit-depth'] ?? values['bitdepth'] ?? '',
+    );
+    if (parsedBitDepth != null) observedFields.add('bitDepth');
+    if (_hasRecognizedBool(values, const [
+      'hdr10+',
+      'hdr10plus',
+      'dynamic-metadata',
+      'hdr10plus-present',
+      'side-data-dynamic-hdr10+',
+    ])) {
+      observedFields.add('dynamicMetadataPresent');
+    }
     return HdrSourceMetadata(
       kind: kind,
       transfer: transfer,
@@ -201,8 +270,7 @@ class HdrSourceMetadata {
         'enhancement-layer-present',
       ]),
       dvEnhancement: _dvEnhancement(values),
-      bitDepth:
-          int.tryParse(values['bit-depth'] ?? values['bitdepth'] ?? '') ?? 8,
+      bitDepth: parsedBitDepth ?? 8,
       dynamicMetadataPresent: _boolProperty(values, const [
         'hdr10+',
         'hdr10plus',
@@ -221,7 +289,97 @@ class HdrSourceMetadata {
         ])
           if (values[key] != null) key: values[key],
       },
+      observedFields: observedFields,
     );
+  }
+
+  /// Merge decoder metadata into the initial stream hint.
+  ///
+  /// mpv commonly reports a Dolby Vision base layer as ordinary HEVC PQ/
+  /// BT.2020. Keep the already verified Dolby Vision identity in that case;
+  /// PQ/BT.2020 alone is not evidence that a DV stream became HDR10.
+  HdrSourceMetadata mergeMpvCorrection(HdrSourceMetadata correction) {
+    final correctionLooksLikeHdrBaseLayer =
+        (correction.transfer == HdrTransfer.pq ||
+            correction.transfer == HdrTransfer.hlg) &&
+        (correction.primaries == HdrPrimaries.bt2020 ||
+            correction.matrix == HdrMatrix.bt2020);
+    final preserveDolbyIdentity =
+        kind == HdrSourceKind.dolbyVision &&
+        correction.kind != HdrSourceKind.dolbyVision &&
+        correctionLooksLikeHdrBaseLayer;
+    final preserveHdrVividIdentity =
+        kind == HdrSourceKind.hdrVivid &&
+        correction.kind != HdrSourceKind.hdrVivid &&
+        correctionLooksLikeHdrBaseLayer;
+    final mergedKind = preserveDolbyIdentity
+        ? HdrSourceKind.dolbyVision
+        : preserveHdrVividIdentity
+        ? HdrSourceKind.hdrVivid
+        : !correction.observed('kind')
+        ? kind
+        : correction.kind;
+    return HdrSourceMetadata(
+      kind: mergedKind,
+      transfer: correction.observed('transfer')
+          ? correction.transfer
+          : transfer,
+      primaries: correction.observed('primaries')
+          ? correction.primaries
+          : primaries,
+      matrix: correction.observed('matrix') ? correction.matrix : matrix,
+      dolbyVisionProfile: correction.observed('dolbyVisionProfile')
+          ? correction.dolbyVisionProfile
+          : dolbyVisionProfile,
+      dolbyVisionLevel: correction.observed('dolbyVisionLevel')
+          ? correction.dolbyVisionLevel
+          : dolbyVisionLevel,
+      rpuPresent: correction.observed('rpuPresent')
+          ? correction.rpuPresent
+          : rpuPresent,
+      baseLayerPresent: correction.observed('baseLayerPresent')
+          ? correction.baseLayerPresent
+          : baseLayerPresent,
+      enhancementLayerPresent: correction.observed('enhancementLayerPresent')
+          ? correction.enhancementLayerPresent
+          : enhancementLayerPresent,
+      dvEnhancement: correction.observed('dvEnhancement')
+          ? correction.dvEnhancement
+          : dvEnhancement,
+      bitDepth: correction.observed('bitDepth')
+          ? correction.bitDepth
+          : bitDepth,
+      masteringMetadata: {
+        ...masteringMetadata,
+        ...correction.masteringMetadata,
+      },
+      dynamicMetadataPresent: correction.observed('dynamicMetadataPresent')
+          ? correction.dynamicMetadataPresent
+          : dynamicMetadataPresent,
+      observedFields: {...observedFields, ...correction.observedFields},
+    );
+  }
+
+  static bool _hasRecognizedBool(
+    Map<String, String> values,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = values[key]?.toLowerCase();
+      if (value == 'yes' ||
+          value == 'true' ||
+          value == '1' ||
+          value == 'present' ||
+          value == 'enabled' ||
+          value == 'no' ||
+          value == 'false' ||
+          value == '0' ||
+          value == 'absent' ||
+          value == 'disabled') {
+        return true;
+      }
+    }
+    return false;
   }
 
   static bool _boolProperty(Map<String, String> values, List<String> keys) {
@@ -271,6 +429,14 @@ class HdrCapabilities {
   final String nativeBackend;
   final int? androidApi;
   final bool displayHdr;
+
+  /// Current compositor headroom for the display containing the output.
+  /// This is diagnostic state; native activation still requires active proof.
+  final double? headroom;
+
+  /// Potential display headroom, which permits an EDR attempt but does not
+  /// prove that native output is active or visibly above the SDR white point.
+  final double? potentialHeadroom;
   final bool decoderHdr;
   final bool nativeOutput;
 
@@ -295,6 +461,8 @@ class HdrCapabilities {
     this.nativeBackend = 'none',
     this.androidApi,
     this.displayHdr = false,
+    this.headroom,
+    this.potentialHeadroom,
     this.decoderHdr = false,
     this.nativeOutput = false,
     bool? nativeOutputCapable,
@@ -310,6 +478,13 @@ class HdrCapabilities {
     this.unsupportedReason,
   }) : nativeOutputCapable = nativeOutputCapable ?? nativeOutput,
        nativeOutputActive = nativeOutputActive ?? nativeOutput;
+
+  /// Whether a fresh display probe changes display facts. Native output state
+  /// is deliberately excluded: a no-op probe must not clear an active output.
+  bool displayStateChangedFrom(HdrCapabilities previous) =>
+      displayHdr != previous.displayHdr ||
+      headroom != previous.headroom ||
+      potentialHeadroom != previous.potentialHeadroom;
 
   bool get canNativeHdr => displayHdr && decoderHdr && nativeOutputActive;
 
@@ -329,6 +504,8 @@ class HdrCapabilities {
     String? platform,
     String? nativeBackend,
     bool? displayHdr,
+    double? headroom,
+    double? potentialHeadroom,
     bool? hcpp,
     bool? nativeOutput,
     bool? nativeOutputCapable,
@@ -340,6 +517,8 @@ class HdrCapabilities {
     nativeBackend: nativeBackend ?? this.nativeBackend,
     androidApi: androidApi,
     displayHdr: displayHdr ?? this.displayHdr,
+    headroom: headroom ?? this.headroom,
+    potentialHeadroom: potentialHeadroom ?? this.potentialHeadroom,
     decoderHdr: decoderHdr ?? this.decoderHdr,
     nativeOutput: nativeOutput ?? nativeOutputActive ?? this.nativeOutput,
     nativeOutputCapable: nativeOutputCapable ?? this.nativeOutputCapable,
@@ -363,6 +542,12 @@ class HdrCapabilities {
       nativeBackend: values['nativeBackend'] as String? ?? 'none',
       androidApi: api is int ? api : null,
       displayHdr: flag('displayHdr'),
+      headroom: values['headroom'] is num
+          ? (values['headroom'] as num).toDouble()
+          : null,
+      potentialHeadroom: values['potentialHeadroom'] is num
+          ? (values['potentialHeadroom'] as num).toDouble()
+          : null,
       decoderHdr: flag('decoderHdr'),
       nativeOutput: flag('nativeOutput'),
       nativeOutputCapable: values['nativeOutputCapable'] is bool
@@ -390,6 +575,29 @@ class HdrCapabilities {
               .toSet(),
       unsupportedReason: values['unsupportedReason'] as String?,
     );
+  }
+}
+
+/// Serializes native HDR configuration and parameter readback transactions.
+/// A stale request is checked before and after its asynchronous action, so it
+/// cannot publish a result after a newer player or surface replaced it.
+class HdrOutputTransactionGate {
+  Future<void> _tail = Future<void>.value();
+
+  Future<T?> run<T>({
+    required bool Function() isCurrent,
+    required Future<T> Function() action,
+  }) {
+    final run = _tail.then<T?>((_) async {
+      if (!isCurrent()) return null;
+      final result = await action();
+      return isCurrent() ? result : null;
+    });
+    _tail = run.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {},
+    );
+    return run;
   }
 }
 
@@ -540,6 +748,7 @@ class HdrDecision {
     required HdrSourceMetadata source,
     required HdrCapabilities capabilities,
     String hwdec = 'auto',
+    bool allowDolbyVisionNative = false,
   }) {
     if (!source.isHdr) {
       return HdrPlaybackDecision(
@@ -559,15 +768,18 @@ class HdrDecision {
         reason: 'disabled-by-user',
       );
     }
-    // Dolby Vision and HDR Vivid need format-specific native output proof.
-    // The current dataspace path only proves PQ/HLG, so keep these streams on
-    // the established tone-map path until their metadata is verified end to end.
+    // DV may enter ordinary HDR only as an explicit DV-to-HDR conversion. It
+    // must not be described as native Dolby Vision metadata passthrough.
     final nativeSource =
-        source.kind != HdrSourceKind.dolbyVision &&
+        (allowDolbyVisionNative ||
+            source.kind != HdrSourceKind.dolbyVision ||
+            source.supportsConvertedHdrOutput) &&
         source.kind != HdrSourceKind.hdrVivid &&
         source.kind != HdrSourceKind.hdr10Plus &&
         source.hasNativeColorMetadata;
-    if (source.kind == HdrSourceKind.dolbyVision && source.isDolbyVisionP7) {
+    if (source.kind == HdrSourceKind.dolbyVision &&
+        source.isDolbyVisionP7 &&
+        !allowDolbyVisionNative) {
       return HdrPlaybackDecision(
         output: HdrOutputMode.toneMappedSdr,
         vo: 'gpu-next',
@@ -591,7 +803,9 @@ class HdrDecision {
         reason: 'display-decoder-and-output-ready',
         usePlatformView: capabilities.canHcpp,
         useHcpp: capabilities.canHcpp,
-        sourceProcessing: 'passthrough',
+        sourceProcessing: source.kind == HdrSourceKind.dolbyVision
+            ? 'dolby-vision-converted-to-hdr'
+            : 'passthrough',
         outputEncoding: 'pq-or-hlg',
       );
     }

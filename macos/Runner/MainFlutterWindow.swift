@@ -74,6 +74,9 @@ class MainFlutterWindow: NSWindow {
         return
       }
       let activeScreen = self.screen ?? NSScreen.main
+      let headroom = activeScreen?.maximumExtendedDynamicRangeColorComponentValue ?? 1.0
+      let potentialHeadroom =
+        activeScreen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0
       // `maximumExtendedDynamicRangeColorComponentValue` remains 1.0 until
       // some onscreen content requests EDR. Using it as a capability gate
       // creates a deadlock: HDR quality is disabled before HDR content can be
@@ -84,6 +87,8 @@ class MainFlutterWindow: NSWindow {
         "platform": "macos",
         "nativeBackend": "none",
         "displayHdr": edr,
+        "headroom": headroom,
+        "potentialHeadroom": potentialHeadroom,
         "decoderHdr": false,
         "nativeOutput": false,
         "nativeOutputCapable": false,

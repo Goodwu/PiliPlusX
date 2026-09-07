@@ -1,0 +1,24 @@
+["kCGWindowSharingState": 1, "kCGWindowNumber": 26040, "kCGWindowMemoryUsage": 2368, "kCGWindowLayer": 0, "kCGWindowStoreType": 1, "kCGWindowIsOnscreen": 1, "kCGWindowAlpha": 1, "kCGWindowBounds": {
+    Height = 360;
+    Width = 640;
+    X = 640;
+    Y = 375;
+}, "kCGWindowOwnerName": media_kit_test, "kCGWindowOwnerPID": 8906, "kCGWindowName": package:media_kit]
+["kCGWindowLayer": 0, "kCGWindowIsOnscreen": 1, "kCGWindowBounds": {
+    Height = 632;
+    Width = 800;
+    X = 560;
+    Y = 232;
+}, "kCGWindowAlpha": 1, "kCGWindowOwnerPID": 8906, "kCGWindowStoreType": 1, "kCGWindowMemoryUsage": 2368, "kCGWindowSharingState": 1, "kCGWindowName": media_kit_test, "kCGWindowOwnerName": media_kit_test, "kCGWindowNumber": 26019]
+["kCGWindowMemoryUsage": 2368, "kCGWindowLayer": 0, "kCGWindowAlpha": 1, "kCGWindowBounds": {
+    Height = 360;
+    Width = 640;
+    X = 439;
+    Y = 438;
+}, "kCGWindowName": package:media_kit, "kCGWindowOwnerPID": 8906, "kCGWindowNumber": 26029, "kCGWindowSharingState": 1, "kCGWindowIsOnscreen": 1, "kCGWindowStoreType": 1, "kCGWindowOwnerName": media_kit_test]
+["kCGWindowOwnerPID": 8906, "kCGWindowSharingState": 1, "kCGWindowMemoryUsage": 2368, "kCGWindowOwnerName": media_kit_test, "kCGWindowAlpha": 1, "kCGWindowStoreType": 1, "kCGWindowLayer": 0, "kCGWindowNumber": 26034, "kCGWindowBounds": {
+    Height = 360;
+    Width = 640;
+    X = 769;
+    Y = 550;
+}, "kCGWindowName": package:media_kit, "kCGWindowIsOnscreen": 1]
