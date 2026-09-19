@@ -54,6 +54,11 @@ export default class HarmonyChannel implements FlutterPlugin {
         await this.autoRotateLandscape();
         result.success(true);
         break;
+      case "setWindowOrientation":
+        const allowLandscape = call.argument("allowLandscape") === true;
+        await this.setWindowOrientation(allowLandscape);
+        result.success(true);
+        break;
       case "setWindowBrightness":
         const brightness: number = call.argument("value") ?? -1;
         this.lastWindow ??= await window.getLastWindow(getContext());
@@ -93,6 +98,15 @@ export default class HarmonyChannel implements FlutterPlugin {
   async autoRotateLandscape() {
     this.lastWindow ??= await window.getLastWindow(getContext());
     this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION_LANDSCAPE)
+  }
+
+  private async setWindowOrientation(allowLandscape: boolean) {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    const orientation = allowLandscape
+      ? window.Orientation.AUTO_ROTATION
+      : window.Orientation.USER_ROTATION_PORTRAIT;
+    console.info(`[HarmonyChannel] setWindowOrientation allowLandscape=${allowLandscape}`);
+    await this.lastWindow.setPreferredOrientation(orientation);
   }
 }
 

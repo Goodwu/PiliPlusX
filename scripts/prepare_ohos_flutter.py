@@ -122,15 +122,175 @@ def apply_patch(root: Path, patch: Path) -> bool:
     raise SystemExit(f"OHOS Flutter patch drift: {patch.name}\n{check.stderr.decode(errors='replace')}")
 
 
+def patch_pointer_filter(root: Path) -> int:
+    scrollable = root / "packages/flutter/lib/src/widgets/scrollable.dart"
+    scrollable_text = scrollable.read_text(encoding="utf-8")
+    scrollable_markers = (
+        "this.pointerDownFilter,",
+        "final bool Function(PointerDownEvent event)? pointerDownFilter;",
+        "_FilteredVerticalDragGestureRecognizer:",
+        "..pointerDownFilter = widget.pointerDownFilter",
+        "class _FilteredVerticalDragGestureRecognizer",
+    )
+    scrollable_marker_state = [marker in scrollable_text for marker in scrollable_markers]
+    custom_markers = (
+        "this.pointerDownFilter,",
+        "final bool Function(PointerDownEvent event)? pointerDownFilter;",
+        "_VerticalDragGestureRecognizer:",
+        "..pointerDownFilter = widget.pointerDownFilter",
+        "typedef PointerDownFilter = bool Function(PointerDownEvent event);",
+        "PointerDownFilter? pointerDownFilter;",
+    )
+    custom_marker_state = [marker in scrollable_text for marker in custom_markers]
+    custom_applied = all(custom_marker_state)
+    if custom_applied or all(scrollable_marker_state):
+        scrollable_changed = False
+    elif "_VerticalDragGestureRecognizer:" in scrollable_text and not any(scrollable_marker_state):
+        custom_expected = (
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            "  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            "                      ..isDyAllowed = _isDyAllowed",
+            "typedef IsDyAllowed = bool Function(double dy);",
+            "  IsDyAllowed? isDyAllowed;",
+            "  bool isPointerAllowed(PointerEvent event) {",
+        )
+        for expected in custom_expected:
+            if scrollable_text.count(expected) != 1:
+                raise SystemExit("OHOS Flutter pointer filter source drift in custom scrollable.dart")
+        scrollable_text = scrollable_text.replace(
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n    this.pointerDownFilter,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            "  /// Optional admission filter for the vertical drag recognizer.\n  final bool Function(PointerDownEvent event)? pointerDownFilter;\n\n  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "                      ..isDyAllowed = _isDyAllowed",
+            "                      ..isDyAllowed = _isDyAllowed\n                      ..pointerDownFilter = widget.pointerDownFilter",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "typedef IsDyAllowed = bool Function(double dy);",
+            "typedef IsDyAllowed = bool Function(double dy);\ntypedef PointerDownFilter = bool Function(PointerDownEvent event);",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "  IsDyAllowed? isDyAllowed;",
+            "  IsDyAllowed? isDyAllowed;\n  PointerDownFilter? pointerDownFilter;",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "  bool isPointerAllowed(PointerEvent event) {",
+            "  bool isPointerAllowed(PointerEvent event) {\n    if (event is PointerDownEvent &&\n        pointerDownFilter?.call(event) == false) {\n      return false;\n    }",
+            1,
+        )
+        scrollable.write_text(scrollable_text, encoding="utf-8")
+        scrollable_changed = True
+    elif any(custom_marker_state) or (any(scrollable_marker_state) and not all(scrollable_marker_state)):
+        raise SystemExit("OHOS Flutter pointer filter is partially applied to scrollable.dart")
+    else:
+        scrollable_expected = (
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            "  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            "            VerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(\n                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (VerticalDragGestureRecognizer instance) {",
+            "            VerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(\n                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (VerticalDragGestureRecognizer instance) {\n                    instance\n                      ..onDown = _handleDragDown",
+        )
+        for expected in scrollable_expected:
+            if scrollable_text.count(expected) != 1:
+                raise SystemExit("OHOS Flutter pointer filter source drift in scrollable.dart")
+        scrollable_text = scrollable_text.replace(
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n    this.pointerDownFilter,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            "  /// Optional admission filter for the vertical drag recognizer.\n  final bool Function(PointerDownEvent event)? pointerDownFilter;\n\n  /// {@template flutter.widgets.Scrollable.axisDirection}",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "            VerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(\n                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (VerticalDragGestureRecognizer instance) {",
+            "            _FilteredVerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<_FilteredVerticalDragGestureRecognizer>(\n                  () => _FilteredVerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (_FilteredVerticalDragGestureRecognizer instance) {",
+            1,
+        )
+        scrollable_text = scrollable_text.replace(
+            "                  (_FilteredVerticalDragGestureRecognizer instance) {\n                    instance\n                      ..onDown = _handleDragDown",
+            "                  (_FilteredVerticalDragGestureRecognizer instance) {\n                    instance\n                      ..pointerDownFilter = widget.pointerDownFilter\n                      ..onDown = _handleDragDown",
+            1,
+        )
+        scrollable_text += """\n\ntypedef PointerDownFilter = bool Function(PointerDownEvent event);\n\nclass _FilteredVerticalDragGestureRecognizer extends VerticalDragGestureRecognizer {\n  _FilteredVerticalDragGestureRecognizer({\n    super.debugOwner,\n    super.supportedDevices,\n    super.allowedButtonsFilter,\n  });\n\n  PointerDownFilter? pointerDownFilter;\n\n  @override\n  bool isPointerAllowed(PointerEvent event) {\n    if (event is PointerDownEvent &&\n        pointerDownFilter?.call(event) == false) {\n      return false;\n    }\n    return super.isPointerAllowed(event);\n  }\n}\n"""
+        if not all(marker in scrollable_text for marker in scrollable_markers):
+            raise SystemExit("OHOS Flutter pointer filter transformation incomplete for scrollable.dart")
+        scrollable.write_text(scrollable_text, encoding="utf-8")
+        scrollable_changed = True
+
+    scroll_view = root / "packages/flutter/lib/src/widgets/scroll_view.dart"
+    scroll_view_text = scroll_view.read_text(encoding="utf-8")
+    scroll_view_markers = (
+        "this.pointerDownFilter,",
+        "final bool Function(PointerDownEvent event)? pointerDownFilter;",
+        "pointerDownFilter: pointerDownFilter,",
+        "super.pointerDownFilter,",
+    )
+    scroll_view_marker_state = [marker in scroll_view_text for marker in scroll_view_markers]
+    if any(scroll_view_marker_state) and not all(scroll_view_marker_state):
+        raise SystemExit("OHOS Flutter pointer filter is partially applied to scroll_view.dart")
+    if all(scroll_view_marker_state):
+        scroll_view_changed = False
+    else:
+        scroll_view_expected = (
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(",
+            "  /// Returns the [AxisDirection] in which the scroll view scrolls.",
+            "      hitTestBehavior: hitTestBehavior,\n      viewportBuilder:",
+            "    super.hitTestBehavior,\n  });\n\n  /// The slivers",
+        )
+        for expected in scroll_view_expected:
+            if scroll_view_text.count(expected) != 1:
+                raise SystemExit("OHOS Flutter pointer filter source drift in scroll_view.dart")
+        scroll_view_text = scroll_view_text.replace(
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(",
+            "    this.hitTestBehavior = HitTestBehavior.opaque,\n    this.pointerDownFilter,\n  }) : assert(",
+            1,
+        )
+        scroll_view_text = scroll_view_text.replace(
+            "  /// Returns the [AxisDirection] in which the scroll view scrolls.",
+            "  final bool Function(PointerDownEvent event)? pointerDownFilter;\n\n  /// Returns the [AxisDirection] in which the scroll view scrolls.",
+            1,
+        )
+        scroll_view_text = scroll_view_text.replace(
+            "      hitTestBehavior: hitTestBehavior,\n      viewportBuilder:",
+            "      hitTestBehavior: hitTestBehavior,\n      pointerDownFilter: pointerDownFilter,\n      viewportBuilder:",
+            1,
+        )
+        scroll_view_text = scroll_view_text.replace(
+            "    super.hitTestBehavior,\n  });\n\n  /// The slivers",
+            "    super.hitTestBehavior,\n    super.pointerDownFilter,\n  });\n\n  /// The slivers",
+            1,
+        )
+        if not all(marker in scroll_view_text for marker in scroll_view_markers):
+            raise SystemExit("OHOS Flutter pointer filter transformation incomplete for scroll_view.dart")
+        scroll_view.write_text(scroll_view_text, encoding="utf-8")
+        scroll_view_changed = True
+    return int(scrollable_changed) + int(scroll_view_changed)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--flutter-root", type=Path, required=True)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
+    parser.add_argument("--pointer-filter-only", action="store_true")
     args = parser.parse_args()
     root = args.flutter_root.resolve()
     patch_root = (args.workspace / "lib/scripts").resolve()
     if not (root / ".git").is_dir():
         parser.error(f"Flutter root is not a git checkout: {root}")
+    if args.pointer_filter_only:
+        changed = patch_pointer_filter(root)
+        print(f"Flutter pointer filter: {changed} file(s) changed")
+        return
     applied = 0
     for name in PATCHES:
         if apply_patch(root, patch_root / name):
@@ -149,6 +309,7 @@ def main() -> None:
     ):
         if apply_selective_patch(root, selective, include):
             applied += 1
+    applied += patch_pointer_filter(root)
     patch_page_view(root)
     patch_raw_text(root)
     selectable = root / "packages/flutter/lib/src/widgets/selectable_region.dart"

@@ -151,6 +151,13 @@ void main() async {
     await setupServiceLocator();
   }
 
+  if (Platform.operatingSystem == 'ohos') {
+    await const MethodChannel('harmonyChannel').invokeMethod<void>(
+      'setWindowOrientation',
+      {'allowLandscape': Pref.horizontalScreen},
+    );
+  }
+
   Request();
   Request.setCookie();
   RequestUtils.syncHistoryStatus();

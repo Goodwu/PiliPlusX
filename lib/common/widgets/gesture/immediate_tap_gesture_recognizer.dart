@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
 
 class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   ImmediateTapGestureRecognizer({
@@ -28,6 +30,9 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   bool _sentTapDown = false;
   bool _wonArena = false;
   Offset? _initialPosition;
+  PointerDeviceKind? _activeKind;
+
+  int get lastPointer => _activePointer ?? _up?.pointer ?? -1;
 
   @override
   bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) => false;
@@ -42,6 +47,13 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
     _reset(event.pointer);
     _handleTapDown(event);
     _initialPosition = event.position;
+    _activeKind = event.kind;
+    PlayerTouchTrace.event(
+      stage: 'ImmediateTapGestureRecognizer tap down',
+      pointer: event.pointer,
+      position: event.position,
+      kind: event.kind,
+    );
   }
 
   @override
@@ -79,7 +91,8 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
-    if ((event.position - _initialPosition!).distanceSquared > 4.0) {
+    if ((event.position - _initialPosition!).distanceSquared >
+        kPlayerTapSlop * kPlayerTapSlop) {
       resolve(GestureDisposition.rejected);
       stopTrackingPointer(event.pointer);
     }
@@ -92,6 +105,12 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _handleTapUp(PointerUpEvent event) {
+    PlayerTouchTrace.event(
+      stage: 'ImmediateTapGestureRecognizer tap成立',
+      pointer: event.pointer,
+      position: event.position,
+      kind: event.kind,
+    );
     if (onTapUp != null) {
       final details = TapUpDetails(
         globalPosition: event.position,
@@ -109,6 +128,16 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _cancelGesture(String reason) {
+    final position = _up?.position ?? _initialPosition;
+    final kind = _up?.kind ?? _activeKind;
+    if (position != null && kind != null) {
+      PlayerTouchTrace.event(
+        stage: 'ImmediateTapGestureRecognizer tap取消 reason=$reason',
+        pointer: lastPointer,
+        position: position,
+        kind: kind,
+      );
+    }
     if (_sentTapDown && onTapCancel != null) {
       invokeCallback<void>('onTapCancel: $reason', onTapCancel!);
     }
@@ -120,6 +149,7 @@ class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
     _up = null;
     _sentTapDown = false;
     _wonArena = false;
+    _activeKind = null;
   }
 
   @override

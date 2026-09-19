@@ -14,6 +14,7 @@ Options:
   --version NAME          HAP version name (default: 2.1.3)
   --build-number NUMBER   HAP version code (default: current timestamp)
   --build-mode MODE       Flutter build mode: debug or release (default: debug)
+  --dart-define DEFINE    Flutter dart-define passed to the remote build (repeatable)
   --output FILE           Signed HAP output path
   --remote-host HOST      SSH host (default: dev)
   --remote-project DIR    Remote PiliPlusX checkout
@@ -39,6 +40,7 @@ build_number=${HAP_BUILD_NUMBER:-$(date +%s)}
 build_mode=${HAP_BUILD_MODE:-debug}
 install_target=
 keep_permission=0
+dart_defines=()
 
 store_dir=${XIAOBAI_STORE_DIR:-$HOME/Documents/hap_installer/store}
 signer=${XIAOBAI_SIGNER:-$HOME/Downloads/小白调试助手.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/assets/macos/signer}
@@ -53,6 +55,7 @@ while (($#)); do
     --version) version=${2:?missing value for --version}; shift 2 ;;
     --build-number) build_number=${2:?missing value for --build-number}; shift 2 ;;
     --build-mode) build_mode=${2:?missing value for --build-mode}; shift 2 ;;
+    --dart-define) dart_defines+=("${2:?missing value for --dart-define}"); shift 2 ;;
     --output) output=${2:?missing value for --output}; shift 2 ;;
     --remote-host) remote_host=${2:?missing value for --remote-host}; shift 2 ;;
     --remote-project) remote_project=${2:?missing value for --remote-project}; shift 2 ;;
@@ -75,6 +78,16 @@ done
 [[ $build_mode == debug || $build_mode == release ]] || {
   echo "invalid build mode: $build_mode" >&2; exit 2;
 }
+for define in "${dart_defines[@]}"; do
+  if [[ "$define" == PILIPLUS_PROCESS_LIVE_TEST=true && "$build_mode" != debug ]]; then
+    echo "PILIPLUS_PROCESS_LIVE_TEST is restricted to debug HAPs" >&2
+    exit 2
+  fi
+  if [[ "$define" == PILIPLUS_PROCESS_LIVE_DIRECT_PAGE_POP=true && "$build_mode" != debug ]]; then
+    echo "PILIPLUS_PROCESS_LIVE_DIRECT_PAGE_POP is restricted to debug HAPs" >&2
+    exit 2
+  fi
+done
 for required in "$ssh_wrapper" "$signer" "$cert" "$profile" "$key" "$config"; do
   [[ -e $required ]] || { echo "missing required file: $required" >&2; exit 1; }
 done
@@ -89,7 +102,7 @@ unsigned="$work_dir/entry-default-unsigned.hap"
 rm -f "$output"
 
 echo "[1/3] build unsigned HAP on $remote_host: $version/$build_number" >&2
-"$ssh_wrapper" --ssh-opt '-oClearAllForwardings=yes' "$remote_host" -- "$remote_project" "$version" "$build_number" "$keep_permission" "$build_mode" "$remote_media_kit" >"$unsigned" <<'REMOTE'
+"$ssh_wrapper" --ssh-opt '-oClearAllForwardings=yes' "$remote_host" -- "$remote_project" "$version" "$build_number" "$keep_permission" "$build_mode" "$remote_media_kit" "${dart_defines[@]}" >"$unsigned" <<'REMOTE'
 set -euo pipefail
 src=$1
 version=$2
@@ -97,6 +110,12 @@ build_number=$3
 keep_permission=$4
 build_mode=$5
 remote_media_kit=$6
+shift 6
+dart_define_args=()
+while (($#)); do
+  dart_define_args+=(--dart-define "$1")
+  shift
+done
 build_parent=$(mktemp -d "${TMPDIR:-/tmp}/piliplusx-ohos-build.XXXXXX")
  build_root="$build_parent/workspace"
  cleanup() { rm -rf "$build_parent"; }
@@ -140,13 +159,324 @@ export https_proxy=http://127.0.0.1:7890
 export HOS_SDK_HOME=/home/wuweiwei1/ohos-sdk/command-line-tools/sdk
 export OHOS_SDK_HOME=$HOS_SDK_HOME
 export PATH=/home/wuweiwei1/tools/flutter-ohos/bin:/home/wuweiwei1/flutter/bin:/home/wuweiwei1/ohos-sdk/command-line-tools/bin:/home/wuweiwei1/ohos-sdk/hvigor/bin:/home/wuweiwei1/ohos-sdk/hvigor/bin:/home/wuweiwei1/ohos-sdk/command-line-tools/tool/node/bin:$PATH
- cd "$build_root"
 export PUB_CACHE=/home/wuweiwei1/.pub-cache-ohos-build
- flutter pub get >&2
- python3 "$src/scripts/prepare_ohos_material_ui.py" --workspace "$build_root" >&2
- flutter build hap --"$build_mode" --no-codesign --build-name "$version" --build-number "$build_number" >&2
+
+# Build the reviewed embedding HAR before the app build.  Flutter's OHOS
+# builder consumes mode-specific cached HARs, so changing ETS source alone can
+# silently leave the final HAP on the old modules.abc.  Merge only the
+# embedding source/type trees into the cached HAR and preserve its native
+# libflutter.so and release module metadata.  Every replacement gets a
+# recoverable backup in the SDK directory.
+embedding_project=/home/wuweiwei1/tools/flutter-ohos/engine/src/flutter/shell/platform/ohos/flutter_embedding
+embedding_hvigor=/home/wuweiwei1/ohos-sdk/command-line-tools/hvigor/bin/hvigorw
+embedding_har="$embedding_project/flutter/build/default/outputs/default/flutter.har"
+export DEVECO_SDK_HOME=/home/wuweiwei1/ohos-sdk/command-line-tools/sdk
+if [[ -x $embedding_hvigor && -d $embedding_project/flutter ]]; then
+  # HCPP input ownership: the full DISPLAY input layer must be above the
+  # overlay rect blocks. Both layers inject into the same Flutter pointer
+  # stream; keeping overlay blocks on top can leave a stale SliceViews rect
+  # consuming a fullscreen-button tap after a landscape->portrait transition.
+  # Keep this idempotent because the OHOS engine checkout is external to this
+  # repository and may be refreshed independently.
+  # The embedding checkout keeps a legacy source copy at src/main/, but the
+  # HAR/HAP compiler consumes the package tree below src/main/ets/. Patch the
+  # compiler input directly; changing only the legacy copy silently produces
+  # an old modules.abc.
+  flutter_page="$embedding_project/flutter/src/main/ets/embedding/ohos/FlutterPage.ets"
+  python3 - "$flutter_page" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+old = "        this.buildHcppInputBlock()\n        this.buildOverlayBlock()"
+new = "        this.buildOverlayBlock()\n        this.buildHcppInputBlock()"
+count = text.count(old)
+if count == 2:
+    path.write_text(text.replace(old, new))
+elif count == 0 and text.count(new) == 2:
+    pass
+else:
+    raise SystemExit(
+        f"unexpected HCPP input layer order in {path}: "
+        f"old={count} new={text.count(new)}"
+    )
+PY
+  rg -q -U 'buildOverlayBlock\(\)\n\s+this\.buildHcppInputBlock\(\)' "$flutter_page" || {
+    echo "HCPP input layer order patch verification failed: $flutter_page" >&2
+    exit 1
+  }
+
+  # Record the actual ArkUI area of the main Flutter XComponent. Flutter's
+  # RenderBox/semantics bounds alone cannot prove that the native input host
+  # covers the same rectangle; this is needed for the lower-control pointer
+  # capture investigation and is harmless in debug/test builds.
+  python3 - "$flutter_page" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+marker = """      .onAreaChange((oldValue: Area, newValue: Area) => {
+        // Only handle when Y position changes (window decoration state changed)
+"""
+replacement = """      .onAreaChange((oldValue: Area, newValue: Area) => {
+        Log.i(TAG, `FlutterSurface area viewId=${this.viewId} ` +
+          `position=(${newValue.globalPosition.x},${newValue.globalPosition.y}) ` +
+          `size=(${newValue.width},${newValue.height})`);
+        // Only handle when Y position changes (window decoration state changed)
+"""
+if text.count(replacement) == 1:
+    pass
+elif text.count(marker) == 1:
+    path.write_text(text.replace(marker, replacement, 1))
+else:
+    raise SystemExit(f"unexpected FlutterSurface area hook in {path}")
+PY
+  rg -q 'FlutterSurface area viewId=' "$flutter_page" || {
+    echo "FlutterSurface area diagnostic patch verification failed: $flutter_page" >&2
+    exit 1
+  }
+
+  python3 - "$flutter_page" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+marker = """      .focusOnTouch(this.defaultFocusOnTouch)
+      .onLoad((context) => {
+"""
+replacement = """      .focusOnTouch(this.defaultFocusOnTouch)
+      .onTouch((event: TouchEvent) => {
+        const changed = event.changedTouches;
+        const firstX = changed != undefined && changed.length > 0
+          ? changed[0].windowX : -1;
+        const firstY = changed != undefined && changed.length > 0
+          ? changed[0].windowY : -1;
+        Log.i(TAG, `FlutterSurface touch viewId=${this.viewId} ` +
+          `type=${event.type} changed=${changed?.length ?? 0} ` +
+          `window=(${firstX},${firstY})`);
+      })
+      .onLoad((context) => {
+"""
+if text.count(replacement) == 1:
+    pass
+elif text.count(marker) == 1:
+    path.write_text(text.replace(marker, replacement, 1))
+else:
+    raise SystemExit(f"unexpected FlutterSurface touch hook in {path}")
+PY
+  rg -q 'FlutterSurface touch viewId=' "$flutter_page" || {
+    echo "FlutterSurface touch diagnostic patch verification failed: $flutter_page" >&2
+    exit 1
+  }
+
+  # Capture the state used by the HCPP dispatcher in the existing owner record.
+  # The owner and NAPI records alone prove that a packet was submitted, but do
+  # not tell whether the overlay/input rect was still displayed or whether the
+  # DISPLAY view had already lost geometry during a resize/fullscreen
+  # transaction. Keeping the fields in the established owner record also
+  # avoids a release ABC optimizer dropping a diagnostic-only log statement.
+  controller_hybrid="$embedding_project/flutter/src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets"
+  python3 - "$controller_hybrid" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+state_suffix = """        ` sourceVisible=${sourceVisible}` +
+        ` inputVisible=${inputRect?.visible ?? false}` +
+        ` displayed=${this.displayedHcppInputViewIds.has(viewId)}` +
+        ` hasGeometry=${hasGeometry} attachmentEpoch=${attachmentEpoch}`;
+"""
+old_suffix = """        ` activeOwner=${active?.ownerViewId ?? -1} activeEpoch=${active?.attachmentEpoch ?? 0}` +
+        ` eventTimestampNs=${event.timestamp}`);
+"""
+new_suffix = """        ` activeOwner=${active?.ownerViewId ?? -1} activeEpoch=${active?.attachmentEpoch ?? 0}` +
+        ` eventTimestampNs=${event.timestamp}` +
+        ` sourceVisible=${sourceVisible}` +
+        ` inputVisible=${inputRect?.visible ?? false}` +
+        ` displayed=${this.displayedHcppInputViewIds.has(viewId)}` +
+        ` hasGeometry=${hasGeometry} attachmentEpoch=${attachmentEpoch}`);
+"""
+if text.count(new_suffix) == 1:
+    pass
+elif text.count(old_suffix) == 1:
+    path.write_text(text.replace(old_suffix, new_suffix, 1))
+else:
+    raise SystemExit(
+        f"unexpected HCPP owner state marker in {path}: "
+        f"old={text.count(old_suffix)} new={text.count(new_suffix)}"
+    )
+PY
+  rg -q 'sourceVisible=\$\{sourceVisible\}' "$controller_hybrid" || {
+    echo "HCPP owner state instrumentation verification failed: $controller_hybrid" >&2
+    exit 1
+  }
+  # The attachment-dispose marker is evidence of a completed native teardown
+  # boundary.  The embedding used to emit it before it cancelled an active
+  # touch, although the actual cancel call follows the marker.  That made the
+  # trace claim the inverse of the real operation order and prevented a
+  # correlated owner Down -> Cancel -> NAPI -> dispose proof.  Keep the
+  # teardown behavior unchanged and move only the diagnostic record after the
+  # Cancel has been submitted to the same dispatcher.
+  python3 - "$controller_hybrid" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+old = """    Log.i(TAG, `hcpp_input attachment platformViewId=${viewId} ` +
+      `epoch=${this.hcppInputAttachmentEpochs.get(viewId) ?? 0} action=dispose`);
+
+    if (this.focusViewId == viewId) {
+      this.focusViewId = -1;
+    }
+
+    // The cancel must use the current offset. Remove the FlutterView storage
+    // slice before deleting the target geometry, so a stale transparent node
+    // cannot swallow the next gesture after this method returns.
+    this.cancelActiveTouchPointersForView(viewId, 'dispose');
+"""
+new = """    const disposeEpoch = this.hcppInputAttachmentEpochs.get(viewId) ?? 0;
+
+    if (this.focusViewId == viewId) {
+      this.focusViewId = -1;
+    }
+
+    // The cancel must use the current offset. Remove the FlutterView storage
+    // slice before deleting the target geometry, so a stale transparent node
+    // cannot swallow the next gesture after this method returns.
+    this.cancelActiveTouchPointersForView(viewId, 'dispose');
+    Log.i(TAG, `hcpp_input attachment platformViewId=${viewId} ` +
+      `epoch=${disposeEpoch} action=dispose`);
+"""
+if text.count(new) == 1:
+    pass
+elif text.count(old) == 1:
+    path.write_text(text.replace(old, new, 1))
+else:
+    raise SystemExit(
+        f"unexpected HCPP attachment dispose trace order in {path}: "
+        f"old={text.count(old)} new={text.count(new)}"
+    )
+PY
+  # Hvigor can keep the embedding HAR's modules.abc as UP-TO-DATE even after
+  # the external ETS source was patched.  Remove only this generated module
+  # output so the next assembleHar recompiles the reviewed source; source and
+  # native engine files are untouched.
+  rm -rf "$embedding_project/flutter/build/default"
+  echo "building OHOS embedding HAR: $embedding_project" >&2
+  (cd "$embedding_project" && "$embedding_hvigor" --mode module \
+    -p module=flutter@default -p product=default assembleHar --no-daemon) >&2
+  [[ -s $embedding_har ]] || {
+    echo "embedding HAR was not produced: $embedding_har" >&2
+    exit 1
+  }
+
+  merge_embedding_har() {
+    local cached_har="$1"
+    local backup="${cached_har}.codex-hcpp-premerge"
+    local work new_work
+    [[ -f $cached_har ]] || return 0
+    [[ -e $backup ]] || cp -p "$cached_har" "$backup"
+    work=$(mktemp -d /tmp/flutter-hcpp-har-merge.XXXXXX)
+    new_work=$(mktemp -d /tmp/flutter-hcpp-har-new.XXXXXX)
+    gzip -cd "$cached_har" | tar -xf - -C "$work"
+    gzip -cd "$embedding_har" | tar -xf - -C "$new_work"
+    rm -rf "$work/package/src/main/ets" "$work/package/src/main/cpp/types"
+    cp -a "$new_work/package/src/main/ets" "$work/package/src/main/"
+    cp -a "$new_work/package/src/main/cpp/types" "$work/package/src/main/cpp/"
+    tar -C "$work" -cf - package | gzip -n >"$cached_har.tmp"
+    mv "$cached_har.tmp" "$cached_har"
+    rm -rf "$work" "$new_work"
+    local marker_strings
+    marker_strings=$(mktemp)
+    gzip -cd "$cached_har" | strings >"$marker_strings"
+    if ! grep -Fq HcppInputRect "$marker_strings"; then
+      rm -f "$marker_strings"
+      echo "merged HAR missing HCPP marker: $cached_har" >&2
+      exit 1
+    fi
+    rm -f "$marker_strings"
+    echo "OHOS embedding HAR synchronized: $cached_har" >&2
+  }
+
+  embedding_sdk=/home/wuweiwei1/tools/flutter-ohos/bin/cache/artifacts/engine
+  merge_embedding_har "$embedding_sdk/ohos-arm64/flutter.har"
+  merge_embedding_har "$embedding_sdk/ohos-arm64/flutter_embedding_debug.har"
+  merge_embedding_har "$embedding_sdk/ohos-arm64-release/flutter.har"
+  merge_embedding_har "$embedding_sdk/ohos-arm64-profile/flutter.har"
+else
+  echo "OHOS embedding build prerequisites missing; refusing stale-HAR build" >&2
+  exit 1
+fi
+
+cd "$build_root"
+flutter pub get >&2
+python3 "$src/scripts/prepare_ohos_package_patches.py" --workspace "$build_root" >&2
+python3 "$src/scripts/prepare_ohos_material_ui.py" --workspace "$build_root" >&2
+# The OHOS package is expanded from the cached HAR into the temporary build
+# workspace.  The checked-out flutter-ohos source is not automatically used by
+# that expansion, so inject the reviewed embedding files into the exact
+# package root that Hvigor will compile.  Without this step source-level SHA
+# checks can pass while the HAP still contains the old modules.abc.
+# Hvigor may resolve the package through the versioned .ohpm store or through
+# the entry module's linked oh_modules tree.  Synchronize every resolved copy;
+# checking only .ohpm can leave modules.abc on a stale package while source/HAR
+# checks still pass.
+mapfile -t flutter_ohos_pkgs < <(find -L "$build_root/ohos" \
+  -type d -path '*/oh_modules/@ohos/flutter_ohos' -print | sort -u)
+(( ${#flutter_ohos_pkgs[@]} > 0 )) || {
+  echo "expanded @ohos/flutter_ohos package not found after flutter pub get" >&2
+  exit 1
+}
+flutter_ohos_src=/home/wuweiwei1/tools/flutter-ohos/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter
+for flutter_ohos_pkg in "${flutter_ohos_pkgs[@]}"; do
+  for rel in \
+    src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets \
+    src/main/ets/embedding/ohos/FlutterPage.ets \
+    src/main/ets/view/DynamicView/dynamicView.ets \
+    src/main/ets/view/FlutterView.ets \
+    src/main/cpp/types/libflutter/index.d.ets; do
+    src_file="$flutter_ohos_src/$rel"
+    dst_file="$flutter_ohos_pkg/$rel"
+    [[ -f "$src_file" && -f "$dst_file" ]] || {
+      echo "HCPP embedding source/package file missing: $rel ($flutter_ohos_pkg)" >&2
+      exit 1
+    }
+    cp "$src_file" "$dst_file"
+    cmp -s "$src_file" "$dst_file" || {
+      echo "HCPP embedding sync verification failed: $rel ($flutter_ohos_pkg)" >&2
+      exit 1
+    }
+done
+echo "OHOS embedding package synchronized: $flutter_ohos_pkg" >&2
+done
+# The temporary workspace is fresh, but Flutter/Hvigor can still carry a
+# generated entry build directory from package preparation.  Remove only
+# those generated directories so HarCompileArkTS cannot reuse an abc compiled
+# before the reviewed embedding source was injected.
+rm -rf "$build_root/ohos/entry/build" "$build_root/ohos/build"
+echo "OHOS generated build outputs cleared before HAP compile" >&2
+ flutter build hap --"$build_mode" --no-codesign --build-name "$version" --build-number "$build_number" "${dart_define_args[@]}" >&2
  hap="$build_root/build/ohos/hap/entry-default-unsigned.hap"
 [[ -s $hap ]] || { echo "unsigned HAP was not produced" >&2; exit 1; }
+abc_strings=$(mktemp)
+unzip -p "$hap" ets/modules.abc | strings >"$abc_strings"
+for marker in HcppInputRect hcpp_input_rects_map attachmentEpoch stale-attachment; do
+  if ! grep -Fq "$marker" "$abc_strings"; then
+    echo "unsigned HAP modules.abc missing required HCPP marker: $marker" >&2
+    echo "HCPP package diagnostics before cleanup:" >&2
+    find -L "$build_root/ohos/oh_modules/.ohpm" -type d \
+      -path '*/oh_modules/@ohos/flutter_ohos' -print 2>/dev/null | sort -u >&2 || true
+    find "$build_root/ohos/entry/build" -name dep_info.json -print \
+      -exec grep -o '"@ohos/flutter_ohos":"[^"]*"' {} \; 2>/dev/null >&2 || true
+    exit 1
+  fi
+done
+echo "unsigned HAP modules.abc HCPP markers: present" >&2
 cat "$hap"
 REMOTE
 
@@ -169,6 +499,30 @@ password=$(sed -n 's/.*"keystorePwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
   -signCode 1 >&2
 [[ -s $output ]] || { echo "signed HAP was not produced" >&2; exit 1; }
 "$signer" verify-app -inFile "$output" >&2
+
+# Keep a durable, local identity record next to every signed HAP.  The HAP
+# itself is the runtime artifact; these hashes make it possible to distinguish
+# a newly signed package from an older package that happens to use the same
+# filename, and keep the ABC/native markers auditable after the build workspace
+# has been cleaned up.
+manifest="${output}.manifest.txt"
+abc_manifest=$(mktemp)
+trap 'rm -rf "$work_dir" "$abc_manifest"' EXIT
+unzip -p "$output" ets/modules.abc | strings >"$abc_manifest"
+{
+  echo "hap=$output"
+  echo "hap_sha256=$(shasum -a 256 "$output" | awk '{print $1}')"
+  echo "libflutter_sha256=$(unzip -p "$output" libs/arm64-v8a/libflutter.so | shasum -a 256 | awk '{print $1}')"
+  echo "libmpv_sha256=$(unzip -p "$output" libs/arm64-v8a/libmpv.so | shasum -a 256 | awk '{print $1}')"
+  echo "abc_sha256=$(unzip -p "$output" ets/modules.abc | shasum -a 256 | awk '{print $1}')"
+  echo "abc_marker_HcppInputRect=$(grep -Fc HcppInputRect "$abc_manifest" || true)"
+  echo "abc_marker_hcpp_input_rects_map=$(grep -Fc hcpp_input_rects_map "$abc_manifest" || true)"
+  echo "abc_marker_attachmentEpoch=$(grep -Fc attachmentEpoch "$abc_manifest" || true)"
+  echo "abc_marker_stale_attachment=$(grep -Fc stale-attachment "$abc_manifest" || true)"
+  echo "abc_marker_cancelTimestamp=$(grep -Fc cancelTimestamp "$abc_manifest" || true)"
+  echo "native_diagnostic_markers=$(grep -E 'OHOS color contract|OHOS color hint after set_color|OHOS target mapping|OHOS consumer color mismatch' <(unzip -p "$output" libs/arm64-v8a/libmpv.so | strings) | tr '\n' ';')"
+} >"$manifest"
+echo "artifact manifest: $manifest" >&2
 
 echo "[3/3] signed HAP: $output" >&2
 if [[ -n $install_target ]]; then

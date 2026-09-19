@@ -9,6 +9,18 @@ native HDR 决策和 PQ dataspace 应用。native HDR 仍未通过完整生命�
 这份记录区分“能力探测”“原生输出”和“SDR tone-map 回退”。构建成功或
 检测到 HDR 显示器，不能单独作为原生 HDR 已启用的证据。
 
+## 跨平台 HDR 硬约束
+
+对 Android/Pink、iOS、macOS、Windows、Linux 和 OHOS，只要目标设备硬件能力满足
+HDR，实现 HDR 就是产品硬约束。只有经过能力探测确认硬件不满足时，才允许把
+SDR/tone-map 作为该设备的最终输出路径。原生后端尚未实现、surface 生命周期不稳定、
+色彩空间配置失败、交互层存在问题、缺少真机证据或 CI/模拟器无法复现，都不能被归类
+为硬件不满足；它们必须作为实现缺口、缺陷、验证阻塞或环境限制继续处理。
+
+`HdrMode.off` 只表示用户明确选择关闭 HDR，不是平台能力回退。软件实现的临时保护性
+回退可以避免黑屏或崩溃，但必须记录为阻塞缺陷，不能作为发布验收、默认路径或关闭
+HDR 开发任务的依据。
+
 PiliPlusX 当前 9 个 media-kit 包统一锁定到
 `Goodwu/media-kit@0fa6afe9cd9af8d8437919257d81a27c643f2f63`。公共输出生命周期
 历史候选 `integration/piliplusx-hdr-public-api`（`ad22c36a...`）保留为差异审查来源，
@@ -28,7 +40,9 @@ PiliPlusX 当前 9 个 media-kit 包统一锁定到
 ## 回退不变量
 
 - `HdrMode.off` 永远使用 SDR tone-map。
-- 能力探测失败、原生 surface 初始化失败或色彩空间设置失败，都必须保留可播放的 Texture/SDR 路径。
+- 只有硬件能力探测明确不满足 HDR 时，才允许将 Texture/SDR 路径记录为最终回退。
+- 原生 surface 初始化失败、色彩空间设置失败或生命周期失败时，可以在紧急运行保护中
+  保留可播放路径，但必须标记为实现阻塞，不能据此宣称平台完成或关闭 HDR 后端。
 - 未有系统色彩空间或等价真实设备证据时，不把 `displayHdr` 或编解码 profile
   单独解释为 `nativeHdr`。
 - 每个平台启用原生 HDR 前，必须补充一份真实设备日志，至少包含片源

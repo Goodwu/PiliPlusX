@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -12,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
+import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
 
 class MouseInteractiveViewer extends StatefulWidget {
   const MouseInteractiveViewer({
@@ -27,6 +28,8 @@ class MouseInteractiveViewer extends StatefulWidget {
     this.onPointerPanZoomUpdate,
     this.onPointerPanZoomEnd,
     required this.onPointerDown,
+    this.onPointerUp,
+    this.onPointerCancel,
     required this.onPanEnd,
     required this.onPanStart,
     required this.onPanUpdate,
@@ -62,6 +65,8 @@ class MouseInteractiveViewer extends StatefulWidget {
   final PointerPanZoomUpdateEventListener? onPointerPanZoomUpdate;
   final PointerPanZoomEndEventListener? onPointerPanZoomEnd;
   final PointerDownEventListener onPointerDown;
+  final PointerUpEventListener? onPointerUp;
+  final PointerCancelEventListener? onPointerCancel;
   final GestureScaleEndCallback onPanEnd;
   final GestureScaleStartCallback onPanStart;
   final GestureScaleUpdateCallback onPanUpdate;
@@ -93,8 +98,10 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
   double _currentRotation = 0.0;
   _GestureType? _gestureType;
 
-  static final gestureSettings = DeviceGestureSettings(
-    touchSlop: Platform.isIOS ? 9 : 4,
+  static const gestureSettings = DeviceGestureSettings(
+    // Keep the base recognizer from accepting the arena before the player
+    // has classified direction at its 18px tolerance.
+    touchSlop: kPlayerDirectionQualificationSlop,
   );
 
   late final ScaleGestureRecognizer _scaleGestureRecognizer;
@@ -645,6 +652,21 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
     setState(() {});
   }
 
+  void _scheduleBoundsTrace() {
+    if (!PlayerTouchTrace.enabled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      PlayerTouchTrace.logRenderObjectBounds(
+        stage: 'MouseInteractiveViewer Listener',
+        context: _parentKey.currentContext,
+      );
+      PlayerTouchTrace.logRenderObjectBounds(
+        stage: 'MouseInteractiveViewer viewport',
+        context: widget.childKey.currentContext,
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -684,12 +706,33 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
   @override
   Widget build(BuildContext context) {
     assert(widget.child.key == widget.childKey);
+    _scheduleBoundsTrace();
 
     return Listener(
       key: _parentKey,
       behavior: HitTestBehavior.opaque,
       onPointerSignal: _receivedPointerSignal,
-      onPointerDown: widget.onPointerDown,
+      onPointerDown: (event) {
+        PlayerTouchTrace.event(
+          stage: 'MouseInteractiveViewer Listener PointerDown',
+          event: event,
+        );
+        widget.onPointerDown(event);
+      },
+      onPointerUp: (event) {
+        PlayerTouchTrace.event(
+          stage: 'MouseInteractiveViewer Listener PointerUp',
+          event: event,
+        );
+        widget.onPointerUp?.call(event);
+      },
+      onPointerCancel: (event) {
+        PlayerTouchTrace.event(
+          stage: 'MouseInteractiveViewer Listener PointerCancel',
+          event: event,
+        );
+        widget.onPointerCancel?.call(event);
+      },
       onPointerPanZoomStart: _scaleGestureRecognizer.addPointerPanZoom,
       onPointerPanZoomUpdate: widget.onPointerPanZoomUpdate,
       onPointerPanZoomEnd: widget.onPointerPanZoomEnd,

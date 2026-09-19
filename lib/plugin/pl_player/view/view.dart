@@ -12,6 +12,7 @@ import 'package:PiliPlus/common/widgets/disabled_icon.dart';
 import 'package:PiliPlus/common/widgets/gesture/immediate_tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/gesture/mouse_interactive_viewer.dart';
 import 'package:PiliPlus/common/widgets/gesture/player_gesture_recognizer.dart';
+import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
 import 'package:PiliPlus/common/widgets/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/player_bar.dart';
@@ -48,6 +49,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/forward_seek.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
@@ -137,6 +139,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   final _playerKey = GlobalKey();
   final _videoKey = GlobalKey();
+  final _fullscreenButtonKey = GlobalKey();
 
   final RxDouble _brightnessValue = 0.0.obs;
   bool _brightnessReady = false;
@@ -149,10 +152,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   GestureType? _gestureType;
   Offset? _initialFocalPoint;
+  PlayerSinglePointerGestureDecision? _gestureDecision;
   double? _gestureStartBrightness;
   double? _gestureStartVolume;
+  Offset _gestureAccumulatedDelta = Offset.zero;
+  bool _gestureSlopReached = false;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
+  bool _globalPointerRouteRegistered = false;
 
   StreamSubscription? _brightnessListener;
   void _onBrightnessChanged(double value) {
@@ -226,6 +233,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   void _onControlChanged(bool val) {
     final visible = val && !plPlayerController.controlsLock.value;
 
+    PlayerTouchTrace.message(
+      'control-layer state requested=$val visible=$visible '
+      'animation=${_animationController.value.toStringAsFixed(3)}',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _logFullscreenButtonBounds('post-frame visible=$visible');
+    });
+    Future<void>.delayed(const Duration(milliseconds: 180), () {
+      if (mounted) _logFullscreenButtonBounds('settled visible=$visible');
+    });
+
     if ((widget.headerControl.key as GlobalKey<TimeBatteryMixin>).currentState
         case final state?) {
       if (state.mounted) {
@@ -269,9 +288,22 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
+  void _logFullscreenButtonBounds(String stage) {
+    PlayerTouchTrace.logRenderBoxBounds(
+      stage:
+          'fullscreen-button $stage '
+          'animation=${_animationController.value.toStringAsFixed(3)}',
+      renderBox:
+          _fullscreenButtonKey.currentContext?.findRenderObject() as RenderBox?,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    PlayerTouchTrace.logStartup();
+    PlayerTouchTrace.registerGlobalPointerRoute();
+    _globalPointerRouteRegistered = true;
     addObserverMobile(this);
 
     _controlsListener = plPlayerController.showControls.listen(
@@ -335,50 +367,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _doubleTapGestureRecognizer = DoubleTapGestureRecognizer()
       ..onDoubleTapDown = _onDoubleTapDown;
 
-    _scaleGestureRecognizer = PlayerScaleGestureRecognizer(
-      debugOwner: this,
-      dragStartBehavior: .start,
-      allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
-      trackpadScrollToScaleFactor: const Offset(
-        0,
-        -1 / kDefaultMouseScrollToScaleFactor,
-      ),
-      trackpadScrollCausesScale: false,
-    );
-
-    _verticalDragGestureRecognizer =
-        PlayerVerticalDragGestureRecognizer(
+    _scaleGestureRecognizer =
+        PlayerScaleGestureRecognizer(
             debugOwner: this,
+            dragStartBehavior: .start,
             allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
+            trackpadScrollToScaleFactor: const Offset(
+              0,
+              -1 / kDefaultMouseScrollToScaleFactor,
+            ),
+            trackpadScrollCausesScale: false,
           )
-          ..onStart = (details) {
-            _onPanStart(
-              ScaleStartDetails(
-                focalPoint: details.globalPosition,
-                localFocalPoint: details.localPosition,
-                pointerCount: 1,
-              ),
-            );
-          }
-          ..onUpdate = (details) {
-            _onPanUpdate(
-              ScaleUpdateDetails(
-                focalPoint: details.globalPosition,
-                localFocalPoint: details.localPosition,
-                focalPointDelta: details.delta,
-                pointerCount: 1,
-              ),
-            );
-          }
-          ..onEnd = (details) {
-            _onPanEnd(
-              ScaleEndDetails(
-                velocity: details.velocity,
-                pointerCount: 1,
-              ),
-            );
-          }
-          ..onCancel = () => _onPanEnd(ScaleEndDetails(pointerCount: 1));
+          ..pointerDownFilter = _isPlayerGesturePointerAllowed
+          ..singlePointerMoveFilter = _isSinglePointerMoveAllowed;
   }
 
   @override
@@ -429,13 +430,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   @override
   void dispose() {
+    if (_globalPointerRouteRegistered) {
+      PlayerTouchTrace.unregisterGlobalPointerRoute();
+      _globalPointerRouteRegistered = false;
+    }
     removeObserverMobile(this);
     _danmakuListener?.cancel();
     _tapGestureRecognizer.dispose();
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
     _scaleGestureRecognizer.dispose();
-    _verticalDragGestureRecognizer.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
     _animationController.dispose();
@@ -980,18 +984,40 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
       /// 全屏
       BottomControlType.fullscreen => ComBtn(
+        key: _fullscreenButtonKey,
         width: widgetWidth,
         height: 30,
+        semanticIdentifier: 'pl-player-fullscreen-toggle',
         tooltip: isFullScreen ? '退出全屏' : '全屏',
         icon: isFullScreen
             ? const Icon(Icons.fullscreen_exit, size: 24, color: Colors.white)
             : const Icon(Icons.fullscreen, size: 24, color: Colors.white),
-        onTap: () =>
-            plPlayerController.triggerFullScreen(status: !isFullScreen),
-        onSecondaryTap: () => plPlayerController.triggerFullScreen(
-          status: !isFullScreen,
-          inAppFullScreen: true,
-        ),
+        onPointerDown: (event) {
+          PlayerTouchTrace.event(
+            stage: 'fullscreen-button pointer-down',
+            event: event,
+          );
+          PlayerTouchTrace.message(
+            'fullscreen-button state-on-down '
+            'showControls=${plPlayerController.showControls.value} '
+            'controlsLock=${plPlayerController.controlsLock.value} '
+            'animation=${_animationController.value.toStringAsFixed(3)}',
+          );
+        },
+        onPointerUp: (event) {
+          PlayerTouchTrace.event(
+            stage: 'fullscreen-button pointer-up',
+            event: event,
+          );
+        },
+        onPointerCancel: (event) {
+          PlayerTouchTrace.event(
+            stage: 'fullscreen-button pointer-cancel',
+            event: event,
+          );
+        },
+        onTap: _onFullscreenButtonTap,
+        onSecondaryTap: _onFullscreenButtonSecondaryTap,
       ),
     };
 
@@ -1031,9 +1057,45 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     );
   }
 
+  void _onFullscreenButtonTap() {
+    final target = !isFullScreen;
+    PlayerTouchTrace.message(
+      'fullscreen-button callback target=$target '
+      'current=$isFullScreen',
+    );
+    plPlayerController.triggerFullScreen(status: target);
+  }
+
+  void _onFullscreenButtonSecondaryTap() {
+    final target = !isFullScreen;
+    PlayerTouchTrace.message(
+      'fullscreen-button secondary-callback target=$target '
+      'current=$isFullScreen',
+    );
+    plPlayerController.triggerFullScreen(
+      status: target,
+      inAppFullScreen: true,
+    );
+  }
+
   PlPlayerController get plPlayerController => widget.plPlayerController;
 
   bool get isFullScreen => plPlayerController.isFullScreen.value;
+
+  Widget _controlLayer(Widget child) {
+    return Obx(() {
+      final enabled =
+          plPlayerController.showControls.value &&
+          !plPlayerController.controlsLock.value;
+      return IgnorePointer(
+        ignoring: !enabled,
+        child: ExcludeSemantics(
+          excluding: !enabled,
+          child: child,
+        ),
+      );
+    });
+  }
 
   late final TransformationController _transformationController;
 
@@ -1057,9 +1119,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void _onPanStart(ScaleStartDetails details) {
     _gestureType = null;
-    _initialFocalPoint = details.localFocalPoint;
+    _gestureDecision = _scaleGestureRecognizer.singlePointerDecision;
+    _initialFocalPoint =
+        _gestureDecision?.startPosition ??
+        _scaleGestureRecognizer.initialPointerDownPosition ??
+        details.localFocalPoint;
     _gestureStartBrightness = _brightnessGestureBaseline();
     _gestureStartVolume = plPlayerController.volume.value;
+    _gestureAccumulatedDelta = Offset.zero;
+    _gestureSlopReached = false;
+    PlayerTouchTrace.message(
+      'gesture pan-start action=${_gestureDecision?.action} '
+      'position=$_initialFocalPoint',
+    );
   }
 
   double _brightnessGestureBaseline() {
@@ -1111,6 +1183,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
+  void _cancelHorizontalDrag() {
+    // A cancel (including multi-pointer takeover) must not commit the
+    // preview position. Restore the last native position and clear all seek
+    // state without normal seek-end feedback.
+    plPlayerController
+      ..seekToPos = null
+      ..onSeekEnd()
+      ..position.value =
+          plPlayerController.videoPlayerController?.state.position.inSeconds ??
+          0;
+    PlayerTouchTrace.message('gesture horizontal-cancelled');
+  }
+
   void _onProgressDragStart(ThumbDragDetails details) {
     feedBack();
     plPlayerController
@@ -1133,53 +1218,30 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onPanUpdate(ScaleUpdateDetails details) {
+    if (_gestureDecision != null && !_gestureSlopReached) {
+      _gestureAccumulatedDelta += details.focalPointDelta;
+      if (_gestureAccumulatedDelta.distance <= kTouchSlop) return;
+      _gestureSlopReached = true;
+    }
     if (_gestureType == null) {
-      final cumulativeDelta = details.localFocalPoint - _initialFocalPoint!;
-      if (cumulativeDelta.distanceSquared < 1) return;
-      final dx = cumulativeDelta.dx.abs();
-      final dy = cumulativeDelta.dy.abs();
-      if (dx > 3 * dy) {
-        _onHorizontalDragStart();
-        _gestureType = .horizontal;
-      } else if (dy > 3 * dx) {
-        if (!plPlayerController.enableSlideVolumeBrightness &&
-            !plPlayerController.enableSlideFS) {
-          return;
-        }
-
-        final double tapPosition = details.localFocalPoint.dx;
-        final double sectionWidth = maxWidth / 3;
-        if (MediaQuery.orientationOf(context) == Orientation.portrait &&
-            (tapPosition < sectionWidth || tapPosition >= sectionWidth * 2)) {
-          return;
-        }
-        if (tapPosition < sectionWidth) {
-          if (!plPlayerController.enableSlideVolumeBrightness) {
-            return;
-          }
-          // 左边区域
-          if (PlatformUtils.isDesktop) {
-            _gestureType = .right;
-          } else {
-            _gestureType = .left;
-          }
+      final decision = _gestureDecision;
+      if (decision == null) return;
+      switch (decision.action) {
+        case .horizontal:
+          _onHorizontalDragStart();
+          _gestureType = .horizontal;
+          PlayerTouchTrace.message('gesture pan-update type=horizontal');
+        case .brightness:
+          _gestureType = .left;
           _gestureStartBrightness = _brightnessGestureBaseline();
-        } else if (tapPosition < sectionWidth * 2) {
-          if (!plPlayerController.enableSlideFS) {
-            return;
-          }
-          // 全屏
-          _gestureType = .center;
-        } else {
-          if (!plPlayerController.enableSlideVolumeBrightness) {
-            return;
-          }
-          // 右边区域
+          PlayerTouchTrace.message('gesture pan-update type=brightness');
+        case .volume:
           _gestureType = .right;
-        }
-        if (_gestureType == .right) {
           _gestureStartVolume = plPlayerController.volume.value;
-        }
+          PlayerTouchTrace.message('gesture pan-update type=volume');
+        case .fullScreen:
+          _gestureType = .center;
+          PlayerTouchTrace.message('gesture pan-update type=fullscreen');
       }
       return;
     }
@@ -1237,6 +1299,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   cumulativeDy / level)
               .clamp(0.0, 1.0);
       setBrightness(brightness);
+      PlayerTouchTrace.message('gesture brightness value=$brightness');
     } else if (_gestureType == .center) {
       // 全屏
       const double threshold = 2.5; // 滑动阈值
@@ -1277,6 +1340,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             plPlayerController.maxVolume,
           );
           plPlayerController.setVolume(volume);
+          PlayerTouchTrace.message('gesture volume value=$volume');
         },
       );
     }
@@ -1284,11 +1348,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void _onPanEnd(ScaleEndDetails details) {
     if (_gestureType == .horizontal) {
-      _onHorizontalDragEnd();
+      if (_scaleGestureRecognizer.shouldCancelCurrentGesture) {
+        _cancelHorizontalDrag();
+      } else {
+        _onHorizontalDragEnd();
+      }
     }
     _initialFocalPoint = null;
+    _gestureDecision = null;
     _gestureStartBrightness = null;
     _gestureStartVolume = null;
+    _gestureAccumulatedDelta = Offset.zero;
+    _gestureSlopReached = false;
     _gestureType = null;
   }
 
@@ -1310,6 +1381,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onTapUp(TapUpDetails details) {
+    final before = plPlayerController.showControls.value;
+    PlayerTouchTrace.event(
+      stage: '_onTapUp execute beforeShowControls=$before',
+      event: PointerUpEvent(
+        pointer: _tapGestureRecognizer.lastPointer,
+        position: details.globalPosition,
+        kind: details.kind,
+      ),
+    );
     switch (details.kind) {
       case ui.PointerDeviceKind.mouse when PlatformUtils.isDesktop:
         plPlayerController.onDoubleTapCenter();
@@ -1322,6 +1402,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           _suspendedDm = null;
         }
     }
+    PlayerTouchTrace.event(
+      stage:
+          '_onTapUp complete afterShowControls=${plPlayerController.showControls.value}',
+      event: PointerUpEvent(
+        pointer: _tapGestureRecognizer.lastPointer,
+        position: details.globalPosition,
+        kind: details.kind,
+      ),
+    );
   }
 
   void _onTapDown(TapDownDetails details) {
@@ -1371,22 +1460,84 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
-  late final VerticalDragGestureRecognizer _verticalDragGestureRecognizer;
 
   StreamSubscription<bool>? _danmakuListener;
 
-  static const _kOffsetThreshold = 25.0;
-  bool _isPositionAllowed(Offset offset) {
-    if (offset.dx < _kOffsetThreshold ||
-        offset.dy < _kOffsetThreshold ||
-        offset.dx > maxWidth - _kOffsetThreshold ||
-        offset.dy > maxHeight - _kOffsetThreshold) {
-      return false;
+  bool _isPlayerGesturePointerAllowed(_) {
+    // MouseInteractiveViewer is the hit-test boundary for player gestures.
+    // Controls and the progress bar are separate hit-test targets above it;
+    // do not approximate their bounds with an inset rectangle here.
+    final allowed = !plPlayerController.controlsLock.value;
+    PlayerTouchTrace.message(
+      'gesture pointer-allowed=$allowed controlsLock=${plPlayerController.controlsLock.value}',
+    );
+    return allowed;
+  }
+
+  PlayerSinglePointerGestureDecision? _isSinglePointerMoveAllowed(
+    Offset startPosition,
+    Offset delta,
+    _,
+  ) {
+    if (isPlayerHorizontalSeekDelta(delta)) {
+      PlayerTouchTrace.message(
+        'gesture move-filter action=horizontal start=$startPosition delta=$delta',
+      );
+      return PlayerSinglePointerGestureDecision(
+        startPosition: startPosition,
+        action: .horizontal,
+      );
     }
-    return true;
+
+    final width = maxWidth;
+    final section = width / 3;
+    final isPortrait =
+        MediaQuery.orientationOf(context) == Orientation.portrait;
+    final inCenter =
+        startPosition.dx >= section && startPosition.dx < section * 2;
+    if (isPortrait && !inCenter) {
+      PlayerTouchTrace.message(
+        'gesture move-filter action=reject-portrait-edge start=$startPosition delta=$delta',
+      );
+      return null;
+    }
+    if (inCenter) {
+      PlayerTouchTrace.message(
+        'gesture move-filter action=fullscreen start=$startPosition delta=$delta',
+      );
+      return plPlayerController.enableSlideFS
+          ? PlayerSinglePointerGestureDecision(
+              startPosition: startPosition,
+              action: .fullScreen,
+            )
+          : null;
+    }
+    if (!plPlayerController.enableSlideVolumeBrightness) {
+      PlayerTouchTrace.message(
+        'gesture move-filter action=reject-disabled start=$startPosition delta=$delta',
+      );
+      return null;
+    }
+    final PlayerSinglePointerGestureAction action =
+        PlatformUtils.isDesktop && startPosition.dx < section
+        ? .volume
+        : startPosition.dx < section
+        ? .brightness
+        : .volume;
+    PlayerTouchTrace.message(
+      'gesture move-filter action=$action start=$startPosition delta=$delta',
+    );
+    return PlayerSinglePointerGestureDecision(
+      startPosition: startPosition,
+      action: action,
+    );
   }
 
   void _onPointerDown(PointerDownEvent event) {
+    PlayerTouchTrace.event(
+      stage: 'PlPlayerView _onPointerDown enter',
+      event: event,
+    );
     if (PlatformUtils.isDesktop) {
       final buttons = event.buttons;
       final isSecondaryBtn = buttons == kSecondaryMouseButton;
@@ -1406,6 +1557,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
 
     final controlsUnlock = !plPlayerController.controlsLock.value;
+    PlayerTouchTrace.message(
+      'gesture pointer-down controlsUnlock=$controlsUnlock '
+      'touchDevice=${PlatformUtils.isTouchDevice}',
+    );
     if (PlatformUtils.isTouchDevice) {
       _tapGestureRecognizer.addPointer(event);
       if (controlsUnlock) {
@@ -1413,10 +1568,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           _doubleTapGestureRecognizer.addPointer(event);
           longPressRecognizer.addPointer(event);
         }
-        _verticalDragGestureRecognizer.addPointer(event);
-        _scaleGestureRecognizer
-          ..isPosAllowed = _isPositionAllowed(event.localPosition)
-          ..addPointer(event);
+        _scaleGestureRecognizer.addPointer(event);
       }
     } else if (controlsUnlock) {
       if (plPlayerController.isLive) {
@@ -1434,7 +1586,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (plPlayerController.controlsLock.value) return;
     if (_gestureType == null) {
       final pan = event.pan;
-      if (pan.distanceSquared < 1) return;
+      if (pan.distance <= kPlayerDirectionQualificationSlop) return;
       final dx = pan.dx.abs();
       final dy = pan.dy.abs();
       if (dx > 3 * dy) {
@@ -1756,31 +1908,34 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     controller: _animationController,
                     isFullScreen: isFullScreen,
                     removeSafeArea: plPlayerController.removeSafeArea,
-                    child: plPlayerController.isDesktopPip
-                        ? GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onPanStart: (_) => windowManager.startDragging(),
-                            child: widget.headerControl,
-                          )
-                        : widget.headerControl,
+                    child: _controlLayer(
+                      plPlayerController.isDesktopPip
+                          ? GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onPanStart: (_) => windowManager.startDragging(),
+                              child: widget.headerControl,
+                            )
+                          : widget.headerControl,
+                    ),
                   ),
                   AppBarAni(
                     isTop: false,
                     controller: _animationController,
                     isFullScreen: isFullScreen,
                     removeSafeArea: plPlayerController.removeSafeArea,
-                    child:
-                        widget.bottomControl ??
-                        BottomControl(
-                          maxWidth: maxWidth,
-                          isFullScreen: isFullScreen,
-                          controller: plPlayerController,
-                          videoDetailController: videoDetailController,
-                          buildBottomControl: () => buildBottomControl(
-                            videoDetailController,
-                            maxWidth > maxHeight,
+                    child: _controlLayer(
+                      widget.bottomControl ??
+                          BottomControl(
+                            maxWidth: maxWidth,
+                            isFullScreen: isFullScreen,
+                            controller: plPlayerController,
+                            videoDetailController: videoDetailController,
+                            buildBottomControl: () => buildBottomControl(
+                              videoDetailController,
+                              maxWidth > maxHeight,
+                            ),
                           ),
-                        ),
+                    ),
                   ),
                 ],
               ),
@@ -2059,9 +2214,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           if (plPlayerController.dataStatus.loading ||
               (plPlayerController.isBuffering.value &&
                   plPlayerController.playerStatus.isPlaying)) {
-            return Center(
-              child: GestureDetector(
-                onTap: plPlayerController.refreshPlayer,
+            // The buffering indicator is visual feedback only. It must not
+            // consume a video-area tap: a tap while controls are hidden is
+            // supposed to wake the controls, not reopen the player and reset
+            // playback to the current (possibly stale) position.
+            return IgnorePointer(
+              child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -2193,53 +2351,75 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       height: maxHeight,
       color: widget.fill,
       child: Obx(
-        () => MouseInteractiveViewer(
-          scaleEnabled: !plPlayerController.controlsLock.value,
-          pointerSignalFallback: _onPointerSignal,
-          onPointerPanZoomUpdate: _onPointerPanZoomUpdate,
-          onPointerPanZoomEnd: _onPointerPanZoomEnd,
-          onPointerDown: _onPointerDown,
-          onPanStart: _onPanStart,
-          onPanUpdate: _onPanUpdate,
-          onPanEnd: _onPanEnd,
-          onScaleUpdate: _onScaleUpdate,
-          scaleGestureRecognizer: _scaleGestureRecognizer,
-          panEnabled: false,
-          minScale: plPlayerController.enableShrinkVideoSize ? 0.75 : 1,
-          maxScale: 2.0,
-          boundaryMargin: plPlayerController.enableShrinkVideoSize
-              ? const .all(double.infinity)
-              : .zero,
-          panAxis: .aligned,
-          transformationController: _transformationController,
-          childKey: _videoKey,
-          child: RepaintBoundary(
-            key: _videoKey,
-            child: Obx(
-              () {
-                final _ = plPlayerController.hdrSurfaceGeneration.value;
-                final videoFit = plPlayerController.videoFit.value;
-                final videoController = plPlayerController.videoController;
-                if (videoController == null) {
-                  return const SizedBox.expand();
-                }
-                return Transform.flip(
-                  flipX: plPlayerController.flipX.value,
-                  flipY: plPlayerController.flipY.value,
-                  child: Video(
-                    controller: videoController,
-                    width: maxWidth,
-                    height: maxHeight,
-                    fit: videoFit.boxFit,
-                    fill: widget.fill,
-                    alignment: widget.alignment,
-                    aspectRatio: videoFit.aspectRatio,
-                    controls: null,
+        () => Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRect(
+              child: AnimatedBuilder(
+                animation: _transformationController,
+                builder: (context, child) => Transform(
+                  transform: _transformationController.value,
+                  child: child,
+                ),
+                child: RepaintBoundary(
+                  child: Obx(
+                    () {
+                      final _ = plPlayerController.hdrSurfaceGeneration.value;
+                      final videoFit = plPlayerController.videoFit.value;
+                      final videoController =
+                          plPlayerController.videoController;
+                      if (videoController == null) {
+                        return const SizedBox.expand();
+                      }
+                      return Transform.flip(
+                        flipX: plPlayerController.flipX.value,
+                        flipY: plPlayerController.flipY.value,
+                        child: Video(
+                          controller: videoController,
+                          width: maxWidth,
+                          height: maxHeight,
+                          fit: videoFit.boxFit,
+                          fill: widget.fill,
+                          alignment: widget.alignment,
+                          aspectRatio: videoFit.aspectRatio,
+                          controls: null,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ),
+            // The viewport owns player input. Its transparent child keeps the
+            // native video surface out of this hit-test boundary while the
+            // controller still drives the display transform above.
+            MouseInteractiveViewer(
+              scaleEnabled: !plPlayerController.controlsLock.value,
+              pointerSignalFallback: _onPointerSignal,
+              onPointerPanZoomUpdate: _onPointerPanZoomUpdate,
+              onPointerPanZoomEnd: _onPointerPanZoomEnd,
+              onPointerDown: _onPointerDown,
+              onPanStart: _onPanStart,
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: _onPanEnd,
+              onScaleUpdate: _onScaleUpdate,
+              scaleGestureRecognizer: _scaleGestureRecognizer,
+              panEnabled: false,
+              minScale: plPlayerController.enableShrinkVideoSize ? 0.75 : 1,
+              maxScale: 2.0,
+              boundaryMargin: plPlayerController.enableShrinkVideoSize
+                  ? const .all(double.infinity)
+                  : .zero,
+              panAxis: .aligned,
+              transformationController: _transformationController,
+              childKey: _videoKey,
+              child: SizedBox(
+                key: _videoKey,
+                width: maxWidth,
+                height: maxHeight,
+              ),
+            ),
+          ],
         ),
       ),
     );

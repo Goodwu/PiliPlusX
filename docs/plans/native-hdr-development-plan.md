@@ -6,6 +6,17 @@
 当前状态以 [HDR 后端状态矩阵](../status/hdr-backend-status.md) 和
 [HDR 验证账本](../status/hdr-verification.md) 为准。
 
+## 跨平台硬约束
+
+对所有目标平台，只要设备硬件能力满足 HDR，就必须实现并交付 HDR 播放。只有能力
+探测明确证明显示输出、解码 profile、色彩管线或等效硬件条件不满足时，才允许最终
+回退到 SDR/tone-map。
+
+原生后端未完成、PlatformView/NativeWindow 生命周期有缺陷、色彩空间配置失败、交互
+问题、缺少真机证据、模拟器限制和 CI 环境不足，都不能归类为“硬件不满足”。这些
+情况必须作为开发阻塞或验收缺口继续处理。为了避免黑屏或崩溃而采取的临时运行回退，
+只能作为保护措施，不能成为产品默认路径或 HDR 阶段完成条件。
+
 ## 目标与完成定义
 
 - 完成 Android/Pink、iOS、macOS、Windows x64、Linux x64 和 OHOS 的原生
@@ -14,8 +25,9 @@
   BT.2020 与 PQ/HLG 元数据，以及高于 SDR 基线的 HDR/SDR ratio 或平台等效指标。
 - 模拟器、虚拟机、CI 和无图形 SSH 环境只能证明编译、启动、布局、生命周期或
   SDR 回退，不能单独证明原生 HDR。
-- 任一能力探测、surface、解码器或色彩空间配置失败，都必须回退到可播放的
-  Texture/gpu-next tone-mapped SDR，不允许黑屏或崩溃。
+- 只有硬件能力不满足时，才允许将 Texture/gpu-next tone-mapped SDR 作为最终回退；
+  实现失败时可以临时保护播放，但必须保留 HDR 阶段阻塞并继续修复，不能以回退代替
+  HDR 实现。
 
 ## 当前基线
 
@@ -41,12 +53,12 @@ HAP 构建，但仍停留在“运行待验证”，不应误读为原生 HDR �
 
 | 平台 | 原生后端 | 开发与验证重点 |
 | --- | --- | --- |
-| Android/Pink | HCPP/SurfaceView + MediaCodec | 保持 HCPP → SurfaceView → Texture 三级回退；API 34+、Vulkan、HDR display、10-bit codec profile 和完整 HDR 元数据同时满足后才尝试；重建后重新提交 Window HDR mode 与 dataspace。 |
-| iOS | `UIView` + `CAMetalLayer` PlatformView | 接入 EDR-capable 原生 layer，设置 10-bit/浮点像素格式和 BT.2020 PQ/HLG 色彩空间；模拟器、EDR 不可用和不支持的 Dolby Vision 流回退 Texture。 |
-| macOS | `NSView` + `CAMetalLayer` | 根据窗口所在 `NSScreen` 动态配置 EDR；监听窗口缩放、全屏、跨屏和显示参数变化，进入 SDR 屏时立即回退。 |
+| Android/Pink | HCPP/SurfaceView + MediaCodec | 保持 HCPP → SurfaceView → Texture 运行保护链；只有硬件能力明确不满足时才允许最终回退，其他失败必须阻塞 HDR 验收。API 34+、Vulkan、HDR display、10-bit codec profile 和完整 HDR 元数据同时满足后提交 Window HDR mode 与 dataspace。 |
+| iOS | `UIView` + `CAMetalLayer` PlatformView | 接入 EDR-capable 原生 layer，设置 10-bit/浮点像素格式和 BT.2020 PQ/HLG 色彩空间；模拟器或 EDR 不可用只能作为环境/能力证据，不能替代支持设备上的 HDR 实现。 |
+| macOS | `NSView` + `CAMetalLayer` | 根据窗口所在 `NSScreen` 动态配置 EDR；监听窗口缩放、全屏、跨屏和显示参数变化，只有目标屏硬件能力不满足时才允许最终回退。 |
 | Windows x64 | 原生视频子窗口 + D3D11 flip-model swapchain | 绑定播放器 HWND，验证 10-bit format、`CheckColorSpaceSupport` 和 `SetColorSpace1`；同步 DPI、缩放、全屏、最小化和跨显示器布局。 |
-| Linux x64 | GTK 原生视频区域 + Wayland color-management | 仅在 compositor 协议、驱动、HDR output、10-bit surface 和 image description 全部可证明时启用；X11、远程桌面和软件渲染保持 SDR。 |
-| OHOS | `XComponent` → NAPI/C++ → `OHNativeWindow` → 解码器输出 | 完成 surface 生命周期、窗口尺寸同步、硬解 profile 和 NativeWindow HDR 色彩空间配置；平台 API 不能证明成功时保持 `nativeOutput=false`。 |
+| Linux x64 | GTK 原生视频区域 + Wayland color-management | 仅在 compositor 协议、驱动、HDR output、10-bit surface 和 image description 全部可证明时启用；X11、远程桌面和软件渲染只有在对应硬件/输出能力明确不满足时才允许最终 SDR。 |
+| OHOS | `XComponent` → NAPI/C++ → `OHNativeWindow` → 解码器输出 | 完成 surface 生命周期、窗口尺寸同步、硬解 profile 和 NativeWindow HDR 色彩空间配置；平台 API 证据不足时保持未验收并继续实现，不能把 `nativeOutput=false` 当作完成状态。 |
 
 FinVideo 只用于参考 HDR10、HLG、Dolby Vision、HDR10+ 元数据分类，以及硬解和
 GPU 渲染策略。其实际播放器来自外部 `@ohpg/player`/FinPlayer，公开应用源码没有

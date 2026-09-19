@@ -192,6 +192,13 @@ foreach ($patch in $patches) {
     Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }
 
+# The shared video page exposes ExtendedNestedScrollView.pointerDownFilter on
+# every platform. Apply the matching Flutter SDK API after platform patches so
+# clean desktop/mobile SDKs do not depend on a developer's dirty SDK checkout.
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+python3 "$repoRoot/scripts/prepare_ohos_flutter.py" --flutter-root $env:FLUTTER_ROOT --workspace $repoRoot --pointer-filter-only
+if ($LASTEXITCODE -ne 0) { throw "Unable to prepare Flutter pointer filter API" }
+
 Set-Location $env:GITHUB_WORKSPACE
 
 $BottomSheetAndroidPatchMaterial = "lib/scripts/material/bottom_sheet_android.patch"
@@ -252,6 +259,9 @@ try {
 }
 
 flutter pub get --enforce-lockfile
+
+python3 "$env:GITHUB_WORKSPACE/scripts/prepare_ohos_package_patches.py" --workspace $env:GITHUB_WORKSPACE
+if ($LASTEXITCODE -ne 0) { throw "Unable to prepare extended nested scroll view pointer boundary" }
 
 $MaterialUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
     Where-Object { $_.Name -like "material_ui-*" } |

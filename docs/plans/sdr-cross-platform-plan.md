@@ -10,8 +10,13 @@
 Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建、
 可启动、可播放并能安全释放资源。
 
-- 默认保持 `HdrMode.off`；虚拟机、模拟器、远程桌面和能力不足的设备统一使用
-  SDR/tone-map，不报告 `nativeHdr`。
+SDR 主链路是兼容性和运行保护基线，不是具备 HDR 硬件能力设备的产品替代方案。对
+任一平台，只要硬件能力满足 HDR，就必须继续实现 HDR；只有能力探测确认硬件不满足时，
+才允许把 SDR/tone-map 作为最终输出。原生 HDR 后端未完成、生命周期缺陷、交互问题、
+缺少真机证据或模拟器限制都必须记录为 HDR 阻塞，不能改写成硬件不支持。
+
+- `HdrMode.off` 仅表示用户主动关闭 HDR；虚拟机、模拟器、远程桌面和能力明确不足的
+  设备可以使用 SDR/tone-map，但不能据此推断支持 HDR 的真机也允许回退。
 - 构建成功只作为编译证据；只有实际启动和播放完成后才记录运行验收。
 - Web 以核心播放为目标；下载、托盘、原生窗口等浏览器不支持的功能隐藏或禁用。
 - Linux arm64 发布 tar.gz 和 deb；Linux x64 继续发布 tar.gz、deb 和 rpm。
@@ -28,7 +33,8 @@ Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建�
 - Linux x64 已在 `dev` 生成 tar.gz、deb、rpm；Linux arm64 已在 Lima 生成
   aarch64 ELF、tar.gz 和 deb，并完成架构及摘要校验。
 - OHOS signed arm64 HAP 已在模拟器和实体机安装/启动；实体机 Texture SDR 首帧已
-  通过，完整控制与生命周期矩阵仍未完成。native surface 是独立 HDR 后续路径。
+  通过，完整控制与生命周期矩阵仍未完成。native surface 是当前 HDR 硬约束下的实现路径，
+  不能因为 SDR 首帧通过就把它降级为可选后续功能。
 - Windows x64 和 Linux 实际视频呈现仍缺可用图形/来宾设备环境；OHOS 已解除
   “无设备”阻塞，但 native surface 当前会触发 `SIGSEGV`。
 - `pubspec.lock` 的 9 个 media-kit 包当前统一锁定到
@@ -78,8 +84,9 @@ Windows x64、Linux x64、Linux arm64、OHOS 和 Web 的 SDR 主链路可构建�
 - **OHOS**：模拟器和实体机的 HAP 安装、Ability/首页启动已解除；模拟器不能作为
   media-kit 视频播放设备，实体机仍需补齐当前包的完整 SDR 播放矩阵和亮度/音量手势
   实测。
-- **HDR**：继续作为独立后续阶段；需系统色彩空间、播放器元数据、原生输出成功和
-  HDR/SDR 亮度比证据同时成立，才允许启用 `nativeHdr`。
+- **HDR**：对硬件能力满足的设备属于当前交付硬约束；需系统色彩空间、播放器元数据、
+  原生输出成功和 HDR/SDR 亮度比证据同时成立，才可标记 `nativeHdr`。证据不足是验收
+  阻塞，不是允许回退的硬件结论。
 
 ## 变更边界
 

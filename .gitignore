@@ -165,3 +165,5 @@ test*
 # the directories also contain large native bundles/packages.
 /remote-release-linux/
 /remote-release-linux-arm64/
+
+AGENTS.md

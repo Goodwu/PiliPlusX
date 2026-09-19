@@ -1,4 +1,5 @@
-import 'dart:async' show StreamSubscription, Timer, unawaited;
+import 'dart:async'
+    show Completer, Future, StreamSubscription, Timer, unawaited;
 import 'dart:convert' show ascii, utf8;
 import 'dart:io' show Platform;
 import 'dart:math' show max, min;
@@ -31,6 +32,8 @@ import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen_request_queue.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
 import 'package:PiliPlus/plugin/pl_player/hdr_android.dart';
 import 'package:PiliPlus/plugin/pl_player/hdr_platform.dart';
 import 'package:PiliPlus/services/service_locator.dart';
@@ -76,6 +79,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   VideoController? _videoController;
 
   static PlPlayerController? _instance;
+
+  final FullScreenOwnerToken _fullScreenOwner = claimFullScreenOwner();
+
+  FullScreenOwnerToken get fullScreenOwner => _fullScreenOwner;
 
   bool get _allowDiagnosticDolbyVisionNative =>
       kDebugMode &&
@@ -396,15 +403,33 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   StreamSubscription<Object?>? _hdrDisplaySubscription;
   void Function(bool displayHdr)? onHdrDisplayChanged;
   bool _hdrOutputRebuildInFlight = false;
+  // Invalidates output rebuilds suspended across an await when the
+  // player/page is disposed. This is separate from HDR source generation:
+  // a source can remain current while its owner is gone.
+  int _videoOutputTransactionGeneration = 0;
   int _hdrDisplayRefreshGeneration = 0;
   final _hdrOutputTransactionGate = HdrOutputTransactionGate();
+  final _videoOutputPublicationGate = VideoOutputPublicationGate();
+  // A shared media-kit Player accepts only one source open at a time.  The
+  // gate makes an older dispatched open settle before its replacement begins,
+  // otherwise completion order can leave the old media selected natively.
+  final _playerSourceOperationGate = PlayerSourceOperationGate();
+  // Keep the production source-open path on the same lifecycle coordinator
+  // exercised by the opaque-handle timing tests. The controller continues to
+  // own concrete media-kit handles and page state.
+  late final _playerLifecycle =
+      PlayerLifecycleOrchestrator<Player, VideoController>(
+        openGate: _playerSourceOperationGate,
+        outputPublicationGate: _videoOutputPublicationGate,
+      );
   bool? _queuedHdrOutputRebuildHcpp;
   bool? _queuedHdrOutputRebuildSurfaceView;
+  bool? _queuedHdrOutputRebuildNativeSurface;
   String? _lastHdrDiagnostic;
   String? _lastHdrVideoParamsDiagnostic;
   String? _lastHdrParameterReadback;
   String? _lastHdrNativeOutputAttempt;
-  bool _hdrNativeOutputAttemptInFlight = false;
+  final _hdrNativeOutputAttemptGate = HdrNativeOutputAttemptGate();
 
   HdrCapabilities get hdrCapabilities => _hdrCapabilities;
   HdrSourceMetadata get hdrSource => _hdrSource;
@@ -534,6 +559,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   void _onOrientationChanged(OrientationParams param) {
+    if (!_isFullScreenTransactionAlive()) return;
     _orientation = param.orientation;
     if (!visible) return;
     if (!_initialOrientationHandled) {
@@ -544,6 +570,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
     final orientation = param.orientation;
     final isFullScreen = this.isFullScreen.value;
+    debugPrint(
+      '[FullscreenTrace] orientation=$orientation isFullScreen=$isFullScreen '
+      'isManualFS=$isManualFS isVertical=$_isVertical '
+      'horizontalScreen=$horizontalScreen auto=$enableLandscapeAutoFullscreen',
+    );
     if (checkIsAutoRotate &&
         param.isAutoRotate != true &&
         (!isFullScreen ||
@@ -573,25 +604,25 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             triggerFullScreen(status: false, orientation: orientation);
           }
         } else {
-          portraitUpMode();
+          portraitUpMode(owner: _fullScreenOwner);
         }
       case .portraitDown:
         if (!horizontalScreen) return;
         if (!_isVertical && controlsLock.value) return;
-        portraitDownMode();
+        portraitDownMode(owner: _fullScreenOwner);
       case .landscapeLeft:
         if ((!horizontalScreen || enableLandscapeAutoFullscreen) &&
             !isFullScreen) {
           triggerFullScreen(orientation: orientation, isManualFS: false);
         } else {
-          landscapeLeftMode();
+          landscapeLeftMode(owner: _fullScreenOwner);
         }
       case .landscapeRight:
         if ((!horizontalScreen || enableLandscapeAutoFullscreen) &&
             !isFullScreen) {
           triggerFullScreen(orientation: orientation, isManualFS: false);
         } else {
-          landscapeRightMode();
+          landscapeRightMode(owner: _fullScreenOwner);
         }
     }
   }
@@ -631,9 +662,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 获取实例 传参
   static PlPlayerController getInstance({bool isLive = false}) {
     // 如果实例尚未创建，则创建一个新实例
-    return (_instance ??= PlPlayerController._())
+    final controller = _instance ??= PlPlayerController._();
+    final firstPlayer = controller._playerCount == 0;
+    controller
       ..isLive = isLive
       .._playerCount += 1;
+    debugPrint(
+      '[FullscreenPlatformTrace] get-controller owner=${controller._fullScreenOwner.generation} '
+      'first=$firstPlayer playerCount=${controller._playerCount}',
+    );
+    if (firstPlayer) {
+      controller._scheduleInitialFullScreenPlatformReconciliation();
+    }
+    return controller;
   }
 
   bool _processing = false;
@@ -670,13 +711,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     int? initialVideoQuality,
     String? initialVideoCodec,
   }) async {
+    late final int sourceGeneration;
     try {
+      sourceGeneration = ++_hdrSourceGeneration;
       _processing = true;
-      final sourceGeneration = ++_hdrSourceGeneration;
       _hdrCodecHint = initialVideoCodec;
       _hdrProbedCodec = null;
       _queuedHdrOutputRebuildHcpp = null;
       _queuedHdrOutputRebuildSurfaceView = null;
+      // A source boundary needs a fresh native-output decision even when the
+      // metadata tuple happens to match the preceding source.
+      _lastHdrNativeOutputAttempt = null;
       hdrOutputError.value = null;
       _hdrSource = HdrSourceMetadata.fromBilibiliHints(
         quality: initialVideoQuality,
@@ -721,8 +766,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         return;
       }
       // 配置Player 音轨、字幕等等
-      await _createVideoController(dataSource, seekTo, volume);
+      await _createVideoController(
+        dataSource,
+        seekTo,
+        volume,
+        sourceGeneration: sourceGeneration,
+      );
 
+      // A reused Player may finish an older open after a replacement source
+      // has started.  Do not publish its duration/status/init callback into
+      // the replacement source's state.
+      if (sourceGeneration != _hdrSourceGeneration) return;
       if (_playerCount == 0) {
         _removeListeners();
         _videoPlayerController?.dispose();
@@ -744,13 +798,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       await _initializePlayer();
       onInit?.call();
     } catch (err, stackTrace) {
-      dataStatus.value = DataStatus.error;
-      if (kDebugMode) {
-        debugPrint(stackTrace.toString());
-        debugPrint('plPlayer err:  $err');
+      // An older queued native open may fail after a replacement source has
+      // already entered loading. Its error is diagnostic only; publishing it
+      // would turn the replacement page into DataStatus.error.
+      if (sourceGeneration == _hdrSourceGeneration) {
+        dataStatus.value = DataStatus.error;
+        if (kDebugMode) {
+          debugPrint(stackTrace.toString());
+          debugPrint('plPlayer err:  $err');
+        }
       }
     } finally {
-      _processing = false;
+      // An older open must not advertise the newer open as idle.
+      if (sourceGeneration == _hdrSourceGeneration) {
+        _processing = false;
+      }
     }
   }
 
@@ -806,7 +868,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
-  Future<Player> _initPlayer() async {
+  Future<Player> _initPlayer({required int sourceGeneration}) async {
     assert(_videoPlayerController == null);
     final opt = {
       'video-sync': Pref.videoSync,
@@ -834,9 +896,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
     assert(_videoController == null);
 
-    _hdrCapabilities = await HdrPlatform.probe(codec: _hdrCodecHint);
+    // A new source can start while the platform capability probe awaits.
+    // Return the uncommitted local Player to its caller for disposal, but do
+    // not let old codec/display facts overwrite the replacement source.
+    final codecHint = _hdrCodecHint;
+    final capabilities = await HdrPlatform.probe(codec: codecHint);
+    if (sourceGeneration != _hdrSourceGeneration ||
+        _playerCount == 0 ||
+        _fsDisposed) {
+      return player;
+    }
+    _hdrCapabilities = capabilities;
     hdrDisplaySupportsHdr.value = _hdrCapabilities.displayHdr;
-    _hdrProbedCodec = _hdrCodecHint;
+    _hdrProbedCodec = codecHint;
     _hdrDecision = HdrDecision.choose(
       mode: Pref.hdrMode,
       source: _hdrSource,
@@ -846,6 +918,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     );
     if (Platform.isAndroid && !_hdrDecision.useHcpp) {
       await HdrAndroid.setWindowHdrMode(hdr: false);
+      if (sourceGeneration != _hdrSourceGeneration ||
+          _playerCount == 0 ||
+          _fsDisposed) {
+        return player;
+      }
     }
     debugPrint(
       'HDR capabilities: platform=${_hdrCapabilities.platform}, '
@@ -861,17 +938,32 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // source. The decision also includes the source metadata and user mode.
     final useHcpp = _hdrDecision.useHcpp;
 
+    // Keep output creation local until the source ownership is checked again.
+    // A replacement can cross the capability-probe boundary while this native
+    // surface is being created; publishing the old controller here would let
+    // it survive after its local Player is returned for disposal below.
+    late final VideoController nextVideoController;
     try {
-      _videoController = await VideoController.create(
+      nextVideoController = await VideoController.create(
         player,
-        configuration: _videoConfiguration(hcpp: useHcpp),
+        configuration: _videoConfiguration(
+          hcpp: useHcpp,
+          nativeSurface: _hdrDecision.useNativeSurface,
+        ),
       );
     } on Object catch (error) {
+      // Do not let a failed stale create alter the replacement source's HDR
+      // capability/decision state while choosing a fallback for itself.
+      if (sourceGeneration != _hdrSourceGeneration ||
+          _playerCount == 0 ||
+          _fsDisposed) {
+        return player;
+      }
       if (!useHcpp) {
         _hdrCapabilities = _hdrCapabilities.copyWith(
           unsupportedReason: 'surface-init-failed:${error.runtimeType}',
         );
-        _videoController = await VideoController.create(
+        nextVideoController = await VideoController.create(
           player,
           configuration: _videoConfiguration(hcpp: false, texture: true),
         );
@@ -887,7 +979,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           );
         }
         try {
-          _videoController = await VideoController.create(
+          nextVideoController = await VideoController.create(
             player,
             configuration: _videoConfiguration(
               hcpp: false,
@@ -895,11 +987,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             ),
           );
         } catch (surfaceError) {
+          if (sourceGeneration != _hdrSourceGeneration ||
+              _playerCount == 0 ||
+              _fsDisposed) {
+            return player;
+          }
           _hdrCapabilities = _hdrCapabilities.copyWith(
             unsupportedReason:
                 'surface-init-failed:${surfaceError.runtimeType}',
           );
-          _videoController = await VideoController.create(
+          nextVideoController = await VideoController.create(
             player,
             configuration: _videoConfiguration(hcpp: false, texture: true),
           );
@@ -907,7 +1004,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       }
     }
 
-    _startListeners(player, sourceGeneration: _hdrSourceGeneration);
+    if (sourceGeneration != _hdrSourceGeneration ||
+        _playerCount == 0 ||
+        _fsDisposed) {
+      try {
+        final platform = await nextVideoController.platform.future;
+        await platform.disposeForRebuild();
+      } catch (error) {
+        debugPrint('stale initial video output dispose failed: $error');
+      }
+      return player;
+    }
+    _videoController = nextVideoController;
+    _startListeners(player, sourceGeneration: sourceGeneration);
     if (Platform.isMacOS) {
       _hdrDisplaySubscription = HdrPlatform.displayChanges.listen(
         (_) => unawaited(refreshHdrDisplayCapabilities()),
@@ -922,6 +1031,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     required bool hcpp,
     bool texture = false,
     bool surfaceView = false,
+    bool nativeSurface = false,
   }) => VideoControllerConfiguration(
     vo: Platform.isAndroid
         ? hcpp
@@ -935,67 +1045,137 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     hwdec: hwdec,
     enableAndroidSurfaceProducer: !hcpp && !texture,
     usePlatformView: hcpp,
-    // OHOS native HDR must remain a compositor layer. The default surface
-    // platform-view path turns the XComponent into a Flutter texture, which
-    // lands in the SDR root BufferQueue and loses HDR metadata. HCPP keeps
-    // the XComponent as a RenderService layer; enable it only for the native
-    // OHOS surface path and leave ordinary texture output unchanged.
-    useHCPP: hcpp || (Platform.operatingSystem == 'ohos' && !texture),
-    // Keep a native candidate stable across SDR/HDR source changes. OHOS is
-    // enabled for the native HDR A/B now that its output size is clamped to
-    // the current display orientation; activation remains fail-closed until
-    // the backend reports a verified native HDR output.
+    // Keep ordinary OHOS SDR playback on the verified Flutter Texture path.
+    // HCPP/native-surface is selected only when the HDR decision explicitly
+    // requests that output topology.
+    // OHOS native HDR keeps the XComponent as an independent compositor
+    // layer even when the Android-specific HCPP capability is false.
+    useHCPP: hcpp || (Platform.operatingSystem == 'ohos' && nativeSurface),
     useNativeSurface:
         !texture &&
         Pref.hdrMode == HdrMode.auto &&
-        (Platform.isIOS ||
+        (nativeSurface ||
+            Platform.isIOS ||
             Platform.isMacOS ||
-            Platform.operatingSystem == 'ohos'),
+            (Platform.operatingSystem == 'ohos' && hcpp)),
   );
 
   Future<void> _rebuildVideoOutput({
     required bool hcpp,
     bool surfaceView = false,
+    bool nativeSurface = false,
   }) async {
     final player = _videoPlayerController;
     final old = _videoController;
+    final sourceGeneration = _hdrSourceGeneration;
     if (player == null) return;
+    final transactionGeneration = ++_videoOutputTransactionGeneration;
+    if (kDebugMode && Platform.operatingSystem == 'ohos') {
+      debugPrint(
+        '[OhosOutputTrace] rebuild-start transaction=$transactionGeneration '
+        'hcpp=$hcpp surfaceView=$surfaceView nativeSurface=$nativeSurface '
+        'old=${old?.hashCode} sourceGeneration=$sourceGeneration '
+        'hdrSurfaceGeneration=${hdrSurfaceGeneration.value}',
+      );
+    }
+    bool isCurrent() =>
+        !_fsDisposed &&
+        sourceGeneration == _hdrSourceGeneration &&
+        transactionGeneration == _videoOutputTransactionGeneration &&
+        identical(player, _videoPlayerController);
+
+    Future<void> disposeStaleOutput(VideoController controller) async {
+      try {
+        final platform = await controller.platform.future;
+        await platform.disposeForRebuild();
+      } catch (error) {
+        debugPrint('stale video output dispose failed: $error');
+      }
+    }
+
+    Future<bool> publishOutputIfCurrent(VideoController nextController) {
+      return _videoOutputPublicationGate.publishOrDispose<VideoController>(
+        candidate: nextController,
+        isCurrent: isCurrent,
+        // A fallback can finish after dispose or after a newer rebuild has
+        // superseded this transaction. Never publish that controller into the
+        // widget tree; it belongs to the stale transaction and must be
+        // released through the same disposal barrier as the primary output.
+        dispose: disposeStaleOutput,
+        publish: (controller) {
+          _videoController = controller;
+          hdrOutputError.value = null;
+          hdrSurfaceGeneration.value++;
+        },
+      );
+    }
+
     final configureNativeColorSpace = hcpp && _hdrSource.hasNativeColorMetadata;
     if (old != null) {
       try {
         final platform = await old.platform.future;
         await platform.disposeForRebuild();
+        // Disposal is an irreversible handoff. If this transaction lost the
+        // source race while awaiting the platform, still detach this exact
+        // controller when it is the one currently exposed; never leave a
+        // released controller reachable through the widget tree. A newer
+        // transaction that already published another controller is left
+        // untouched by the identity check.
+        if (identical(_videoController, old)) {
+          _videoController = null;
+          hdrSurfaceGeneration.value++;
+        }
       } catch (error) {
+        if (!isCurrent()) return;
         _hdrCapabilities = _hdrCapabilities.copyWith(
           unsupportedReason: 'output-dispose-failed:${error.runtimeType}',
         );
         _refreshHdrDecision();
         debugPrint('HDR output dispose failed: $error');
-        return;
+        rethrow;
       }
     }
+    if (!isCurrent()) return;
     // The disposal barrier means [old] is no longer renderable. Remove it
     // from the widget tree before awaiting any platform transition so a frame
     // can never observe a disposed controller.
     _videoController = null;
     hdrOutputError.value = null;
     hdrSurfaceGeneration.value++;
+    if (kDebugMode && Platform.operatingSystem == 'ohos') {
+      debugPrint(
+        '[OhosOutputTrace] rebuild-detached transaction=$transactionGeneration '
+        'hdrSurfaceGeneration=${hdrSurfaceGeneration.value}',
+      );
+    }
     _lastHdrNativeOutputAttempt = null;
     if (Platform.isAndroid && !hcpp) {
       await HdrAndroid.setWindowHdrMode(hdr: false);
+      if (!isCurrent()) return;
     }
     try {
-      _videoController = await VideoController.create(
+      final nextController = await VideoController.create(
         player,
         configuration: _videoConfiguration(
           hcpp: hcpp,
           surfaceView: surfaceView,
+          nativeSurface: nativeSurface,
         ),
       );
-      hdrOutputError.value = null;
-      hdrSurfaceGeneration.value++;
+      if (!await publishOutputIfCurrent(nextController)) return;
+      if (kDebugMode && Platform.operatingSystem == 'ohos') {
+        debugPrint(
+          '[OhosOutputTrace] rebuild-published transaction=$transactionGeneration '
+          'controller=${nextController.hashCode} '
+          'hdrSurfaceGeneration=${hdrSurfaceGeneration.value}',
+        );
+      }
       if (configureNativeColorSpace) {
-        final applied = await _setHdrColorSpace(player);
+        final applied = await _setHdrColorSpace(
+          player,
+          sourceGeneration: sourceGeneration,
+        );
+        if (!isCurrent()) return;
         if (!applied) {
           _hdrCapabilities = _hdrCapabilities.copyWith(
             nativeOutput: false,
@@ -1015,10 +1195,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           unsupportedReason: 'native-dataspace-applied',
         );
         _refreshHdrDecision();
-        unawaited(_applyHdrOutputParameters(player));
+        unawaited(
+          _applyHdrOutputParameters(
+            player,
+            sourceGeneration: sourceGeneration,
+          ),
+        );
         debugPrint('HDR dataspace applied after output rebuild');
       }
     } catch (error) {
+      if (!isCurrent()) return;
       Object failure = error;
       if (hcpp) {
         _hdrCapabilities = _hdrCapabilities.copyWith(
@@ -1027,39 +1213,41 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
         _refreshHdrDecision();
         try {
-          _videoController = await VideoController.create(
+          final fallbackController = await VideoController.create(
             player,
             configuration: _videoConfiguration(
               hcpp: false,
               surfaceView: true,
             ),
           );
-          hdrOutputError.value = null;
-          hdrSurfaceGeneration.value++;
+          if (!await publishOutputIfCurrent(fallbackController)) return;
           if (Platform.isAndroid) {
             await HdrAndroid.setWindowHdrMode(hdr: false);
+            if (!isCurrent()) return;
           }
           debugPrint('HDR output fallback: HCPP -> SurfaceView');
           return;
         } catch (surfaceError) {
           failure = surfaceError;
+          if (!isCurrent()) return;
         }
       }
+      if (!isCurrent()) return;
       _hdrCapabilities = _hdrCapabilities.copyWith(
         unsupportedReason: 'surface-rebuild-failed:${failure.runtimeType}',
       );
       try {
-        _videoController = await VideoController.create(
+        final fallbackController = await VideoController.create(
           player,
           configuration: _videoConfiguration(hcpp: false, texture: true),
         );
-        hdrOutputError.value = null;
-        hdrSurfaceGeneration.value++;
+        if (!await publishOutputIfCurrent(fallbackController)) return;
         debugPrint('HDR output fallback: SurfaceView -> Texture');
         return;
       } catch (textureError) {
         failure = textureError;
       }
+      if (!isCurrent()) return;
       _hdrCapabilities = _hdrCapabilities.copyWith(
         hcpp: false,
         unsupportedReason: 'output-rebuild-failed:${failure.runtimeType}',
@@ -1067,6 +1255,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _refreshHdrDecision();
       if (Platform.isAndroid) {
         await HdrAndroid.setWindowHdrMode(hdr: false);
+        if (!isCurrent()) return;
       }
       hdrOutputError.value = 'video-output-rebuild-failed';
       debugPrint('HDR output rebuild failed: $failure');
@@ -1076,25 +1265,37 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   void _requestHdrOutputRebuild({
     required bool hcpp,
     bool surfaceView = false,
+    bool? nativeSurface,
   }) {
+    final requestedNativeSurface =
+        nativeSurface ?? _hdrDecision.useNativeSurface;
     if (_hdrOutputRebuildInFlight) {
       _queuedHdrOutputRebuildHcpp = hcpp;
       _queuedHdrOutputRebuildSurfaceView = surfaceView;
+      _queuedHdrOutputRebuildNativeSurface = requestedNativeSurface;
       return;
     }
     _hdrOutputRebuildInFlight = true;
     unawaited(
-      _rebuildVideoOutput(hcpp: hcpp, surfaceView: surfaceView).whenComplete(
+      _rebuildVideoOutput(
+        hcpp: hcpp,
+        surfaceView: surfaceView,
+        nativeSurface: requestedNativeSurface,
+      ).whenComplete(
         () {
           _hdrOutputRebuildInFlight = false;
           final queued = _queuedHdrOutputRebuildHcpp;
           final queuedSurfaceView = _queuedHdrOutputRebuildSurfaceView ?? false;
+          final queuedNativeSurface =
+              _queuedHdrOutputRebuildNativeSurface ?? false;
           _queuedHdrOutputRebuildHcpp = null;
           _queuedHdrOutputRebuildSurfaceView = null;
+          _queuedHdrOutputRebuildNativeSurface = null;
           if (queued != null) {
             _requestHdrOutputRebuild(
               hcpp: queued,
               surfaceView: queuedSurfaceView,
+              nativeSurface: queuedNativeSurface,
             );
           }
         },
@@ -1117,8 +1318,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> _refreshHdrCapabilitiesForCodec(String codec) async {
     if (!Platform.isAndroid || codec == _hdrProbedCodec) return;
+    final sourceGeneration = _hdrSourceGeneration;
+    final player = _videoPlayerController;
     final previousDecision = _hdrDecision;
     final capabilities = await HdrPlatform.probe(codec: codec);
+    if (sourceGeneration != _hdrSourceGeneration ||
+        !identical(player, _videoPlayerController) ||
+        _playerCount == 0 ||
+        _fsDisposed) {
+      return;
+    }
     _hdrProbedCodec = codec;
     _hdrCapabilities = capabilities;
     _refreshHdrDecision();
@@ -1294,6 +1503,50 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           ).toMap(),
         );
         if (!isCurrent()) return false;
+        if (Platform.operatingSystem == 'ohos' &&
+            (configured is! Map || configured['active'] != true)) {
+          // The XComponent surface is asynchronous. The OHOS backend keeps
+          // this configuration pending and applies it from nativeSurfaceReady;
+          // wait on its notifier instead of guessing with a fixed delay.
+          final notifier = nativePlatform.nativeSurfaceActiveNotifier;
+          final active = Completer<void>();
+          void onActiveChanged() {
+            if (notifier.value == true && !active.isCompleted) {
+              active.complete();
+            }
+          }
+
+          notifier.addListener(onActiveChanged);
+          try {
+            onActiveChanged();
+            if (!active.isCompleted) {
+              await Future.any<void>([
+                active.future,
+                Future<void>.delayed(const Duration(seconds: 3)),
+              ]);
+            }
+          } finally {
+            notifier.removeListener(onActiveChanged);
+          }
+          if (!isCurrent() || notifier.value != true) return false;
+          configured = await nativePlatform.configureHdrOutput(
+            HdrOutputConfiguration(
+              transfer: source.transfer,
+              primaries: source.primaries,
+              matrix: source.matrix,
+              dolbyVisionProfile: source.dolbyVisionProfile,
+              rpuPresent: source.rpuPresent,
+              baseLayerPresent: source.baseLayerPresent,
+              enhancementLayerPresent: source.enhancementLayerPresent,
+              dvEnhancement: source.dvEnhancement,
+              dynamicMetadataPresent: source.dynamicMetadataPresent,
+              masteringMetadata: source.masteringMetadata,
+              surfaceId: surfaceHandle.toString(),
+              surfaceGeneration: surfaceGeneration,
+            ).toMap(),
+          );
+          if (!isCurrent()) return false;
+        }
         // The Darwin layer can receive its first drawable/provider callback a
         // few frames after the controller is created. The media-kit Ready
         // callback configures the saved payload at that point, so retry the
@@ -1388,7 +1641,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
     if (!isCurrent()) return;
     final native = _hdrDecision.output == HdrOutputMode.nativeHdr;
-    if (!native && _hdrCapabilities.nativeOutputActive) {
+    final shouldResetNativeOutput =
+        !native &&
+        (_hdrCapabilities.nativeOutputActive ||
+            Platform.operatingSystem == 'ohos');
+    if (shouldResetNativeOutput) {
       try {
         final platform = await _videoController?.platform.future;
         if (!isCurrent()) return;
@@ -1405,6 +1662,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         debugPrint('HDR native output reset failed: $error');
       }
     }
+    // OHOS owns the complete mpv HDR parameter transaction in its video
+    // backend. Keep the app responsible for policy and configure/reset entry
+    // points, but do not race the backend with a second property writer.
+    if (Platform.operatingSystem == 'ohos') return;
     final transfer = switch (_hdrSource.transfer) {
       HdrTransfer.hlg => 'arib-std-b67',
       HdrTransfer.pq => 'pq',
@@ -1503,8 +1764,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> _createVideoController(
     DataSource dataSource,
     Duration? seekTo,
-    Volume? volume,
-  ) async {
+    Volume? volume, {
+    required int sourceGeneration,
+  }) async {
     isBuffering.value = false;
     _heartDuration = 0;
     danmakuController?.clear();
@@ -1512,12 +1774,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     var player = _videoPlayerController;
 
     if (player == null) {
-      player = await _initPlayer();
-      if (_playerCount == 0) {
-        _removeListeners();
+      player = await _initPlayer(sourceGeneration: sourceGeneration);
+      // Two source changes can both cross _initPlayer before either assigns
+      // the shared field.  Dispose the stale local Player rather than letting
+      // it overwrite the replacement source's shared Player.
+      if (sourceGeneration != _hdrSourceGeneration || _playerCount == 0) {
         player.dispose();
-        player = null;
-        _videoController = null;
         return;
       }
       _videoPlayerController = player;
@@ -1525,6 +1787,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         await setShader();
       }
     }
+
+    // Do not let an old source continue into Player.open after an async
+    // player/shader initialization. The shared Player may already belong to
+    // the replacement source at this point.
+    if (sourceGeneration != _hdrSourceGeneration ||
+        !identical(player, _videoPlayerController)) {
+      return;
+    }
+    // Keep the current Player in an immutable local for the queued closure.
+    final currentPlayer = player;
 
     final Map<String, String> extras = {
       if (dataSource is FileSource)
@@ -1553,25 +1825,55 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       audioFilterExtras(volume, map: extras);
     }
 
-    await player.open(
-      Media(
-        video,
-        start: seekTo,
-        httpHeaders: {
-          'User-Agent': BrowserUa.pc,
-          'Referer': HttpString.baseUrl,
-        },
-        extras: extras.isEmpty ? null : extras,
+    if (kDebugMode) {
+      debugPrint(
+        '[OhosPlaybackTrace] player.open initialize '
+        'play=false seekTo=$seekTo source=${video.length > 120 ? '${video.substring(0, 120)}...' : video}',
+      );
+    }
+    final opened = await _playerLifecycle.openCurrent(
+      player: currentPlayer,
+      isCurrent: () =>
+          sourceGeneration == _hdrSourceGeneration &&
+          _playerCount > 0 &&
+          identical(currentPlayer, _videoPlayerController),
+      open: (player) => player.open(
+        Media(
+          video,
+          start: seekTo,
+          httpHeaders: {
+            'User-Agent': BrowserUa.pc,
+            'Referer': HttpString.baseUrl,
+          },
+          extras: extras.isEmpty ? null : extras,
+        ),
+        play: false,
       ),
-      play: false,
+      rebindListeners: (player) {
+        _removeListeners();
+        _startListeners(player, sourceGeneration: sourceGeneration);
+      },
     );
+
+    // A source replacement or disposal can occur while the native open is in
+    // flight. Its completion is intentionally not treated as this source's
+    // successful open, and must not rebind listener ownership below.
+    if (!opened) return;
   }
 
-  Future<void>? refreshPlayer() {
+  Future<void>? refreshPlayer({String reason = 'unspecified'}) {
     if (dataSource is FileSource) {
       return null;
     }
     if (_videoPlayerController case final ctr? when (ctr.current.isNotEmpty)) {
+      if (kDebugMode) {
+        debugPrint(
+          '[OhosPlaybackTrace] refreshPlayer '
+          'reason=$reason '
+          'position=${ctr.state.position} playing=${ctr.state.playing} '
+          'buffering=${ctr.state.buffering} source=${ctr.current.last.uri}',
+        );
+      }
       return ctr.open(
         ctr.current.last.copyWith(start: ctr.state.position),
         play: true,
@@ -1586,7 +1888,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
       return;
     }
-    unawaited(refreshPlayer() ?? Future<void>.value());
+    if (kDebugMode) {
+      debugPrint('[OhosPlaybackTrace] retryVideoOutput');
+    }
+    unawaited(
+      refreshPlayer(reason: 'retry-video-output') ?? Future<void>.value(),
+    );
   }
 
   // 开始播放
@@ -1631,6 +1938,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _subscriptions = [
       /// playing
       stream.playing.listen((bool playing) {
+        PlayerTouchTrace.message(
+          'player-state playing=$playing generation=$sourceGeneration '
+          'position=${videoPlayerController?.state.position}',
+        );
         WakelockPlus.toggle(enable: playing);
         if (playing) {
           if (_isAutoEnterPip) {
@@ -1774,6 +2085,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         if (outputTopologyChanged &&
             _videoController != null &&
             !darwinNativeCandidate) {
+          if (kDebugMode && Platform.operatingSystem == 'ohos') {
+            debugPrint(
+              '[OhosOutputTrace] video-params topology-change '
+              'previous=${previousDecision.outputTopologySignature} '
+              'current=${_hdrDecision.outputTopologySignature} '
+              'nativeCandidate=$ohosNativeCandidate',
+            );
+          }
           _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
         }
         unawaited(
@@ -1810,10 +2129,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             _hdrSource.hasNativeColorMetadata &&
             (!outputTopologyChanged || darwinNativeCandidate) &&
             !_hdrOutputRebuildInFlight &&
-            !_hdrNativeOutputAttemptInFlight &&
+            !_hdrNativeOutputAttemptGate.inFlight &&
             _lastHdrNativeOutputAttempt != nativeOutputAttempt) {
           _lastHdrNativeOutputAttempt = nativeOutputAttempt;
-          _hdrNativeOutputAttemptInFlight = true;
+          final nativeOutputAttemptToken = _hdrNativeOutputAttemptGate.start();
+          if (nativeOutputAttemptToken == null) return;
           unawaited(
             _setHdrColorSpace(player, sourceGeneration: sourceGeneration)
                 .then((applied) {
@@ -1864,14 +2184,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                   );
                 })
                 .whenComplete(() {
-                  if (sourceGeneration == _hdrSourceGeneration) {
-                    _hdrNativeOutputAttemptInFlight = false;
-                  }
+                  // The completion belongs to this token even when its source
+                  // has become stale.  Clearing only the matching token both
+                  // releases a stale attempt and preserves any later one.
+                  _hdrNativeOutputAttemptGate.complete(
+                    nativeOutputAttemptToken,
+                  );
                 }),
           );
         }
       }),
       stream.buffering.listen((bool buffering) {
+        PlayerTouchTrace.message(
+          'player-state buffering=$buffering generation=$sourceGeneration '
+          'position=${videoPlayerController?.state.position}',
+        );
         isBuffering.value = buffering;
         videoPlayerServiceHandler?.onStatusChange(
           playerStatus.value,
@@ -1891,6 +2218,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           }
         })),
       stream.error.listen((String event) {
+        if (kDebugMode) {
+          debugPrint('[OhosPlaybackTrace] stream.error event=$event');
+        }
         if (dataSource is FileSource &&
             event.startsWith("Failed to open file")) {
           return;
@@ -1899,7 +2229,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           if (event.startsWith('tcp: ffurl_read returned ') ||
               event.startsWith("Failed to open https://") ||
               event.startsWith("Can not open external file https://")) {
-            Future.delayed(const Duration(milliseconds: 3000), refreshPlayer);
+            Future.delayed(
+              const Duration(milliseconds: 3000),
+              () => refreshPlayer(reason: 'live-stream-error'),
+            );
           }
           return;
         }
@@ -1924,7 +2257,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                     '视频链接打开失败，重试中',
                     displayTime: const Duration(milliseconds: 500),
                   );
-                  refreshPlayer();
+                  refreshPlayer(reason: 'vod-buffer-timeout');
                 }
               });
             },
@@ -2251,6 +2584,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   void _setFullScreen(bool val) {
+    PlayerTouchTrace.message(
+      'fullscreen commit target=$val before=${isFullScreen.value} '
+      'vertical=$_isVertical owner=${_fullScreenOwner.generation}',
+    );
     isFullScreen.value = val;
     updateSubtitleStyle();
   }
@@ -2264,7 +2601,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void>? changeOrientation({
     required bool isVertical,
     DeviceOrientation? orientation,
+    FullScreenOwnerToken? owner,
   }) {
+    // A vertical source is already presented in the device's natural portrait
+    // layout. Fullscreen must not turn it into a landscape surface merely
+    // because the global fullscreen preference or a stale orientation event
+    // requests rotation.
+    if (isVertical && orientation == null) {
+      debugPrint(
+        '[FullscreenTrace] changeOrientation vertical=true '
+        'mode=$mode request=null -> portrait',
+      );
+      return portraitUpMode(owner: owner ?? _fullScreenOwner);
+    }
     if (orientation == null && (mode == .none || mode == .gravity)) {
       return null;
     }
@@ -2272,68 +2621,293 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         (mode == .vertical ||
             (mode == .auto && isVertical) ||
             (mode == .ratio && (isVertical || screenRatio < kScreenRatio)))) {
-      return portraitUpMode();
+      return portraitUpMode(owner: owner ?? _fullScreenOwner);
     } else {
       // https://github.com/flutter/flutter/issues/73651
       // https://github.com/flutter/flutter/issues/183708
       if (Platform.isAndroid) {
         if ((orientation ?? _orientation) == .landscapeRight) {
-          return landscapeRightMode();
+          return landscapeRightMode(owner: owner ?? _fullScreenOwner);
         } else {
-          return landscapeLeftMode();
+          return landscapeLeftMode(owner: owner ?? _fullScreenOwner);
         }
       } else {
         if (orientation == .landscapeLeft) {
-          return landscapeLeftMode();
+          return landscapeLeftMode(owner: owner ?? _fullScreenOwner);
         } else {
-          return landscapeRightMode();
+          return landscapeRightMode(owner: owner ?? _fullScreenOwner);
         }
       }
     }
   }
 
   // 全屏
-  bool _fsProcessing = false;
+  final FullScreenRequestQueue _fullScreenRequestQueue =
+      FullScreenRequestQueue();
+  bool _fsNeedsReconciliation = false;
+  bool _fsDisposed = false;
+  bool _fsCleanupInFlight = false;
+  // Tracks the platform effect actually applied by this owner. It must not
+  // be inferred from the current source orientation, which can change while
+  // the player remains logically fullscreen.
+  bool _nativeFullScreenEffectActive = false;
+  int _fullScreenRequestId = 0;
+
+  void _scheduleInitialFullScreenPlatformReconciliation() {
+    final canHaveNativeFullscreen =
+        PlatformUtils.isMobile ||
+        PlatformUtils.isDesktop ||
+        Platform.operatingSystem == 'ohos';
+    if (!canHaveNativeFullscreen) return;
+    _fsNeedsReconciliation = true;
+    unawaited(
+      _fullScreenRequestQueue.enqueue(
+        const FullScreenRequest(
+          status: false,
+          inAppFullScreen: false,
+          orientation: null,
+          isManualFS: false,
+        ),
+        isAlive: _isFullScreenTransactionAlive,
+        isAtTarget: (target) =>
+            !_fsNeedsReconciliation && isFullScreen.value == target,
+        execute: _executeFullScreenRequest,
+        commit: (target) {
+          _fsNeedsReconciliation = false;
+          if (_isFullScreenTransactionAlive()) _setFullScreen(target);
+        },
+      ),
+    );
+  }
+
+  bool _isFullScreenTransactionAlive() =>
+      !_fsDisposed &&
+      _fullScreenOwner.isCurrent &&
+      !_isCloseAll &&
+      _playerCount > 0;
+
+  Future<bool> _runFullScreenPlatformStep(
+    Future<void>? Function() start,
+  ) async {
+    if (!_isFullScreenTransactionAlive()) return false;
+    final operation = start();
+    if (operation == null) return _isFullScreenTransactionAlive();
+    if (!_isFullScreenTransactionAlive()) return false;
+    await operation;
+    return _isFullScreenTransactionAlive();
+  }
+
+  Future<bool> _executeFullScreenRequest(FullScreenRequest request) async {
+    if (!_isFullScreenTransactionAlive()) return false;
+    isManualFS = request.isManualFS;
+    final requestId =
+        'owner-${_fullScreenOwner.generation}-'
+        '${++_fullScreenRequestId}-${request.status ? 'enter' : 'exit'}';
+    final requestedOrientation = request.status && isVertical
+        ? null
+        : request.orientation;
+    debugPrint(
+      '[FullscreenTrace] execute status=${request.status} '
+      'vertical=$isVertical mode=$mode '
+      'requested=${request.orientation} effective=$requestedOrientation '
+      'requestId=$requestId',
+    );
+    try {
+      if (request.status) {
+        if (PlatformUtils.isMobile) {
+          if (!await _runFullScreenPlatformStep(
+            () => hideSystemBar(owner: _fullScreenOwner),
+          )) {
+            return false;
+          }
+          if (!await _runFullScreenPlatformStep(
+            () => changeOrientation(
+              isVertical: isVertical,
+              orientation: requestedOrientation,
+              owner: _fullScreenOwner,
+            ),
+          )) {
+            return false;
+          }
+          if (requestedOrientation == null && mode == .none) {
+            debugPrint('Fullscreen enter: orientation already satisfied');
+          }
+        } else {
+          if (Platform.operatingSystem == 'ohos' && isVertical) {
+            // OHOS portrait playback is already in the desired portrait
+            // window. Keep this product-specific path layout-only; desktop
+            // platforms still need their native window fullscreen even when
+            // the video itself is portrait.
+            debugPrint(
+              '[FullscreenTrace] vertical OHOS fullscreen: layout-only, '
+              'no native window/system-bar effect',
+            );
+          } else {
+            if (!await _runFullScreenPlatformStep(() async {
+              // Mark the cleanup obligation before the platform call. The
+              // native window may have changed and then throw, or complete
+              // after dispose makes the transaction return false.
+              if (!request.inAppFullScreen) {
+                _nativeFullScreenEffectActive = true;
+              }
+              await enterDesktopFullScreen(
+                inAppFullScreen: request.inAppFullScreen,
+                landscape: true,
+                owner: _fullScreenOwner,
+                requestId: requestId,
+              );
+            })) {
+              return false;
+            }
+          }
+        }
+      } else {
+        if (PlatformUtils.isMobile) {
+          if (!removeSafeArea) {
+            if (!await _runFullScreenPlatformStep(
+              () => showSystemBar(owner: _fullScreenOwner),
+            )) {
+              return false;
+            }
+          }
+          if (request.orientation == null && mode == .none) {
+            debugPrint('Fullscreen exit: rotation not managed by player');
+          } else if (!await _runFullScreenPlatformStep(
+            () => resetScreenRotation(owner: _fullScreenOwner),
+          )) {
+            return false;
+          }
+        } else {
+          final shouldExitNative =
+              _nativeFullScreenEffectActive || _fsNeedsReconciliation;
+          if (!shouldExitNative) {
+            debugPrint(
+              '[FullscreenTrace] fullscreen exit: no native effect owned by '
+              'this controller',
+            );
+          } else {
+            if (Platform.operatingSystem == 'ohos') {
+              debugPrint(
+                'Fullscreen exit: native OHOS request '
+                'allowLandscape=$horizontalScreen',
+              );
+            }
+            if (!await _runFullScreenPlatformStep(
+              () => exitDesktopFullScreen(
+                owner: _fullScreenOwner,
+                allowLandscape: horizontalScreen,
+                requestId: requestId,
+              ),
+            )) {
+              return false;
+            }
+            _nativeFullScreenEffectActive = false;
+          }
+        }
+      }
+      return _isFullScreenTransactionAlive();
+    } catch (error, stackTrace) {
+      // The platform may have completed an earlier step (for example, hiding
+      // system bars) before a later step failed. Keep the logical state at its
+      // last committed value and force the next request through the platform
+      // path so it can reconcile that partial result.
+      _fsNeedsReconciliation = true;
+      debugPrint('Fullscreen transaction failed: $error');
+      if (kDebugMode) debugPrint(stackTrace.toString());
+      return false;
+    }
+  }
+
+  Future<void> _restoreFullScreenPlatformState(
+    Future<void> queueSettled,
+    FullScreenOwnerToken owner,
+  ) async {
+    await restoreFullScreenPlatformState(
+      queueSettled: queueSettled,
+      owner: owner,
+      // OHOS enters fullscreen through the media-kit native window backend,
+      // which is the same backend exposed by exitDesktopFullScreen below.
+      // Cleanup must be selected by the backend actually used, not by the
+      // unrelated desktop platform classification.
+      desktop: (PlatformUtils.isDesktop || Platform.operatingSystem == 'ohos')
+          ? (owner) async {
+              if (!_nativeFullScreenEffectActive && !_fsNeedsReconciliation) {
+                return;
+              }
+              await exitDesktopFullScreen(
+                owner: owner,
+                allowLandscape: horizontalScreen,
+              );
+              _nativeFullScreenEffectActive = false;
+              _fsNeedsReconciliation = false;
+            }
+          : null,
+      orientation: (owner) => resetScreenRotation(owner: owner),
+      // OHOS native fullscreen owns the window system bars through the
+      // media-kit channel. Calling the generic SystemChrome restoration from
+      // dispose can remain pending after the player page is detached and
+      // block the process-wide fullscreen queue for the next owner.
+      systemBar: Platform.operatingSystem == 'ohos'
+          ? (_) => null
+          : (owner) => showSystemBar(owner: owner),
+      onError: (step, error, stackTrace) {
+        debugPrint('Fullscreen disposal cleanup $step failed: $error');
+        if (kDebugMode) debugPrint(stackTrace.toString());
+      },
+    );
+  }
+
+  void _scheduleFullScreenDisposalCleanup() {
+    if (_fsCleanupInFlight) return;
+    _fsCleanupInFlight = true;
+    unawaited(
+      () async {
+        try {
+          await _restoreFullScreenPlatformState(
+            _fullScreenRequestQueue.cancel(),
+            _fullScreenOwner,
+          );
+        } catch (error, stackTrace) {
+          debugPrint('Fullscreen disposal cleanup aborted: $error');
+          if (kDebugMode) debugPrint(stackTrace.toString());
+        } finally {
+          // A failed cleanup must not permanently disable a later retry.
+          _fsCleanupInFlight = false;
+        }
+      }(),
+    );
+  }
+
   Future<void> triggerFullScreen({
     bool status = true,
     bool inAppFullScreen = false,
     DeviceOrientation? orientation,
     bool isManualFS = true,
   }) async {
-    if (isDesktopPip) return;
-    if (isFullScreen.value == status) return;
-
-    if (_fsProcessing) return;
-    _fsProcessing = true;
-    this.isManualFS = isManualFS;
-    try {
-      if (status) {
-        if (PlatformUtils.isMobile) {
-          hideSystemBar();
-          await changeOrientation(
-            isVertical: isVertical,
-            orientation: orientation,
-          );
-        } else {
-          await enterDesktopFullScreen(inAppFullScreen: inAppFullScreen);
-        }
-      } else {
-        if (PlatformUtils.isMobile) {
-          if (!removeSafeArea) {
-            showSystemBar();
-          }
-          if (orientation == null && mode == .none) {
-            return;
-          }
-          await resetScreenRotation();
-        } else {
-          await exitDesktopFullScreen();
-        }
-      }
-    } finally {
-      _setFullScreen(status);
-      _fsProcessing = false;
-    }
+    if (isDesktopPip || !_isFullScreenTransactionAlive()) return;
+    PlayerTouchTrace.fullscreenMessage(
+      'trigger status=$status inApp=$inAppFullScreen '
+      'manual=$isManualFS current=${isFullScreen.value} '
+      'vertical=$_isVertical',
+    );
+    final request = FullScreenRequest(
+      status: status,
+      inAppFullScreen: inAppFullScreen,
+      orientation: orientation,
+      isManualFS: isManualFS,
+    );
+    final completion = _fullScreenRequestQueue.enqueue(
+      request,
+      isAlive: _isFullScreenTransactionAlive,
+      isAtTarget: (target) =>
+          !_fsNeedsReconciliation && isFullScreen.value == target,
+      execute: _executeFullScreenRequest,
+      commit: (target) {
+        _fsNeedsReconciliation = false;
+        if (_isFullScreenTransactionAlive()) _setFullScreen(target);
+      },
+    );
+    await completion;
   }
 
   void addPositionListener(ValueChanged<Duration> listener) {
@@ -2426,33 +3000,43 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   bool _isCloseAll = false;
   bool get isCloseAll => _isCloseAll;
 
-  Future<void>? resetScreenRotation() {
+  Future<void>? resetScreenRotation({FullScreenOwnerToken? owner}) {
     if (horizontalScreen) {
-      return fullMode();
+      return fullMode(owner: owner ?? _fullScreenOwner);
     } else {
-      return portraitUpMode();
+      return portraitUpMode(owner: owner ?? _fullScreenOwner);
     }
   }
 
   void onCloseAll() {
     _isCloseAll = true;
-    if (PlatformUtils.isDesktop) exitDesktopFullScreen();
+    _fsDisposed = true;
     dispose();
     Get.until((route) => route.isFirst);
   }
 
   void dispose() {
-    _hdrDisplaySubscription?.cancel();
-    _hdrDisplaySubscription = null;
-    // 每次减1，最后销毁
-    resetScreenRotation();
-    cancelLongPressTimer();
-    _cancelSubForSeek();
+    final isLastPlayer = _isCloseAll || _playerCount <= 1;
+    debugPrint(
+      '[FullscreenPlatformTrace] dispose owner=${_fullScreenOwner.generation} '
+      'isLast=$isLastPlayer playerCount=$_playerCount closeAll=$_isCloseAll',
+    );
     if (!_isCloseAll && _playerCount > 1) {
       _playerCount -= 1;
       _heartDuration = 0;
       return;
     }
+
+    // Everything below belongs to the shared Player.  A non-last reference
+    // must only decrement its count: it cannot cancel shared listeners or
+    // invalidate an output rebuild that the remaining reference still owns.
+    _videoOutputTransactionGeneration++;
+    _fsDisposed = true;
+    _scheduleFullScreenDisposalCleanup();
+    _hdrDisplaySubscription?.cancel();
+    _hdrDisplaySubscription = null;
+    cancelLongPressTimer();
+    _cancelSubForSeek();
 
     // Window color mode is process-wide on Android. Do not leave a disposed
     // HDR player forcing the next page's SDR content through HDR output.
@@ -2461,9 +3045,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       unawaited(HdrAndroid.setWindowHdrMode(hdr: false));
     }
     _playerCount = 0;
-    if (removeSafeArea) {
-      showSystemBar();
-    }
     danmakuController = null;
     _stopOrientationListener();
     _disableAutoEnterPip();

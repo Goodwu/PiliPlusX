@@ -205,6 +205,18 @@
 - 构建号 `1788639668` 已完成 OHOS arm64 HAP 编译、签名、校验，并安装到实体机 `2PM0223A18006914`。
 - 本包包含横屏视口级重复刷新抑制；上一轮已验证的居中、亮度和 HDR 重应用逻辑保持不变。安装启动完成，长片全屏回归需继续按控制条操作规程复测。
 
+## 当前工作树：全屏变灰回归的 A/B 修正（2026-09-08）
+
+当前 media-kit 工作树曾将 `refreshSurfaceSize` 中的 HDR producer-contract
+重应用删除，并让 OHOS FFI 不再写 transfer metadata/color space。该状态尚未有新的
+实机包证明能保持 0643/0644 的亮度结果；它与已记录成功包的关键差异相同于“全屏后
+变灰”的现象。
+
+现已恢复为：新 XComponent surface attach 和全屏 resize 均在同一 surface/generation
+串行保护内，重新应用当前 PQ/HLG 的 format、gamut、white-point、metadata 和 color
+space；并记录 `serial/view/surface` 及返回值。该修正仍需用实体机脚本化复测，不能仅
+凭 `result=0` 宣称 HDR 已验收。
+
 ## 0646 稳定性优化包实体机回归（2026-09-06）
 
 - `1788639668` 实体机回归成功打开 `BV1vY4y1N7TY` 并进入横屏全屏；截图 `/tmp/fstest2.jpeg` 为 `2720x1260`，视频左右黑边对称，未出现左上角小块。
@@ -263,3 +275,184 @@
 
 - 基于已提交代码和恢复后的 HCPP 路径完成 release 模式 HAP 构建，构建号 `1788642115`，unsigned HAP 约 `77.1MB`。
 - 签名、校验和实体机安装均成功，目标为 `2PM0223A18006914`；应用已自动重启，等待后续 HDR 与控制条对比测试。
+
+## 0656 全屏变灰回归脚本化复测（2026-09-08）
+
+- 使用 `tool/ohos/verify_hdr_real_device.sh` 在实体机 `2PM0223A18006914` 上完成连续操作；搜索并播放同一片源 `BV1vY4y1N7TY`，没有在脚本外补发 UI 点击。产物目录为 `/tmp/piliplusx-ohos-verify-20260908-r11`。
+- `06-controls.jpeg` 确认视频底部控制条和全屏图标；脚本从当前 layout 的 Slider 与右下角可点击节点推导全屏目标，避免控制条超时或误点页面顶部按钮。
+- `07-fullscreen-immediate.json` 和 `08-fullscreen-stable.json` 的根 bounds 均为 `[0,0][2720,1260]`，证明进入真实横屏全屏；两张截图均显示视频画面持续变化，脚本报告 `frame progression: PASS`。
+- 同轮 hilog 记录 `HDR native decision applied: output=nativeHdr`、`HDR dataspace applied: pq`，并在横屏 resize 记录 `3840x1920 -> 2520x1260`、`reapplied HDR after surface resize: result=0 transfer=0`。
+- 全屏立即和稳定截图中的夕阳高光、暖色饱和度可见，未复现此前“全屏变灰/亮度偏低”；该结果是当前包和当前片源的实机回归证据，长片、前后台切换及退出全屏仍需单独验证。
+
+## 0657 重复全屏 colorspace A/B 与冻结帧复测（2026-09-08）
+
+- 在 r15 的基础上仅将 FFI HDR colorspace 从 `OH_COLORSPACE_BT2020_PQ_LIMIT` /
+  `OH_COLORSPACE_BT2020_HLG_LIMIT` 对齐为 mpv 使用的
+  `OH_COLORSPACE_DISPLAY_BT2020_PQ` / `OH_COLORSPACE_DISPLAY_BT2020_HLG`；其余 resize、
+  metadata、target-trc 和 Surface 生命周期逻辑保持不变。
+- 新包已构建、签名、校验并安装到实体机；使用脚本 `--freeze-frame --toggle-count 3`
+  连续进出全屏，产物为 `/tmp/piliplusx-ohos-verify-20260908-r19`。
+- 脚本先暂停同一视频帧，再采集首次全屏、退出全屏、再次进入全屏的 immediate/stable
+  截图。第 2 次进入全屏的两张截图保持同一帧的亮度、蓝色天空和绿色草地，没有出现“先亮后灰”；
+  `HDR decision evidence: PASS`、`frame progression: PASS`。
+- 该 A/B 证明 colorspace 枚举不一致是必要修正，且当前包已通过冻结帧的重复切换验证；仍需在
+  用户现场确认主观灰屏不再出现，并继续保留真实 buffer/RenderService 属性作为后续深入证据。
+
+## 0658 播放中全屏变灰修正包（2026-09-08）
+
+- architect 复核确认：暂停切换安全、播放中切换变灰，优先指向 live Vulkan resize/present 与
+  Dart FFI 并行写 NativeWindow producer contract 的竞态；单纯把 `invalidate_color` 前移或
+  增加延时不足以解决根因。
+- 修正 media-kit OHOS controller：初次 surface attach/HDR configure 仍使用 FFI；窗口尺寸
+  变化期间只更新 mpv `target-*` 属性，不再从 Dart 线程并行调用 `_configureHdr`，由 mpv VO
+  线程在新 swapchain 首帧恢复 NativeWindow colorspace、metadata 和 brightness。
+- 新包构建号 `1788840216` 已完成编译、签名、校验并安装到实体机
+  `2PM0223A18006914`。使用脚本执行播放中连续 3 次全屏切换，产物为
+  `/tmp/piliplusx-ohos-verify-20260908-r20`；脚本报告 `HDR decision evidence: PASS`、
+  `frame progression: PASS`，立即/稳定截图均保持可见高光与饱和颜色，未复现“先亮后灰”。
+- 该结果是当前片源和当前设备的脚本化回归证据；仍需用户现场确认主观亮度，并在必要时补充
+  NativeWindow 实际 buffer colorspace/RenderService 属性，而不能仅以日志或 `result=0` 作最终证明。
+
+## 0659 WSI swapchain 诊断包（2026-09-08）
+
+- architect 否决了直接扩展 `pl_swapchain_frame` 的 generation 方案：恢复时机仍晚于
+  acquire，且存在公共结构体 ABI 风险；该方案未进入 HAP。
+- 为验证“多次切换后发生隐式 Vulkan swapchain 重建”的假设，构建链新增临时诊断 patch，
+  将 libplacebo `(Re)creating swapchain` 日志提升到可采集级别；未改变渲染或颜色逻辑。
+- native `libmpv_aarch64.zip` 已重建，SHA-256 为
+  `202e6b36e49a92b6e8a0822a414dcfbc0c8f6caf048d29e087ff0e5e311888cb`；对应诊断 HAP
+  构建号 `1788845149` 已签名、校验并安装到实体机。包内 `libmpv.so` 已确认包含诊断字符串。
+- 下一次必须在 `nativeHdr` 前置条件成立时执行多次切换；脚本现默认拒绝 480P/SDR 流，避免
+  把登录态或画质回落造成的结果误判为 HDR 变灰。
+
+## 0660 播放中多次全屏灰屏证据与日志增强（2026-09-08）
+
+- r22 在不清数据、自动处理版本更新弹窗的前提下，使用 `BV1vY4y1N7TY` 连续切换 6 次；
+  HDR 前置条件通过，日志确认 `source=dolbyVision`、`output=nativeHdr`、
+  `surface=native-hdr`、`nativeActive=true`，同一 native surface ID 在全屏尺寸间切换。
+- 用户目测后续全屏均为灰屏；即时截图也显示窗口态与横屏全屏之间存在明显的饱和度/亮度下降线索。
+  但旧脚本仅以截图差异判定 frame progression，不能自动证明颜色变化，因此不能把该轮写成
+  “已修复”或“已定位根因”。
+- architect review 指出最值得关联的是视频 surface 周边的 `ReleaseBufferLocked: cache not find`
+  与旋转期间的 `SetWindowTransform: App Is Not Doing Pre-rotation`；它们目前仍只是时间关联点，
+  不能单独证明 colorspace 丢失。NativeWindow 同一 surface ID 也不等于同一批 swapchain buffer。
+- 诊断脚本新增 `events.tsv`，记录每次切换、点击和截图时间，并将最终输出改为明确的
+  `color verdict: INCONCLUSIVE`；不再把截图变化冒充颜色验收。
+- 为打通 WSI 日志链路，临时诊断 native 将 libplacebo INFO 映射到应用当前采集的 warn 通道，
+  并成功重建 `libmpv.so`（zip SHA-256：
+  `2b098cb1c024f8e69273bbc136f0cc96deab7fb936b318d0f8ed8474cb7536c1`）。签名 HAP 已生成，
+  但构建耗时期间实体机 HDC 变为 `USB Offline`，安装未完成；不得把该包视为已实机验证。
+
+## 0661 换线后连续全屏复测：灰屏已稳定复现（2026-09-08）
+
+- 更换 USB 线后先执行 5 次 HDC 探针，前后均为 `USB Connected`；随后使用
+  `tool/ohos/verify_hdr_real_device.sh --source BV1vY4y1N7TY` 连续切换全屏 6 次，
+  全程脚本操作且未清理应用数据。产物为 `/tmp/piliplusx-ohos-verify-20260908-r32`。
+- 本轮脚本完整通过 `HDR decision evidence: PASS` 和 `frame progression: OBSERVED`；
+  6 次切换和全部截图均完成，故不是上一轮 HDC 断线造成的无效复测。
+- 人工复核截图确认：初始全屏及第 2 次横屏画面仍有正常颜色；第 4、6 次横屏稳定截图
+  出现明显灰雾化，弹幕仍清晰，符合“播放中反复切换后画面变灰”的用户现象。该轮应判定
+  为“灰屏已复现”，不是修复通过。
+- 日志同时显示 `nativeHdr` 已生效、每次 resize 后都执行 HDR reapply，但仍反复出现
+  `ReleaseBufferLocked: cache not find the buffer` 和 `SetWindowTransform: The App Is Not Doing
+  Pre-rotation`。这些是关联证据，暂不能据此直接修改系统旋转或 BufferQueue 生命周期。
+- architect 复核建议的下一步是单一 A/B：保持灰态横屏和同一 surface，只在 VO 线程强制重放一次
+  现有 HDR 色彩契约，且不主动重建 swapchain；记录重放前后的同源、同播放时间段画面。若恢复，
+  再定位颜色状态失效/缓存时序；若不恢复，继续补齐实际 swapchain、format/colorspace、
+  acquire/present 和 setter 返回值证据。当前不应继续堆叠 pre-rotation 或 BufferQueue workaround。
+
+### 延迟重放诊断包用法
+
+当前默认延迟为 `1200ms`；构建时可传入延迟毫秒数做 A/B，对照包显式传 `0`：
+
+```bash
+tool/ohos/build_sign_hap_test.sh \
+  --dart-define OHOS_HDR_DELAYED_REAPPLY_MS=1200 \
+  --install 2PM0223A18006914
+```
+
+该路径只通过 mpv 属性路径重放 `target-prim`、`target-trc` 和
+`target-colorspace-hint`，不调用 HDR FFI、不主动重建 swapchain。两轮均须使用同一片源和
+同样的脚本切换次数。
+
+## 0662 延迟 HDR 重放 A/B：6 次切换未复现灰屏（2026-09-08）
+
+- 诊断包使用 `OHOS_HDR_DELAYED_REAPPLY_MS=1200` 构建、签名并安装到实体机；
+  HDC 安装和启动均成功。产物为 `/Users/wuweiwei1/Downloads/PiliPlusX-ohos-hdr-delay1200-signed.hap`。
+- 使用同一片源 `BV1vY4y1N7TY` 完成 6 次脚本化全屏切换，产物为
+  `/tmp/piliplusx-ohos-verify-20260908-r33-delay1200`。HDR 前置条件通过，6 次切换和截图完整完成。
+- 与 r32 对照：初始、第 2、4、6 次横屏稳定截图均保持蓝天、绿色和正常饱和度，未出现 r32
+  第 4、6 次的灰雾化；日志确认延迟重放在 serial=3、6、10、14 等 resize 后执行。
+  这支持“resize 后颜色契约恢复时序”假设，但尚不能证明 1200ms 是最终正确时序，也不能直接
+  把定时器作为永久 workaround。
+- 后续 12 次尝试 `/tmp/piliplusx-ohos-verify-20260908-r34-delay1200` 因搜索后接口报错、
+  未进入 `nativeHdr`，脚本 fail-closed 退出；该轮不是 HDR 结果，不能与 r33 合并统计。
+
+## 0663 延迟重放包在确认播放推进后仍复现灰屏（2026-09-08）
+
+- 针对 r33 可能因网络卡顿而实际暂停的疑问，脚本新增播放推进门槛：每次全屏切换前连续抓取两帧，
+  间隔 2 秒；帧完全相同则立即使整轮失效，不再进入 HDR 结论。新增产物为
+  `/tmp/piliplusx-ohos-verify-20260908-r35-delay1200-playing`。
+- 在同一实体机、同一片源 `BV1vY4y1N7TY`、同一延迟重放包上，6 次切换前的 6 个推进采样均通过，
+  `HDR decision evidence: PASS`，且 HDC 全程在线。因此本轮不是网络导致视频暂停的无效样本。
+- 人工复核稳定截图：初始全屏和第 2 次仍正常；第 4 次已明显灰雾化，第 6 次继续灰雾化。
+  证据文件为 `08-fullscreen-stable.jpeg`、`09-toggle-2-fullscreen-stable.jpeg`、
+  `09-toggle-4-fullscreen-stable.jpeg`、`09-toggle-6-fullscreen-stable.jpeg`。
+- 日志仍同时出现 `diagnostic delayed HDR reapply done` 与多次
+  `ReleaseBufferLocked: cache not find the buffer`；因此“延迟重放单独修复问题”的假设被本轮有效播放
+  回归否定，1200ms 目前只能保留为诊断变量，不能作为修复验收结论。
+
+## 0664 状态机与诊断产物复核（2026-09-08）
+
+- r36/r38 的 RenderService 快照显示，横屏有效样本中的视频 surface 始终保持 10-bit buffer
+  (`config` format 34)、`metadataType=2`、静态 HDR metadata、`hdrWhitePointBrightness=1.0`、
+  `sdrWhitePointBrightness=0.2`，视频 surface `colorSpace=7` 且为 device composition。由此不能把
+  “NativeWindow HDR 标签丢失”作为当前已证实根因；实际 Vulkan 输出映射仍未被观测。
+- r36 暴露出测试状态机曾把竖屏退出全屏状态命名为 `fullscreen-stable`，因此该截图不能用于颜色结论。
+  r38 已改为识别横屏/竖屏交替，只有横屏状态才作为有效全屏样本；r38 的 4 次切换均完成，播放推进门禁
+  均通过，但颜色结论仍为 `INCONCLUSIVE`，因为不同截图不是同一帧。
+- `ohos_ui_layout.py` 的竖屏唤醒坐标曾按面积选中透明整页 XComponent，导致点击点落在真实视频 surface
+  之外。现已优先选择黑色 native video XComponent，并将唤醒点限制在其 bounds 内；离线布局回放验证为
+  竖屏 `[0,162][1260,792]` 内的 `y=772`。r39 尚未完成实机确认，因 HDC 在启动阶段变为 `USB Offline`。
+- 诊断 patch 虽已同步到 dev wrapper，但当前 media-kit 内置 `libmpv_aarch64.zip` 的 SHA-256 为
+  `2b098cb1c024f8e69273bbc136f0cc96deab7fb936b318d0f8ed8474cb7536c1`，其中不含新增诊断字符串；
+  签名 HAP 内的 `libmpv.so` 也不含这些标记。因此必须先完成 patched `.so` → ZIP → HAP → 运行库的
+  身份链路验证，再继续判断 Vulkan `VkFormat`/`VkColorSpaceKHR` 和首个 present 的时序。
+
+## 0665 防止 CMake 复用旧 libmpv（2026-09-08，已被 0667 修正）
+
+- `media_kit_libs_ohos` 的 CMake 原先只在 `libs/arm64-v8a` 为空时解压 ZIP；即使 ZIP 已替换，
+  非空目录中的旧 `libmpv.so` 仍可能被打进 HAP。此前尝试在配置阶段清理目标目录，但该目录是
+  共享解压/消费路径，配置期删除会制造空目录和并行构建竞态；该做法不再作为当前方案。
+
+## 0667 将 libmpv 解压从 CMake configure 移到构建目标（2026-09-08）
+
+- `media-kit` 的 OHOS CMake 现在只在 configure 阶段下载并校验 archive，使用带 archive 依赖的
+  `LIBMPV_EXTRACT` stamp 目标在实际构建阶段清空并重新解压 `libs/arm64-v8a`，并让
+  `mediakit_ohos_hdr` 显式依赖该目标；不会在配置期删除共享目录。
+- 该最小修正位于工作区外的 `/Users/wuweiwei1/src/media-kit/.../CMakeLists.txt`，保留其余
+  用户未提交改动不动。尚未运行 dev 远端构建、HAP 签名、安装或实体机验证。
+
+## 0668 诊断 patch 条件编译与实机脚本门禁（2026-09-08）
+
+- `vo_gpu_next.c` 的 OHOS target-mapping 诊断补齐了 `#endif`，并仅在 `HAVE_OHOS` 下声明
+  `swap_color`，避免非 OHOS 编译出现未闭合条件块或未使用变量；同步更新
+  `libmpv-ohos-build/patches/mpv/ohos-output-mapping-diagnostics.patch`。
+- `verify_hdr_real_device.sh` 保留 `--toggle-count` 兼容行为，新增 `--cycles N`，每个 cycle 完整
+  执行退出横屏/进入竖屏再回到横屏；播放门禁现在要求语义 `playing` 加位置变化或帧变化，
+  并明确输出 `paused`、`buffering`、`unknown`，JPEG 变化不能单独证明播放。
+- 版本更新弹窗只允许脚本识别的关闭动作；检测到未知动作或弹窗未消失即 fail closed。
+  本阶段仅完成静态检查/帮助检查，未进行设备 UI、远端构建或签名安装。
+
+## 0666 增加实际 target mapping 观测（2026-09-08）
+
+- 未直接采用无条件“双调用”方案。architect 复核认为 `set_color` 与
+  `pl_swapchain_colorspace_hint` 的互斥可能造成 shader target 与 Vulkan swapchain mapping 分裂，
+  但尚不能解释全屏切换后的状态变化；直接双写还可能触发额外重建和 HDR metadata 双写。
+- 新增 `patches/mpv/ohos-output-mapping-diagnostics.patch`，只记录 OHOS `set_color` 回写后的
+  hint，以及 `pl_frame_from_swapchain` 原始 target 与最终 target 的 primaries、transfer、levels 和
+  HDR luminance 字段，不改变颜色策略或生命周期。
+- 该 patch 尚未进入 HAP；dev SSH 当前不可用。恢复连接后必须先验证 patch、native ZIP、HAP 和运行库
+  的身份，再用连续全屏脚本对照灰态/正常态的 mapping 日志。
+- `verify_hdr_real_device.sh` 新增可选门禁 `VERIFY_REQUIRE_NATIVE_DIAGNOSTICS=1`；对当前旧诊断 HAP
+  的预检已按预期失败，明确报告 HAP 内缺少诊断标记，避免再次把旧包的“无日志”误判为运行路径无事件。

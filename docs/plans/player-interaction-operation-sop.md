@@ -90,6 +90,28 @@
 
 记录 Flutter 控件、XComponent/native Surface、HAP 日志和真实设备/模拟器画面；native Surface 与 Flutter overlay 可能有独立的交互边界，控制条动作必须在同一批次完成。OHOS 的“仅软件解码、仅 RGBA 显示”能力边界不能被 macOS 结果覆盖。
 
+控制条无法由视频主体点击唤出时，按以下事件链定位首个断点：
+
+```text
+Flutter pointer route
+→ MouseInteractiveViewer Listener
+→ _onPointerDown
+→ tap recognizer / gesture arena
+→ _onTapUp
+→ showControls
+→ 控制条合成
+```
+
+实体机应使用同一个 pointer 分别点击视频中心、上下黑边，并记录
+`down/move/up/cancel`、surface bounds、surface ID/generation 和 HDR 输出状态。已有
+的 opaque Listener、ArkUI `HitTestMode.None`、SurfaceView/HCPP A/B 结果必须作为证据
+记录，不能直接继续叠加重复 Listener 或调低手势阈值。
+
+HDR 是硬约束。排查交互问题时不得关闭 native surface/HCPP、降低 HDR 片源选择、或
+切换到 SDR tone-map。若确认事件没有进入 Flutter，修复层级应在 OHOS PlatformView
+的命中与事件转发；若事件已进入 Flutter，再调整交互层和 recognizer 的边界。任何
+交互修复都必须重新验证 HDR native output、可见帧以及控制条行为。
+
 ## 五、结果记录模板
 
 ```text

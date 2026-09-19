@@ -51,6 +51,7 @@ import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
 import 'package:PiliPlus/plugin/pl_player/view/view.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart'
@@ -85,6 +86,21 @@ class VideoDetailPageV extends StatefulWidget {
 
 class _VideoDetailPageVState extends State<VideoDetailPageV>
     with RouteAware, RouteAwareMixin, WidgetsBindingObserver {
+  static const bool _processLiveTest =
+      kDebugMode &&
+      bool.fromEnvironment(
+        'PILIPLUS_PROCESS_LIVE_TEST',
+        defaultValue: false,
+      );
+  // Diagnostic-only variant: pop the page while the originating native touch
+  // is still held, so embedding disposal can be tested before ArkUI emits Up.
+  // The default production path remains the normal fullscreen/back semantic.
+  static const bool _processLiveDirectPagePop =
+      _processLiveTest &&
+      bool.fromEnvironment(
+        'PILIPLUS_PROCESS_LIVE_DIRECT_PAGE_POP',
+        defaultValue: false,
+      );
   final heroTag = Get.arguments['heroTag'];
 
   late final VideoDetailController videoDetailController;
@@ -119,6 +135,78 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool get isFullScreen =>
       videoDetailController.plPlayerController.isFullScreen.value;
 
+  void _popProcessLivePageWhenFullscreenExited(
+    int pointer, {
+    int attempts = 0,
+  }) {
+    if (!mounted || !PlayerTouchTrace.isActivePointer(pointer)) {
+      if (mounted) _armProcessLiveTest();
+      return;
+    }
+    if (isFullScreen) {
+      if (attempts >= 20) {
+        PlayerTouchTrace.event(
+          stage: 'process-live-test fullscreen-exit-timeout',
+        );
+        _armProcessLiveTest();
+        return;
+      }
+      Future<void>.delayed(const Duration(milliseconds: 50), () {
+        _popProcessLivePageWhenFullscreenExited(
+          pointer,
+          attempts: attempts + 1,
+        );
+      });
+      return;
+    }
+    PlayerTouchTrace.event(
+      stage: 'process-live-test page-pop',
+      pointer: pointer,
+    );
+    videoDetailController.plPlayerController.onPopInvokedWithResult(
+      false,
+      null,
+    );
+  }
+
+  void _armProcessLiveTest() {
+    if (!_processLiveTest || !mounted) return;
+    PlayerTouchTrace.armProcessLiveTest((pointer) {
+      final ready =
+          mounted &&
+          plPlayerController?.playerStatus.isPlaying == true &&
+          isFullScreen &&
+          PlayerTouchTrace.isActivePointer(pointer);
+      PlayerTouchTrace.event(
+        stage: 'process-live-test condition ready=$ready',
+      );
+      if (!mounted) return;
+      if (!ready) {
+        _armProcessLiveTest();
+        return;
+      }
+
+      if (_processLiveDirectPagePop) {
+        PlayerTouchTrace.event(
+          stage: 'process-live-test direct-page-pop',
+          pointer: pointer,
+        );
+        Get.back();
+        return;
+      }
+
+      // Use the same back semantic as the production PopScope handler. The
+      // controller first exits fullscreen; only after the observable state
+      // changes do we request the page pop, and only while the original
+      // pointer is still active.
+      videoDetailController.plPlayerController.onPopInvokedWithResult(
+        false,
+        null,
+      );
+      _popProcessLivePageWhenFullscreenExited(pointer);
+    });
+  }
+
   bool get _shouldShowSeasonPanel {
     if (videoDetailController.isFileSource ||
         isPortrait ||
@@ -135,6 +223,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoRelatedKey = GlobalKey();
   final videoIntroKey = GlobalKey();
 
+  bool _allowOuterVideoPointer(PointerDownEvent event) {
+    final playerContext = videoDetailController.videoPlayerKey.currentContext;
+    final renderObject = playerContext?.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.attached) return true;
+
+    final localPosition = renderObject.globalToLocal(event.position);
+    final insidePlayer = renderObject.size.contains(localPosition);
+    if (insidePlayer) {
+      PlayerTouchTrace.message(
+        'outer-scroll pointer-rejected position=${event.position} '
+        'playerSize=${renderObject.size} '
+        'controlsLock=${plPlayerController?.controlsLock.value ?? false}',
+      );
+      return false;
+    }
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -142,8 +248,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     PlPlayerController.setPlayCallBack(playCallBack);
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
 
+    if (_processLiveTest) {
+      _armProcessLiveTest();
+    }
+
     if (videoDetailController.removeSafeArea) {
-      hideSystemBar();
+      hideSystemBar(
+        owner: videoDetailController.plPlayerController.fullScreenOwner,
+      );
     }
 
     if (videoDetailController.showReply) {
@@ -270,6 +382,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       }
 
       if (exitFlag) {
+        debugPrint(
+          '[FullscreenTrace] completed exitFlag=$exitFlag '
+          'autoExitFullscreen=$autoExitFullscreen '
+          'playRepeat=${plPlayerController!.playRepeat}',
+        );
         if (autoExitFullscreen) {
           plPlayerController!.triggerFullScreen(status: false);
           if (plPlayerController!.controlsLock.value) {
@@ -327,6 +444,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void dispose() {
+    if (_processLiveTest) {
+      PlayerTouchTrace.disarmProcessLiveTest();
+    }
     plPlayerController
       ?..removeStatusLister(playerListener)
       ..removePositionListener(positionListener);
@@ -343,10 +463,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       } else {
         pgcIntroController.cancelTimer();
       }
-    }
-
-    if (!videoDetailController.removeSafeArea) {
-      showSystemBar();
     }
 
     if (!videoDetailController.plPlayerController.isCloseAll) {
@@ -522,6 +638,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   },
                 ),
           body: ExtendedNestedScrollView(
+            pointerDownFilter: _allowOuterVideoPointer,
             onlyOneScrollInBody: true,
             physics: platformClampingPhysics,
             key: videoDetailController.scrollKey,
@@ -714,8 +831,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         if (scrollRatio == 0) {
           return const SizedBox.shrink();
         }
-        return Positioned.fill(
-          bottom: -1,
+        // The overlay only renders the collapsed top toolbar.  Covering the
+        // whole header here makes it the hit-test winner over the player and
+        // prevents vertical volume/brightness/fullscreen gestures from ever
+        // reaching PLVideoPlayer.
+        return Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: kToolbarHeight,
           child: GestureDetector(
             onTap: () {
               if (!videoDetailController.isFileSource) {

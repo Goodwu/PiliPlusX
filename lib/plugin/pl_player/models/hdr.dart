@@ -488,9 +488,15 @@ class HdrCapabilities {
 
   bool get canNativeHdr => displayHdr && decoderHdr && nativeOutputActive;
 
+  /// OHOS has a separate XComponent/NativeWindow carrier.  Its existence is
+  /// only enough to mount a native candidate; decoder and active-output proof
+  /// still come from the media-kit backend after the surface is ready.
+  bool get canOhosNativeSurfaceCandidate => platform == 'ohos' && displayHdr;
+
   /// HCPP is a provisional native-output path: the surface must exist before
   /// its dataspace can be applied and verified against the actual stream.
-  bool get canNativeHdrCandidate => canNativeHdr || canHcpp;
+  bool get canNativeHdrCandidate =>
+      canNativeHdr || canHcpp || canOhosNativeSurfaceCandidate;
 
   bool get canHcpp =>
       hcpp &&
@@ -601,6 +607,33 @@ class HdrOutputTransactionGate {
   }
 }
 
+/// Serializes media opens performed on a reused Player.
+///
+/// [Player.open] is asynchronous but cannot be cancelled once dispatched. A
+/// replacement source therefore waits for the older open to settle before it
+/// is issued, making the replacement the final native Player state. Both
+/// boundaries check [isCurrent], so an obsolete operation neither starts late
+/// nor publishes a successful result after a newer source/dispose boundary.
+class PlayerSourceOperationGate {
+  Future<void> _tail = Future<void>.value();
+
+  Future<T?> run<T>({
+    required bool Function() isCurrent,
+    required Future<T> Function() action,
+  }) {
+    final run = _tail.then<T?>((_) async {
+      if (!isCurrent()) return null;
+      final result = await action();
+      return isCurrent() ? result : null;
+    });
+    _tail = run.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {},
+    );
+    return run;
+  }
+}
+
 class HdrPlaybackDecision {
   final HdrOutputMode output;
   final String vo;
@@ -609,6 +642,7 @@ class HdrPlaybackDecision {
   final String reason;
   final bool usePlatformView;
   final bool useHcpp;
+  final bool useNativeSurface;
   final String sourceProcessing;
   final String outputEncoding;
   final bool dynamicMetadataApplied;
@@ -621,6 +655,7 @@ class HdrPlaybackDecision {
     required this.reason,
     this.usePlatformView = false,
     this.useHcpp = false,
+    this.useNativeSurface = false,
     this.sourceProcessing = 'tone-map',
     this.outputEncoding = 'sdr',
     this.dynamicMetadataApplied = false,
@@ -631,8 +666,207 @@ class HdrPlaybackDecision {
   /// Identifies the native output carrier, excluding color-processing state.
   /// SDR and tone-mapped HDR share one texture, while HCPP uses a platform
   /// view. A color metadata update must not rebuild an unchanged carrier.
-  String get outputTopologySignature =>
-      useHcpp ? 'android-hcpp-platform-view' : 'flutter-texture';
+  String get outputTopologySignature => useHcpp
+      ? 'android-hcpp-platform-view'
+      : useNativeSurface
+      ? 'ohos-native-surface'
+      : 'flutter-texture';
+}
+
+/// Owns the single native-output configuration attempt for a Player.
+///
+/// A source change does not cancel an already dispatched platform call.  Its
+/// completion must nevertheless release the gate, while a late completion
+/// must never release an attempt that started after it.
+class HdrNativeOutputAttemptGate {
+  int _nextToken = 0;
+  int? _activeToken;
+
+  bool get inFlight => _activeToken != null;
+
+  int? start() {
+    if (_activeToken != null) return null;
+    final token = ++_nextToken;
+    _activeToken = token;
+    return token;
+  }
+
+  void complete(int token) {
+    if (_activeToken == token) {
+      _activeToken = null;
+    }
+  }
+}
+
+/// Commits a newly-created video output only while its owning transaction is
+/// still current.  A stale output was already created by the native backend,
+/// so it must be released rather than silently abandoned or published into a
+/// replacement player's widget tree.
+class VideoOutputPublicationGate {
+  Future<bool> publishOrDispose<T>({
+    required T candidate,
+    required bool Function() isCurrent,
+    required void Function(T candidate) publish,
+    required Future<void> Function(T candidate) dispose,
+  }) async {
+    if (!isCurrent()) {
+      await dispose(candidate);
+      return false;
+    }
+    publish(candidate);
+    return true;
+  }
+}
+
+/// Result of creating a Player and its first video output as one source
+/// transaction. A null [player] means that the transaction became stale and
+/// released every local candidate before it could be published.
+class PlayerLifecycleStartResult<P, O> {
+  final P? player;
+  final O? output;
+  final HdrCapabilities? capabilities;
+
+  const PlayerLifecycleStartResult._({
+    this.player,
+    this.output,
+    this.capabilities,
+  });
+
+  const PlayerLifecycleStartResult.stale() : this._();
+
+  const PlayerLifecycleStartResult.published({
+    required P player,
+    required O output,
+    required HdrCapabilities capabilities,
+  }) : this._(player: player, output: output, capabilities: capabilities);
+
+  bool get published =>
+      player != null && output != null && capabilities != null;
+}
+
+/// Coordinates the externally-visible ordering of the controller's Player
+/// lifecycle without depending on media-kit classes.
+///
+/// The production controller supplies its existing Player, VideoController and
+/// platform calls as callbacks. Tests can instead use opaque handles and
+/// controlled futures, so they exercise create -> probe -> output -> open and
+/// the stale/final-dispose boundaries without loading a platform plugin.
+class PlayerLifecycleOrchestrator<P, O> {
+  final PlayerSourceOperationGate _openGate;
+  final VideoOutputPublicationGate _outputPublicationGate;
+
+  PlayerLifecycleOrchestrator({
+    PlayerSourceOperationGate? openGate,
+    VideoOutputPublicationGate? outputPublicationGate,
+  }) : _openGate = openGate ?? PlayerSourceOperationGate(),
+       _outputPublicationGate =
+           outputPublicationGate ?? VideoOutputPublicationGate();
+
+  /// Creates and publishes an initial Player/output pair, then opens the
+  /// source through the shared open gate. Every uncommitted stale candidate is
+  /// released in output-before-player order.
+  Future<PlayerLifecycleStartResult<P, O>> createProbeOutputOpen({
+    required bool Function() isCurrent,
+    required Future<P> Function() createPlayer,
+    required Future<HdrCapabilities> Function() probe,
+    required Future<O> Function(P player, HdrCapabilities capabilities)
+    createOutput,
+    required Future<void> Function(O output) disposeOutput,
+    required Future<void> Function(P player) disposePlayer,
+    required void Function(P player, O output, HdrCapabilities capabilities)
+    publish,
+    required Future<void> Function(P player) open,
+    required void Function(P player) rebindListeners,
+  }) async {
+    final player = await createPlayer();
+    if (!isCurrent()) {
+      await disposePlayer(player);
+      return PlayerLifecycleStartResult<P, O>.stale();
+    }
+
+    final capabilities = await probe();
+    if (!isCurrent()) {
+      await disposePlayer(player);
+      return PlayerLifecycleStartResult<P, O>.stale();
+    }
+
+    final output = await createOutput(player, capabilities);
+    if (!isCurrent()) {
+      await disposeOutput(output);
+      await disposePlayer(player);
+      return PlayerLifecycleStartResult<P, O>.stale();
+    }
+
+    final published = await _outputPublicationGate.publishOrDispose<O>(
+      candidate: output,
+      isCurrent: isCurrent,
+      publish: (candidate) => publish(player, candidate, capabilities),
+      dispose: disposeOutput,
+    );
+    if (!published) {
+      await disposePlayer(player);
+      return PlayerLifecycleStartResult<P, O>.stale();
+    }
+
+    final opened = await openCurrent(
+      player: player,
+      isCurrent: isCurrent,
+      open: open,
+      rebindListeners: rebindListeners,
+    );
+    if (!opened) {
+      // The pair is already published and may be the shared Player that a
+      // replacement source reuses. Its owner decides whether it is final and
+      // calls [disposeFinal]; never dispose a published handle here.
+      return PlayerLifecycleStartResult.published(
+        player: player,
+        output: output,
+        capabilities: capabilities,
+      );
+    }
+    return PlayerLifecycleStartResult.published(
+      player: player,
+      output: output,
+      capabilities: capabilities,
+    );
+  }
+
+  /// Serializes a source open for either a newly-created or reused Player.
+  /// Listener ownership is rebound only after a current successful open.
+  Future<bool> openCurrent({
+    required P player,
+    required bool Function() isCurrent,
+    required Future<void> Function(P player) open,
+    required void Function(P player) rebindListeners,
+  }) async {
+    final opened = await _openGate.run<bool>(
+      isCurrent: isCurrent,
+      action: () async {
+        await open(player);
+        return true;
+      },
+    );
+    if (opened != true || !isCurrent()) return false;
+    rebindListeners(player);
+    return true;
+  }
+
+  /// Applies the controller's final-release ordering. [invalidate] must run
+  /// before any asynchronous cleanup so late output/probe/open completions see
+  /// a stale transaction. Non-final reference counting stays in the controller
+  /// and deliberately does not call this method.
+  Future<void> disposeFinal({
+    required void Function() invalidate,
+    required Future<void> Function() cancelListeners,
+    required Future<void> Function() resetOutput,
+    required Future<void> Function(P player) disposePlayer,
+    required P player,
+  }) async {
+    invalidate();
+    await cancelListeners();
+    await resetOutput();
+    await disposePlayer(player);
+  }
 }
 
 /// Metadata submitted to a native video output. Native implementations must
@@ -803,6 +1037,7 @@ class HdrDecision {
         reason: 'display-decoder-and-output-ready',
         usePlatformView: capabilities.canHcpp,
         useHcpp: capabilities.canHcpp,
+        useNativeSurface: capabilities.platform == 'ohos',
         sourceProcessing: source.kind == HdrSourceKind.dolbyVision
             ? 'dolby-vision-converted-to-hdr'
             : 'passthrough',
@@ -813,14 +1048,16 @@ class HdrDecision {
     // dataspace, but that is not proof of native HDR output. Keep mpv in the
     // SDR tone-map mode until the native layer reports nativeOutput=true.
     if (nativeSource && capabilities.canNativeHdrCandidate) {
+      final useOhosNativeSurface = capabilities.canOhosNativeSurfaceCandidate;
       return HdrPlaybackDecision(
         output: HdrOutputMode.toneMappedSdr,
         vo: 'gpu-next',
         hwdec: hwdec,
         surface: 'native-hdr-candidate',
         reason: 'hcpp-capabilities-awaiting-dataspace',
-        usePlatformView: true,
-        useHcpp: true,
+        usePlatformView: capabilities.canHcpp,
+        useHcpp: capabilities.canHcpp,
+        useNativeSurface: useOhosNativeSurface,
         sourceProcessing: 'awaiting-native-output-proof',
       );
     }

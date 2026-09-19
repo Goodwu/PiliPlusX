@@ -150,6 +150,12 @@ def main() -> None:
             "ephemeral",
             "remote-release-linux",
             "remote-release-linux-arm64",
+            # Local agent instructions can be ignored symlinks into a user's
+            # private configuration directory.  rsync preserves that link
+            # for remote builds, where its target does not exist; copytree's
+            # default symlink-following would then make a code build fail.
+            # They are not runtime/build inputs for the isolated OHOS tree.
+            "AGENTS.md",
         ),
     )
     # This is a developer-local media-kit path override.  It is deliberately
@@ -240,23 +246,25 @@ def main() -> None:
         )
     pubspec.write_text(pubspec_text, encoding="utf-8")
 
-    # The OHOS build uses the synchronized media-kit source.  Keep the
-    # native-surface configuration because OHOS now consumes that API; only
-    # retain the dispose compatibility rewrite for older platform controllers.
+    # The OHOS build uses the synchronized media-kit source. Keep the
+    # native-surface configuration because OHOS now consumes that API. The
+    # initial stale candidate, a stale rebuild candidate, and the current
+    # output handoff must each retain a real asynchronous disposeForRebuild
+    # barrier; never replace any of them with the synchronous dispose
+    # compatibility path.
     controller = root / "lib/plugin/pl_player/controller.dart"
     if controller.is_file():
         controller_text = controller.read_text(encoding="utf-8")
-        controller_text, dispose_removed = re.subn(
+        dispose_barriers = re.findall(
             r"await platform\.disposeForRebuild\(\);",
-            "platform.dispose();",
             controller_text,
         )
-        if dispose_removed != 1:
+        if len(dispose_barriers) != 3 or "await Future<void>.sync(platform.dispose);" in controller_text:
             raise SystemExit(
-                "OHOS preparation expected one media-kit dispose compatibility rewrite, "
-                f"found {dispose_removed}"
+                "OHOS preparation expected exactly three real media-kit async "
+                "disposeForRebuild barrier and no synchronous dispose bypass, "
+                f"found {len(dispose_barriers)} barrier(s)"
             )
-        controller.write_text(controller_text, encoding="utf-8")
 
     dart_files = sorted((root / "lib").rglob("*.dart"))
     changed = 0

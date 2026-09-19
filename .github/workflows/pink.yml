@@ -68,6 +68,9 @@ jobs:
             - name: Resolve locked dependencies
               run: flutter pub get --enforce-lockfile
 
+            - name: Patch extended nested scroll view pointer boundary
+              run: python3 scripts/prepare_ohos_package_patches.py --workspace "$GITHUB_WORKSPACE"
+
             - name: Verify media-kit lock
               run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
 

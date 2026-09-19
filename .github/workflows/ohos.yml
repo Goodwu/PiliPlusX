@@ -88,7 +88,12 @@ jobs:
           # resolving the compatible OHOS dependency graph.
           cd "$OHOS_WORKSPACE"
           flutter pub get
+          python3 "$GITHUB_WORKSPACE/scripts/prepare_ohos_package_patches.py" --workspace "$OHOS_WORKSPACE"
           python3 "$GITHUB_WORKSPACE/scripts/prepare_ohos_material_ui.py" --workspace "$OHOS_WORKSPACE"
+
+      - name: Run player nested gesture regression
+        working-directory: ${{ env.OHOS_WORKSPACE }}
+        run: flutter test test/plugin/pl_player/player_view_hit_test.dart test/common/widgets/gesture/player_gesture_recognizer_test.dart
 
       - name: Verify media-kit lock
         run: |

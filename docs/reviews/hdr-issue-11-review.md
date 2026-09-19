@@ -10,6 +10,13 @@
 及其实现 PR 的调查结论。Issue 的现象是：选择 HDR 画质后仍按 SDR 播放，系统
 HDR/SDR ratio 保持 1.00。
 
+## 跨平台硬约束
+
+对任一平台，只要目标硬件满足 HDR，就必须实现 HDR 播放。只有能力探测明确证明硬件
+不满足时，才允许最终使用 SDR/tone-map。后端未实现、初始化或生命周期缺陷、色彩空间
+配置失败、交互问题、缺少真机证据和模拟器限制都不是硬件不满足；它们必须作为实现或
+验收阻塞继续处理。`HdrMode.off` 是用户主动关闭，不属于能力回退。
+
 ## Issue、PR 与原始 media-kit 状态
 
 - PiliPlusX 的实际实现 PR 是 [PR #26](https://github.com/cnctem/PiliPlusX/pull/26)，
@@ -33,21 +40,22 @@ HDR/SDR ratio 保持 1.00。
 1. 从最新目标分支重建干净 PR，不直接合并旧 `hdr` 分支。
 2. media-kit 依赖使用项目可控 fork，并在 `pubspec.yaml` 与 lockfile 中固定完整 SHA；
    不引用可移动的第三方分支。
-3. 保持跨平台 Dart API 可编译，但按平台选择原生后端；HDR 初始化失败必须自动回退
-   到可播放的 SDR tone-map。
+3. 保持跨平台 Dart API 可编译，但按平台选择原生后端；只有硬件能力明确不满足时才
+   允许最终回退到 SDR tone-map。初始化失败时可以采取运行保护避免黑屏或崩溃，但必须
+   保留为 HDR 实现阻塞，不能把该回退作为完成结论。
 4. Android 与 Android Pink 共用同一 arm64 原生库；Pink 只改变包名、更新通道和产物名。
 5. iOS、macOS、Windows、Linux、OHOS 不应因 Android HDR 依赖变更而改变默认播放行为。
 
 ## 跨平台后端边界
 
-| 平台 | 原生 HDR 目标 | 未满足条件时 |
+| 平台 | 原生 HDR 目标 | 硬件能力明确不满足时 |
 | --- | --- | --- |
-| Android / Pink | `SurfaceView + MediaCodec + mediacodec_embed`；API、显示 HDR 类型、codec profile、Vulkan/HCPP 均需检测 | SurfaceView 或 Texture tone-map |
-| iOS | EDR-capable `UIView/CAMetalLayer`，验证设备与 profile | Texture tone-map |
-| macOS | 窗口实际所在屏幕的 EDR layer，跨屏时重新探测 | Texture tone-map |
-| Windows x64 | 原生 HDR swapchain/子窗口，检测 DXGI HDR 色彩空间 | `gpu-next` tone-map 或 SDR |
-| Linux x64 | 仅在 Wayland compositor、驱动和输出协议均可证明时启用 | X11/普通 Wayland 使用 SDR |
-| OHOS | XComponent/NativeWindow 能力与真机验证完成后启用 | Texture tone-map，并明确报告未证明 |
+| Android / Pink | `SurfaceView + MediaCodec + mediacodec_embed`；API、显示 HDR 类型、codec profile、Vulkan/HCPP 均需检测 | 仅在硬件能力明确不满足时使用 SurfaceView 或 Texture tone-map |
+| iOS | EDR-capable `UIView/CAMetalLayer`，验证设备与 profile | 仅在硬件能力明确不满足时使用 Texture tone-map |
+| macOS | 窗口实际所在屏幕的 EDR layer，跨屏时重新探测 | 仅在硬件能力明确不满足时使用 Texture tone-map |
+| Windows x64 | 原生 HDR swapchain/子窗口，检测 DXGI HDR 色彩空间 | 仅在硬件能力明确不满足时使用 `gpu-next` tone-map 或 SDR |
+| Linux x64 | 仅在 Wayland compositor、驱动和输出协议均可证明时启用 | 仅在硬件能力明确不满足时使用 SDR |
+| OHOS | XComponent/NativeWindow 能力与真机验证完成后启用 | 仅在硬件能力明确不满足时使用 Texture tone-map；验证未完成不等于硬件不支持 |
 
 统一的能力状态应区分 `capable`、`active` 和 `fallbackReason`；检测到 HDR 显示器、
 选中 HDR 画质或构建成功，均不能单独证明 `active=nativeHdr`。
@@ -77,6 +85,6 @@ HDR/SDR ratio 保持 1.00。
 ## 结论
 
 Issue #11 的根因不是单一的 B 站画质参数，而是“HDR 解码”和“能够以 HDR 色彩空间
-输出”被混为一谈。短期可用原始 media-kit 做 tone-map；要实现真正 HDR，必须维护
-原生输出后端、能力探测和可靠回退。跨平台方案应允许各平台按能力逐步开启原生 HDR，
-并始终保持普通 SDR 播放和其他架构产物可用。
+输出”被混为一谈。要实现真正 HDR，必须维护原生输出后端和能力探测；只有硬件能力
+明确不足时才允许最终使用 tone-map。实现缺口必须继续推进，同时保持普通 SDR 播放和
+其他架构产物可用。

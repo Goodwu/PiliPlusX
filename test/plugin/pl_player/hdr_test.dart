@@ -114,6 +114,298 @@ void main() {
     },
   );
 
+  test(
+    'source operation gate makes the replacement final after overlap',
+    () async {
+      final gate = PlayerSourceOperationGate();
+      final oldStarted = Completer<void>();
+      final releaseOld = Completer<void>();
+      var oldCurrent = true;
+      var newCurrent = false;
+      final nativeState = <String>[];
+
+      final oldOpen = gate.run<bool>(
+        isCurrent: () => oldCurrent,
+        action: () async {
+          oldStarted.complete();
+          await releaseOld.future;
+          nativeState.add('old');
+          return true;
+        },
+      );
+      await oldStarted.future;
+
+      oldCurrent = false;
+      newCurrent = true;
+      final newOpen = gate.run<bool>(
+        isCurrent: () => newCurrent,
+        action: () async {
+          nativeState.add('new');
+          return true;
+        },
+      );
+
+      releaseOld.complete();
+      expect(await oldOpen, isNull);
+      expect(await newOpen, isTrue);
+      expect(nativeState, ['old', 'new']);
+    },
+  );
+
+  test(
+    'source operation gate skips an operation made stale before its turn',
+    () async {
+      final gate = PlayerSourceOperationGate();
+      final releaseFirst = Completer<void>();
+      var firstCurrent = true;
+      var secondCurrent = true;
+      var secondRan = false;
+
+      final first = gate.run<bool>(
+        isCurrent: () => firstCurrent,
+        action: () async {
+          await releaseFirst.future;
+          return true;
+        },
+      );
+      final second = gate.run<bool>(
+        isCurrent: () => secondCurrent,
+        action: () async {
+          secondRan = true;
+          return true;
+        },
+      );
+      firstCurrent = false;
+      secondCurrent = false;
+      releaseFirst.complete();
+
+      expect(await first, isNull);
+      expect(await second, isNull);
+      expect(secondRan, isFalse);
+    },
+  );
+
+  test('source operation gate recovers after a failed native open', () async {
+    final gate = PlayerSourceOperationGate();
+    var current = true;
+    final failed = gate.run<bool>(
+      isCurrent: () => current,
+      action: () async => throw StateError('old-open-failed'),
+    );
+    await expectLater(failed, throwsStateError);
+
+    expect(
+      await gate.run<bool>(
+        isCurrent: () => current,
+        action: () async => true,
+      ),
+      isTrue,
+    );
+  });
+
+  test('native output attempt gate releases stale source completion only', () {
+    final gate = HdrNativeOutputAttemptGate();
+    final first = gate.start();
+    expect(first, isNotNull);
+    expect(gate.start(), isNull);
+
+    // A replacement source waits for the dispatched old platform call, then
+    // may start its own attempt once that call completes.
+    gate.complete(first!);
+    expect(gate.inFlight, isFalse);
+    final second = gate.start();
+    expect(second, isNotNull);
+
+    // A duplicate/late completion from the first source cannot clear second.
+    gate.complete(first);
+    expect(gate.inFlight, isTrue);
+    gate.complete(second!);
+    expect(gate.inFlight, isFalse);
+  });
+
+  test(
+    'output publication gate disposes a stale candidate without publishing',
+    () async {
+      final gate = VideoOutputPublicationGate();
+      final events = <String>[];
+
+      final published = await gate.publishOrDispose<String>(
+        candidate: 'stale-output',
+        isCurrent: () => false,
+        publish: (candidate) => events.add('publish:$candidate'),
+        dispose: (candidate) async => events.add('dispose:$candidate'),
+      );
+
+      expect(published, isFalse);
+      expect(events, ['dispose:stale-output']);
+    },
+  );
+
+  test(
+    'output publication gate publishes a current candidate exactly once',
+    () async {
+      final gate = VideoOutputPublicationGate();
+      final events = <String>[];
+
+      final published = await gate.publishOrDispose<String>(
+        candidate: 'current-output',
+        isCurrent: () => true,
+        publish: (candidate) => events.add('publish:$candidate'),
+        dispose: (candidate) async => events.add('dispose:$candidate'),
+      );
+
+      expect(published, isTrue);
+      expect(events, ['publish:current-output']);
+    },
+  );
+
+  test(
+    'lifecycle orchestrator releases a source made stale during output create',
+    () async {
+      final lifecycle = PlayerLifecycleOrchestrator<String, String>();
+      final outputStarted = Completer<void>();
+      final releaseOutput = Completer<void>();
+      var current = true;
+      final events = <String>[];
+
+      final pending = lifecycle.createProbeOutputOpen(
+        isCurrent: () => current,
+        createPlayer: () async {
+          events.add('create-player');
+          return 'player-a';
+        },
+        probe: () async {
+          events.add('probe');
+          return const HdrCapabilities();
+        },
+        createOutput: (_, __) async {
+          events.add('create-output');
+          outputStarted.complete();
+          await releaseOutput.future;
+          return 'output-a';
+        },
+        disposeOutput: (output) async => events.add('dispose-output:$output'),
+        disposePlayer: (player) async => events.add('dispose-player:$player'),
+        publish: (_, __, ___) => events.add('publish'),
+        open: (_) async => events.add('open'),
+        rebindListeners: (_) => events.add('rebind'),
+      );
+
+      await outputStarted.future;
+      current = false;
+      releaseOutput.complete();
+
+      final result = await pending;
+      expect(result.published, isFalse);
+      expect(events, [
+        'create-player',
+        'probe',
+        'create-output',
+        'dispose-output:output-a',
+        'dispose-player:player-a',
+      ]);
+    },
+  );
+
+  test(
+    'lifecycle orchestrator drops a stale codec probe before output',
+    () async {
+      final lifecycle = PlayerLifecycleOrchestrator<String, String>();
+      final probeStarted = Completer<void>();
+      final releaseProbe = Completer<void>();
+      var current = true;
+      final events = <String>[];
+
+      final pending = lifecycle.createProbeOutputOpen(
+        isCurrent: () => current,
+        createPlayer: () async {
+          events.add('create-player');
+          return 'player-a';
+        },
+        probe: () async {
+          events.add('probe');
+          probeStarted.complete();
+          await releaseProbe.future;
+          return const HdrCapabilities(decoderHdr: true);
+        },
+        createOutput: (_, __) async {
+          events.add('create-output');
+          return 'output-a';
+        },
+        disposeOutput: (output) async => events.add('dispose-output:$output'),
+        disposePlayer: (player) async => events.add('dispose-player:$player'),
+        publish: (_, __, ___) => events.add('publish'),
+        open: (_) async => events.add('open'),
+        rebindListeners: (_) => events.add('rebind'),
+      );
+
+      await probeStarted.future;
+      current = false;
+      releaseProbe.complete();
+
+      final result = await pending;
+      expect(result.published, isFalse);
+      expect(events, ['create-player', 'probe', 'dispose-player:player-a']);
+    },
+  );
+
+  test(
+    'lifecycle orchestrator serializes stale and replacement opens',
+    () async {
+      final lifecycle = PlayerLifecycleOrchestrator<String, String>();
+      final oldOpenStarted = Completer<void>();
+      final releaseOldOpen = Completer<void>();
+      var oldCurrent = true;
+      var replacementCurrent = false;
+      final events = <String>[];
+
+      final old = lifecycle.openCurrent(
+        player: 'player-a',
+        isCurrent: () => oldCurrent,
+        open: (player) async {
+          events.add('open:$player');
+          oldOpenStarted.complete();
+          await releaseOldOpen.future;
+        },
+        rebindListeners: (player) => events.add('rebind:$player'),
+      );
+      await oldOpenStarted.future;
+      oldCurrent = false;
+      replacementCurrent = true;
+      final replacement = lifecycle.openCurrent(
+        player: 'player-b',
+        isCurrent: () => replacementCurrent,
+        open: (player) async => events.add('open:$player'),
+        rebindListeners: (player) => events.add('rebind:$player'),
+      );
+
+      releaseOldOpen.complete();
+      expect(await old, isFalse);
+      expect(await replacement, isTrue);
+      expect(events, ['open:player-a', 'open:player-b', 'rebind:player-b']);
+    },
+  );
+
+  test('lifecycle orchestrator invalidates before final disposal', () async {
+    final lifecycle = PlayerLifecycleOrchestrator<String, String>();
+    final events = <String>[];
+
+    await lifecycle.disposeFinal(
+      invalidate: () => events.add('invalidate'),
+      cancelListeners: () async => events.add('cancel-listeners'),
+      resetOutput: () async => events.add('reset-output'),
+      disposePlayer: (player) async => events.add('dispose-player:$player'),
+      player: 'player-a',
+    );
+
+    expect(events, [
+      'invalidate',
+      'cancel-listeners',
+      'reset-output',
+      'dispose-player:player-a',
+    ]);
+  });
+
   test('auto selects native HDR only with complete capability proof', () {
     final decision = HdrDecision.choose(
       mode: HdrMode.auto,
