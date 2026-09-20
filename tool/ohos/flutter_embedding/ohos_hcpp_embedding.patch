@@ -1,0 +1,1191 @@
+diff --git a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/cpp/types/libflutter/index.d.ets b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/cpp/types/libflutter/index.d.ets
+index 594c00fe..5c05262c 100644
+--- a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/cpp/types/libflutter/index.d.ets
++++ b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/cpp/types/libflutter/index.d.ets
+@@ -435,6 +435,11 @@ export const nativeIsHybridCompositionEnabled: (nativeShellHolderId: number) =>
+  *   change(number), device(number), embedder_id(number),
+  *   physical_x(number), physical_y(number), time_stamp(number),
+  *   pressure(number), size(number), kind(number)
++ * The native implementation currently does not read a view_id field. The
++ * packet is dispatched through the shell holder's Flutter view and native
++ * initialization leaves PointerData.view_id at the implicit view (0). The
++ * HCPP PlatformView id must therefore remain an ArkUI rect/event-routing id,
++ * not be copied into PointerData.view_id.
+  */
+ export const nativeDispatchTouchToEngine: (
+   nativeShellHolderId: number,
+diff --git a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/embedding/ohos/FlutterPage.ets b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/embedding/ohos/FlutterPage.ets
+index ac45e1f7..28107ec7 100644
+--- a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/embedding/ohos/FlutterPage.ets
++++ b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/embedding/ohos/FlutterPage.ets
+@@ -8,7 +8,12 @@ import Log from '../../util/Log';
+ import { FlutterView } from '../../view/FlutterView';
+ import FlutterManager from './FlutterManager';
+ import { DVModel, DVModelChildren, DynamicView } from '../../view/DynamicView/dynamicView';
+-import { OverlayRect } from '../../plugin/platform/PlatformViewsControllerHybrid';
++import {
++  HcppInputRect,
++  hcppInputRectKey,
++  hcppOverlayRectKey,
++  OverlayRect
++} from '../../plugin/platform/PlatformViewsControllerHybrid';
+ import Any from '../../plugin/common/Any';
+ import deviceInfo from '@ohos.deviceInfo';
+ import flutter from 'libflutter.so';
+@@ -53,6 +58,16 @@ struct FlutterSurface {
+       .id(this.viewId)
+       .focusable(true)
+       .focusOnTouch(this.defaultFocusOnTouch)
++      .onTouch((event: TouchEvent) => {
++        const changed = event.changedTouches;
++        const firstX = changed != undefined && changed.length > 0
++          ? changed[0].windowX : -1;
++        const firstY = changed != undefined && changed.length > 0
++          ? changed[0].windowY : -1;
++        Log.i(TAG, `FlutterSurface touch viewId=${this.viewId} ` +
++          `type=${event.type} changed=${changed?.length ?? 0} ` +
++          `window=(${firstX},${firstY})`);
++      })
+       .onLoad((context) => {
+         this.flutterView = FlutterManager.getInstance().getFlutterView(this.viewId);
+         this.surfaceLifecycleToken = this.flutterView?.onSurfaceCreated() ?? 0;
+@@ -83,6 +98,9 @@ struct FlutterSurface {
+           this.xComponentColor : Color.Transparent))
+       .expandSafeArea(this.safeAreaTypes, this.safeAreaEdges)
+       .onAreaChange((oldValue: Area, newValue: Area) => {
++        Log.i(TAG, `FlutterSurface area viewId=${this.viewId} ` +
++          `position=(${newValue.globalPosition.x},${newValue.globalPosition.y}) ` +
++          `size=(${newValue.width},${newValue.height})`);
+         // Only handle when Y position changes (window decoration state changed)
+         if (oldValue.globalPosition.y != newValue.globalPosition.y) {
+           FlutterManager.getInstance().handleWindowDecorSafeArea(this.viewId, this.getUIContext().getHostContext());
+@@ -119,16 +137,69 @@ struct FlutterOverlayXComponent {
+  * （platform view 上方所有 Flutter 控件的 Union 包围盒，如刷新按钮/视频播放控件）。
+  * rect 列表来自 AppStorage（ControllerHybrid.onEndFrameHybrid 每 frame flush 覆盖）。
+  */
++@Component
++struct FlutterOverlayRectBlock {
++  @ObjectLink rect: OverlayRect;
++  flutterView: FlutterView | null = null;
++  @Prop viewId: string = "";
++
++  private getFlutterView(): FlutterView | null {
++    return this.flutterView != null
++      ? this.flutterView
++      : FlutterManager.getInstance().getFlutterView(this.viewId);
++  }
++
++  build() {
++    Stack()
++      .width(this.rect.width)
++      .height(this.rect.height)
++      .position({ x: this.rect.x, y: this.rect.y })
++      .visibility(this.rect.visible ? Visibility.Visible : Visibility.Hidden)
++      .backgroundColor(Color.Transparent)
++      .hitTestBehavior(HitTestMode.Block)
++      .onTouch((event: TouchEvent) => {
++        const flutterView = this.getFlutterView();
++        if (flutterView != null) {
++          flutterView.dispatchTouchToEngineHybrid(
++            this.rect.viewId,
++            event,
++            'overlay',
++            this.rect.attachmentEpoch,
++          );
++        }
++      })
++      .onHover((isHover: boolean, event: HoverEvent) => {
++        const flutterView = this.getFlutterView();
++        if (flutterView != null) {
++          flutterView.dispatchHoverToEngineHybrid(
++            this.rect.viewId,
++            isHover,
++            event,
++            this.rect.attachmentEpoch,
++          );
++        }
++      })
++      .onAxisEvent((event: AxisEvent) => {
++        const flutterView = this.getFlutterView();
++        if (flutterView != null) {
++          flutterView.dispatchAxisToEngineHybrid(
++            this.rect.viewId,
++            event,
++            'overlay',
++            this.rect.attachmentEpoch,
++          );
++        }
++      })
++  }
++}
++
+ @Component
+ export struct FlutterOverlayBlock {
+   flutterView: FlutterView | null = null;
+   @Prop viewId: string = "";
+-  // ForEach 模式：动态渲染每个 rect 一个局部 Block，支持多 PV。
+-  // key 含坐标：OverlayRect 是普通 interface（非 @Observed），ForEach 用稳定 key（viewId）复用
+-  // 节点时不重新执行 itemBuilder，导致 rect 变化时节点几何不更新，
+-  // key 含坐标则 rect 变即重建 →几何跟随刷新。
+-  // Map<viewKey, rects>：多引擎时各 controller 只写自己的 slice，本页按
+-  // viewId 取自己的部分，避免固定 key 的跨引擎 last-writer-wins。
++  // Map<viewKey, rects>: each controller owns one storage slice. Rect objects
++  // are observed and retained by platformViewId, so geometry updates do not
++  // destroy an active ArkUI input node.
+   @StorageLink('hcpp_overlay_rects_map') overlayRectsMap: Map<string, OverlayRect[]> = new Map();
+ 
+   private getOverlayRects(): OverlayRect[] {
+@@ -138,53 +209,91 @@ export struct FlutterOverlayBlock {
+ 
+   build() {
+     Stack() {
+-      ForEach(this.getOverlayRects(), (r: OverlayRect) => {
+-        if (r.visible) {
+-          Stack() {
+-          }
+-          .width(r.width)
+-          .height(r.height)
+-          .position({ x: r.x, y: r.y })
+-          .backgroundColor(Color.Transparent)
+-          .hitTestBehavior(HitTestMode.Block)
+-          .onTouch((event: TouchEvent) => {
+-            if (r == undefined || !r.visible) {
+-              return;
+-            }
+-            const flutterView = this.flutterView != null
+-              ? this.flutterView
+-              : FlutterManager.getInstance().getFlutterView(this.viewId);
+-            if (flutterView == null) {
+-              return;
+-            }
+-            flutterView.dispatchTouchToEngineHybrid(r.viewId, event);
+-          })
+-          .onHover((isHover: boolean, event: HoverEvent) => {
+-            if (r == undefined || !r.visible) {
+-              return;
+-            }
+-            const flutterView = this.flutterView != null
+-              ? this.flutterView
+-              : FlutterManager.getInstance().getFlutterView(this.viewId);
+-            if (flutterView == null) {
+-              return;
+-            }
+-            flutterView.dispatchHoverToEngineHybrid(r.viewId, isHover, event);
+-          })
+-          .onAxisEvent((event: AxisEvent) => {
+-            if (r == undefined || !r.visible) {
+-              return;
+-            }
+-            const flutterView = this.flutterView != null
+-              ? this.flutterView
+-              : FlutterManager.getInstance().getFlutterView(this.viewId);
+-            if (flutterView == null) {
+-              return;
+-            }
+-            flutterView.dispatchAxisToEngineHybrid(r.viewId, event);
+-          })
++      ForEach(this.getOverlayRects(), (rect: OverlayRect) => {
++        FlutterOverlayRectBlock({ rect: rect, flutterView: this.flutterView, viewId: this.viewId })
++      }, (rect: OverlayRect) =>
++        hcppOverlayRectKey(rect.viewId, rect.attachmentEpoch))
++    }
++    .width('100%')
++    .height('100%')
++    .hitTestBehavior(HitTestMode.None)
++  }
++}
++
++/**
++ * Transparent input-only HCPP entry. It renders no video and never calls
++ * player/UI business code; every event is forwarded to the existing engine
++ * PointerData injector. The target FlutterView is this component's viewId,
++ * while rect.platformViewId remains the Dart PlatformView identity.
++ */
++@Component
++struct HcppInputRectBlock {
++  @ObjectLink rect: HcppInputRect;
++  flutterView: FlutterView | null = null;
++  @Prop viewId: string = "";
++
++  aboutToAppear(): void {
++    Log.d(TAG, `hcpp_input block appear viewId=${this.rect.platformViewId} ` +
++      `rect=(${this.rect.x},${this.rect.y},${this.rect.width},${this.rect.height})`);
++  }
++
++  private getFlutterView(): FlutterView | null {
++    const flutterView = this.flutterView != null
++      ? this.flutterView
++      : FlutterManager.getInstance().getFlutterView(this.viewId);
++    return flutterView;
++  }
++
++  build() {
++    Stack()
++      .width(this.rect.width)
++      .height(this.rect.height)
++      .position({ x: this.rect.x, y: this.rect.y })
++      .backgroundColor(Color.Transparent)
++      .hitTestBehavior(HitTestMode.Block)
++      .onTouch((event: TouchEvent) => {
++        Log.d(TAG, `hcpp_input block touch viewId=${this.rect.platformViewId} ` +
++          `type=${event.type} points=${event.touches?.length ?? 0}`);
++        // Do not gate on rect.visible here. ArkUI may deliver the terminal
++        // Up/Cancel after geometry becomes hidden; ControllerHybrid owns the
++        // pointer sequence and rejects only a new Down for an invisible rect.
++        const flutterView = this.getFlutterView();
++        if (flutterView != null) {
++          flutterView.dispatchTouchToEngineHybrid(
++            this.rect.platformViewId,
++            event,
++            'input',
++            this.rect.attachmentEpoch,
++          );
+         }
+-      }, (r: OverlayRect) => `${r.id}_${r.x}_${r.y}_${r.width}_${r.height}`)
++      })
++      .onAxisEvent((event: AxisEvent) => {
++        const flutterView = this.getFlutterView();
++        if (flutterView != null) {
++          flutterView.dispatchAxisToEngineHybrid(this.rect.platformViewId, event, 'input');
++        }
++      })
++  }
++}
++
++/** The HCPP input rect collection; the parent is hit-test transparent. */
++@Component
++struct HcppInputRectLayer {
++  flutterView: FlutterView | null = null;
++  @Prop viewId: string = "";
++  @StorageLink('hcpp_input_rects_map') inputRectsMap: Map<string, HcppInputRect[]> = new Map();
++
++  private getInputRects(): HcppInputRect[] {
++    const rects = this.inputRectsMap.get(this.viewId);
++    return rects != undefined ? rects : [];
++  }
++
++  build() {
++    Stack() {
++      ForEach(this.getInputRects(), (rect: HcppInputRect) => {
++        HcppInputRectBlock({ rect: rect, flutterView: this.flutterView, viewId: this.viewId })
++      }, (rect: HcppInputRect) =>
++        hcppInputRectKey(rect.platformViewId, rect.attachmentEpoch))
+     }
+     .width('100%')
+     .height('100%')
+@@ -289,6 +398,15 @@ export struct FlutterPage {
+     FlutterOverlayBlock({ flutterView: this.flutterView, viewId: this.viewId })
+   }
+ 
++  // Input blocks sit above DISPLAY wrappers and below Flutter overlay blocks.
++  // Therefore an overlay rect owns overlapping controls, while this full
++  // DISPLAY-bounds rect owns the remaining video area. DynamicView has no
++  // HCPP touch/axis dispatcher, so this is the sole DISPLAY touch entry.
++  @Builder
++  buildHcppInputBlock() {
++    HcppInputRectLayer({ flutterView: this.flutterView, viewId: this.viewId })
++  }
++
+   private refreshHybridCompositionState(): void {
+     const enabled = this.flutterView?.isHybridCompositionEnabled() ?? false;
+     if (enabled != this.hybridCompositionEnabled) {
+@@ -311,6 +429,7 @@ export struct FlutterPage {
+         this.buildPlatformViewLayer(true)
+         this.buildOverlayLayer()
+         this.buildOverlayBlock()
++        this.buildHcppInputBlock()
+       } else {
+         this.buildPlatformViewLayer()
+         Text("").id("unfocus-xcomponent-node").focusable(true)
+@@ -370,6 +489,7 @@ export struct FlutterPage {
+         this.buildPlatformViewLayer(true)
+         this.buildOverlayLayer()
+         this.buildOverlayBlock()
++        this.buildHcppInputBlock()
+       } else {
+         this.buildPlatformViewLayer()
+         Text("").id("unfocus-xcomponent-node").focusable(true)
+@@ -581,4 +701,4 @@ class StackModifier implements AttributeModifier<StackAttribute> {
+       )
+     }
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets
+index 8c75cf89..3eab682a 100644
+--- a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets
++++ b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/plugin/platform/PlatformViewsControllerHybrid.ets
+@@ -32,6 +32,14 @@ import display from '@ohos.display';
+ 
+ const TAG = "PlatformViewsControllerHybrid";
+ 
++// Keep DISPLAY/HCPP injected contacts in a device namespace separate from the
++// main XComponent stream. The native bridge must forward this value unchanged;
++// ownership of the namespace offset lives here so cached old libflutter.so
++// binaries and rebuilt binaries use the same PointerData contract.
++// Keep the namespace inside signed int32 for cached native bridges; the
++// native bridge reads this field as int64 so the contract remains explicit.
++const HCPP_INJECTED_DEVICE_BIAS: number = 1048576;
++
+ /** DynamicView 模型的 JSON 表示(本地镜像)。 */
+ class DVModelJson2 {
+   compType: string;
+@@ -297,21 +305,75 @@ interface DisplayOffset {
+  * 数组供 FlutterPage ForEach 渲染多个局部 Block 节点。每个 rect 是某 platform view
+  * 上方所有 Flutter 控件的 Union 包围盒。id 供 ForEach key 区分。
+  */
+-export interface OverlayRect {
++@Observed
++export class OverlayRect extends Object {
+   id: number;       // 唯一 id（= viewId），ForEach key
+   viewId: number;
+-  x: number;        // vp
+-  y: number;        // vp
+-  width: number;    // vp
+-  height: number;   // vp
+-  visible: boolean;
++  // Immutable source identity for overlay callbacks.
++  attachmentEpoch: number;
++  x: number = 0;    // vp
++  y: number = 0;    // vp
++  width: number = 0;
++  height: number = 0;
++  visible: boolean = false;
++
++  constructor(viewId: number, attachmentEpoch: number) {
++    super();
++    this.id = viewId;
++    this.viewId = viewId;
++    this.attachmentEpoch = attachmentEpoch;
++  }
++}
++
++/** Stable ArkUI identity: geometry must not participate in this key. */
++export function hcppOverlayRectKey(platformViewId: number, attachmentEpoch: number = 0): string {
++  return `hcpp-overlay-${platformViewId}-${attachmentEpoch}`;
++}
++
++/**
++ * A transparent ArkUI input block for one visible HCPP DISPLAY node.
++ *
++ * The storage map is keyed by the target FlutterView string id.  The rect's
++ * platformViewId is a different identity: it is the Dart PlatformView id and
++ * is only used to select the DISPLAY bounds and route the touch packet.
++ * Keeping the object observed lets its geometry change without changing the
++ * ForEach identity or interrupting an active touch stream.
++ */
++@Observed
++export class HcppInputRect extends Object {
++  platformViewId: number;
++  // Immutable for the lifetime of the ArkUI block. A late callback from an
++  // old attachment must not observe the epoch of a reused rect object.
++  attachmentEpoch: number;
++  x: number = 0; // vp, relative to the target FlutterView
++  y: number = 0; // vp, relative to the target FlutterView
++  width: number = 0;
++  height: number = 0;
++  visible: boolean = false;
++
++  constructor(platformViewId: number, attachmentEpoch: number) {
++    super();
++    this.platformViewId = platformViewId;
++    this.attachmentEpoch = attachmentEpoch;
++  }
++}
++
++/** Stable ArkUI identity: coordinates must not participate in this key. */
++export function hcppInputRectKey(platformViewId: number, attachmentEpoch: number = 0): string {
++  return `hcpp-input-${platformViewId}-${attachmentEpoch}`;
+ }
+ 
+ // FlutterPage 按 viewId 取自己的部分，避免固定 key 的跨引擎覆盖。
+ const OVERLAY_RECT_MAP_KEY: string = 'hcpp_overlay_rects_map';
++// Separate storage slice: FlutterPage must not merge input blocks with the
++// existing SliceViews overlay blocks, because the latter have a higher z-order
++// and already inject the same touch stream in their covered regions.
++const HCPP_INPUT_RECT_MAP_KEY: string = 'hcpp_input_rects_map';
+ 
+ // 单个 PointerData 字段，对照 native HandleTouchEvent 的 PointerData 构造
+ interface TouchDataItem {
++  trace_seq?: number;
++  attachment_epoch?: number;
+   change: number;
+   device: number;
+   embedder_id: number;
+@@ -327,6 +389,16 @@ interface TouchDataItem {
+   signal_kind: number;
+ }
+ 
++interface ActiveTouchPointer {
++  ownerViewId: number;
++  pointerId: number;
++  attachmentEpoch: number;
++  traceSeq: number;
++  windowX: number;
++  windowY: number;
++  timestamp: number;
++}
++
+ /**
+  * 管理 OpenHarmony 上的 Hybrid Composition++（HCPP）平台视图。
+  * 原生视图由 ArkUI 通过 BuilderNode（{@link NodeRenderType.RENDER_TYPE_DISPLAY}）
+@@ -357,6 +429,25 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+   private overscrollOffsets: Map<number, number> = new Map();
+   // 本帧已收到的 overlay rect，onDisplayOverlayHybrid 逐条 push，onEndFrameHybrid flush 到 AppStorage。
+   private pendingOverlayRects: OverlayRect[] = [];
++  private pendingOverlayViewIds: Set<number> = new Set();
++  // Overlay geometry is observed and retained by platformViewId. Replacing a
++  // rect object would rebuild its ArkUI node and can break an active stream.
++  private overlayRectsByViewId: Map<number, OverlayRect> = new Map();
++  // Stable objects are retained by PlatformView id; only the visible set is
++  // replaced per frame. This prevents coordinate animation from rebuilding a
++  // node and losing an in-flight down/move/up/cancel sequence.
++  private hcppInputRects: Map<number, HcppInputRect> = new Map();
++  private displayedHcppInputViewIds: Set<number> = new Set();
++  // The first Down owns a pointer until Up/Cancel. This is deliberately kept
++  // above rect visibility so a geometry/lifecycle update cannot create a
++  // Move/Up without its Down.
++  private activeTouchPointers: Map<number, ActiveTouchPointer> = new Map();
++  // Monotonic diagnostic identity for HCPP input dispatches. It is independent
++  // of pointer id, which ArkUI may reuse after a cancelled stream.
++  private hcppInputTraceSequence: number = 0;
++  // Keep attachment epochs after dispose so a reused view id cannot look like
++  // the old attachment in diagnostics.
++  private hcppInputAttachmentEpochs: Map<number, number> = new Map();
+   /**
+    * 本帧引擎合成序（onDisplayPlatformViewHybrid 按引擎 composition_order 逐个
+    * 调用，此处按到达顺序记录）。ArkUI 侧 wrapper DVModel 是创建时一次性 push 的，
+@@ -400,6 +491,18 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+   }
+ 
+   public detach(): void {
++    this.cancelAllActiveTouchPointers('detach');
++    this.invalidateAllInputRects();
++    for (const viewId of this.platformViews.keys()) {
++      this.hcppInputAttachmentEpochs.set(
++        viewId,
++        (this.hcppInputAttachmentEpochs.get(viewId) ?? 0) + 1,
++      );
++      this.hcppInputRects.delete(viewId);
++      this.overlayRectsByViewId.delete(viewId);
++    }
++    this.removeOverlayRectsFromStorage();
++    this.removeHcppInputRectsFromStorage();
+     this.channel?.setPlatformViewsHandler(null);
+     this.channel = null;
+     this.context = null;
+@@ -433,6 +536,16 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     if (detachingFlutterView != undefined && this.flutterView != detachingFlutterView) {
+       return;
+     }
++    this.cancelAllActiveTouchPointers('detachFromView');
++    this.invalidateAllInputRects();
++    for (const viewId of this.platformViews.keys()) {
++      this.hcppInputAttachmentEpochs.set(
++        viewId,
++        (this.hcppInputAttachmentEpochs.get(viewId) ?? 0) + 1,
++      );
++      this.hcppInputRects.delete(viewId);
++      this.overlayRectsByViewId.delete(viewId);
++    }
+     for (let viewId of this.viewWrappers.keys()) {
+       const wrapper = this.viewWrappers.get(viewId);
+       if (!wrapper) {
+@@ -446,6 +559,7 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     }
+ 
+     this.removeOverlayRectsFromStorage();
++    this.removeHcppInputRectsFromStorage();
+     this.flutterView = null;
+     for (let viewId of this.platformViews.keys()) {
+       const platformView = this.platformViews.get(viewId);
+@@ -486,16 +600,9 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+       platformView, "", 0, 0, request.logicalTop, request.logicalLeft, request.direction));
+     this.nodeControllers.set(request.viewId, nodeController);
+ 
+-    // 注入 ohosHcppViewId + touchDispatcher，让 DISPLAY 子树的 onTouch 把事件
+-    // 转发回本控制器，经 ArkTS 坐标转换后注入引擎 Dart 竞技场。
++    // Keep the platform identity for diagnostics and native callbacks. Touch
++    // and axis input are owned exclusively by FlutterPage's input blocks.
+     platformView.ohosHcppViewId = request.viewId;
+-    platformView.touchDispatcher = (vid: number, ev: TouchEvent) => {
+-      this.dispatchTouchToEngine(vid, ev);
+-    };
+-    // 滚轮链路：DISPLAY 子树 onAxisEvent 转发至此，注入引擎 signal_kind=kScroll。
+-    platformView.axisDispatcher = (vid: number, ev: AxisEvent) => {
+-      this.dispatchAxisToEngine(vid, ev);
+-    };
+ 
+     // 创建请求携带尺寸时引导布局，嵌入层经 onDisplayPlatformViewHybrid 驱动几何。
+     const bootstrapWidth = request.logicalWidth > 0 ? request.logicalWidth : 0;
+@@ -532,12 +639,26 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+       return;
+     }
+ 
++    const disposeEpoch = this.hcppInputAttachmentEpochs.get(viewId) ?? 0;
++
+     if (this.focusViewId == viewId) {
+       this.focusViewId = -1;
+     }
+ 
+-    platformView.touchDispatcher = null;
+-    platformView.axisDispatcher = null;
++    // The cancel must use the current offset. Remove the FlutterView storage
++    // slice before deleting the target geometry, so a stale transparent node
++    // cannot swallow the next gesture after this method returns.
++    this.cancelActiveTouchPointersForView(viewId, 'dispose');
++    Log.i(TAG, `hcpp_input attachment platformViewId=${viewId} ` +
++      `epoch=${disposeEpoch} action=dispose`);
++    this.removeOverlayRectFromStorage(viewId);
++    this.removeHcppInputRectFromStorage(viewId);
++    this.overlayRectsByViewId.delete(viewId);
++    this.hcppInputRects.delete(viewId);
++    const inputRect = this.hcppInputRects.get(viewId);
++    if (inputRect != undefined) {
++      inputRect.visible = false;
++    }
+     platformView.injectedTimestamps.clear();
+     this.platformViews.delete(viewId);
+     this.viewInfos.delete(viewId);
+@@ -556,6 +677,13 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     this.viewWrappers.delete(viewId);
+     this.displayOffsets.delete(viewId);
+     this.overscrollOffsets.delete(viewId);
++    this.hcppInputRects.delete(viewId);
++    this.displayedHcppInputViewIds.delete(viewId);
++    this.overlayRectsByViewId.delete(viewId);
++    this.pendingOverlayViewIds.delete(viewId);
++    this.pendingOverlayRects = this.pendingOverlayRects.filter((rect: OverlayRect): boolean => {
++      return rect.viewId !== viewId;
++    });
+     // 清 hover enter 残留，该 rect 的 Block 节点随 dispose清除
+     this.hoverInjectedRects.delete(viewId);
+ 
+@@ -752,6 +880,35 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     const viewY = prevOffset != undefined ? prevOffset.viewY : y;
+     const offsetEntry: DisplayOffset = { x: x, y: y, w: width, h: height, viewW: viewWidth, viewH: viewHeight, viewX: viewX, viewY: viewY };
+     this.displayOffsets.set(viewId, offsetEntry);
++
++    // Independent input entry for the HCPP DISPLAY surface. It is published
++    // with the frame and rendered above the DISPLAY wrapper. The existing
++    // FlutterOverlayBlock is rendered above this layer and wins where a
++    // SliceViews Flutter control overlaps the video; those regions therefore
++    // still have exactly one injector (OverlayBlock, not this rect).
++    if (width > 0 && height > 0) {
++      let inputRect = this.hcppInputRects.get(viewId);
++      if (inputRect == undefined) {
++        inputRect = new HcppInputRect(
++          viewId,
++          this.hcppInputAttachmentEpochs.get(viewId) ?? 0,
++        );
++        this.hcppInputRects.set(viewId, inputRect);
++      }
++      inputRect.x = leftVp;
++      inputRect.y = topVp - overscrollOffset;
++      inputRect.width = widthVp;
++      inputRect.height = heightVp;
++      inputRect.visible = true;
++      this.displayedHcppInputViewIds.add(viewId);
++    } else {
++      this.cancelActiveTouchPointersForView(viewId, 'zero-display-rect');
++      const inputRect = this.hcppInputRects.get(viewId);
++      if (inputRect != undefined) {
++        inputRect.visible = false;
++      }
++      this.displayedHcppInputViewIds.delete(viewId);
++    }
+   }
+ 
+   /**
+@@ -760,16 +917,30 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+    */
+   onDisplayOverlayHybrid(viewId: number, x: number, y: number, width: number,
+     height: number): void {
+-    const rect: OverlayRect = {
+-      id: viewId,
+-      viewId: viewId,
+-      x: px2vp(x),
+-      y: px2vp(y),
+-      width: px2vp(width),
+-      height: px2vp(height),
+-      visible: width > 0 && height > 0,
+-    };
+-    this.pendingOverlayRects.push(rect);
++    let rect = this.overlayRectsByViewId.get(viewId);
++    if (rect == undefined) {
++      rect = new OverlayRect(
++        viewId,
++        this.hcppInputAttachmentEpochs.get(viewId) ?? 0,
++      );
++      this.overlayRectsByViewId.set(viewId, rect);
++    }
++    rect.x = px2vp(x);
++    rect.y = px2vp(y);
++    rect.width = px2vp(width);
++    rect.height = px2vp(height);
++    rect.visible = width > 0 && height > 0;
++    if (!rect.visible) {
++      this.pendingOverlayRects = this.pendingOverlayRects.filter((item: OverlayRect): boolean => {
++        return item.viewId !== viewId;
++      });
++      this.pendingOverlayViewIds.delete(viewId);
++      return;
++    }
++    if (!this.pendingOverlayViewIds.has(viewId)) {
++      this.pendingOverlayRects.push(rect);
++      this.pendingOverlayViewIds.add(viewId);
++    }
+   }
+ 
+   onDisplayMutatorsHybrid(viewId: number, data: number[]): void {
+@@ -1389,70 +1560,169 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+    * PointerData 期望的相对 Flutter view 的物理坐标。用窗口级坐标而非
+    * offset(块位置)+ local(块内)叠加，规避块位置渲染延迟导致的 dpr 倍放大。
+    */
+-  dispatchTouchToEngine(viewId: number, event: TouchEvent): void {
+-    if (this.flutterNapi == null) {
+-      return;
+-    }
+-    if (this.displayOffsets.get(viewId) == undefined) {
+-      // 首帧几何未到，view 尚未显示，丢弃(后续 move 会补上)。
++  dispatchTouchToEngine(viewId: number, event: TouchEvent, source: string = 'input',
++    sourceEpoch?: number): void {
++    const traceSeq = ++this.hcppInputTraceSequence;
++    const attachmentEpoch = this.hcppInputAttachmentEpochs.get(viewId) ?? 0;
++    if (sourceEpoch != undefined && sourceEpoch !== attachmentEpoch) {
++      Log.i(TAG, `hcpp_input stage=owner route=${source} seq=${traceSeq} ` +
++        `epoch=${sourceEpoch} platformViewId=${viewId} ` +
++        `TouchType=${event.type} dropped reason=stale-attachment ` +
++        `currentEpoch=${attachmentEpoch}`);
+       return;
+     }
+-    const dpr = display.getDefaultDisplaySync().densityPixels;
+-
+-    // ArkUI TouchType → PointerData::Change 枚举值(pointer_data.h)。
+     let change = PointerChange.CANCEL;
++    let typeName = 'Cancel';
+     if (event.type === TouchType.Down) {
+       change = PointerChange.DOWN;
++      typeName = 'Down';
+     } else if (event.type === TouchType.Up) {
+       change = PointerChange.UP;
++      typeName = 'Up';
+     } else if (event.type === TouchType.Move) {
+       change = PointerChange.MOVE;
+-    } else if (event.type === TouchType.Cancel) {
+-      change = PointerChange.CANCEL;
+-    } else {
++      typeName = 'Move';
++    } else if (event.type !== TouchType.Cancel) {
++      Log.i(TAG, `hcpp_input stage=owner route=${source} seq=${traceSeq} ` +
++        `epoch=${attachmentEpoch} platformViewId=${viewId} TouchType=Unknown reason=unsupported`);
+       return;
+     }
+ 
+-    // changedTouches: 当前帧变化的触摸点。每点一个 PointerData。
+-    // 用 windowX/windowY(相对 Flutter 窗口左上角的 vp)直接 ×dpr 得 Flutter view 物理坐标，
+-    // 即 PointerData 期望的坐标系。不用 offset(块位置)+ local(块内)叠加：块位置由
+-    // onDisplayPlatformViewHybrid 更新，相对触摸帧有渲染延迟，叠加会把手指位移放大 dpr 倍。
+     const points = event.changedTouches;
++    if (points == undefined || points.length === 0) {
++      Log.i(TAG, `hcpp_input stage=owner route=${source} seq=${traceSeq} ` +
++        `epoch=${attachmentEpoch} platformViewId=${viewId} TouchType=${typeName} reason=no-changed-pointer`);
++      return;
++    }
++    const inputRect = this.hcppInputRects.get(viewId);
++    const sourceVisible = source === 'overlay'
++      ? (this.overlayRectsByViewId.get(viewId)?.visible ?? false)
++      : (inputRect?.visible ?? false);
++    const hasGeometry = this.displayOffsets.get(viewId) != undefined;
++    const dpr = display.getDefaultDisplaySync().densityPixels;
++    const acceptedPoints: CustomTouchObject[] = [];
+     const touchData: Object[] = [];
++
+     for (let i = 0; i < points.length; i++) {
+       const t = points[i];
++      const active = this.activeTouchPointers.get(t.id);
++      let accepted = false;
++      let reason = '';
++      if (event.type === TouchType.Down) {
++        if (!sourceVisible) {
++          reason = 'invisible-new-down';
++        } else if (active != undefined) {
++          reason = 'duplicate-down';
++        } else if (!hasGeometry) {
++          reason = 'no-display-geometry';
++        } else {
++          accepted = true;
++        }
++      } else if (active == undefined) {
++        reason = 'no-down-owner';
++      } else if (active.ownerViewId !== viewId) {
++        reason = `owned-by-${active.ownerViewId}`;
++      } else if (sourceEpoch != undefined && active.attachmentEpoch !== sourceEpoch) {
++        reason = `stale-active-attachment-${active.attachmentEpoch}`;
++      } else if (!hasGeometry) {
++        reason = 'no-display-geometry';
++      } else {
++        accepted = true;
++      }
++
++      Log.i(TAG, `hcpp_input stage=owner route=${source} seq=${traceSeq} ` +
++        `epoch=${attachmentEpoch} platformViewId=${viewId} ` +
++        `TouchType=${typeName} pointerId=${t.id} ${accepted ? 'accepted' : 'dropped'}` +
++        `${reason == '' ? '' : ` reason=${reason}`}` +
++        ` activeOwner=${active?.ownerViewId ?? -1} activeEpoch=${active?.attachmentEpoch ?? 0}` +
++        ` eventTimestampNs=${event.timestamp}` +
++        ` sourceVisible=${sourceVisible}` +
++        ` inputVisible=${inputRect?.visible ?? false}` +
++        ` displayed=${this.displayedHcppInputViewIds.has(viewId)}` +
++        ` hasGeometry=${hasGeometry} attachmentEpoch=${attachmentEpoch}`);
++      if (!accepted) {
++        continue;
++      }
++
+       const physicalX = t.windowX * dpr;
+       const physicalY = t.windowY * dpr;
+       const item: TouchDataItem = {
++        trace_seq: traceSeq,
++        attachment_epoch: attachmentEpoch,
+         change: change,
+-        device: (t.id << TOOL_TYPE_BITS) | PointerDeviceKind.TOUCH,
++        device: ((t.id << TOOL_TYPE_BITS) | PointerDeviceKind.TOUCH) +
++          HCPP_INJECTED_DEVICE_BIAS,
+         embedder_id: (t.id << TOOL_TYPE_BITS) | PointerDeviceKind.TOUCH,
+         physical_x: physicalX,
+         physical_y: physicalY,
+-        time_stamp: Math.floor(event.timestamp / 1000), // ns → μs
++        time_stamp: Math.floor(event.timestamp / 1000),
+         pressure: 1.0,
+         size: 0.0,
+-        kind: PointerDeviceKind.TOUCH, // kTouch
++        kind: PointerDeviceKind.TOUCH,
+         buttons: 0,
+         scroll_delta_x: 0.0,
+         scroll_delta_y: 0.0,
+-        signal_kind: PointerSignalKind.NONE, // kNone（触摸无信号）
++        signal_kind: PointerSignalKind.NONE,
+       };
+       touchData.push(item);
++      acceptedPoints.push(t as CustomTouchObject);
++    }
++
++    if (touchData.length === 0) {
++      return;
++    }
++    if (this.flutterNapi == null) {
++      Log.i(TAG, `hcpp_input stage=owner route=${source} seq=${traceSeq} ` +
++        `epoch=${attachmentEpoch} platformViewId=${viewId} TouchType=${typeName} reason=no-napi`);
++      return;
+     }
+-    if (touchData.length > 0) {
+-      this.flutterNapi.dispatchTouchToEngine(touchData);
++    this.flutterNapi.dispatchTouchToEngine(touchData);
++    Log.i(TAG, `hcpp_input stage=napi-request route=${source} seq=${traceSeq} ` +
++      `epoch=${attachmentEpoch} platformViewId=${viewId} TouchType=${typeName} ` +
++      `count=${touchData.length} eventTimestampNs=${event.timestamp}`);
++
++    for (const t of acceptedPoints) {
++      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
++        this.activeTouchPointers.delete(t.id);
++      } else {
++        this.activeTouchPointers.set(t.id, {
++          ownerViewId: viewId,
++          pointerId: t.id,
++          attachmentEpoch: attachmentEpoch,
++          traceSeq: traceSeq,
++          windowX: t.windowX,
++          windowY: t.windowY,
++          timestamp: event.timestamp,
++        });
++      }
+     }
+   }
+ 
+   // 把 ArkUI onAxisEvent 的 AxisEvent 注入引擎 PointerData。
+-  dispatchAxisToEngine(viewId: number, event: AxisEvent): void {
++  dispatchAxisToEngine(viewId: number, event: AxisEvent, source: string = 'input',
++    sourceEpoch?: number): void {
++    const currentEpoch = this.hcppInputAttachmentEpochs.get(viewId) ?? 0;
++    if (sourceEpoch != undefined && sourceEpoch !== currentEpoch) {
++      Log.i(TAG, `hcpp_input route=${source} platformViewId=${viewId} ` +
++        `AxisEvent dropped reason=stale-attachment epoch=${sourceEpoch} ` +
++        `currentEpoch=${currentEpoch}`);
++      return;
++    }
+     if (this.flutterNapi == null) {
++      Log.d(TAG, `hcpp_input route=${source} platformViewId=${viewId} AxisEvent reason=no-napi`);
++      return;
++    }
++    const sourceVisible = source === 'overlay'
++      ? (this.overlayRectsByViewId.get(viewId)?.visible ?? false)
++      : (this.hcppInputRects.get(viewId)?.visible ?? false);
++    if (!sourceVisible) {
++      Log.d(TAG, `hcpp_input route=${source} platformViewId=${viewId} AxisEvent reason=invisible`);
+       return;
+     }
+     // 只注入 UPDATE（滚轮增量只在 UPDATE 时有值）。
+     const AXIS_ACTION_UPDATE = 2;
+     if (event.action !== AXIS_ACTION_UPDATE) {
++      Log.d(TAG, `hcpp_input route=${source} platformViewId=${viewId} AxisEvent action=${event.action} reason=not-update`);
+       return;
+     }
+ 
+@@ -1462,6 +1732,7 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+ 
+     // 滚轮增量为 0 则无意义，跳过。
+     if (scrollX === 0 && scrollY === 0) {
++      Log.d(TAG, `hcpp_input route=${source} platformViewId=${viewId} AxisEvent reason=zero-delta`);
+       return;
+     }
+ 
+@@ -1487,7 +1758,15 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+   }
+ 
+   // 把 ArkUI onHover 回调注入引擎 PointerData（hover 返投）。
+-  dispatchHoverToEngine(viewId: number, isHover: boolean, event: HoverEvent): void {
++  dispatchHoverToEngine(viewId: number, isHover: boolean, event: HoverEvent,
++    sourceEpoch?: number): void {
++    const currentEpoch = this.hcppInputAttachmentEpochs.get(viewId) ?? 0;
++    if (sourceEpoch != undefined && sourceEpoch !== currentEpoch) {
++      Log.i(TAG, `hcpp_input route=overlay platformViewId=${viewId} ` +
++        `HoverEvent dropped reason=stale-attachment epoch=${sourceEpoch} ` +
++        `currentEpoch=${currentEpoch}`);
++      return;
++    }
+     if (this.flutterNapi == null) {
+       return;
+     }
+@@ -1542,6 +1821,15 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+       return;
+     }
+     Log.i(TAG, "hidePlatformViewHybrid id=" + viewId);
++    this.cancelActiveTouchPointersForView(viewId, 'hide');
++    const overlayRect = this.overlayRectsByViewId.get(viewId);
++    if (overlayRect != undefined) {
++      overlayRect.visible = false;
++    }
++    this.pendingOverlayRects = this.pendingOverlayRects.filter((rect: OverlayRect): boolean => {
++      return rect.viewId !== viewId;
++    });
++    this.pendingOverlayViewIds.delete(viewId);
+     const params: DVModelParameters | undefined = wrapper.getDvModel().params;
+     if (!params) {
+       return;
+@@ -1555,6 +1843,11 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     this.setParam(params, "pathCommands", 'M0 0 L0 0 Z');
+     this.setParam(params, "pathWidth", 1);
+     this.setParam(params, "pathHeight", 1);
++    const inputRect = this.hcppInputRects.get(viewId);
++    if (inputRect != undefined) {
++      inputRect.visible = false;
++    }
++    this.displayedHcppInputViewIds.delete(viewId);
+   }
+ 
+   showOverlaySurfaceHybrid(): void {
+@@ -1567,7 +1860,10 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+   }
+ 
+   onBeginFrameHybrid(): void {
+-    // 帧开始时没有需要预热/清零的工作,为后续预留
++    // The OHOS external view embedder invokes display/hide/end on one platform
++    // task and does not call this hook. Frame ownership is therefore settled
++    // only by onEndFrameHybrid; begin must not cancel a live pointer or erase
++    // a still-mounted input node.
+   }
+ 
+   onEndFrameHybrid(): void {
+@@ -1583,8 +1879,25 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     if (viewKey == undefined) {
+       // attach 前 flutterView 未知，rects 无消费者，丢弃。
+       this.pendingOverlayRects = [];
++      this.pendingOverlayViewIds.clear();
++      this.cancelAllActiveTouchPointers('end-without-flutter-view');
++      this.invalidateAllInputRects();
++      this.displayedHcppInputViewIds.clear();
+       return;
+     }
++
++    // A view not displayed or explicitly hidden in this display/hide/end
++    // sequence is no longer a valid input target. End its owned pointers while
++    // displayOffsets still exists, before publishing the empty storage slice.
++    for (const viewId of this.hcppInputRects.keys()) {
++      if (!this.displayedHcppInputViewIds.has(viewId)) {
++        const inputRect = this.hcppInputRects.get(viewId);
++        if (inputRect != undefined && inputRect.visible) {
++          this.cancelActiveTouchPointersForView(viewId, 'end-frame-absent');
++          inputRect.visible = false;
++        }
++      }
++    }
+     const oldMap = AppStorage.get<Map<string, OverlayRect[]>>(OVERLAY_RECT_MAP_KEY);
+     const newMap: Map<string, OverlayRect[]> = new Map();
+     if (oldMap != undefined) {
+@@ -1598,6 +1911,33 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     newMap.set(viewKey, this.pendingOverlayRects);
+     AppStorage.setOrCreate<Map<string, OverlayRect[]>>(OVERLAY_RECT_MAP_KEY, newMap);
+     this.pendingOverlayRects = [];
++    this.pendingOverlayViewIds.clear();
++
++    const inputRects: HcppInputRect[] = [];
++    for (const viewId of this.displayedHcppInputViewIds) {
++      const inputRect = this.hcppInputRects.get(viewId);
++      if (inputRect != undefined && inputRect.visible &&
++        inputRect.width > 0 && inputRect.height > 0) {
++        inputRects.push(inputRect);
++      }
++    }
++    const oldInputMap = AppStorage.get<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY);
++    const newInputMap: Map<string, HcppInputRect[]> = new Map();
++    if (oldInputMap != undefined) {
++      for (const key of Array.from(oldInputMap.keys())) {
++        const rects = oldInputMap.get(key);
++        if (rects != undefined) {
++          newInputMap.set(key, rects);
++        }
++      }
++    }
++    // Empty inputRects is intentional: it clears invisible/absent DISPLAY
++    // nodes for this FlutterView while preserving other engine slices.
++    newInputMap.set(viewKey, inputRects);
++    Log.d(TAG, `hcpp_input publish viewKey=${viewKey} rects=${inputRects.length} ` +
++      `displayed=${Array.from(this.displayedHcppInputViewIds).join(',')}`);
++    AppStorage.setOrCreate<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY, newInputMap);
++    this.displayedHcppInputViewIds.clear();
+   }
+ 
+   /**
+@@ -1791,6 +2131,18 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+       throw new Error("PlatformViewsControllerHybrid#context is null.");
+     }
+     const platformView = factory.create(this.context, request.viewId, createParams);
++    const attachmentEpoch =
++      (this.hcppInputAttachmentEpochs.get(request.viewId) ?? 0) + 1;
++    this.hcppInputAttachmentEpochs.set(request.viewId, attachmentEpoch);
++    // Do not reuse the previous observed rect. A new object plus an epoch-keyed
++    // ForEach entry gives old ArkUI callbacks a stable source identity that
++    // can be rejected after this attachment takes over the same view id.
++    this.removeHcppInputRectFromStorage(request.viewId);
++    this.hcppInputRects.delete(request.viewId);
++    this.removeOverlayRectFromStorage(request.viewId);
++    this.overlayRectsByViewId.delete(request.viewId);
++    Log.i(TAG, `hcpp_input attachment platformViewId=${request.viewId} ` +
++      `epoch=${attachmentEpoch} action=create`);
+     // 从平台视图实例取回它要渲染的 ArkUI UI 构建器(WrappedBuilder),取不到就抛错中止创建——因为后续挂载到
+     // Flutter 树、交给 BuilderNode 渲染都依赖这个构建器,没有它视图无法显示
+     const embeddedView: WrappedBuilder<[Params]> = platformView.getView();
+@@ -1814,6 +2166,79 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     this.frameDisplayOrder = [];
+     // 本引擎（或 isolate restart 后）不再持有 rects，清掉自己的 slice
+     this.removeOverlayRectsFromStorage();
++    this.removeHcppInputRectsFromStorage();
++  }
++
++  /** Inject CANCEL through the same route used by native input blocks. */
++  private cancelActiveTouchPointersForView(viewId: number, reason: string): void {
++    const cancelTouches: CustomTouchObject[] = [];
++    const cancelOwnerSequences: number[] = [];
++    let cancelTimestamp = 0;
++    for (const pointer of this.activeTouchPointers.values()) {
++      if (pointer.ownerViewId !== viewId) {
++        continue;
++      }
++      // HCPP TouchEvent.timestamp is in the ArkUI nanosecond clock domain;
++      // dispatchTouchToEngine converts it to Flutter microseconds. Keep the
++      // synthetic Cancel in that same domain and strictly after the latest
++      // delivered Down/Move instead of switching to Date.now() (wall clock).
++      cancelTimestamp = Math.max(cancelTimestamp, pointer.timestamp);
++      cancelTouches.push(new CustomTouchObject(
++        TouchType.Cancel,
++        pointer.pointerId,
++        pointer.windowX,
++        pointer.windowY,
++        pointer.windowX,
++        pointer.windowY,
++        pointer.windowX,
++        pointer.windowY,
++        pointer.windowX,
++        pointer.windowY));
++      cancelOwnerSequences.push(pointer.traceSeq);
++    }
++    if (cancelTouches.length > 0) {
++      const cancelEvent = new CustomTouchEvent(
++        TouchType.Cancel,
++        cancelTouches,
++        cancelTouches,
++        cancelTimestamp + DEDUP_TIMESTAMP_DELTA_US * 1000,
++        SourceType.TouchScreen,
++        1.0,
++        0.0,
++        0.0,
++        SourceTool.Finger);
++      Log.i(TAG, `hcpp_input stage=cancel-request route=input platformViewId=${viewId} ` +
++        `epoch=${this.hcppInputAttachmentEpochs.get(viewId) ?? 0} TouchType=Cancel ` +
++        `pointerId=${cancelTouches.map((touch: CustomTouchObject): number => touch.id).join(',')} ` +
++        `ownerSeq=${cancelOwnerSequences.join(',')} ` +
++        `reason=${reason} count=${cancelTouches.length}`);
++      this.dispatchTouchToEngine(viewId, cancelEvent, 'input');
++    }
++    // If the NAPI bridge or geometry disappeared, dispatchTouchToEngine cannot
++    // emit a packet; clearing ownership still prevents later Move/Up leakage.
++    for (const pointerId of Array.from(this.activeTouchPointers.keys())) {
++      const pointer = this.activeTouchPointers.get(pointerId);
++      if (pointer != undefined && pointer.ownerViewId === viewId) {
++        this.activeTouchPointers.delete(pointerId);
++      }
++    }
++  }
++
++  private cancelAllActiveTouchPointers(reason: string): void {
++    const owners: Set<number> = new Set();
++    for (const pointer of this.activeTouchPointers.values()) {
++      owners.add(pointer.ownerViewId);
++    }
++    for (const viewId of owners.values()) {
++      this.cancelActiveTouchPointersForView(viewId, reason);
++    }
++  }
++
++  private invalidateAllInputRects(): void {
++    for (const inputRect of this.hcppInputRects.values()) {
++      inputRect.visible = false;
++    }
++    this.displayedHcppInputViewIds.clear();
+   }
+ 
+   /** 把本 view 的 overlay rects slice 从 AppStorage map 中移除（读-改-写）。 */
+@@ -1838,4 +2263,77 @@ export default class PlatformViewsControllerHybrid implements HybridCompositionH
+     }
+     AppStorage.setOrCreate<Map<string, OverlayRect[]>>(OVERLAY_RECT_MAP_KEY, newMap);
+   }
++
++  /** Remove only one platform view's overlay rect from this FlutterView slice. */
++  private removeOverlayRectFromStorage(viewId: number): void {
++    const viewKey = this.flutterView?.getId();
++    if (viewKey == undefined) {
++      return;
++    }
++    const oldMap = AppStorage.get<Map<string, OverlayRect[]>>(OVERLAY_RECT_MAP_KEY);
++    const oldRects = oldMap?.get(viewKey);
++    if (oldRects == undefined) {
++      return;
++    }
++    const newMap: Map<string, OverlayRect[]> = new Map();
++    if (oldMap != undefined) {
++      for (const key of Array.from(oldMap.keys())) {
++        const rects = oldMap.get(key);
++        if (rects != undefined) {
++          newMap.set(key, key === viewKey
++            ? rects.filter((rect: OverlayRect): boolean => rect.viewId !== viewId)
++            : rects);
++        }
++      }
++    }
++    AppStorage.setOrCreate<Map<string, OverlayRect[]>>(OVERLAY_RECT_MAP_KEY, newMap);
++  }
++
++  /** Remove only this FlutterView's independent HCPP input slice. */
++  private removeHcppInputRectsFromStorage(): void {
++    const viewKey = this.flutterView?.getId();
++    if (viewKey == undefined) {
++      return;
++    }
++    const oldMap = AppStorage.get<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY);
++    if (oldMap == undefined || !oldMap.has(viewKey)) {
++      return;
++    }
++    const newMap: Map<string, HcppInputRect[]> = new Map();
++    for (const key of Array.from(oldMap.keys())) {
++      if (key === viewKey) {
++        continue;
++      }
++      const rects = oldMap.get(key);
++      if (rects != undefined) {
++        newMap.set(key, rects);
++      }
++    }
++    AppStorage.setOrCreate<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY, newMap);
++  }
++
++  /** Remove only one platform view's input rect from this FlutterView slice. */
++  private removeHcppInputRectFromStorage(viewId: number): void {
++    const viewKey = this.flutterView?.getId();
++    if (viewKey == undefined) {
++      return;
++    }
++    const oldMap = AppStorage.get<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY);
++    const oldRects = oldMap?.get(viewKey);
++    if (oldRects == undefined) {
++      return;
++    }
++    const newMap: Map<string, HcppInputRect[]> = new Map();
++    if (oldMap != undefined) {
++      for (const key of Array.from(oldMap.keys())) {
++        const rects = oldMap.get(key);
++        if (rects != undefined) {
++          newMap.set(key, key === viewKey
++            ? rects.filter((rect: HcppInputRect): boolean => rect.platformViewId !== viewId)
++            : rects);
++        }
++      }
++    }
++    AppStorage.setOrCreate<Map<string, HcppInputRect[]>>(HCPP_INPUT_RECT_MAP_KEY, newMap);
++  }
+ }
+diff --git a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/view/FlutterView.ets b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/view/FlutterView.ets
+index d6aa520c..abb30e49 100644
+--- a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/view/FlutterView.ets
++++ b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/main/ets/view/FlutterView.ets
+@@ -950,13 +950,14 @@ export class FlutterView {
+    * @param viewId - overlay rect 所属 platform view id（webview 的 viewId）
+    * @param event - ArkUI TouchEvent，坐标用 windowX×dpr（dispatchTouchToEngine 内部转）
+    */
+-  dispatchTouchToEngineHybrid(viewId: number, event: TouchEvent): void {
++  dispatchTouchToEngineHybrid(viewId: number, event: TouchEvent, source: string = 'unknown',
++    sourceEpoch?: number): void {
+     const controller = this.flutterEngine?.getPlatformViewsControllerHybrid();
+     if (controller == null) {
+       Log.w(TAG, `dispatchTouchToEngineHybrid no controllerHybrid (viewId=${viewId})`);
+       return;
+     }
+-    controller.dispatchTouchToEngine(viewId, event);
++    controller.dispatchTouchToEngine(viewId, event, source, sourceEpoch);
+   }
+ 
+   /**
+@@ -965,13 +966,14 @@ export class FlutterView {
+    * @param isHover - ArkUI onHover 的 isHover（true=进入/移动，false=离开）
+    * @param event - ArkUI HoverEvent，坐标用 windowX×dpr（dispatchHoverToEngine 内部转）
+    */
+-  dispatchHoverToEngineHybrid(viewId: number, isHover: boolean, event: HoverEvent): void {
++  dispatchHoverToEngineHybrid(viewId: number, isHover: boolean, event: HoverEvent,
++    sourceEpoch?: number): void {
+     const controller = this.flutterEngine?.getPlatformViewsControllerHybrid();
+     if (controller == null) {
+       Log.w(TAG, `dispatchHoverToEngineHybrid no controllerHybrid (viewId=${viewId})`);
+       return;
+     }
+-    controller.dispatchHoverToEngine(viewId, isHover, event);
++    controller.dispatchHoverToEngine(viewId, isHover, event, sourceEpoch);
+   }
+ 
+   /**
+@@ -979,13 +981,14 @@ export class FlutterView {
+    * @param viewId - overlay rect 所属 platform view id
+    * @param event - ArkUI AxisEvent，滚轮增量在 UPDATE action 时有值（dispatchAxisToEngine 内部处理）
+    */
+-  dispatchAxisToEngineHybrid(viewId: number, event: AxisEvent): void {
++  dispatchAxisToEngineHybrid(viewId: number, event: AxisEvent, source: string = 'unknown',
++    sourceEpoch?: number): void {
+     const controller = this.flutterEngine?.getPlatformViewsControllerHybrid();
+     if (controller == null) {
+       Log.w(TAG, `dispatchAxisToEngineHybrid no controllerHybrid (viewId=${viewId})`);
+       return;
+     }
+-    controller.dispatchAxisToEngine(viewId, event);
++    controller.dispatchAxisToEngine(viewId, event, source, sourceEpoch);
+   }
+ 
+   /**

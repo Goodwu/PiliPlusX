@@ -1,0 +1,246 @@
+diff --git a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/ohosTest/ets/test/plugin/platform/PlatformViewsControllerHybrid.test.ets b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/ohosTest/ets/test/plugin/platform/PlatformViewsControllerHybrid.test.ets
+index a46f8d6d..dd54294d 100644
+--- a/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/ohosTest/ets/test/plugin/platform/PlatformViewsControllerHybrid.test.ets
++++ b/engine/src/flutter/shell/platform/ohos/flutter_embedding/flutter/src/ohosTest/ets/test/plugin/platform/PlatformViewsControllerHybrid.test.ets
+@@ -18,7 +18,11 @@ import FlutterNapi from '../../../../../main/ets/embedding/engine/FlutterNapi';
+ import PlatformView, { Params } from '../../../../../main/ets/plugin/platform/PlatformView';
+ import PlatformViewFactory from '../../../../../main/ets/plugin/platform/PlatformViewFactory';
+ import PlatformViewRegistryImpl from '../../../../../main/ets/plugin/platform/PlatformViewRegistryImpl';
+-import PlatformViewsControllerHybrid from '../../../../../main/ets/plugin/platform/PlatformViewsControllerHybrid';
++import PlatformViewsControllerHybrid, {
++  HcppInputRect,
++  hcppInputRectKey
++} from '../../../../../main/ets/plugin/platform/PlatformViewsControllerHybrid';
++import { OverlayRect } from '../../../../../main/ets/plugin/platform/PlatformViewsControllerHybrid';
+ import { ByteBuffer } from '../../../../../main/ets/util/ByteBuffer';
+ import { FlutterView } from '../../../../../main/ets/view/FlutterView';
+ import {
+@@ -549,6 +553,166 @@ export default function PlatformViewsControllerHybridTest() {
+       expect(controller.owns(1)).assertEqual(false);
+     });
+ 
++    it('hcpp_input_rect_visible_hidden_and_stable_by_platform_view_id', 0, () => {
++      const pair = makeControllerWithFactory();
++      const controller: PlatformViewsControllerHybrid = pair[0];
++      attachContextAndView(controller);
++      const platformViewId: number = 360;
++      controller.createForPlatformViewLayer(makeCreateRequest(platformViewId));
++
++      controller.onBeginFrameHybrid();
++      controller.onDisplayPlatformViewHybrid(platformViewId, 12, 24, 200, 100, 200, 100);
++      controller.onEndFrameHybrid();
++      let inputMap: Map<string, HcppInputRect[]> =
++        AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      const first: HcppInputRect = inputMap.get('fake-flutter-view')![0];
++      const firstX: number = first.x;
++      expect(first.platformViewId).assertEqual(platformViewId);
++      expect(first.visible).assertEqual(true);
++      expect(first.width > 0 && first.height > 0).assertEqual(true);
++      expect(hcppInputRectKey(platformViewId)).assertEqual('hcpp-input-360');
++
++      // A coordinate-only update retains the observed object and therefore
++      // the ForEach key/node while a touch sequence is in flight.
++      controller.onBeginFrameHybrid();
++      controller.onDisplayPlatformViewHybrid(platformViewId, 40, 50, 220, 110, 220, 110);
++      controller.onEndFrameHybrid();
++      inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      const second: HcppInputRect = inputMap.get('fake-flutter-view')![0];
++      expect(second === first).assertEqual(true);
++      expect(second.x !== firstX).assertEqual(true);
++
++      // No DISPLAY callback in the next frame means invisible and clears the
++      // independent input slice; overlay storage remains a separate contract.
++      controller.onBeginFrameHybrid();
++      controller.onEndFrameHybrid();
++      inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      expect(inputMap.get('fake-flutter-view')!.length).assertEqual(0);
++
++      controller.dispose(platformViewId);
++      controller.detachFromView();
++      controller.detach();
++    });
++
++    it('input_pointer_owner_forwards_terminal_events_after_visible_false', 0, () => {
++      const pair = makeControllerWithFactory();
++      const controller: PlatformViewsControllerHybrid = pair[0];
++      attachContextAndView(controller);
++      const viewId: number = 361;
++      controller.createForPlatformViewLayer(makeCreateRequest(viewId));
++      controller.onDisplayPlatformViewHybrid(viewId, 0, 0, 200, 100, 200, 100);
++      controller.onEndFrameHybrid();
++      const fakeNapi: FakeFlutterNapi = new FakeFlutterNapi();
++      controller.setFlutterNapi(fakeNapi as Any as FlutterNapi);
++
++      // Move/Up without a Down never enter the engine.
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Move,
++        timestamp: 1000,
++        changedTouches: [{ id: 77, windowX: 1, windowY: 2 }]
++      } as TouchEvent);
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Up,
++        timestamp: 2000,
++        changedTouches: [{ id: 77, windowX: 1, windowY: 2 }]
++      } as TouchEvent);
++      expect(fakeNapi.touchPackets).assertEqual(0);
++
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Down,
++        timestamp: 3000,
++        changedTouches: [{ id: 7, windowX: 10, windowY: 20 }]
++      } as TouchEvent);
++      const inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      inputMap.get('fake-flutter-view')![0].visible = false;
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Move,
++        timestamp: 4000,
++        changedTouches: [{ id: 7, windowX: 11, windowY: 21 }]
++      } as TouchEvent);
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Up,
++        timestamp: 5000,
++        changedTouches: [{ id: 7, windowX: 12, windowY: 22 }]
++      } as TouchEvent);
++      expect(fakeNapi.touchPackets).assertEqual(3);
++      expect((fakeNapi.lastPackets[0] as Record<string, Any>)['change']).assertEqual(6);
++      const injectedDevice = (fakeNapi.lastPackets[0] as Record<string, Any>)['device'] as number;
++      expect(injectedDevice >= 1048576).assertTrue();
++      controller.dispose(viewId);
++      controller.detachFromView();
++      controller.detach();
++    });
++
++    it('dispose_cancels_active_input_before_storage_and_geometry_cleanup', 0, () => {
++      const pair = makeControllerWithFactory();
++      const controller: PlatformViewsControllerHybrid = pair[0];
++      attachContextAndView(controller);
++      const viewId: number = 362;
++      controller.createForPlatformViewLayer(makeCreateRequest(viewId));
++      controller.onDisplayPlatformViewHybrid(viewId, 0, 0, 200, 100, 200, 100);
++      controller.onEndFrameHybrid();
++      const fakeNapi: FakeFlutterNapi = new FakeFlutterNapi();
++      controller.setFlutterNapi(fakeNapi as Any as FlutterNapi);
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Down,
++        timestamp: 6000,
++        changedTouches: [{ id: 8, windowX: 30, windowY: 40 }]
++      } as TouchEvent);
++      controller.dispose(viewId);
++      expect(fakeNapi.touchPackets).assertEqual(2);
++      expect((fakeNapi.lastPackets[0] as Record<string, Any>)['change']).assertEqual(0);
++      const inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      expect(inputMap.get('fake-flutter-view')!.length).assertEqual(0);
++      const state: Record<string, Any> = controller as Any as Record<string, Any>;
++      expect((state['activeTouchPointers'] as Map<number, Any>).size).assertEqual(0);
++      controller.detachFromView();
++      controller.detach();
++    });
++
++    it('display_hide_end_empty_frame_keeps_overlay_and_input_slices_separate', 0, () => {
++      const pair = makeControllerWithFactory();
++      const controller: PlatformViewsControllerHybrid = pair[0];
++      attachContextAndView(controller);
++      const viewId: number = 363;
++      controller.createForPlatformViewLayer(makeCreateRequest(viewId));
++
++      // Production order: display/overlay/end, without begin.
++      controller.onDisplayPlatformViewHybrid(viewId, 4, 6, 200, 100, 200, 100);
++      controller.onDisplayOverlayHybrid(viewId, 8, 10, 40, 20);
++      controller.onEndFrameHybrid();
++      let inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      let overlayMap = AppStorage.get('hcpp_overlay_rects_map') as Map<string, OverlayRect[]>;
++      expect(inputMap.get('fake-flutter-view')!.length).assertEqual(1);
++      expect(overlayMap.get('fake-flutter-view')!.length).assertEqual(1);
++      const firstOverlay = overlayMap.get('fake-flutter-view')![0];
++      const firstOverlayX: number = firstOverlay.x;
++
++      // Stable identity survives a geometry-only update.
++      controller.onDisplayPlatformViewHybrid(viewId, 14, 16, 220, 110, 220, 110);
++      controller.onDisplayOverlayHybrid(viewId, 18, 20, 50, 25);
++      controller.onEndFrameHybrid();
++      overlayMap = AppStorage.get('hcpp_overlay_rects_map') as Map<string, OverlayRect[]>;
++      expect(overlayMap.get('fake-flutter-view')![0] === firstOverlay).assertEqual(true);
++      expect(overlayMap.get('fake-flutter-view')![0].x !== firstOverlayX).assertEqual(true);
++
++      // hide/end clears both slices; a following empty frame remains empty.
++      controller.hidePlatformViewHybrid(viewId);
++      controller.onEndFrameHybrid();
++      inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      overlayMap = AppStorage.get('hcpp_overlay_rects_map') as Map<string, OverlayRect[]>;
++      expect(inputMap.get('fake-flutter-view')!.length).assertEqual(0);
++      expect(overlayMap.get('fake-flutter-view')!.length).assertEqual(0);
++      controller.onEndFrameHybrid();
++      inputMap = AppStorage.get('hcpp_input_rects_map') as Map<string, HcppInputRect[]>;
++      overlayMap = AppStorage.get('hcpp_overlay_rects_map') as Map<string, OverlayRect[]>;
++      expect(inputMap.get('fake-flutter-view')!.length).assertEqual(0);
++      expect(overlayMap.get('fake-flutter-view')!.length).assertEqual(0);
++      controller.dispose(viewId);
++      controller.detachFromView();
++      controller.detach();
++    });
++
+     it('showOverlaySurfaceHybrid_and_hide_safe', 0, () => {
+       const controller: PlatformViewsControllerHybrid =
+         new PlatformViewsControllerHybrid(new PlatformViewRegistryImpl());
+@@ -604,8 +768,6 @@ export default function PlatformViewsControllerHybridTest() {
+       expect(factory.lastViewId).assertEqual(viewId);
+       expect(factory.created).not().assertNull();
+       expect(factory.created!.ohosHcppViewId).assertEqual(viewId);
+-      expect(factory.created!.touchDispatcher).not().assertNull();
+-      expect(factory.created!.axisDispatcher).not().assertNull();
+       expect(fakeView.getDVModel().children.length).assertEqual(1);
+ 
+       controller.setOverscrollOffset(viewId, -8);
+@@ -1066,38 +1228,29 @@ export default function PlatformViewsControllerHybridTest() {
+       controller.detach();
+     });
+ 
+-    it('touch_and_axis_dispatcher_lambdas', 0, () => {
++    it('input_block_is_the_only_engine_touch_entry_and_axis_is_retained', 0, () => {
+       const pair = makeControllerWithFactory();
+       const controller: PlatformViewsControllerHybrid = pair[0];
+-      const factory: FakePlatformViewFactory = pair[1];
+       attachContextAndView(controller);
+       const viewId: number = 326;
+       controller.createForPlatformViewLayer(makeCreateRequest(viewId));
+       controller.onDisplayPlatformViewHybrid(viewId, 0, 0, 100, 50, 100, 50);
+       const fakeNapi: FakeFlutterNapi = new FakeFlutterNapi();
+       controller.setFlutterNapi(fakeNapi as Any as FlutterNapi);
+-      expect(factory.created!.touchDispatcher).not().assertNull();
+-      expect(factory.created!.axisDispatcher).not().assertNull();
+-      try {
+-        factory.created!.touchDispatcher!(viewId, {
+-          type: TouchType.Down,
+-          timestamp: 3000000,
+-          changedTouches: [{ id: 1, windowX: 5, windowY: 6 }]
+-        } as TouchEvent);
+-      } catch (e) {
+-      }
++      controller.dispatchTouchToEngine(viewId, {
++        type: TouchType.Down,
++        timestamp: 3000000,
++        changedTouches: [{ id: 1, windowX: 5, windowY: 6 }]
++      } as TouchEvent);
+       expect(fakeNapi.touchPackets).assertEqual(1);
+-      try {
+-        factory.created!.axisDispatcher!(viewId, {
+-          action: 2,
+-          windowX: 1,
+-          windowY: 2,
+-          timestamp: 4000000,
+-          getHorizontalAxisValue: (): number => 2,
+-          getVerticalAxisValue: (): number => 0
+-        } as AxisEvent);
+-      } catch (e) {
+-      }
++      controller.dispatchAxisToEngine(viewId, {
++        action: 2,
++        windowX: 1,
++        windowY: 2,
++        timestamp: 4000000,
++        getHorizontalAxisValue: (): number => 2,
++        getVerticalAxisValue: (): number => 0
++      } as AxisEvent, 'input');
+       expect(fakeNapi.touchPackets).assertEqual(2);
+       controller.dispose(viewId);
+       controller.detachFromView();
