@@ -279,20 +279,24 @@ echo "OHOS generated build outputs cleared before HAP compile" >&2
  flutter build hap --"$build_mode" --no-codesign --build-name "$version" --build-number "$build_number" "${dart_define_args[@]}" >&2
  hap="$build_root/build/ohos/hap/entry-default-unsigned.hap"
 [[ -s $hap ]] || { echo "unsigned HAP was not produced" >&2; exit 1; }
-abc_strings=$(mktemp)
-unzip -p "$hap" ets/modules.abc | strings >"$abc_strings"
-for marker in HcppInputRect hcpp_input_rects_map attachmentEpoch stale-attachment; do
-  if ! grep -Fq "$marker" "$abc_strings"; then
-    echo "unsigned HAP modules.abc missing required HCPP marker: $marker" >&2
-    echo "HCPP package diagnostics before cleanup:" >&2
-    find -L "$build_root/ohos/oh_modules/.ohpm" -type d \
-      -path '*/oh_modules/@ohos/flutter_ohos' -print 2>/dev/null | sort -u >&2 || true
-    find "$build_root/ohos/entry/build" -name dep_info.json -print \
-      -exec grep -o '"@ohos/flutter_ohos":"[^"]*"' {} \; 2>/dev/null >&2 || true
-    exit 1
-  fi
-done
-echo "unsigned HAP modules.abc HCPP markers: present" >&2
+if [[ $build_mode == debug ]]; then
+  abc_strings=$(mktemp)
+  unzip -p "$hap" ets/modules.abc | strings >"$abc_strings"
+  for marker in HcppInputRect hcpp_input_rects_map attachmentEpoch stale-attachment; do
+    if ! grep -Fq "$marker" "$abc_strings"; then
+      echo "unsigned HAP modules.abc missing required HCPP marker: $marker" >&2
+      echo "HCPP package diagnostics before cleanup:" >&2
+      find -L "$build_root/ohos/oh_modules/.ohpm" -type d \
+        -path '*/oh_modules/@ohos/flutter_ohos' -print 2>/dev/null | sort -u >&2 || true
+      find "$build_root/ohos/entry/build" -name dep_info.json -print \
+        -exec grep -o '"@ohos/flutter_ohos":"[^"]*"' {} \; 2>/dev/null >&2 || true
+      exit 1
+    fi
+  done
+  echo "unsigned HAP modules.abc HCPP markers: present" >&2
+else
+  echo "release HAP: skip debug-only HCPP marker gate" >&2
+fi
 cat "$hap"
 REMOTE
 

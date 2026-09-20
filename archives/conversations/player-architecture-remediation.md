@@ -9,7 +9,7 @@
 - authoritative-plan: `docs/plans/player-architecture-remediation-plan.md`
 - task-source: `TASKS.md`
 - agent-team-runtime: 历史 direct launcher 路线已于 2026-09-19 被通用 root spawn policy 取代。当前只读事实与确定性机械修改先尝试原生 Luna 角色；native 不可用时停止工作包。2026-09-18 direct preflight 只保留为历史材料，不证明当前原生 Mechanical Worker 已注册，且不改变 HDR/实机验收的 Terra 路由。
-- embedding patch provenance: Architect review 后，Flutter OHOS engine 的生产 embedding 差异已从远端 dirty checkout 固化到 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 和 embedding test 分别保存为 opt-in patch；`scripts/prepare_ohos_embedding.py` 成为统一应用入口，`build_sign_hap_test.sh` 不再内联修改 engine 源码。三个 patch 已对 dirty checkout reverse-check，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中 clean-apply 通过；CI HAR 消费、native `libflutter.so` 来源与最终 HAP 绑定仍未验证。
+- embedding patch provenance: Architect review 后，Flutter OHOS engine 的生产 embedding 差异已从远端 dirty checkout 固化到 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 和 embedding test 分别保存为 opt-in patch；`scripts/prepare_ohos_embedding.py` 成为统一应用入口，`build_sign_hap_test.sh` 不再内联修改 engine 源码。三个 patch 已对 dirty checkout reverse-check，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中 clean-apply 通过；随后将 HCPP marker gate 限定为 debug HAP，release HAP 跳过 debug-only marker 检查。CI HAR 消费、native `libflutter.so` 来源与最终 HAP 绑定仍未验证。
 
 ### 唯一有效状态
 
