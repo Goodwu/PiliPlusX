@@ -266,7 +266,9 @@ abstract final class Pref {
   static String get hardwareDecoding => _setting.get(
     SettingBoxKey.hardwareDecoding,
     defaultValue: Platform.isAndroid
-        ? HwDecType.androidDefault
+        ? DeviceUtils.sdkInt <= 28
+              ? HwDecType.androidLegacyDefault
+              : HwDecType.androidDefault
         : HwDecType.auto.hwdec,
   );
 

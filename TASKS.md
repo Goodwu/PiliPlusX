@@ -18,17 +18,29 @@
   - context: archives/conversations/player-architecture-remediation.md
   - acceptance: 以可控依赖覆盖 source 切换、复用 Player open、codec probe、output rebuild、非末引用释放和最终 dispose 的真实调用链；证明无旧源回写、永久 in-flight、失效输出发布或共享监听丢失。2026-09-17 已新增 opaque-handle lifecycle orchestrator，生产 `Player.open`/listener rebind 已接入同一 open gate；44 项 HDR 定向测试覆盖 probe/output 迟到释放、重叠 open 与 final-dispose 顺序。初始 `_initPlayer`、rebuild 和 controller 最终释放尚未完整改由该编排器执行，任务继续进行。
 
-- [ ] 构建唯一最终候选并完成 OHOS 实体机矩阵
+- [ ] 构建唯一最终候选并完成 macOS、Android 与 OHOS 功能验收矩阵
   - status: in_progress
   - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 最终候选绑定源码、依赖、补丁、HAP 摘要和脚本版本；横屏及竖屏视频各 3 个完整周期、控制条/手势/seek 边界、surface 重建、同进程重入、DV/PQ/SDR 和同源颜色对照分别有实机证据；DV 长周期完成 30 个连续周期。设备重连后推荐列表专项已通过；DV surface 脚本的连续播放基线通过，但冷重启后未重新打开视频，故只记录冷启动控制，不计 surface 恢复通过。P13 已完成横屏 DV 三轮矩阵，P14 已完成同一进程页面退出与目标播放重入；仍缺最终候选上的竖屏 SDR/PQ、surface 重建、HLG/HDR Vivid 与同源颜色对照。
+  - acceptance: 最终候选绑定源码、依赖、补丁、各平台产物摘要和脚本版本。OHOS：横屏及竖屏视频各 3 个完整周期、控制条/手势/seek 边界、surface 重建、同进程重入、DV/PQ/SDR 和同源颜色对照分别有实机证据，DV 长周期完成 30 个连续周期。macOS：同一 DV 输入/PTS 的 HDR/SDR 高光与中灰对照、持续 `rgba16Float → successful frame → active=true`、reset/切屏恢复和核心播放操作有运行证据。Android：arm64 候选在目标 Android 环境完成安装、冷启动、首页/搜索/详情/播放首帧和控制操作验证，且测试窗口内无 ANR/崩溃；HDR 输出另按具备能力的真机独立验收。设备重连后推荐列表专项已通过；DV surface 脚本的连续播放基线通过，但冷重启后未重新打开视频，故只记录冷启动控制，不计 surface 恢复通过。P13 已完成横屏 DV 三轮矩阵，P14 已完成同一进程页面退出与目标播放重入；仍缺最终候选上的竖屏 SDR/PQ、surface 重建、HLG/HDR Vivid 与同源颜色对照。
   - latest: Architect review 后已将 Flutter OHOS engine embedding 的生产差异整理为 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 与 embedding tests 分别独立为 opt-in patch；`build_sign_hap_test.sh` 的 engine inline substitutions 已迁移到 `scripts/prepare_ohos_embedding.py`。三个 patch 对当前 `dev:/home/wuweiwei1/tools/flutter-ohos` dirty checkout reverse-check 通过，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中全部 clean-apply 通过（生产 4、native 1、test 1 个路径）。随后将 `build_sign_hap_test.sh` 的 debug-only HCPP marker gate 与 release 路径分开，避免 release HAP 因 debug 诊断字符串缺失而误失败；CI HAR 消费和 native `libflutter.so` 来源契约仍未验证，因此不宣称供应链闭环。
+  - latest: Android ANR 已在 arm64 模拟器的连续退出/重进场景验证修复。旧候选在固定 `BV1T7t96BECu` 的 `tap(375,330)` 可重现 `InputDispatcher` 5 秒超时，主线程停在 `libmpv.so mpv_set_property_string`。修复使默认 `PlayerConfiguration.async=true` 的公开 `Player.setProperty` 走异步协议，同时将 native `Player` 的进程级互斥锁收窄为实例锁，避免上一页异步释放阻塞下一页独立 libmpv context 创建；`on_load/on_unload` 钩子内的属性直写保留同步，避免事件处理等待自身异步回复。Android SDR/Texture 的 app HDR 参数写入仍跳过；“听视频”保持仅播放音轨、不播放视频。最新 arm64 APK（SHA-256 `82db6375c0086772144516e4370f7ef33d947df2cb3820b7b9cc8c7e19eb9139`）完成严格 5 轮：每轮 BVID 身份、首帧/帧推进、触摸后 6 秒及退出后重入均 PASS。脚本现保存启动时的 `dumpsys window` ANR 基线，只把本轮新增 window 记录或清空后 logcat 的新 ANR 判为失败，避免历史系统残留误判。artifact：`/tmp/piliplusx-android-emulator-20260920/reentry-anr-instance-lock-strict-5cycles-20260920-220147`；`hdr_test.dart` 46 项、目标 analyze、build、bash-n 和 diff-check 均通过。
+  - latest: Android 返回键候选已排除并回退：模拟器上的系统返回手势可正常离开视频页，故不修改 `PopScope`；此前现象归为模拟器物理 Back 输入/映射问题，而非已证实的播放器路由问题。回退后的 arm64 APK 已用 `scripts/build_android_arm64_release.sh` 构建，并成功覆盖安装到 `emulator-5554` 与 Android 实机 `WJX5T17314001484`（Huawei VKY-AL00，arm64-v8a，Android 9）。
+  - latest: Huawei Android 9 实机的播放日志已定位为 `OMX.hisi.video.decoder.avc` 直通 `mediacodec` 在 `gpu-next`/Texture 输出协商中请求 10 个输出缓冲、而驱动上限为 4；首次失败后同一解码器可重试进入 Executing，但会向用户显示“打开解码器错误”。按 Android 版本而非厂商定向：仅 Android API 28 及以下且没有持久化硬解偏好的首次默认值改为 `mediacodec-copy,auto-safe`，已选择的硬解模式及 API 29+ 默认值不变。`hdr_test.dart` 46 项、相关 `dart analyze`、`bash -n` 和 diff-check 已通过；arm64 APK 已于 2026-09-20 22:58:24 成功覆盖安装到该实机，待以原触发视频采集新鲜 logcat 判定运行结果。
+  - latest: 复测新视频已确认 `mediacodec-copy,auto-safe` 生效，Hisi AVC 解码器进入 `onStart`，没有 `invalid buffer count`、`Failed to allocate buffers` 或 codec error。其前仍有 `OMXNodeInstance setConfig(..., 0x6f700006) ERROR: BadParameter(0x80001005)`：该索引不在公开 AOSP OMX 名称表，且相同华为系统扩展调用在其它应用/音频解码器中也会失败后继续播放；AOSP 仅透传厂商 `OMX_SetConfig` 返回值。故它是旧固件/Hisi 组件不接受可选厂商配置的非阻断系统日志，应用不能也不应拦截或通过关闭硬解“修复”。后续只将其与 `MediaCodec` codec error、输出缓冲分配失败、无帧或用户可见失败联合作为阻断信号。
+
+## 已完成（近期）
+
+- [x] 构建 Android arm64 APK 并完成模拟器首轮验收
+  - status: done
+  - context: archives/conversations/player-architecture-remediation.md
+  - acceptance: 仅生成 arm64 APK，确认包内 ABI、签名和模拟器安装/启动结果。
+  - latest: 2026-09-20 生成 `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`（SHA-256 `8c611b54e8a33acad4b0834e778346139cea25b32bddf03974649629a6938cb1`），包内仅有 `lib/arm64-v8a/`，v2 Debug 签名有效。`bluekey-api36-arm64`（API 36）安装、冷启动和首屏绘制通过；随后发生持续 `Input dispatching timed out` ANR，Wait 后仍未恢复，故不能视为模拟器交互运行通过。完整证据见 context 与 `docs/status/platform-sdr-build-status.md`。
 
 ## 当前交付边界与验收规则
 
-- 当前唯一交付主线是 OHOS 实体机播放器验收闭环：控制条和手势、全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。macOS 仅做共享代码变更涉及的回归；不启动新的 macOS 渲染路线、上游重建或无关格式工作。
+- 当前交付主线是 macOS、Android 与 OHOS 的播放器功能验收闭环：控制条和手势、全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。三平台共用改动必须分别保留可归因的构建与运行证据；不以任一平台的通过替代另一平台验收。
 - 保留现有原生 HDR 路线。不得以 Texture SDR 回退、屏蔽功能、降低验收条件或删除诊断解决 HDR 路径上的交互问题。变更技术路线前，记录直接阻断证据、替代路线的最小可行性实验和受影响回归范围；影响交付范围的决定交由用户。
-- 同时只推进一个实体机关键阻断项；可并行处理不改变当前候选包的独立测试或证据提取。实验开始前记录假设、基线、唯一主要变量、预期区分结果和停止条件；同类实验连续两轮未缩小范围时重新诊断。
+- 每个平台同一时段只推进一个关键阻断项；可并行处理不改变当前候选包的独立测试或证据提取。Android 模拟器、macOS 本机与 OHOS 实体机的输入执行者和证据目录必须隔离。实验开始前记录假设、基线、唯一主要变量、预期区分结果和停止条件；同类实验连续两轮未缩小范围时重新诊断。
 - 设备、权限、依赖或环境缺失时，完成独立工作后标记 blocked 并停止相关验收；明确区分产品失败、测试基础设施失败、环境阻塞、证据不足和通过。验证器故障先修验证器；不得以重复探测、静态检查、构建通过、HAP 安装、单次动作或跨试次拼接日志代替实体机验收。
 - 每个候选 HAP 必须绑定源码、依赖、补丁版本、包摘要、设备、脚本版本和关键参数；保留最近可复现通过基线。只有相关实现、依赖、环境或验收标准改变时才重新打开既有通过项，并注明失效原因。
 - 实体机操作只通过 HDC 脚本；同一设备同一时段只能有一个输入执行者。动作前校验目标应用、PID、attachment、逻辑全屏状态和新鲜布局；控制条隐藏时最多一次安全唤醒后重抓布局。前置不成立立即 fail-closed，不追加点击。

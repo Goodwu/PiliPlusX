@@ -4,12 +4,15 @@
 
 - status: in_progress
 - updated: 2026-09-20
-- objective: 完成 OHOS 实体机播放器验收闭环：控制条/手势/seek、竖横屏全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。所有结论必须绑定代码、候选 HAP、测试或实体机产物证据。
-- scope: `/Users/wuweiwei1/src/PiliPlusX`；开发诊断状态，不恢复生产包、不清理应用数据、不手工操作 UI；实体机 UI 只通过 HDC 脚本。macOS 仅做共享改动的回归，不启动新的渲染路线。
+- objective: 完成 macOS、Android 与 OHOS 的播放器功能验收闭环：控制条/手势/seek、竖横屏全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。所有结论必须绑定代码、候选平台产物、测试或目标设备运行证据。
+- scope: `/Users/wuweiwei1/src/PiliPlusX`；开发诊断状态，不恢复生产包、不清理应用数据。OHOS 实体机 UI 只通过 HDC 脚本；Android 模拟器通过 ADB 验证；macOS 依据对应运行操作说明采集本机功能与显示证据。三平台分别记录产物、环境和 verdict，不允许跨平台替代验收。
 - authoritative-plan: `docs/plans/player-architecture-remediation-plan.md`
 - task-source: `TASKS.md`
 - task-ledger: `TASKS.md` 仅保留未完成工作及其当前边界、候选身份、实验顺序和验收硬门槛；已完成工作与证据保留在本 conversation。`AGENTS.local.md` 只保留项目执行协议和上下文入口。
-- ancillary-android-build: 2026-09-20 已在不触碰 OHOS 候选或实体机状态的前提下，用本机 OpenJDK 17 执行 `flutter build apk --release --target-platform android-arm64 --split-per-abi`。产物为 `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`，SHA-256 `8c611b54e8a33acad4b0834e778346139cea25b32bddf03974649629a6938cb1`；压缩包只含 `lib/arm64-v8a/`。为避免本地 `pubspec_overrides.yaml` 屏蔽项目级 webview Android override 而解析至 AGP 9 不兼容的 hosted 1.1.3，已在该覆盖文件同步相同 Git source，并更新 lockfile。APK 的 v2 签名验证通过，但回退为 Android Debug 证书，不能作为生产发布签名包。`bluekey-api36-arm64`（API 36 / arm64-v8a）已完成 `adb install -r` 和 MainActivity 冷启动（约 7.9 秒），首屏可见且进程为 arm64；随后发生 `Input dispatching timed out`，系统 ANR 对话框在 Wait 后 15 秒仍为 `mNotResponding=true`。因此构建/安装/首屏通过，但该模拟器交互运行验收失败；未关闭应用或清数据，现场保留。完整构建、ABI 与运行证据见 `docs/status/platform-sdr-build-status.md`。
+- ancillary-android-build: 2026-09-20 已在不触碰 OHOS 候选或实体机状态的前提下，用本机 OpenJDK 17 执行 `flutter build apk --release --target-platform android-arm64 --split-per-abi`。旧候选在固定 `BV1T7t96BECu` 的 route entry -> BVID 身份与帧推进门禁 -> `tap(375,330)` -> 6 秒观察 -> 退出/重进路径重现 `InputDispatcher` 5 秒超时，主线程为 `mpv_set_property_string`。path override `../media-kit/media_kit` 现使默认 `async=true` 的公开 `Player.setProperty` 使用异步协议；事件钩子内部直写保留同步，以免 handler 等待自身异步回复。第二次重进的无帧根因是 `NativePlayer.lock` 为进程级 static：前页异步释放仍持锁时，新页独立 context 的 `Player.create` 无法执行；现改为实例锁，同一 Player 仍串行、不同 context 不互相阻塞。最新 APK SHA-256 `82db6375c0086772144516e4370f7ef33d947df2cb3820b7b9cc8c7e19eb9139` 在 `/tmp/piliplusx-android-emulator-20260920/reentry-anr-instance-lock-strict-5cycles-20260920-220147` 完成严格 5 轮：每轮 BVID、帧推进、触摸后 6 秒和退出重进均 PASS。脚本会保存开始时的 window-ANR signature；只有新的 window signature、`mNotResponding=true` 或清空 logcat 后的新 ANR 才失败，历史 `dumpsys window` 残留不再混淆 verdict。`hdr_test.dart` 46 项、目标 analyze、release build、bash-n 与 diff-check 已通过。“听视频”维持只播放音轨、无视频画面的产品语义，未参与本故障。
+- android-back-pop: 2026-09-20 用户报告播放视频后多次按返回键无法离页。代码审查曾提出 `PopScope` 自我拦截候选，但用户随后在同一模拟器以系统返回手势成功离开视频页，故该候选未获证实且已回退；当前归因是模拟器物理 Back 输入/映射问题，不修改播放器路由逻辑。回退后的 APK 以新增 `scripts/build_android_arm64_release.sh` 构建，已成功覆盖安装至 `emulator-5554` 和 Android 实机 `WJX5T17314001484`（Huawei VKY-AL00，arm64-v8a，Android 9）。
+- android-legacy-mediacodec: 2026-09-20 Huawei VKY-AL00（Android 9）实机在 SDR/Texture + `gpu-next` 路径记录到 `OMX.hisi.video.decoder.avc` 的直通 `mediacodec` 输出协商：驱动拒绝 10、9、8、7 个输出缓冲（上限为 4），`ACodec` 首次转入 IDLE 分配失败并显示“打开解码器错误”，随后同一解码器重建可进入 Executing。为避免首次可见失败，`HwDecType.androidLegacyDefault` 定义为 `mediacodec-copy,auto-safe`；`Pref.hardwareDecoding` 仅在 API <= 28 且没有持久化用户值时采用它，API >= 29 延续 `mediacodec,auto-safe`，用户已选项一律优先。源码目标 analyze、46 项 `hdr_test.dart`、shell syntax 和 diff-check 通过；使用 OpenJDK 17 的 arm64 release APK 已于 22:58:24 成功覆盖安装，实际播放复测及新鲜 logcat verdict 尚待完成。
+- android-legacy-mediacodec: 新视频复测：`mediacodec-copy,auto-safe` 已在 Huawei Android 9 实机日志中生效，AVC `ACodec onStart` 后无原先的缓冲数超限、`Failed to allocate buffers` 或 `MediaCodec` codec error。`setConfig(..., 0x6f700006) ERROR: BadParameter(0x80001005)` 仍在 `onStart` 前出现；公开 AOSP 显示 `OMXNodeInstance` 仅将该调用透传为 `OMX_SetConfig`，索引 `0x6f700006` 是该系统未公开命名的厂商扩展。公开的同版 Huawei 日志显示其他应用/Google 音频解码器也会出现相同索引失败而继续工作。结论为旧固件/Hisi 组件拒绝可选配置的非阻断系统告警，不在 app 可修复边界；不因其关闭硬解或增加按机型屏蔽。验收以其后实际 codec error、缓冲分配失败、无帧或用户可见失败为准。
 - agent-team-runtime: 历史 direct launcher 路线已于 2026-09-19 被通用 root spawn policy 取代。当前只读事实与确定性机械修改先尝试原生 Luna 角色；native 不可用时停止工作包。2026-09-18 direct preflight 只保留为历史材料，不证明当前原生 Mechanical Worker 已注册，且不改变 HDR/实机验收的 Terra 路由。
 - embedding patch provenance: Architect review 后，Flutter OHOS engine 的生产 embedding 差异已从远端 dirty checkout 固化到 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 和 embedding test 分别保存为 opt-in patch；`scripts/prepare_ohos_embedding.py` 成为统一应用入口，`build_sign_hap_test.sh` 不再内联修改 engine 源码。三个 patch 已对 dirty checkout reverse-check，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中 clean-apply 通过；随后将 HCPP marker gate 限定为 debug HAP，release HAP 跳过 debug-only marker 检查。CI HAR 消费、native `libflutter.so` 来源与最终 HAP 绑定仍未验证。
 
@@ -38,6 +41,7 @@
 1. 在具备 HDR 显示器后，对 macOS final10 候选完成同一 DV 源、同一 PTS 的高光/中灰 HDR/SDR 对照，并取得持续 `rgba16Float → successful frame → active=true` 及 reset/切屏恢复证据；此前不能宣布亮度验收通过。
 2. 为 controller 补齐 `_initPlayer`、output rebuild 与最终 dispose 的真实调用链时序覆盖，保持 source/output 失效结果不发布、资源可释放和共享监听不丢失的门禁。
 3. 使用 P13 候选从完整前置重跑 `BV1sA4y1D7ZA` 的竖屏 SDR/Texture `--vertical --cycles 3` 矩阵；中断试次不拼接。随后再分别完成 PQ、surface 重建、HLG/HDR Vivid 和同源颜色对照。
+4. Android 模拟器的已知播放 ANR 仍在修复中：已固化退出/重进脚本并确认旧候选的同步 mpv 属性栈，公开属性 API 异步化后仅有单轮通过。下一步为脚本增加指定 BVID/首帧身份门禁，再以连续退出/重进试次判定；Android 模拟器结果不替代 Android HDR 真机验收。
 
 ### 历史工作笔记（非当前状态；不得据此重开任务）
 

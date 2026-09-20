@@ -1743,9 +1743,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       }
     }
     // OHOS owns the complete mpv HDR parameter transaction in its video
-    // backend. Keep the app responsible for policy and configure/reset entry
-    // points, but do not race the backend with a second property writer.
-    if (Platform.operatingSystem == 'ohos') return;
+    // backend. Android SDR/Texture similarly relies on media-kit's output
+    // defaults: synchronously setting mpv properties from Flutter's platform
+    // thread can wait on a busy decoder/VO lock and block input long enough to
+    // trigger an ANR. Keep the app responsible for policy and native-output
+    // configure/reset entry points, but do not add a second property writer
+    // to either backend's SDR output path.
+    if (Platform.operatingSystem == 'ohos' || (Platform.isAndroid && !native)) {
+      return;
+    }
     final transfer = switch (_hdrSource.transfer) {
       HdrTransfer.hlg => 'arib-std-b67',
       HdrTransfer.pq => 'pq',
