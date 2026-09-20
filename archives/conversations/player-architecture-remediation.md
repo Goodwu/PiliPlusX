@@ -8,6 +8,7 @@
 - scope: `/Users/wuweiwei1/src/PiliPlusX`；开发诊断状态，不恢复生产包、不清理应用数据、不手工操作 UI；实体机 UI 只通过 HDC 脚本。macOS 仅做共享改动的回归，不启动新的渲染路线。
 - authoritative-plan: `docs/plans/player-architecture-remediation-plan.md`
 - task-source: `TASKS.md`
+- task-ledger: `TASKS.md` 仅保留未完成工作及其当前边界、候选身份、实验顺序和验收硬门槛；已完成工作与证据保留在本 conversation。`AGENTS.local.md` 只保留项目执行协议和上下文入口。
 - agent-team-runtime: 历史 direct launcher 路线已于 2026-09-19 被通用 root spawn policy 取代。当前只读事实与确定性机械修改先尝试原生 Luna 角色；native 不可用时停止工作包。2026-09-18 direct preflight 只保留为历史材料，不证明当前原生 Mechanical Worker 已注册，且不改变 HDR/实机验收的 Terra 路由。
 - embedding patch provenance: Architect review 后，Flutter OHOS engine 的生产 embedding 差异已从远端 dirty checkout 固化到 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 和 embedding test 分别保存为 opt-in patch；`scripts/prepare_ohos_embedding.py` 成为统一应用入口，`build_sign_hap_test.sh` 不再内联修改 engine 源码。三个 patch 已对 dirty checkout reverse-check，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中 clean-apply 通过；随后将 HCPP marker gate 限定为 debug HAP，release HAP 跳过 debug-only marker 检查。CI HAR 消费、native `libflutter.so` 来源与最终 HAP 绑定仍未验证。
 
@@ -33,9 +34,9 @@
 
 ### 当前下一步
 
-1. 使用已通过的 P9 竖屏/横屏全屏基线，先执行控制条、手势与 seek 边界的实体机专项；每项保留当前 PID/view/通道、动作前后布局和直接行为证据。
-2. 再执行 surface recreate、同进程退出重入与 source/output 生命周期矩阵；三轮失败按 action record 定位，不扩大 timeout 或拼接历史请求。颜色矩阵独立保持同源同帧要求。
-3. 为 controller 引入最小、非公开的可控依赖边界后，再补 open/probe/rebuild/final-dispose 的真实调用链时序测试；不得为测试重写播放器或扩大公开接口。将证实的修复并入唯一最终候选后，按固定 OHOS 矩阵递进验收。
+1. 在具备 HDR 显示器后，对 macOS final10 候选完成同一 DV 源、同一 PTS 的高光/中灰 HDR/SDR 对照，并取得持续 `rgba16Float → successful frame → active=true` 及 reset/切屏恢复证据；此前不能宣布亮度验收通过。
+2. 为 controller 补齐 `_initPlayer`、output rebuild 与最终 dispose 的真实调用链时序覆盖，保持 source/output 失效结果不发布、资源可释放和共享监听不丢失的门禁。
+3. 使用 P13 候选从完整前置重跑 `BV1sA4y1D7ZA` 的竖屏 SDR/Texture `--vertical --cycles 3` 矩阵；中断试次不拼接。随后再分别完成 PQ、surface 重建、HLG/HDR Vivid 和同源颜色对照。
 
 ### 历史工作笔记（非当前状态；不得据此重开任务）
 

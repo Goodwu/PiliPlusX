@@ -40,4 +40,4 @@
 
 - [HDR 设备证据模板](examples/hdr-device-evidence.example.json)：真实设备记录格式；占位值不能作为验收证据。
 
-历史文档若不再代表当前状态，统一放在 `docs/backup/`，不作为当前验收依据。
+带日期的实验记录和历史评审保留在原路径，便于追溯，但不作为当前验收依据；当前结论以 `../TASKS.md` 及其链接的 conversation `Current State` 为准。

@@ -24,6 +24,20 @@
   - acceptance: 最终候选绑定源码、依赖、补丁、HAP 摘要和脚本版本；横屏及竖屏视频各 3 个完整周期、控制条/手势/seek 边界、surface 重建、同进程重入、DV/PQ/SDR 和同源颜色对照分别有实机证据；DV 长周期完成 30 个连续周期。设备重连后推荐列表专项已通过；DV surface 脚本的连续播放基线通过，但冷重启后未重新打开视频，故只记录冷启动控制，不计 surface 恢复通过。P13 已完成横屏 DV 三轮矩阵，P14 已完成同一进程页面退出与目标播放重入；仍缺最终候选上的竖屏 SDR/PQ、surface 重建、HLG/HDR Vivid 与同源颜色对照。
   - latest: Architect review 后已将 Flutter OHOS engine embedding 的生产差异整理为 `tool/ohos/flutter_embedding/ohos_hcpp_embedding.patch`，native NAPI 与 embedding tests 分别独立为 opt-in patch；`build_sign_hap_test.sh` 的 engine inline substitutions 已迁移到 `scripts/prepare_ohos_embedding.py`。三个 patch 对当前 `dev:/home/wuweiwei1/tools/flutter-ohos` dirty checkout reverse-check 通过，并在固定 `aa76d9bbeee7806a87dbd202d2550dfd11550b82` 临时 clean worktree 中全部 clean-apply 通过（生产 4、native 1、test 1 个路径）。随后将 `build_sign_hap_test.sh` 的 debug-only HCPP marker gate 与 release 路径分开，避免 release HAP 因 debug 诊断字符串缺失而误失败；CI HAR 消费和 native `libflutter.so` 来源契约仍未验证，因此不宣称供应链闭环。
 
+## 当前交付边界与验收规则
+
+- 当前唯一交付主线是 OHOS 实体机播放器验收闭环：控制条和手势、全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。macOS 仅做共享代码变更涉及的回归；不启动新的 macOS 渲染路线、上游重建或无关格式工作。
+- 保留现有原生 HDR 路线。不得以 Texture SDR 回退、屏蔽功能、降低验收条件或删除诊断解决 HDR 路径上的交互问题。变更技术路线前，记录直接阻断证据、替代路线的最小可行性实验和受影响回归范围；影响交付范围的决定交由用户。
+- 同时只推进一个实体机关键阻断项；可并行处理不改变当前候选包的独立测试或证据提取。实验开始前记录假设、基线、唯一主要变量、预期区分结果和停止条件；同类实验连续两轮未缩小范围时重新诊断。
+- 设备、权限、依赖或环境缺失时，完成独立工作后标记 blocked 并停止相关验收；明确区分产品失败、测试基础设施失败、环境阻塞、证据不足和通过。验证器故障先修验证器；不得以重复探测、静态检查、构建通过、HAP 安装、单次动作或跨试次拼接日志代替实体机验收。
+- 每个候选 HAP 必须绑定源码、依赖、补丁版本、包摘要、设备、脚本版本和关键参数；保留最近可复现通过基线。只有相关实现、依赖、环境或验收标准改变时才重新打开既有通过项，并注明失效原因。
+- 实体机操作只通过 HDC 脚本；同一设备同一时段只能有一个输入执行者。动作前校验目标应用、PID、attachment、逻辑全屏状态和新鲜布局；控制条隐藏时最多一次安全唤醒后重抓布局。前置不成立立即 fail-closed，不追加点击。
+- 每个输入试次必须绑定唯一 ID、坐标、时间范围、PID/view/epoch 和独立消费的日志标记。不得跨试次拼接 pointer、callback 和 request，也不得让迟到日志改写已结束试次的 verdict。四标记只证明请求链路；完整全屏验收还须证明事务提交、正确方向和持续出帧。
+- 验证器须覆盖旧布局、错误 PID、过期 attachment、重复/乱序/缺失/迟到日志的离线反例；诊断日志默认关闭且有界。不得仅扩大超时，先定位事件生成、输出、传输或解析的首个缺口。
+- 手势以累计约 18px 确认方向，只有 `|dx| > 3 × |dy|` 的明显横向手势进入 seek；分别验证播放器内手势、倾斜容错、Cancel/多指和播放器外推荐列表滚动。无直接反例不得继续调整阈值、层序、代理按钮、合成 PointerUp 或 down 直接全屏。
+- 全屏状态仅在平台事务成功后提交；竖屏视频全屏不强制旋转。取消、销毁和失败不得伪造成功或永久阻塞后续请求。所有异步 Player/source/output 完成后的发布都校验 source、Player、输出事务和存活状态；失效结果不发布但须释放资源及 in-flight 标记。非末引用释放不得取消共享监听；最终释放必须等待真实释放；controller 测试覆盖真实调用链的 open、probe、rebuild 和 dispose 时序。
+- 应用只决定 HDR 策略，media-kit 管理输出配置，OHOS VO 管理动态 NativeWindow 色彩契约；不得多层重复写动态输出属性。颜色验收必须使用同设备、同源、同一暂停帧或可复现片段；日志色彩契约或不同播放时刻截图不能单独证明显示正确。HLG/HDR Vivid 没有可靠样片时保持待办，不阻塞已定义的 DV、PQ、SDR 验收。
+
 ## Next（近期候选）
 
 - [ ] P13 竖屏 SDR/Texture 三轮矩阵（中断后重跑）
@@ -40,101 +54,9 @@
 
 - 当前无同进程退出重入阻塞项。
 
-## Recently Done（最近完成）
-
-- [x] Codex Agent Team Luna fallback 运行时门禁
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 历史任务，已于 2026-09-19 被通用 root spawn policy 取代。`AGENTS.local.md` 要求原生角色创建与持久化 `turn_context` 核验；失败时停止工作包，不再启动 Codex adapter launcher。2026-09-18 的 direct preflight 仅保留为历史运行时材料，不代替新主会话对原生 Mechanical Worker 的验证，也不降低当前实体机验收要求。
-
-- [x] P13 最终候选横屏 DV 三轮矩阵
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: P13 HAP `/Users/wuweiwei1/Downloads/PiliPlusX-ohos-final-candidate-20260918-p13-signed.hap`（SHA-256 `8b2dca2ebdccfe26174ffba75eeb7ab6c51926a55faeb406735493647738831c`）未启用 process-live hook。artifact `/tmp/piliplusx-ohos-dv-p13-cycles3-20260918` 的 PID `8923`、view `0`、epoch `1`：initial enter 与 cycle-1/2/3 exit/re-enter 共七份 action record 全为 PASS；每次方向 portrait -> landscape -> portrait -> landscape、播放帧推进与 150 秒 root-Hilog final drain 均通过。HDR decision evidence PASS；颜色仍为 INCONCLUSIVE。
-
-- [x] P14 同进程页面退出与播放重入
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-page-exit-reentry-bv1vy4y1n7ty-p14-20260918` 在 PID `64534` 完成全屏就绪后的 page-pop；`page-exit/verdict.env` 为 application/attachment/overall PASS，日志按序含 page-pop、Cancel request 和 attachment dispose。重入阶段以同一 PID 打开 `BV1vY4y1N7TY`，`reentry/verdict.env` 为 application/playback/overall PASS，前后 PID 均为 `64534`，并有 `reentry-playback-progress` 的播放状态及视频帧变化证据。
-
-- [x] P12 同进程页面退出生命周期链
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: versionCode `2026091802` 的 P12 HAP artifact `/tmp/piliplusx-ohos-page-exit-reentry-bv1vy4y1n7ty-p12-20260918/page-exit` 记录同 PID `55077` 的 page-pop、Dart PointerCancel、route cancel、同 view/epoch 的 HCPP owner Down -> Cancel -> NAPI -> attachment dispose；`verdict.env` 为 `application=PASS`、`attachment=PASS`、`overall=PASS`。
-
-- [x] P9 推荐列表纵滑边界
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 设备恢复 `USB Connected` 后在 `BV1sA4y1D7ZA` 详情页执行 artifact `/tmp/piliplusx-ohos-recommendation-scroll-bv1sa4y1d7za-p9-20260917-reconnect`；windowed portrait baseline 下播放器区保持布局，推荐列表文本锚点由 2069 变为 1891，专项 verdict PASS。
-
-- [x] P9 竖屏全屏边缘纵滑拒绝
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-vertical-gesture-edge-bv1sa4y1d7za-p9-20260917` 对左右边缘分别注入纵滑；均记录 `gesture move-filter action=reject-portrait-edge` 与 recognizer reject，专项 verdict PASS
-
-- [x] P9 竖屏全屏中央纵滑接管
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-vertical-gesture-center-bv1sa4y1d7za-p9-20260917` 的两个中心纵滑均有同 PID/view 的 `accept-single-pointer action=fullScreen`、`pan-start` 与 `pan-update type=fullscreen`；专项 verdict PASS。此项只证明播放器接管中央纵滑，不推断亮度或音量实际改变
-
-- [x] P9 竖屏全屏 seek 方向边界
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-seek-direction-bv1sa4y1d7za-p9-20260917` 在同一稳定竖屏全屏页记录三次受限输入；方向判定依次为 `horizontal`、`reject-portrait-edge`、`fullscreen`。清晰横滑唯一进入 seek，斜滑与竖滑均未进入 seek；专项 verdict PASS，主 gate 的 Texture/SDR 与帧推进也通过，颜色独立为 INCONCLUSIVE
-
-- [x] P9 竖屏 SDR/Texture 三轮实体机矩阵
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 先在 `BV1sA4y1D7ZA` 的实际详情页确认 BVID、720×1280、`source=sdr, output=sdr, surface=texture` 与持续播放，再执行 artifact `/tmp/piliplusx-ohos-vertical-sdr-bv1sa4y1d7za-p9-cycles3-fresh-20260917`。PID `62938`、view `0` 的 initial enter 和 cycle-1/2/3 exit/re-enter 共七份 Flutter 通道 action record 均 PASS；每次保持 portrait 和播放帧推进，三个 cycle complete 与 150 秒 root-Hilog final drain 完成。颜色结论仍为 INCONCLUSIVE
-
-- [x] P9 严格单轮播放中全屏回归
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: `2PM0223A18006914` 的同一 P9 进程完成 initial enter、cycle exit、cycle re-enter；三个 action record 均绑定 PID/viewId/epoch 且严格四标记 PASS，方向、持续出帧和 native HDR decision 同时通过；颜色结论保留 INCONCLUSIVE
-
-- [x] P9 横屏三轮的 fail-closed 中间证据
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 新进程 initial enter、cycle-1、cycle-2 共五个 action record PASS；cycle-3 exit 在 360 秒内缺严格四标记而为 INCONCLUSIVE，保留 150 秒 failure drain/snapshot，未追加输入
-
-- [x] 定位并修正 P9 cycle-3 exit 的 opacity-zero 误点击
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 原始输入在同 PID/view/epoch 的 HCPP seq 83/84 与 Flutter global Down/Up 均到达，却未命中 fullscreen-button；后续 `owner-1-5-exit` 是前一轮排队请求。`verify_player_button_input_trial_real_device.sh` 现拒绝直接点击仅由 fresh/opacity-zero 解析出的节点，先 wake、重抓再进行唯一 raw action；P9 原始布局离线反例通过
-
-- [x] 第一轮验证器门禁和 controller 生命周期修复
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 当前布局/PID/attachment/同试次事件序列门禁成立；native-output token、旧 source open、非末引用释放、codec probe 和 output publication 已有首轮修复及定向回归
-
-- [x] 拒绝发布 `_initPlayer` 异步创建期间已过期的 output 候选
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: `VideoController.create` 改为局部候选；source generation、Player count 或 dispose 状态失效时释放候选且不注册监听、不写共享 `_videoController`。`dart analyze lib/plugin/pl_player/controller.dart lib/plugin/pl_player/models/hdr.dart` 与 47 项 HDR/touch-trace 定向测试通过
-
-- [x] 为全屏验证器补离线反例和可单测标记边界
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: `verify_player_button_markers.py` 从试次脚本提取同 PID/view/epoch、顺序、HCPP 配对和消费 offset 判定。4 个离线反例覆盖 opacity-zero 旧布局、错误 PID/view/epoch、乱序、旧 offset 与已消费迟到标记；`python3 test/ohos_player_button_verifier_test.py`、`bash -n` 和 `py_compile` 通过
-
-- [x] 修正后 P9 横屏单周期实体机回归
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-fullscreen-p9-post-verifier-fix-20260917` 的 initial-enter、cycle-1 exit、cycle-1 re-enter 均 PASS，全部绑定 PID `41102`、viewId `0`、epoch `1`；exit 先 wake/regrab，方向 portrait -> landscape -> portrait -> landscape，连续 root-Hilog final drain 完成，P9 native HDR decision 与持续出帧均通过，颜色仍 INCONCLUSIVE
-
-- [x] 修正后 P9 横屏三轮实体机回归
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: artifact `/tmp/piliplusx-ohos-fullscreen-p9-post-verifier-fix-cycles3-20260917` 的 initial-enter 与 cycle-1/2/3 exit/re-enter 七份 action record 全为 PASS，均绑定 PID `44607`、viewId `0`、epoch `1` 与独立 consumption offset；每次方向 portrait -> landscape -> portrait -> landscape，连续出帧、native HDR decision 和 150 秒 root-Hilog final drain 均通过，颜色仍 INCONCLUSIVE
-
-- [x] 按渲染拓扑修正竖屏 SDR 输入验证器
-  - status: done
-  - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: `verify_hdr_real_device.sh` 仅在日志明确判定 nativeHdr/native-hdr 时使用 HCPP attachment；明确 SDR/Texture 时以同 PID/view 的 Flutter 四标记绑定输入，并在 action record 写明 `input_channel`、不伪造 HCPP 序号。修正 Texture 空字段导致 ledger 丢失 end offset 的编码后，离线 5 项验证、47 项播放器回归和 target analyze 通过；artifact `/tmp/piliplusx-ohos-vertical-sdr-p9-cycles3-channel-ledger-fix-20260917` 的 initial enter、cycle-1 exit/re-enter 均 PASS，保持 portrait 和持续出帧
-
 ## 规则
 
 - 新任务必须写入本文件；完成任务必须打勾。
 - 每个活跃任务必须有唯一 context、可验证 acceptance 和明确状态：todo / in_progress / blocked / done。
 - 同一总目标和其重复子项不得同时作为活跃进度；因候选版本或验收口径变化重新打开的任务必须写明失效原因。
-- 每次实质推进更新本文件和当前 conversation；历史完成项超出上限后压缩进对应 conversation。
+- 每次实质推进更新本文件和当前 conversation；已完成工作及其证据只保留在对应 conversation，不在本文件复述。
