@@ -57,7 +57,8 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart'
+    show VoidCallback, debugPrint, kDebugMode;
 import 'package:flutter/services.dart' show HapticFeedback, DeviceOrientation;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -430,10 +431,46 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   String? _lastHdrParameterReadback;
   String? _lastHdrNativeOutputAttempt;
   final _hdrNativeOutputAttemptGate = HdrNativeOutputAttemptGate();
+  dynamic _nativeSurfaceActiveNotifier;
+  VoidCallback? _nativeSurfaceActiveListener;
 
   HdrCapabilities get hdrCapabilities => _hdrCapabilities;
   HdrSourceMetadata get hdrSource => _hdrSource;
   HdrPlaybackDecision get hdrDecision => _hdrDecision;
+
+  void _unbindNativeSurfaceState() {
+    final notifier = _nativeSurfaceActiveNotifier;
+    final listener = _nativeSurfaceActiveListener;
+    if (notifier != null && listener != null) {
+      notifier.removeListener(listener);
+    }
+    _nativeSurfaceActiveNotifier = null;
+    _nativeSurfaceActiveListener = null;
+  }
+
+  Future<void> _bindNativeSurfaceState(VideoController controller) async {
+    if (!Platform.isMacOS) return;
+    _unbindNativeSurfaceState();
+    try {
+      final platform = await controller.platform.future;
+      if (!identical(controller, _videoController)) return;
+      final dynamic notifier =
+          (platform as dynamic).nativeSurfaceActiveNotifier;
+      void listener() {
+        if (identical(controller, _videoController)) {
+          _refreshHdrDecision();
+        }
+      }
+
+      _nativeSurfaceActiveNotifier = notifier;
+      _nativeSurfaceActiveListener = listener;
+      notifier.addListener(listener);
+      listener();
+    } catch (_) {
+      // Older media-kit revisions do not expose the notifier. The existing
+      // one-shot configuration path remains the compatibility fallback.
+    }
+  }
 
   late final progressType = Pref.btmProgressBehavior;
   late final enableQuickDouble = Pref.enableQuickDouble;
@@ -1016,6 +1053,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       return player;
     }
     _videoController = nextVideoController;
+    unawaited(_bindNativeSurfaceState(nextVideoController));
     _startListeners(player, sourceGeneration: sourceGeneration);
     if (Platform.isMacOS) {
       _hdrDisplaySubscription = HdrPlatform.displayChanges.listen(
@@ -1039,6 +1077,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
               : surfaceView
               ? 'mediacodec_embed'
               : null
+        : Platform.isMacOS && nativeSurface
+        ? 'libmpv'
         : null,
     enableHardwareAcceleration: hwdec != null,
     androidAttachSurfaceAfterVideoParameters: false,
@@ -1103,9 +1143,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         // released through the same disposal barrier as the primary output.
         dispose: disposeStaleOutput,
         publish: (controller) {
+          _unbindNativeSurfaceState();
           _videoController = controller;
           hdrOutputError.value = null;
           hdrSurfaceGeneration.value++;
+          unawaited(_bindNativeSurfaceState(controller));
         },
       );
     }
@@ -1307,6 +1349,32 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       decision.outputTopologySignature;
 
   void _refreshHdrDecision() {
+    // Darwin's media-kit surface is the authoritative activation source. A
+    // late NativeSurface.Ready callback may promote the actual RGBA16F/EDR
+    // output after the app-side display probe already chose the provisional
+    // candidate. Reflect that verified state before choosing the next policy,
+    // otherwise diagnostics can say `surface=texture` while Metal is already
+    // consuming the native float frame.
+    if (Platform.isMacOS && _videoController?.nativeSurfaceActive == true) {
+      _hdrCapabilities = _hdrCapabilities.copyWith(
+        nativeOutput: true,
+        nativeOutputCapable: true,
+        nativeOutputActive: true,
+        decoderHdr: true,
+        unsupportedReason: 'native-surface-active',
+      );
+    } else if (Platform.isMacOS &&
+        _hdrCapabilities.nativeOutputActive &&
+        _videoController?.nativeSurfaceActive != true) {
+      // The native controller owns the post-present activation edge. If it
+      // has subsequently gone inactive, do not let the app retain a stale
+      // active decision across reset, surface replacement, or display change.
+      _hdrCapabilities = _hdrCapabilities.copyWith(
+        nativeOutput: false,
+        nativeOutputActive: false,
+        unsupportedReason: 'native-surface-inactive',
+      );
+    }
     _hdrDecision = HdrDecision.choose(
       mode: Pref.hdrMode,
       source: _hdrSource,
@@ -1385,12 +1453,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       }
     }
     await _applyHdrOutputParameters(player);
+    final keepDarwinNativeHdr =
+        Platform.isMacOS &&
+        Pref.hdrMode == HdrMode.auto &&
+        (_allowDiagnosticDolbyVisionNative ||
+            _hdrSource.supportsConvertedHdrOutput) &&
+        (_hdrSource.transfer == HdrTransfer.pq ||
+            _hdrSource.transfer == HdrTransfer.hlg) &&
+        _hdrSource.hasNativeColorMetadata;
     if (refreshGeneration != _hdrDisplayRefreshGeneration ||
-        _hdrSource.kind == HdrSourceKind.dolbyVision ||
-        _hdrSource.kind == HdrSourceKind.hdrVivid ||
-        _hdrSource.kind == HdrSourceKind.hdr10Plus ||
-        !_hdrSource.hasNativeColorMetadata ||
-        Pref.hdrMode != HdrMode.auto) {
+        (!keepDarwinNativeHdr &&
+            (_hdrSource.kind == HdrSourceKind.dolbyVision ||
+                _hdrSource.kind == HdrSourceKind.hdrVivid ||
+                _hdrSource.kind == HdrSourceKind.hdr10Plus ||
+                !_hdrSource.hasNativeColorMetadata ||
+                Pref.hdrMode != HdrMode.auto))) {
       return;
     }
     final applied = await _setHdrColorSpace(
@@ -1547,31 +1624,34 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           );
           if (!isCurrent()) return false;
         }
-        // The Darwin layer can receive its first drawable/provider callback a
-        // few frames after the controller is created. The media-kit Ready
-        // callback configures the saved payload at that point, so retry the
-        // same transaction once before declaring HDR unavailable.
+        // Darwin activation is deliberately post-first-frame: configureHdrOutput
+        // may return an accepted candidate with active=false while the native
+        // timer waits for a successful RGBA16F Metal presentation. Wait on the
+        // actual notifier rather than treating the candidate as a failure.
         if ((Platform.isMacOS || Platform.isIOS) &&
             (configured is! Map || configured['active'] != true)) {
-          await Future<void>.delayed(const Duration(milliseconds: 300));
-          if (!isCurrent()) return false;
-          configured = await nativePlatform.configureHdrOutput(
-            HdrOutputConfiguration(
-              transfer: source.transfer,
-              primaries: source.primaries,
-              matrix: source.matrix,
-              dolbyVisionProfile: source.dolbyVisionProfile,
-              rpuPresent: source.rpuPresent,
-              baseLayerPresent: source.baseLayerPresent,
-              enhancementLayerPresent: source.enhancementLayerPresent,
-              dvEnhancement: source.dvEnhancement,
-              dynamicMetadataPresent: source.dynamicMetadataPresent,
-              masteringMetadata: source.masteringMetadata,
-              surfaceId: surfaceHandle.toString(),
-              surfaceGeneration: surfaceGeneration,
-            ).toMap(),
-          );
-          if (!isCurrent()) return false;
+          final notifier = nativePlatform.nativeSurfaceActiveNotifier;
+          final active = Completer<void>();
+          void onActiveChanged() {
+            if (notifier.value == true && !active.isCompleted) {
+              active.complete();
+            }
+          }
+
+          notifier.addListener(onActiveChanged);
+          try {
+            onActiveChanged();
+            if (!active.isCompleted) {
+              await Future.any<void>([
+                active.future,
+                Future<void>.delayed(const Duration(seconds: 3)),
+              ]);
+            }
+          } finally {
+            notifier.removeListener(onActiveChanged);
+          }
+          if (!isCurrent() || notifier.value != true) return false;
+          configured = const <String, dynamic>{'active': true};
         }
         if (configured is! Map || configured['active'] != true) return false;
         if (Platform.isMacOS ||
@@ -1677,11 +1757,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // The verified producer/display contract exists only for macOS. Do not
     // silently apply the macOS 400-nit mapping to iOS without an equivalent
     // native-surface and display-output measurement.
-    final darwinNative = native && Platform.isMacOS;
+    // A macOS native candidate must use the same producer contract before
+    // activation; otherwise the candidate is configured as SDR first and the
+    // native backend can never verify its linear BT.2020 target.
+    final darwinNative =
+        Platform.isMacOS && (native || _hdrDecision.useNativeSurface);
     final values = <String, String>{
-      'target-prim': native ? 'bt.2020' : 'bt.709',
+      'target-prim': (native || darwinNative) ? 'bt.2020' : 'bt.709',
       'target-trc': darwinNative ? 'linear' : (native ? transfer : 'bt.1886'),
-      'target-colorspace-hint': native ? 'yes' : 'auto',
       // The Darwin native surface consumes display-referred linear BT.2020.
       // Keep mpv's tone-mapping stage enabled so a 1000-nit source is mapped
       // to the same 400-nit reference used by the verified brew-mpv setup
@@ -1693,6 +1776,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // HDR and SDR sources, and mpv properties survive a native-output reset.
       'target-peak': darwinNative ? '400' : 'auto',
     };
+    // The bundled Darwin mpv does not expose target-colorspace-hint. Keep
+    // this optional property for backends that support it, but never let an
+    // unsupported diagnostic property abort the real HDR transaction.
+    if (!darwinNative) {
+      values['target-colorspace-hint'] = native ? 'yes' : 'auto';
+    }
     // Local A/B only. These overrides are deliberately debug-only and are
     // never used as production defaults; they isolate whether the remaining
     // difference is caused by the producer transfer/peak contract.
@@ -1724,9 +1813,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         final handle = await player.handle;
         if (!isCurrent()) return;
         final readback = <String, String>{};
-        // Read the effective peak without writing it. The shipped Darwin
-        // mpv has libplacebo disabled, so this is diagnostic evidence only;
-        // do not guess or force a target peak from another mpv build.
+        // Read back the effective values from the exact bundled Darwin mpv.
+        // The runtime verifier still requires these values plus a visible
+        // RGBA16F/EDR frame; a successful setProperty call alone is not proof.
         for (final property in <String>[...values.keys, 'target-peak']) {
           if (!isCurrent()) return;
           try {
@@ -2055,13 +2144,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             corrected.matrix != HdrMatrix.unknown) {
           _hdrSource = _hdrSource.mergeMpvCorrection(corrected);
         }
-        _hdrDecision = HdrDecision.choose(
-          mode: Pref.hdrMode,
-          source: _hdrSource,
-          capabilities: _hdrCapabilities,
-          hwdec: hwdec ?? 'auto',
-          allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
-        );
+        _refreshHdrDecision();
         final outputTopologyChanged =
             _hdrOutputSignature(previousDecision) !=
             _hdrOutputSignature(_hdrDecision);
@@ -3076,6 +3159,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     _removeListeners();
+    _unbindNativeSurfaceState();
     _positionListeners.clear();
     _statusListeners.clear();
     if (playerStatus.isPlaying) {

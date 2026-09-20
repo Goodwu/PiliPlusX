@@ -822,6 +822,10 @@ void main() {
       HdrSourceKind.dolbyVision,
     );
     expect(
+      HdrSourceMetadata.fromBilibiliHints(quality: 126).transfer,
+      HdrTransfer.unknown,
+    );
+    expect(
       HdrSourceMetadata.fromBilibiliHints(quality: 129).kind,
       HdrSourceKind.hdrVivid,
     );
@@ -829,6 +833,33 @@ void main() {
       HdrSourceMetadata.fromBilibiliHints(quality: 80).isHdr,
       isFalse,
     );
+  });
+
+  test('DV hint waits for mpv transfer metadata before native HDR', () {
+    final initial = HdrSourceMetadata.fromBilibiliHints(quality: 126);
+    expect(initial.hasNativeColorMetadata, isFalse);
+
+    final hlg = initial.mergeMpvCorrection(
+      HdrSourceMetadata.fromMpvProperties({
+        'transfer': 'arib-std-b67',
+        'primaries': 'bt.2020',
+        'codec': 'hevc',
+      }),
+    );
+    expect(hlg.kind, HdrSourceKind.dolbyVision);
+    expect(hlg.transfer, HdrTransfer.hlg);
+    expect(hlg.hasNativeColorMetadata, isTrue);
+
+    final pq = initial.mergeMpvCorrection(
+      HdrSourceMetadata.fromMpvProperties({
+        'transfer': 'pq',
+        'primaries': 'bt.2020',
+        'codec': 'hevc',
+      }),
+    );
+    expect(pq.kind, HdrSourceKind.dolbyVision);
+    expect(pq.transfer, HdrTransfer.pq);
+    expect(pq.hasNativeColorMetadata, isTrue);
   });
 
   test('matrix metadata can identify HDR when primaries are absent', () {
@@ -895,6 +926,30 @@ void main() {
       hlgDolbyVisionDecision.sourceProcessing,
       'dolby-vision-converted-to-hdr',
     );
+  });
+
+  test('macOS EDR prepares a native surface before activation', () {
+    const capabilities = HdrCapabilities(
+      platform: 'macos',
+      displayHdr: true,
+      nativeOutputCapable: true,
+      nativeOutputActive: false,
+    );
+    const source = HdrSourceMetadata(
+      kind: HdrSourceKind.dolbyVision,
+      transfer: HdrTransfer.hlg,
+      primaries: HdrPrimaries.bt2020,
+    );
+    final decision = HdrDecision.choose(
+      mode: HdrMode.auto,
+      source: source,
+      capabilities: capabilities,
+    );
+    expect(capabilities.canNativeHdr, isFalse);
+    expect(capabilities.canNativeHdrCandidate, isTrue);
+    expect(decision.output, HdrOutputMode.toneMappedSdr);
+    expect(decision.surface, 'native-hdr-candidate');
+    expect(decision.useNativeSurface, isTrue);
   });
 
   test(

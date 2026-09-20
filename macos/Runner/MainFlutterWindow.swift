@@ -85,17 +85,22 @@ class MainFlutterWindow: NSWindow {
         (activeScreen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0) > 1.0
       result([
         "platform": "macos",
-        "nativeBackend": "none",
+        "nativeBackend": "cametal-layer",
         "displayHdr": edr,
         "headroom": headroom,
         "potentialHeadroom": potentialHeadroom,
         "decoderHdr": false,
         "nativeOutput": false,
-        "nativeOutputCapable": false,
+        // The media-kit native-surface plugin owns the actual output. This
+        // app channel only proves that the window's display can attempt EDR;
+        // activation remains false until the native layer reports a float
+        // frame and a successful HDR configuration.
+        "nativeOutputCapable": edr,
         "nativeOutputActive": false,
         "toneMapping": true,
         "displayFormats": edr ? ["edr"] : [],
-        "unsupportedReason": "native-hdr-layer-not-integrated"
+        "supportedOutputFormats": edr ? ["extended-linear-bt2020"] : [],
+        "unsupportedReason": edr ? "native-surface-awaiting-frame" : "display-edr-unavailable"
       ])
     }
 

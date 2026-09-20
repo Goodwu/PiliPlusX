@@ -2,6 +2,17 @@
 
 ## Now（当前推进，最多 3 条）
 
+- [ ] 修复 macOS `BV1vY4y1N7TY` Dolby Vision 亮度不足
+  - status: in_progress
+  - context: archives/conversations/player-architecture-remediation.md
+  - acceptance: 正式 macOS 产物使用可追溯的 modern libmpv（mpv 0.41+、libplacebo/Vulkan）并完成同一 DV 输入、同一时间点的 HDR/SDR 对照；日志确认 `dolbyvision/pq` 识别、`target-peak=400`、`tone-mapping=bt.2390`、原生 EDR 可见帧和高光观感达到参考播放器。当前原正式包仍为 mpv 0.36/libplacebo disabled；本地 modern arm64 预览已验证可行，但尚未形成正式 universal 依赖。
+  - latest: 已通过 `gh run download` 获取 `Goodwu/libmpv-darwin-build` 分支 `experiment/mpv-041-b3-opengl` commit `bc52bbaedf02fcf11d8042ce1e7799815a2e8405` 的成功 Actions artifact（run `34097910903`），并新增 `scripts/build_macos_goodwu_hdr.sh`、`scripts/package_macos_goodwu_mpv_hdr.sh` 固化构建。最终包 `build/macos/Build/Products/Debug/PiliPlusX-goodwu-hdr-final.app` 的 `Mpv.framework` 已确认 universal mpv 0.41.0，进程实际加载分支 libmpv、libplacebo、Vulkan、shaderc 和 FFmpeg，且同一 BVID 可播放；旧正式包与最终包均已定位到约 50% 播放位置完成画面对照，最终包高光明显恢复；已通过无 `/opt/homebrew` 绝对依赖、`codesign --verify --deep --strict`、45 项 HDR 测试和 Dart analyze。旧正式 `PiliPlusX.app` 仍嵌入 mpv 0.36.0；需要将 Goodwu artifact 依赖正式纳入发布流水线并补齐播放器日志中的 Dolby Vision/target-peak/tone-mapping 证据，任务保持 in_progress。
+  - latest: architect 三轮独立审核均为 FAIL。已修复线性 RGBA16F 层的 PQ metadata 错配实验、reset 旧配置回灌、窗口屏幕 headroom、Metal command 完成状态、videoParams 决策绕过、Dart reset 事务版本和 verifier 正则；修复后源码 `flutter build macos --debug --no-pub`、45 项 HDR 测试、analyze、diff check 均通过，`PiliPlusX-goodwu-hdr-final3.app` 可打包并实际播放目标 BVID，画面不再出现已报告的立即发白现象。仍未达成：active 必须绑定成功首帧、Darwin active false 双向同步及 display refresh 顺序、完整 GL→Metal fence/lease、arm64/x86_64 modern 依赖能力一致性、同源同 PTS 光度验收；按用户要求，未将任务标记 done。
+  - latest: final4 运行采样仍持续为 `bgra8Unorm`，未据此宣称 HDR 已打通；按 architect 建议将 OpenGL→Metal 生产者栅栏改为 `glFinish()`，补充 native gate 诊断字段，并修正 macOS Dolby Vision 在 display reset 后直接 return、导致 native 配置未重新下发的问题。45 项 HDR 测试、analyze、diff check、macOS debug build 通过，`PiliPlusX-goodwu-hdr-final7.app` 已重新打包；architect 复审进行中，任务保持 in_progress。
+  - latest: architect 已对 reset/重叠 reset/失败重试/旧 Ready/epoch 门禁代码审查 PASS；最终源码再次通过 45 项 HDR 测试、Dart analyze、两仓库 diff check 和 `flutter build macos --debug --no-pub`，并生成 `PiliPlusX-goodwu-hdr-final8.app`（Goodwu universal mpv 0.41.0、无 `/opt/homebrew` 绝对依赖）。但产品验收仍保持 in_progress：尚未取得同一候选持续 `rgba16Float → successful frame → active=true`、reset/切屏恢复和同源同时间亮度对照证据，不能宣称整条 HDR 链路已完成。
+  - latest: 在 reset 失败/重叠窗口增加共享 Future 和 reset-in-flight 门禁；architect 对最终 reset/旧 Ready 代码门禁再次 PASS。最新 `PiliPlusX-goodwu-hdr-final9.app` 已重新构建打包，Goodwu universal mpv 0.41.0 且无 `/opt/homebrew` 绝对依赖。端到端亮度验收仍未闭合：历史实测曾持续观察到 `bgra8Unorm`，当前缺少 final9 同进程持续 `rgba16Float`、active=true 和同源同时间亮度对照证据，任务保持 in_progress。
+  - latest: final10 已纳入 DV 初始 hint 不伪造 PQ 的修复；46 项 HDR 测试、Dart analyze、`flutter build macos --debug --no-pub`、Goodwu universal mpv 0.41.0 打包及绝对依赖检查通过。无 HDR 显示器时仅确认到 native `rgba16Float`/EDR 候选链路，未宣称实际亮度达到 HDR；连接 HDR 显示器后仍需同源同 PTS 做高光/中灰亮度接受度对照，并完成 architect 最终复审。
+
 - [ ] 补齐 controller source/output 完整时序覆盖
   - status: in_progress
   - context: archives/conversations/player-architecture-remediation.md

@@ -134,7 +134,13 @@ class HdrSourceMetadata {
     };
     return HdrSourceMetadata(
       kind: kind,
-      transfer: kind == HdrSourceKind.hlg
+      // A Dolby Vision quality tier identifies the stream family, but does
+      // not identify the base-layer transfer. Bilibili's DV representations
+      // can carry PQ or HLG-compatible base layers; wait for mpv's
+      // video-params gamma before selecting the native output contract.
+      transfer: kind == HdrSourceKind.dolbyVision
+          ? HdrTransfer.unknown
+          : kind == HdrSourceKind.hlg
           ? HdrTransfer.hlg
           : kind == HdrSourceKind.sdr
           ? HdrTransfer.sdr
@@ -493,10 +499,21 @@ class HdrCapabilities {
   /// still come from the media-kit backend after the surface is ready.
   bool get canOhosNativeSurfaceCandidate => platform == 'ohos' && displayHdr;
 
+  /// Darwin's CAMetalLayer path is also a two-phase output: the display and
+  /// native layer can be prepared before a float frame is available. Keep the
+  /// initial decision provisional until the backend reports `active=true`.
+  bool get canDarwinNativeSurfaceCandidate =>
+      (platform == 'macos' || platform == 'ios') &&
+      displayHdr &&
+      nativeOutputCapable;
+
   /// HCPP is a provisional native-output path: the surface must exist before
   /// its dataspace can be applied and verified against the actual stream.
   bool get canNativeHdrCandidate =>
-      canNativeHdr || canHcpp || canOhosNativeSurfaceCandidate;
+      canNativeHdr ||
+      canHcpp ||
+      canOhosNativeSurfaceCandidate ||
+      canDarwinNativeSurfaceCandidate;
 
   bool get canHcpp =>
       hcpp &&
@@ -669,7 +686,7 @@ class HdrPlaybackDecision {
   String get outputTopologySignature => useHcpp
       ? 'android-hcpp-platform-view'
       : useNativeSurface
-      ? 'ohos-native-surface'
+      ? 'native-surface'
       : 'flutter-texture';
 }
 
@@ -1037,7 +1054,8 @@ class HdrDecision {
         reason: 'display-decoder-and-output-ready',
         usePlatformView: capabilities.canHcpp,
         useHcpp: capabilities.canHcpp,
-        useNativeSurface: capabilities.platform == 'ohos',
+        useNativeSurface:
+            capabilities.platform == 'ohos' || capabilities.platform == 'macos',
         sourceProcessing: source.kind == HdrSourceKind.dolbyVision
             ? 'dolby-vision-converted-to-hdr'
             : 'passthrough',
@@ -1057,7 +1075,9 @@ class HdrDecision {
         reason: 'hcpp-capabilities-awaiting-dataspace',
         usePlatformView: capabilities.canHcpp,
         useHcpp: capabilities.canHcpp,
-        useNativeSurface: useOhosNativeSurface,
+        useNativeSurface:
+            useOhosNativeSurface ||
+            capabilities.canDarwinNativeSurfaceCandidate,
         sourceProcessing: 'awaiting-native-output-proof',
       );
     }
