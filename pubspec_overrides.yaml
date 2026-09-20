@@ -1,5 +1,13 @@
 # Local media-kit integration override. Remove before publishing a release.
 dependency_overrides:
+  # Keep the Android implementation aligned with the project-level override;
+  # otherwise this local override file resolves an AGP 9-incompatible hosted
+  # implementation instead.
+  flutter_inappwebview_android:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/flutter_inappwebview.git
+      path: flutter_inappwebview_android
+      ref: v6.1.5
   # Resolve the two existing git-source declarations to the cached package
   # while testing the local media-kit path override.
   cached_network_image_ce:

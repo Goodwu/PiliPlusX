@@ -1,6 +1,6 @@
 # SDR 跨平台构建证据
 
-更新时间：2026-09-03
+更新时间：2026-09-20
 
 本轮将 Web 与原生入口做了条件隔离，并完成可复现的本机构建门：
 
@@ -9,8 +9,9 @@
 | 目标 | 证据 | 结果 |
 | --- | --- | --- |
 | Web | `flutter run -d chrome`；`flutter build web --release --no-wasm-dry-run` | `build/web` 已生成；当前是独立的 URL 播放验证入口，使用单个 HTML video，固定 SDR/tone-map，隐藏原生能力。媒体 URL 必须满足浏览器 codec/CORS 要求；不支持直接组合 B 站分离的 DASH 音视频流，也不等同于完整客户端功能 |
-| Android arm64 | `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home flutter build apk --release --split-per-abi --target-platform android-arm64` | `app-arm64-v8a-release.apk` 已生成 |
-| Android ABI | `python3 scripts/verify_artifact.py build/app/outputs/flutter-apk/app-arm64-v8a-release.apk --platform android --abi arm64-v8a` | 当前代码通过；SHA-256 `a81f2cbc5116a2fe39b5d114bb73578f9090a753572a9479b4286d5e693eb250` |
+| Android arm64 | `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home flutter build apk --release --split-per-abi --target-platform android-arm64` | 2026-09-20 成功生成 `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`（26.5 MB）。本机默认 JDK 27 不满足项目 Java 17 配置，故只对本次命令显式指定 JDK 17；`pubspec_overrides.yaml` 同步 Android webview 的项目级 Git override 后，避免其覆盖文件解析到 AGP 9 不支持的 hosted 实现。 |
+| Android ABI 与签名 | `unzip -Z1`、`aapt dump badging`、`apksigner verify --verbose --print-certs` | APK 只含 `lib/arm64-v8a/`（`libapp.so`、`libflutter.so`、`libmpv.so` 等），包为 `com.example.piliplusx` 2.1.2+1（minSdk 24、targetSdk 36），SHA-256 `8c611b54e8a33acad4b0834e778346139cea25b32bddf03974649629a6938cb1`。v2 签名通过；因没有 release keystore，签名者是 Android Debug，不能视为可发布的生产签名包。 |
+| Android arm64 模拟器启动 | AVD `bluekey-api36-arm64`（API 36 / arm64-v8a）；`adb install -r`、`am start -W`、`dumpsys`、截图 | 安装成功，`com.example.piliplusx/.MainActivity` 冷启动完成（约 7.9 秒）、首屏已绘制且进程为 arm64。随后系统记录 `Input dispatching timed out`，对话框显示 “PiliPlusX isn't responding”；选择 Wait 后 15 秒仍为 `mNotResponding=true`。因此仅安装/首屏通过，模拟器交互运行验收为失败；未关闭应用、未清除数据，保留现场。 |
 | Android release metadata | `release_manifest.py` + `verify_release_manifest.py` | manifest 与 `SHA256SUMS` 通过（4 个文件） |
 | macOS release | `flutter build macos --release`（Xcode 26.6、CocoaPods 1.17.0） | universal app：`build/macos/Build/Products/Release/PiliPlusX.app`；分发 zip：`build/macos/artifacts/PiliPlusX-macos-universal-release.zip`，SHA-256 `bdeec2e39034df591b0e9649e2789894056a8f7013cb58f7ccc50297cfd609b9`。该本地包未签名/未公证；此行为历史构建证据，后续 runtime follow-up 与连续换源记录覆盖其早期黑屏候选结论 |
 | iOS device | `flutter build ios --no-codesign` | `build/ios/iphoneos/Runner.app` 已生成（无签名） |
