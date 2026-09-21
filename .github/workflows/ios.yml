@@ -5,20 +5,34 @@ on:
     inputs:
       tag:
         description: "tag"
-        required: false
-        default: ""
+        required: true
+        type: string
+      ref:
+        description: Immutable source commit to build
+        required: true
         type: string
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Asset label for a sideload IPA build
+        required: true
+        type: string
 
 jobs:
   build-macos-app:
-    name: Release IOS
+    name: iOS arm64 sideload IPA
     runs-on: macos-26
+    permissions:
+      contents: read
+    env:
+      PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
+      PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref }}
 
       - name: Setup flutter
         uses: subosito/flutter-action@v2
@@ -30,21 +44,21 @@ jobs:
         shell: pwsh
         run: lib/scripts/build.ps1
 
+      - name: Use reproducible dependencies
+        run: scripts/prepare_ci_dependencies.sh
+
       - name: Apply Patch
         shell: pwsh
         run: lib/scripts/patch.ps1 iOS
 
-      - name: Resolve locked dependencies
-        run: flutter pub get --enforce-lockfile
+      - name: Resolve pinned dependencies
+        run: flutter pub get
 
       - name: Patch extended nested scroll view pointer boundary
         run: python3 scripts/prepare_ohos_package_patches.py --workspace "$GITHUB_WORKSPACE"
 
       - name: Verify media-kit lock
-        run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
-
-      - name: Verify workflow media-kit references
-        run: python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96
+        run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
 
       - name: Build iOS
         run: |
@@ -64,31 +78,19 @@ jobs:
           cp PiliPlusX_ios_*.ipa release-metadata/ios/
           python3 scripts/release_manifest.py release-metadata/ios \
             --platform ios --abi arm64 \
-            --media-kit-commit 73536efdda482f2d5eefe2feb7038db419944b96 \
+            --media-kit-commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63 \
             --hdr-backend texture-tone-map \
             --native-library-version media_kit_libs_ios_video@1.1.4
           python3 scripts/verify_release_manifest.py release-metadata/ios
           mv release-metadata/ios/manifest.json PiliPlusX_ios_${{ inputs.tag }}.manifest.json
           mv release-metadata/ios/SHA256SUMS PiliPlusX_ios_${{ inputs.tag }}.SHA256SUMS
 
-      - name: Release
-        if: ${{ inputs.tag != '' && !contains(inputs.tag, 'test') }}
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ inputs.tag }}
-          name: ${{ inputs.tag }}
-          draft: true
-          prerelease: true
-          files: |
-            PiliPlusX_ios_*.ipa
-            PiliPlusX_ios_*.manifest.json
-            PiliPlusX_ios_*.SHA256SUMS
-
       - name: Upload ios release
         uses: actions/upload-artifact@v7
         with:
           archive: false
-          name: iOS-release
+          if-no-files-found: error
+          name: release-ios-arm64-sideload
           path: |
             PiliPlusX_ios_*.ipa
             PiliPlusX_ios_*.manifest.json

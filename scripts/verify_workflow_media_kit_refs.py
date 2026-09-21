@@ -34,6 +34,10 @@ def main() -> None:
     manifest_count = 0
     for workflow in workflows:
         text = workflow.read_text(encoding="utf-8")
+        # Orchestrators only call reusable build workflows and therefore do
+        # not resolve Dart packages themselves.
+        if not re.search(r"(?:flutter pub get|flutter build|fastforge package)", text):
+            continue
         lock_refs = LOCK_RE.findall(text)
         manifest_refs = MANIFEST_RE.findall(text)
         lock_count += len(lock_refs)
@@ -48,8 +52,8 @@ def main() -> None:
     if failures:
         raise SystemExit("workflow media-kit reference verification failed:\n" + "\n".join(failures))
     print(
-        f"workflow media-kit references verified: {len(workflows)} workflows, "
-        f"{lock_count} lock checks, {manifest_count} manifest references at {args.commit}"
+        f"workflow media-kit references verified: {lock_count} lock checks, "
+        f"{manifest_count} manifest references at {args.commit}"
     )
 
 

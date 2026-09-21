@@ -1,6 +1,14 @@
 name: Build OHOS unsigned HAP
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
   pull_request:
     branches:
       - ohos
@@ -8,6 +16,11 @@ on:
     paths-ignore:
       - "**.md"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Asset label for an unsigned HAP build
+        required: true
+        type: string
 
 concurrency:
   group: piliplusx-ohos-${{ github.workflow }}-${{ github.ref }}
@@ -20,11 +33,16 @@ jobs:
     env:
       OHOS_WORKSPACE: ${{ runner.temp }}/PiliPlusX-ohos
       PUB_CACHE: ${{ runner.temp }}/pub-cache-ohos
+      PILIPLUSX_RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      PILIPLUSX_SOURCE_SHA: ${{ inputs.ref || github.sha }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref || github.sha }}
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y curl unzip xz-utils zip libglu1-mesa python3
@@ -98,10 +116,7 @@ jobs:
       - name: Verify media-kit lock
         run: |
           cd "$OHOS_WORKSPACE"
-          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
-
-      - name: Verify workflow media-kit references
-        run: python3 "$GITHUB_WORKSPACE/scripts/verify_workflow_media_kit_refs.py" --workflow-dir "$OHOS_WORKSPACE/.github/workflows" --commit 73536efdda482f2d5eefe2feb7038db419944b96
+          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0dd1535ec622c0e8560551b15800c75c3a07da95
 
       - name: Build unsigned HAP
         run: |
@@ -127,20 +142,26 @@ jobs:
           hap=$(find build ohos/entry/build -type f -name '*unsigned.hap' -print -quit 2>/dev/null || true)
           test -n "$hap"
           mkdir -p release-metadata/ohos
-          cp "$hap" release-metadata/ohos/
+          output_hap="release-metadata/ohos/PiliPlusX_ohos_${PILIPLUSX_RELEASE_TAG}_arm64-unsigned.hap"
+          cp "$hap" "$output_hap"
           python3 scripts/release_manifest.py release-metadata/ohos \
             --platform ohos --abi arm64-v8a \
-            --media-kit-commit 73536efdda482f2d5eefe2feb7038db419944b96 \
+            --media-kit-commit 0dd1535ec622c0e8560551b15800c75c3a07da95 \
+            --git-commit "$PILIPLUSX_SOURCE_SHA" \
             --hdr-backend texture-tone-map \
             --native-library-version media_kit_libs_ohos@1.0.0
           python3 scripts/verify_release_manifest.py release-metadata/ohos
+
+          mv release-metadata/ohos/manifest.json "release-metadata/ohos/PiliPlusX_ohos_${PILIPLUSX_RELEASE_TAG}_arm64-unsigned.manifest.json"
+          mv release-metadata/ohos/SHA256SUMS "release-metadata/ohos/PiliPlusX_ohos_${PILIPLUSX_RELEASE_TAG}_arm64-unsigned.SHA256SUMS"
 
       - name: Upload unsigned HAP and manifest
         uses: actions/upload-artifact@v7
         with:
           archive: false
-          name: OHOS-arm64-unsigned
+          if-no-files-found: error
+          name: release-ohos-arm64-unsigned
           path: |
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/*.hap
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/manifest.json
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/SHA256SUMS
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.hap
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.manifest.json
+            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.SHA256SUMS

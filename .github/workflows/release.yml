@@ -1,0 +1,103 @@
+name: Publish four-platform release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing vMAJOR.MINOR.PATCH tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: piliplusx-release-${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  context:
+    name: Validate release tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+      source_sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'push' && github.sha || inputs.tag }}
+      - id: tag
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+        run: python3 scripts/validate_release_tag.py "$RELEASE_TAG" --github-output "$GITHUB_OUTPUT"
+      - id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: context
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: ${{ needs.context.outputs.tag }}
+      ref: ${{ needs.context.outputs.source_sha }}
+    secrets: inherit
+
+  ios:
+    needs: context
+    uses: ./.github/workflows/ios.yml
+    with:
+      tag: ${{ needs.context.outputs.tag }}
+      ref: ${{ needs.context.outputs.source_sha }}
+
+  macos:
+    needs: context
+    uses: ./.github/workflows/mac.yml
+    with:
+      tag: ${{ needs.context.outputs.tag }}
+      ref: ${{ needs.context.outputs.source_sha }}
+
+  ohos:
+    needs: context
+    uses: ./.github/workflows/ohos.yml
+    with:
+      tag: ${{ needs.context.outputs.tag }}
+      ref: ${{ needs.context.outputs.source_sha }}
+
+  publish:
+    name: Verify and publish GitHub Release
+    needs: [context, android, ios, macos, ohos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.context.outputs.tag }}
+      PRERELEASE: ${{ needs.context.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: Verify all platform assets and metadata
+        run: python3 scripts/verify_release_assets.py release-assets
+      - name: Create or resume draft release
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft >/tmp/is_draft 2>/dev/null; then
+            test "$(cat /tmp/is_draft)" = true || { echo "release $RELEASE_TAG is already public" >&2; exit 1; }
+          else
+            if [[ "$PRERELEASE" == true ]]; then
+              gh release create "$RELEASE_TAG" --draft --prerelease --generate-notes --title "$RELEASE_TAG"
+            else
+              gh release create "$RELEASE_TAG" --draft --generate-notes --title "$RELEASE_TAG"
+            fi
+          fi
+      - name: Upload verified assets
+        run: gh release upload "$RELEASE_TAG" release-assets/* --clobber
+      - name: Publish completed release
+        run: gh release edit "$RELEASE_TAG" --draft=false --prerelease="$PRERELEASE"

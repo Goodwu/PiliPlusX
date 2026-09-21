@@ -1,0 +1,101 @@
+name: Build Android release asset
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    name: Android arm64-v8a
+    runs-on: ubuntu-latest
+    env:
+      PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
+      PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
+      KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+      - name: Use reproducible dependencies
+        run: scripts/prepare_ci_dependencies.sh
+      - name: Apply Android patch
+        shell: pwsh
+        run: lib/scripts/patch.ps1 android
+      - name: Resolve pinned dependencies
+        run: flutter pub get
+      - name: Verify media-kit provenance
+        run: |
+          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
+      - name: Require and install Android release signing key
+        run: |
+          set -euo pipefail
+          for value in KEYSTORE_FILE KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            test -n "${!value}" || { echo "missing required Android release secret: $value" >&2; exit 1; }
+          done
+          printf '%s' "$KEYSTORE_FILE" | base64 --decode > android/app/key.jks
+          {
+            echo "storeFile=key.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+      - name: Stamp release metadata
+        shell: pwsh
+        run: lib/scripts/build.ps1 android
+      - name: Build Android arm64-v8a APK
+        run: flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=pili_release.json --no-pub
+      - name: Verify and name APK
+        run: |
+          set -euo pipefail
+          apk=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          test -f "$apk"
+          apksigner verify --verbose --print-certs "$apk"
+          ! apksigner verify --print-certs "$apk" | grep -F 'Android Debug'
+          output="PiliPlusX_android_${PILIPLUSX_RELEASE_TAG}_arm64-v8a.apk"
+          mv "$apk" "$output"
+          python3 scripts/verify_artifact.py "$output" --platform android --abi arm64-v8a
+      - name: Create checksums and manifest
+        run: |
+          set -euo pipefail
+          mkdir -p release-metadata/android
+          cp PiliPlusX_android_*.apk release-metadata/android/
+          python3 scripts/release_manifest.py release-metadata/android \
+            --platform android --abi arm64-v8a \
+            --media-kit-commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63 \
+            --hdr-backend android-hcpp-platform-view \
+            --native-library-version media_kit_libs_android_video@1.3.6
+          python3 scripts/verify_release_manifest.py release-metadata/android
+          mv release-metadata/android/manifest.json PiliPlusX_android_${PILIPLUSX_RELEASE_TAG}_arm64-v8a.manifest.json
+          mv release-metadata/android/SHA256SUMS PiliPlusX_android_${PILIPLUSX_RELEASE_TAG}_arm64-v8a.SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-android-arm64-v8a
+          archive: false
+          if-no-files-found: error
+          path: |
+            PiliPlusX_android_*.apk
+            PiliPlusX_android_*.manifest.json
+            PiliPlusX_android_*.SHA256SUMS

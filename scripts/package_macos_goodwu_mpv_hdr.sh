@@ -114,6 +114,7 @@ find "$frameworks" -type f \( -name '*.dylib' -o -path '*/Mpv.framework/*/Mpv' \
   done
 
 codesign --force --deep --sign - "$output_app" >/dev/null
+codesign --verify --deep --strict "$output_app"
 
 if ! file "$mpv_framework" | rg -q 'x86_64.*arm64|arm64.*x86_64'; then
   echo "packaged Mpv.framework is not universal" >&2
