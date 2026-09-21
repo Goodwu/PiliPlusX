@@ -75,9 +75,19 @@ import 'package:window_manager/window_manager.dart';
 
 typedef PlayCallback = Future<void>? Function();
 
+class _InitializedVideoPlayer {
+  const _InitializedVideoPlayer(this.player, this.video);
+
+  final Player player;
+  final VideoController video;
+}
+
 class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Player? _videoPlayerController;
   VideoController? _videoController;
+  Future<void>? _playerTeardownFuture;
+  final Map<Player, VideoController> _blockedTeardowns = {};
+  bool _blockedTeardownRetryScheduled = false;
 
   static PlPlayerController? _instance;
 
@@ -816,9 +826,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (sourceGeneration != _hdrSourceGeneration) return;
       if (_playerCount == 0) {
         _removeListeners();
-        _videoPlayerController?.dispose();
-        _videoPlayerController = null;
-        _videoController = null;
+        _schedulePlayerTeardown();
         return;
       }
 
@@ -905,7 +913,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
-  Future<Player> _initPlayer({required int sourceGeneration}) async {
+  Future<_InitializedVideoPlayer?> _initPlayer({
+    required int sourceGeneration,
+  }) async {
     assert(_videoPlayerController == null);
     final opt = {
       'video-sync': Pref.videoSync,
@@ -941,7 +951,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (sourceGeneration != _hdrSourceGeneration ||
         _playerCount == 0 ||
         _fsDisposed) {
-      return player;
+      await _disposePlayerAfterVideoOutput(player, null);
+      return null;
     }
     _hdrCapabilities = capabilities;
     hdrDisplaySupportsHdr.value = _hdrCapabilities.displayHdr;
@@ -958,7 +969,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (sourceGeneration != _hdrSourceGeneration ||
           _playerCount == 0 ||
           _fsDisposed) {
-        return player;
+        await _disposePlayerAfterVideoOutput(player, null);
+        return null;
       }
     }
     debugPrint(
@@ -994,7 +1006,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (sourceGeneration != _hdrSourceGeneration ||
           _playerCount == 0 ||
           _fsDisposed) {
-        return player;
+        await _disposePlayerAfterVideoOutput(player, null);
+        return null;
       }
       if (!useHcpp) {
         _hdrCapabilities = _hdrCapabilities.copyWith(
@@ -1027,7 +1040,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           if (sourceGeneration != _hdrSourceGeneration ||
               _playerCount == 0 ||
               _fsDisposed) {
-            return player;
+            await _disposePlayerAfterVideoOutput(player, null);
+            return null;
           }
           _hdrCapabilities = _hdrCapabilities.copyWith(
             unsupportedReason:
@@ -1044,15 +1058,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (sourceGeneration != _hdrSourceGeneration ||
         _playerCount == 0 ||
         _fsDisposed) {
-      try {
-        final platform = await nextVideoController.platform.future;
-        await platform.disposeForRebuild();
-      } catch (error) {
-        debugPrint('stale initial video output dispose failed: $error');
-      }
-      return player;
+      await _disposePlayerAfterVideoOutput(player, nextVideoController);
+      return null;
     }
-    _videoController = nextVideoController;
     unawaited(_bindNativeSurfaceState(nextVideoController));
     _startListeners(player, sourceGeneration: sourceGeneration);
     if (Platform.isMacOS) {
@@ -1062,7 +1070,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       );
     }
 
-    return player;
+    return _InitializedVideoPlayer(player, nextVideoController);
   }
 
   VideoControllerConfiguration _videoConfiguration({
@@ -1869,15 +1877,20 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     var player = _videoPlayerController;
 
     if (player == null) {
-      player = await _initPlayer(sourceGeneration: sourceGeneration);
+      final initialized = await _initPlayer(
+        sourceGeneration: sourceGeneration,
+      );
+      if (initialized == null) return;
+      player = initialized.player;
       // Two source changes can both cross _initPlayer before either assigns
       // the shared field.  Dispose the stale local Player rather than letting
       // it overwrite the replacement source's shared Player.
       if (sourceGeneration != _hdrSourceGeneration || _playerCount == 0) {
-        player.dispose();
+        await _disposePlayerAfterVideoOutput(player, initialized.video);
         return;
       }
       _videoPlayerController = player;
+      _videoController = initialized.video;
       if (isAnim && superResolutionType.value != .disable) {
         await setShader();
       }
@@ -3174,11 +3187,77 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (kDebugMode) {
       debugPrint('dispose player');
     }
-    _videoPlayerController?.dispose();
-    _videoPlayerController = null;
-    _videoController = null;
+    _schedulePlayerTeardown();
     _instance = null;
     videoPlayerServiceHandler?.clear();
+  }
+
+  /// Releases the video output before terminating libmpv.
+  ///
+  /// On macOS, `VideoOutputManager.Dispose` is the barrier that frees mpv's
+  /// render context. Destroying [Player] first makes modern mpv abort with
+  /// `mpv_render_context_free() not called.` Keep one shared future so every
+  /// close path waits for the same output release rather than racing it.
+  void _schedulePlayerTeardown() {
+    final player = _videoPlayerController;
+    final video = _videoController;
+    _videoPlayerController = null;
+    _videoController = null;
+    if (player == null || _playerTeardownFuture != null) return;
+    _playerTeardownFuture = _disposePlayerAfterVideoOutput(player, video);
+    unawaited(_playerTeardownFuture!);
+  }
+
+  void _scheduleBlockedTeardownRetry() {
+    if (_blockedTeardowns.isEmpty || _blockedTeardownRetryScheduled) return;
+    _blockedTeardownRetryScheduled = true;
+    unawaited(
+      Future<void>.delayed(const Duration(seconds: 1), () async {
+        for (final entry in Map<Player, VideoController>.from(
+          _blockedTeardowns,
+        ).entries) {
+          await _disposePlayerAfterVideoOutput(entry.key, entry.value);
+        }
+        _blockedTeardownRetryScheduled = false;
+        _scheduleBlockedTeardownRetry();
+      }),
+    );
+  }
+
+  Future<void> _disposePlayerAfterVideoOutput(
+    Player player,
+    VideoController? video,
+  ) async {
+    if (video != null) {
+      for (var attempt = 1; attempt <= 3; attempt++) {
+        try {
+          final platform = await video.platform.future;
+          await platform.disposeForRebuild();
+          break;
+        } catch (error, stackTrace) {
+          if (attempt == 3) {
+            // Failing open here would reproduce the libmpv abort: never
+            // terminate the player until its render output confirms release.
+            // Retain every pair and retry from a timer that outlives a page
+            // close, rather than relying on another dispose call.
+            _blockedTeardowns[player] = video;
+            _scheduleBlockedTeardownRetry();
+            debugPrint(
+              'video output release failed after $attempt attempts; '
+              'preserving player for safe teardown: $error\n$stackTrace',
+            );
+            return;
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        }
+      }
+    }
+    try {
+      await player.dispose();
+      _blockedTeardowns.remove(player);
+    } catch (error, stackTrace) {
+      debugPrint('player teardown failed: $error\n$stackTrace');
+    }
   }
 
   static void updatePlayCount() {
