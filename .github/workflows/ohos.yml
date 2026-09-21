@@ -162,6 +162,6 @@ jobs:
           if-no-files-found: error
           name: release-ohos-arm64-unsigned
           path: |
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.hap
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.manifest.json
-            ${{ runner.temp }}/PiliPlusX-ohos/release-metadata/ohos/PiliPlusX_ohos_*.SHA256SUMS
+            ${{ env.OHOS_WORKSPACE }}/release-metadata/ohos/PiliPlusX_ohos_*.hap
+            ${{ env.OHOS_WORKSPACE }}/release-metadata/ohos/PiliPlusX_ohos_*.manifest.json
+            ${{ env.OHOS_WORKSPACE }}/release-metadata/ohos/PiliPlusX_ohos_*.SHA256SUMS

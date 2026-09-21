@@ -29,7 +29,6 @@ jobs:
     env:
       PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
-      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: "1"
       KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -58,6 +57,8 @@ jobs:
         run: lib/scripts/patch.ps1 android
       - name: Resolve pinned dependencies
         run: flutter pub get
+      - name: Remove OHOS-only package platform cases
+        run: python3 scripts/prepare_standard_flutter_package_compat.py --workspace "$GITHUB_WORKSPACE"
       - name: Verify media-kit provenance
         run: |
           python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63

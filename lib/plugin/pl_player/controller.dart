@@ -482,6 +482,28 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
+  // The public media-kit release used by CI predates these convenience
+  // getters. Keep the activation check tied to the newer backend when it is
+  // present, while allowing every release platform to compile against the
+  // pinned public dependency.
+  bool _hasActiveNativeSurface(VideoController? controller) {
+    if (controller == null) return false;
+    try {
+      return (controller as dynamic).nativeSurfaceActive == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _hasNativeSurfaceCandidate(VideoController? controller) {
+    if (controller == null) return false;
+    try {
+      return (controller as dynamic).nativeSurfaceCandidate == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   late final progressType = Pref.btmProgressBehavior;
   late final enableQuickDouble = Pref.enableQuickDouble;
   late final fullScreenGestureReverse = Pref.fullScreenGestureReverse;
@@ -1363,7 +1385,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // candidate. Reflect that verified state before choosing the next policy,
     // otherwise diagnostics can say `surface=texture` while Metal is already
     // consuming the native float frame.
-    if (Platform.isMacOS && _videoController?.nativeSurfaceActive == true) {
+    if (Platform.isMacOS && _hasActiveNativeSurface(_videoController)) {
       _hdrCapabilities = _hdrCapabilities.copyWith(
         nativeOutput: true,
         nativeOutputCapable: true,
@@ -1373,7 +1395,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       );
     } else if (Platform.isMacOS &&
         _hdrCapabilities.nativeOutputActive &&
-        _videoController?.nativeSurfaceActive != true) {
+        !_hasActiveNativeSurface(_videoController)) {
       // The native controller owns the post-present activation edge. If it
       // has subsequently gone inactive, do not let the app retain a stale
       // active decision across reset, surface replacement, or display change.
@@ -2182,8 +2204,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         // HDR output. Promotion still requires the backend's active report.
         final ohosNativeCandidate =
             Platform.operatingSystem == 'ohos' &&
-            _videoController?.nativeSurfaceCandidate == true &&
-            _videoController?.nativeSurfaceActive == true;
+            _hasNativeSurfaceCandidate(_videoController) &&
+            _hasActiveNativeSurface(_videoController);
         if (outputTopologyChanged &&
             _videoController != null &&
             !darwinNativeCandidate) {
