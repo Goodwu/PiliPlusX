@@ -52,12 +52,12 @@ jobs:
       - name: Use reproducible dependencies
         run: scripts/prepare_ci_dependencies.sh
       - name: Resolve release dependencies before SDK patch
-        run: flutter pub get
+        run: scripts/flutter_pub_get_with_retry.sh
       - name: Apply Android patch
         shell: pwsh
         run: lib/scripts/patch.ps1 android
       - name: Resolve pinned dependencies
-        run: flutter pub get
+        run: scripts/flutter_pub_get_with_retry.sh
       - name: Remove OHOS-only package platform cases
         run: python3 scripts/prepare_standard_flutter_package_compat.py --workspace "$GITHUB_WORKSPACE"
       - name: Verify media-kit provenance
