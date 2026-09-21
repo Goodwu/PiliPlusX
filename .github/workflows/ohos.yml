@@ -158,7 +158,6 @@ jobs:
       - name: Upload unsigned HAP and manifest
         uses: actions/upload-artifact@v7
         with:
-          archive: false
           if-no-files-found: error
           name: release-ohos-arm64-unsigned
           path: |
