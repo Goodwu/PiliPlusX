@@ -29,6 +29,7 @@ jobs:
     env:
       PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
+      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: "1"
       KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}

@@ -267,8 +267,10 @@ try {
 
 flutter pub get --enforce-lockfile
 
-python3 "$env:GITHUB_WORKSPACE/scripts/prepare_ohos_package_patches.py" --workspace $env:GITHUB_WORKSPACE
-if ($LASTEXITCODE -ne 0) { throw "Unable to prepare extended nested scroll view pointer boundary" }
+if ($env:PILIPLUSX_SKIP_POINTER_FILTER_PATCH -ne "1") {
+    python3 "$env:GITHUB_WORKSPACE/scripts/prepare_ohos_package_patches.py" --workspace $env:GITHUB_WORKSPACE
+    if ($LASTEXITCODE -ne 0) { throw "Unable to prepare extended nested scroll view pointer boundary" }
+}
 
 $MaterialUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
     Where-Object { $_.Name -like "material_ui-*" } |
