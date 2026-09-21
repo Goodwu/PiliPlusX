@@ -68,6 +68,8 @@ jobs:
           flutter build macos --release --dart-define-from-file=pili_release.json --no-pub
 
       - name: Fetch pinned mpv 0.41 archive
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: scripts/fetch_goodwu_mpv_archive.sh "$RUNNER_TEMP/libmpv-macos.tar.gz"
 
       - name: Bundle mpv 0.41 runtime closure
