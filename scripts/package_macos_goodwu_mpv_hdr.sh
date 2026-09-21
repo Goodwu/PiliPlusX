@@ -116,12 +116,12 @@ find "$frameworks" -type f \( -name '*.dylib' -o -path '*/Mpv.framework/*/Mpv' \
 codesign --force --deep --sign - "$output_app" >/dev/null
 codesign --verify --deep --strict "$output_app"
 
-if ! file "$mpv_framework" | rg -q 'x86_64.*arm64|arm64.*x86_64'; then
+if ! file "$mpv_framework" | grep -Eq 'x86_64.*arm64|arm64.*x86_64'; then
   echo "packaged Mpv.framework is not universal" >&2
   exit 1
 fi
 if find "$frameworks" -type f \( -name '*.dylib' -o -path '*/Mpv.framework/*/Mpv' \) -print0 |
-  xargs -0 -n 1 otool -L 2>/dev/null | rg -q '/opt/homebrew/'; then
+  xargs -0 -n 1 otool -L 2>/dev/null | grep -q '/opt/homebrew/'; then
   echo "absolute Homebrew dependency remains" >&2
   exit 1
 fi
