@@ -17,7 +17,7 @@ from pathlib import Path
 # The OHOS build cache is intentionally pinned to the media-kit revision that
 # is already provisioned on the build host.  The normal checkout may move to
 # a newer/private revision that is not available to the older OHOS pub fork.
-OHOS_MEDIA_KIT_REF = "0dd1535ec622c0e8560551b15800c75c3a07da95"
+OHOS_MEDIA_KIT_REF = "0fa6afe9cd9af8d8437919257d81a27c643f2f63"
 
 
 def replace_once(path: Path, old: str, new: str) -> None:

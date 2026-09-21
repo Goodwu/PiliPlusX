@@ -67,7 +67,9 @@ jobs:
 
       - name: Build iOS
         run: |
-          flutter build ios --release --no-codesign --dart-define-from-file=pili_release.json --no-pub
+          flutter build ios --release --no-codesign --config-only --dart-define-from-file=pili_release.json --no-pub
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
           mkdir -p Payload
           cp -R build/ios/iphoneos/Runner.app Payload/
           # make AltSign happy...

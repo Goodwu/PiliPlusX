@@ -116,7 +116,7 @@ jobs:
       - name: Verify media-kit lock
         run: |
           cd "$OHOS_WORKSPACE"
-          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0dd1535ec622c0e8560551b15800c75c3a07da95
+          python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
 
       - name: Build unsigned HAP
         run: |
