@@ -69,6 +69,12 @@ def main() -> None:
         changed += count
     if changed == 0:
         raise SystemExit(f"no TargetPlatform.ohos references found in {root}")
+    view = args.workspace.resolve() / "lib/pages/video/view.dart"
+    source = view.read_text(encoding="utf-8")
+    needle = "            pointerDownFilter: _allowOuterVideoPointer,\n"
+    if needle not in source:
+        raise SystemExit(f"standard Flutter pointer-filter call missing from {view}")
+    view.write_text(source.replace(needle, "", 1), encoding="utf-8")
     print(f"standard Flutter package compatibility: removed {changed} OHOS references")
 
 
