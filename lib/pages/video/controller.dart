@@ -47,6 +47,8 @@ import 'package:PiliPlus/pages/video/note/view.dart';
 import 'package:PiliPlus/pages/video/post_panel/view.dart';
 import 'package:PiliPlus/pages/video/send_danmaku/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
+import 'package:PiliPlus/pages/video/video_quality_eligibility.dart';
+import 'package:PiliPlus/platform/platform_features.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
@@ -115,8 +117,19 @@ class VideoDetailController extends GetxController
 
   /// 播放器配置 画质 音质 解码格式
   final Rxn<VideoQuality> currentVideoQa = Rxn<VideoQuality>();
+
+  /// Advances whenever a new part's DASH response replaces [data]. Menus read
+  /// this explicitly because a same-qn P1 -> P2 transition otherwise leaves
+  /// them closed over the previous response.
+  final RxInt videoQualityMenuRevision = 0.obs;
+  int _playbackDataRevision = 0;
+  final Map<String, VideoDecodeCapability> _decodeCapabilities = {};
   AudioQuality? currentAudioQa;
-  late VideoDecodeFormatType currentDecodeFormats;
+  // `findVideoByQa` is also the initial source selector. Give that first
+  // transaction a safe preference before it has had a prior rendition from
+  // which to inherit a codec; otherwise reading a late field aborts playback
+  // before the 8K gate can fall back.
+  VideoDecodeFormatType currentDecodeFormats = VideoDecodeFormatType.AVC;
 
   // 是否开始自动播放 存在多p的情况下，第二p需要为true
   final RxBool _autoPlay = Pref.autoPlayEnable.obs;
@@ -415,6 +428,81 @@ class VideoDetailController extends GetxController
       code == VideoQuality.hdr.code ||
       code == VideoQuality.hdrVivid.code;
 
+  List<VideoItem> _tracksForQuality(int quality) =>
+      data.dash?.video
+          ?.where((track) => track.quality.code == quality)
+          .toList() ??
+      const <VideoItem>[];
+
+  List<FormatItem> get currentDashQualityFormats {
+    return formatsForCurrentDash(
+      formats: data.supportFormats ?? const <FormatItem>[],
+      tracks: data.dash?.video ?? const <VideoItem>[],
+    );
+  }
+
+  VideoQualityEligibility qualityEligibility(int quality) =>
+      videoQualityEligibility(
+        quality: quality,
+        tracks: _tracksForQuality(quality),
+        displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+        gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+        decodeCapabilities: _decodeCapabilities,
+      );
+
+  Future<void> _probeEightKDecodeCapabilities(int revision) async {
+    if (!PlatformFeatureSupport.isMacOS) return;
+    final candidates =
+        data.dash?.video
+            ?.map(VideoDecodeCapability.fromTrack)
+            .where((track) => track.isEightK)
+            .fold<Map<String, VideoDecodeCapability>>(
+              <String, VideoDecodeCapability>{},
+              (all, track) => all..[track.key] = track,
+            ) ??
+        <String, VideoDecodeCapability>{};
+    if (candidates.isEmpty) return;
+    _decodeCapabilities
+      ..clear()
+      ..addAll(candidates);
+    videoQualityMenuRevision.value++;
+    final results = await Future.wait(
+      candidates.values.map(probeMacosVideoDecode),
+    );
+    if (revision != _playbackDataRevision) return;
+    for (final result in results) {
+      _decodeCapabilities[result.key] = result;
+    }
+    videoQualityMenuRevision.value++;
+  }
+
+  Future<bool> changeVideoQuality(int quality) async {
+    final revision = _playbackDataRevision;
+    final eligibility = qualityEligibility(quality);
+    if (_tracksForQuality(quality).isEmpty) {
+      SmartDialog.showToast('当前分 P 不提供该画质');
+      return false;
+    }
+    if (!eligibility.enabled) {
+      SmartDialog.showToast(eligibility.message);
+      return false;
+    }
+    final selected = findVideoByQa(
+      quality,
+      setCodecs: true,
+      requireConfirmedEightKHardware: true,
+    );
+    if (selected == null || revision != _playbackDataRevision) {
+      SmartDialog.showToast('当前画质资源不可用');
+      return false;
+    }
+    final newQa = VideoQuality.fromCode(quality);
+    plPlayerController.cacheVideoQa = newQa.code;
+    currentVideoQa.value = newQa;
+    updatePlayer();
+    return true;
+  }
+
   Future<void> getMediaList({
     bool isReverse = false,
     bool isLoadPrevious = false,
@@ -667,9 +755,21 @@ class VideoDetailController extends GetxController
     }
   }
 
-  VideoItem findVideoByQa(int qa, {bool setCodecs = false}) {
+  VideoItem? findVideoByQa(
+    int qa, {
+    bool setCodecs = false,
+    bool requireConfirmedEightKHardware = false,
+  }) {
     /// 根据currentVideoQa和currentDecodeFormats 重新设置videoUrl
-    final videoList = data.dash!.video!.where((i) => i.id == qa).toList();
+    var videoList = data.dash!.video!.where((i) => i.id == qa).toList();
+    if (requireConfirmedEightKHardware) {
+      videoList = tracksEligibleForPlayback(
+        tracks: videoList,
+        gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+        decodeCapabilities: _decodeCapabilities,
+      );
+    }
+    if (videoList.isEmpty) return null;
 
     final currentCodes = currentDecodeFormats.codes;
     VideoItem? bestVideo;
@@ -711,7 +811,16 @@ class VideoDetailController extends GetxController
       ..isBuffering.value = false
       ..buffered.value = 0;
 
-    firstVideo = findVideoByQa(currentVideoQa.code, setCodecs: true);
+    final selected = findVideoByQa(
+      currentVideoQa.code,
+      setCodecs: true,
+      requireConfirmedEightKHardware: true,
+    );
+    if (selected == null) {
+      SmartDialog.showToast('当前画质资源不可用');
+      return;
+    }
+    firstVideo = selected;
     videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
 
     /// 根据currentAudioQa 重新设置audioUrl
@@ -879,6 +988,16 @@ class VideoDetailController extends GetxController
 
     if (result case Success(:final response)) {
       data = response;
+      _playbackDataRevision++;
+      _decodeCapabilities.clear();
+      videoQualityMenuRevision.value++;
+      // Do not let a saved 8K preference open a source while the matching
+      // decoder result is still unknown. Waiting here is local/native only
+      // and makes the initial source selection observe the same revision that
+      // the menu shows; 4K and lower remain eligible regardless of the probe.
+      final playbackRevision = _playbackDataRevision;
+      await _probeEightKDecodeCapabilities(playbackRevision);
+      if (isClosed || playbackRevision != _playbackDataRevision) return;
 
       languages.value = data.language?.items;
       currLang.value = data.curLanguage;
@@ -1010,6 +1129,21 @@ class VideoDetailController extends GetxController
           plPlayerController.cacheVideoQa = targetVideoQa;
         }
       }
+      // A default 8K preference is only safe after a matching macOS hardware
+      // decode probe. During probing (or on failure), start on the best
+      // eligible non-8K rendition rather than a black AV1 output.
+      if (!qualityEligibility(targetVideoQa).enabled) {
+        final fallback = highestEligibleNonEightKTrack(
+          tracks: videoList,
+          displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+          gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+          decodeCapabilities: _decodeCapabilities,
+        );
+        if (fallback != null) {
+          targetVideoQa = fallback.quality.code;
+          plPlayerController.cacheVideoQa = targetVideoQa;
+        }
+      }
       if (kDebugMode) {
         debugPrint(
           'Video quality selection: displayHdr='
@@ -1020,30 +1154,21 @@ class VideoDetailController extends GetxController
       }
       currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
 
-      /// 优先顺序 设置中指定解码格式 -> 当前可选的首个解码格式
-      final supportFormats = data.supportFormats!;
-
-      // 根据画质选编码格式
-      currentDecodeFormats = VideoUtils.selectCodec(
-        supportFormats
-            .firstWhere(
-              (e) => e.quality == targetVideoQa,
-              orElse: () => supportFormats.first,
-            )
-            .codecs!,
-        preferCodecs,
+      /// Select the initial URL through the same track transaction used by
+      /// the menu. An 8K quality can expose AV1 and HEVC at once: a positive
+      /// HEVC probe must not be followed by the legacy preference path
+      /// selecting the unavailable AV1 rendition.
+      final selectedVideo = findVideoByQa(
+        targetVideoQa,
+        setCodecs: true,
+        requireConfirmedEightKHardware: true,
       );
-
-      /// 取出符合当前画质的videoList
-      final videosList = videoList
-          .where((e) => e.quality.code == targetVideoQa)
-          .toList();
-
-      /// 取出符合当前解码格式的videoItem
-      firstVideo = videosList.firstWhere(
-        (e) => currentDecodeFormats.codes.any(e.codecs!.startsWith),
-        orElse: () => videosList.first,
-      );
+      if (selectedVideo == null) {
+        SmartDialog.showToast('当前画质资源不可用');
+        isQuerying = false;
+        return;
+      }
+      firstVideo = selectedVideo;
       _setVideoHeight();
 
       videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);

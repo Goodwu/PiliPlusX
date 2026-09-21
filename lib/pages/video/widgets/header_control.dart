@@ -906,20 +906,6 @@ class HeaderControlState extends State<HeaderControl>
     final VideoQuality? currentVideoQa = videoDetailCtr.currentVideoQa.value;
     if (currentVideoQa == null) return;
 
-    final List<FormatItem> videoFormat = videoInfo.supportFormats!;
-
-    /// 总质量分类
-    final int totalQaSam = videoFormat.length;
-
-    /// 可用的质量分类 ID
-    final List<VideoItem> video = videoInfo.dash!.video!;
-    final Set<int> idSet = {};
-    for (final VideoItem item in video) {
-      final int id = item.id!;
-      if (!idSet.contains(id)) {
-        idSet.add(id);
-      }
-    }
     showBottomSheet(
       (context, setState) {
         final theme = Theme.of(context);
@@ -954,31 +940,35 @@ class HeaderControlState extends State<HeaderControl>
                   ),
                 ),
                 Obx(() {
-                  final displaySupportsHdr =
-                      plPlayerController.hdrDisplaySupportsHdr.value;
+                  videoDetailCtr.videoQualityMenuRevision.value;
+                  final activeQuality = videoDetailCtr.currentVideoQa.value;
+                  if (activeQuality == null) {
+                    return const SliverToBoxAdapter();
+                  }
+                  final videoFormat = videoDetailCtr.currentDashQualityFormats;
                   return SliverList.builder(
-                    itemCount: totalQaSam,
+                    itemCount: videoFormat.length,
                     itemBuilder: (context, index) {
                       final item = videoFormat[index];
-                      final isCurr = currentVideoQa.code == item.quality;
-                      final isHdrQuality =
-                          item.quality == VideoQuality.dolbyVision.code ||
-                          item.quality == VideoQuality.hdr.code ||
-                          item.quality == VideoQuality.hdrVivid.code;
+                      final isCurr = activeQuality.code == item.quality;
+                      final eligibility = videoDetailCtr.qualityEligibility(
+                        item.quality!,
+                      );
+                      final enabled = eligibility.enabled;
                       return ListTile(
                         dense: true,
                         onTap: () async {
                           if (isCurr) {
                             return;
                           }
-                          Get.back();
                           final int quality = item.quality!;
+                          if (!await videoDetailCtr.changeVideoQuality(
+                            quality,
+                          )) {
+                            return;
+                          }
+                          Get.back();
                           final newQa = VideoQuality.fromCode(quality);
-                          videoDetailCtr
-                            ..plPlayerController.cacheVideoQa = newQa.code
-                            ..currentVideoQa.value = newQa
-                            ..updatePlayer();
-
                           SmartDialog.showToast("画质已变为：${newQa.desc}");
 
                           // update
@@ -991,18 +981,20 @@ class HeaderControlState extends State<HeaderControl>
                             );
                           }
                         },
-                        // 可能包含会员解锁画质
-                        // The API can return available qualities in a
-                        // different order from support_formats. Positional
-                        // slicing incorrectly greys out 1080P+ when the DASH
-                        // list is ordered high-to-low; use the actual IDs.
-                        enabled:
-                            idSet.contains(item.quality) &&
-                            (!isHdrQuality || displaySupportsHdr),
+                        // Do not use Material's disabled state: users need a
+                        // precise HDR/8K capability explanation on tap.
+                        enabled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                         ),
-                        title: Text(item.newDesc!),
+                        title: Text(
+                          item.newDesc!,
+                          style: enabled
+                              ? null
+                              : TextStyle(
+                                  color: theme.colorScheme.outline,
+                                ),
+                        ),
                         trailing: isCurr
                             ? Icon(
                                 Icons.done,

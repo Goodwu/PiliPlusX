@@ -1,5 +1,65 @@
 import Cocoa
+import Darwin
 import FlutterMacOS
+import VideoToolbox
+
+// Keep these declarations opaque: libavcodec is embedded by media-kit rather
+// than linked by the Runner target. The two public FFmpeg functions below let
+// us query the exact decoder binary that mpv will use at runtime.
+private struct FFmpegHardwareConfig {
+  let pixelFormat: Int32
+  let methods: Int32
+  let deviceType: Int32
+}
+
+private typealias FFmpegFindDecoder = @convention(c) (
+  UnsafePointer<CChar>
+) -> UnsafeRawPointer?
+private typealias FFmpegGetHardwareConfig = @convention(c) (
+  UnsafeRawPointer,
+  Int32
+) -> UnsafeRawPointer?
+
+private let ffmpegVideoToolboxDeviceType: Int32 = 6
+
+private func bundledFFmpegSupportsVideoToolboxDecoder(
+  named decoderName: String
+) -> Bool? {
+  guard
+    let frameworksPath = Bundle.main.privateFrameworksPath,
+    let handle = dlopen(
+      URL(fileURLWithPath: frameworksPath)
+        .appendingPathComponent("libavcodec.dylib")
+        .path,
+      RTLD_LAZY
+    ),
+    let findDecoderSymbol = dlsym(handle, "avcodec_find_decoder_by_name"),
+    let getHardwareConfigSymbol = dlsym(handle, "avcodec_get_hw_config")
+  else {
+    return nil
+  }
+  let findDecoder = unsafeBitCast(findDecoderSymbol, to: FFmpegFindDecoder.self)
+  let getHardwareConfig = unsafeBitCast(
+    getHardwareConfigSymbol,
+    to: FFmpegGetHardwareConfig.self
+  )
+  return decoderName.withCString { name in
+    guard let decoder = findDecoder(name) else {
+      return false
+    }
+    var index: Int32 = 0
+    while let configuration = getHardwareConfig(decoder, index) {
+      let hardwareConfig = configuration
+        .assumingMemoryBound(to: FFmpegHardwareConfig.self)
+        .pointee
+      if hardwareConfig.deviceType == ffmpegVideoToolboxDeviceType {
+        return true
+      }
+      index += 1
+    }
+    return false
+  }
+}
 
 private final class HdrDisplayEventHandler: NSObject, FlutterStreamHandler {
   private var eventSink: FlutterEventSink?
@@ -51,6 +111,71 @@ class MainFlutterWindow: NSWindow {
       binaryMessenger: flutterViewController.engine.binaryMessenger
     )
     channel.setMethodCallHandler { call, result in
+      if call.method == "probeVideoDecode" {
+        let arguments = call.arguments as? [String: Any]
+        let codec = arguments?["codec"] as? String ?? ""
+        let width = arguments?["width"] as? Int ?? 0
+        let height = arguments?["height"] as? Int ?? 0
+        guard width > 0, height > 0 else {
+          result(["codec": codec, "width": width, "height": height,
+                  "supported": false, "reason": "invalid-track-size"])
+          return
+        }
+        let normalized = codec.lowercased()
+        let codecType: CMVideoCodecType?
+        let ffmpegDecoderName: String?
+        if normalized.hasPrefix("av01") {
+          if #available(macOS 11.0, *) {
+            codecType = kCMVideoCodecType_AV1
+            ffmpegDecoderName = "av1"
+          } else {
+            codecType = nil
+            ffmpegDecoderName = nil
+          }
+        } else if normalized.hasPrefix("hvc1") || normalized.hasPrefix("hev1") {
+          codecType = kCMVideoCodecType_HEVC
+          ffmpegDecoderName = "hevc"
+        } else if normalized.hasPrefix("avc1") || normalized.hasPrefix("avc3") {
+          codecType = kCMVideoCodecType_H264
+          ffmpegDecoderName = "h264"
+        } else {
+          codecType = nil
+          ffmpegDecoderName = nil
+        }
+        guard let codecType, let ffmpegDecoderName else {
+          result(["codec": codec, "width": width, "height": height,
+                  "supported": false, "reason": "unsupported-codec"])
+          return
+        }
+        if #available(macOS 11.0, *) {
+          // A system codec-family answer alone is insufficient: the bundled
+          // FFmpeg may omit that codec's VideoToolbox hwaccel (for example,
+          // an AV1 stream). Check the same libavcodec binary used by mpv
+          // first, then ask the OS whether current hardware supports it.
+          guard let ffmpegSupportsDecoder = bundledFFmpegSupportsVideoToolboxDecoder(
+            named: ffmpegDecoderName
+          ) else {
+            result(["codec": codec, "width": width, "height": height,
+                    "supported": false,
+                    "reason": "bundled-hwdec-probe-unavailable"])
+            return
+          }
+          guard ffmpegSupportsDecoder else {
+            result(["codec": codec, "width": width, "height": height,
+                    "supported": false,
+                    "reason": "bundled-videotoolbox-decoder-unavailable"])
+            return
+          }
+          let supported = VTIsHardwareDecodeSupported(codecType)
+          result(["codec": codec, "width": width, "height": height,
+                  "supported": supported,
+                  "reason": supported ? "hardware-decode-supported" : "hardware-decode-unavailable"])
+        } else {
+          result(["codec": codec, "width": width, "height": height,
+                  "supported": false, "reason": "videotoolbox-probe-unavailable"])
+        }
+        return
+      }
       if call.method == "resetOutput" {
         result(true)
         return

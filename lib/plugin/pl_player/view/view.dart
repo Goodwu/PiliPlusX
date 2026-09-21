@@ -898,6 +898,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         () {
           final VideoQuality? currentVideoQa =
               videoDetailController.currentVideoQa.value;
+          // Read the response revision while Obx is building. Reading it only
+          // inside PopupMenuButton.itemBuilder would not subscribe the closed
+          // control to a same-qn P1 -> P2 response replacement.
+          videoDetailController.videoQualityMenuRevision.value;
           if (currentVideoQa == null) {
             return const SizedBox.shrink();
           }
@@ -905,33 +909,26 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           if (videoInfo.dash == null) {
             return const SizedBox.shrink();
           }
-          final videoFormat = videoInfo.supportFormats!;
-          final totalQaSam = videoFormat.length;
-          final availableQualityIds = videoInfo.dash!.video!
-              .map((i) => i.id)
-              .whereType<int>()
-              .toSet();
-          final displaySupportsHdr =
-              plPlayerController.hdrDisplaySupportsHdr.value;
           return PopupMenuButton<int>(
             tooltip: '画质',
             requestFocus: false,
             initialValue: currentVideoQa.code,
             color: Colors.black.withValues(alpha: 0.8),
             itemBuilder: (context) {
+              final videoFormat =
+                  videoDetailController.currentDashQualityFormats;
               return List.generate(
-                totalQaSam,
+                videoFormat.length,
                 (index) {
                   final item = videoFormat[index];
-                  final isHdrQuality =
-                      item.quality == VideoQuality.dolbyVision.code ||
-                      item.quality == VideoQuality.hdr.code ||
-                      item.quality == VideoQuality.hdrVivid.code;
-                  final enabled =
-                      availableQualityIds.contains(item.quality) &&
-                      (!isHdrQuality || displaySupportsHdr);
+                  final eligibility = videoDetailController.qualityEligibility(
+                    item.quality!,
+                  );
+                  final enabled = eligibility.enabled;
                   return PopupMenuItem<int>(
-                    enabled: enabled,
+                    // Keep disabled-looking options tappable so the shared
+                    // eligibility model can explain the actual reason.
+                    enabled: true,
                     height: 35,
                     padding: const EdgeInsets.only(left: 15, right: 10),
                     value: item.quality,
@@ -940,12 +937,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         return;
                       }
                       final int quality = item.quality!;
+                      if (!await videoDetailController.changeVideoQuality(
+                        quality,
+                      )) {
+                        return;
+                      }
                       final newQa = VideoQuality.fromCode(quality);
-                      videoDetailController
-                        ..plPlayerController.cacheVideoQa = newQa.code
-                        ..currentVideoQa.value = newQa
-                        ..updatePlayer();
-
                       SmartDialog.showToast("画质已变为：${newQa.desc}");
 
                       // update
@@ -2429,6 +2426,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     final videoInfo = videoDetailController.data;
     final ids = videoInfo.dash!.video!.map((i) => i.id!).toSet();
     final video = videoDetailController.findVideoByQa(ids.min);
+    if (video == null) {
+      SmartDialog.showToast('当前画质资源不可用');
+      return;
+    }
 
     VideoQuality qa = video.quality;
     String? url = video.baseUrl;
@@ -2469,6 +2470,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   value: () => qa.code,
                   onSelected: (value) {
                     final video = videoDetailController.findVideoByQa(value);
+                    if (video == null) return false;
                     url = video.baseUrl;
                     qa = video.quality;
                     return false;
