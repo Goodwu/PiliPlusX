@@ -51,6 +51,8 @@ jobs:
           cache: true
       - name: Use reproducible dependencies
         run: scripts/prepare_ci_dependencies.sh
+      - name: Resolve release dependencies before SDK patch
+        run: flutter pub get
       - name: Apply Android patch
         shell: pwsh
         run: lib/scripts/patch.ps1 android
