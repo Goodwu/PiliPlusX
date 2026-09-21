@@ -265,6 +265,19 @@ def main() -> None:
                 "disposeForRebuild barrier and no synchronous dispose bypass, "
                 f"found {len(dispose_barriers)} barrier(s)"
             )
+        # The pinned media-kit OHOS implementation carries output creation and
+        # teardown APIs, but not the macOS-only native-surface state getters.
+        # These predicates are only relevant to macOS recovery paths; make
+        # them unreachable in the isolated OHOS source without changing the
+        # shared production controller.
+        controller_text = controller_text.replace(
+            "_videoController?.nativeSurfaceActive == true", "false"
+        ).replace(
+            "_videoController?.nativeSurfaceActive != true", "true"
+        ).replace(
+            "_videoController?.nativeSurfaceCandidate == true", "false"
+        )
+        controller.write_text(controller_text, encoding="utf-8")
 
     # The isolated package name is lowercase. Rewrite both production and
     # checked-in regression-test imports so `flutter test` resolves the same
