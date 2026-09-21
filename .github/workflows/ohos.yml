@@ -31,8 +31,8 @@ jobs:
     name: Build OHOS arm64 unsigned HAP
     runs-on: ubuntu-latest
     env:
-      OHOS_WORKSPACE: ${{ runner.temp }}/PiliPlusX-ohos
-      PUB_CACHE: ${{ runner.temp }}/pub-cache-ohos
+      OHOS_WORKSPACE: /tmp/PiliPlusX-ohos
+      PUB_CACHE: /tmp/pub-cache-ohos
       PILIPLUSX_RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref || github.sha }}
     permissions:
