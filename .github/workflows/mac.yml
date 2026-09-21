@@ -28,7 +28,6 @@ jobs:
       PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
       PILIPLUSX_SKIP_POINTER_FILTER_PATCH: "1"
-      PILIPLUSX_SKIP_LEGACY_PATCHES: "1"
     steps:
       - name: Checkout code
         uses: actions/checkout@v7

@@ -124,14 +124,14 @@ $MouseCursorPatch = "lib/scripts/mouse_cursor.patch"
 
 $GeetestIOSPatch = "lib/scripts/geetest_ios.patch"
 
-if ($platform.ToLower() -eq "ios" -and $env:PILIPLUSX_SKIP_LEGACY_PATCHES -ne "1") {
+if ($platform.ToLower() -eq "ios") {
     Apply-RequiredPatch $BottomSheetIOSPiliPlusPatch
-    Apply-RequiredPatch $GeetestIOSPatch
-}
-
-if ($env:PILIPLUSX_SKIP_LEGACY_PATCHES -eq "1") {
-    Write-Host "Skipping legacy Flutter and application patch set for the pinned Flutter toolchain"
-    exit 0
+    if ($env:PILIPLUSX_SKIP_GEETEST_IOS_PATCH -ne "1") {
+        Apply-RequiredPatch $GeetestIOSPatch
+    }
+    else {
+        Write-Host "Skipping obsolete iOS Geetest application patch"
+    }
 }
 
 Set-Location $env:FLUTTER_ROOT
