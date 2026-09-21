@@ -266,7 +266,15 @@ def main() -> None:
                 f"found {len(dispose_barriers)} barrier(s)"
             )
 
-    dart_files = sorted((root / "lib").rglob("*.dart"))
+    # The isolated package name is lowercase. Rewrite both production and
+    # checked-in regression-test imports so `flutter test` resolves the same
+    # local package graph as `flutter build hap`.
+    dart_files = sorted(
+        path
+        for directory in (root / "lib", root / "test")
+        if directory.is_dir()
+        for path in directory.rglob("*.dart")
+    )
     changed = 0
     for path in dart_files:
         text = path.read_text(encoding="utf-8")
