@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' show min;
 import 'dart:ui';
 
@@ -50,6 +51,7 @@ import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/pages/video/video_quality_eligibility.dart';
 import 'package:PiliPlus/platform/platform_features.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
@@ -70,8 +72,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show Options;
-import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
-    show ExtendedNestedScrollViewState;
+import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'    show ExtendedNestedScrollViewState;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -428,6 +429,38 @@ class VideoDetailController extends GetxController
       code == VideoQuality.hdr.code ||
       code == VideoQuality.hdrVivid.code;
 
+  /// 开播前预测（需求 R1.2/A7）：按 DASH codec 与清晰度档构造
+  /// HdrSourceDescriptor，调 `HdrCapabilities.query` + `predict`
+  /// （与执行同一 planner）。可呈现（playable 且呈现为 HDR）才请求 HDR 档，
+  /// 否则由调用方回落 SDR 档。非 Android 平台维持既有选择逻辑。
+  Future<bool> _hdrTierPresentable(int quality) async {
+    if (!Platform.isAndroid) return true;
+    final track = _tracksForQuality(quality).firstOrNull;
+    final descriptor = HdrOutputSelector.descriptorFromDash(
+      quality: quality,
+      codec: track?.codecs,
+    );
+    if (descriptor == null) return true;
+    final capabilities = await HdrOutputSelector.queryCapabilities(
+      player: plPlayerController.videoPlayerController,
+    );
+    final prediction = HdrOutputSelector.predict(
+      descriptor: descriptor,
+      capabilities: capabilities,
+    );
+    final presentable = HdrOutputSelector.isHdrPresentable(prediction);
+    if (kDebugMode) {
+      debugPrint(
+        'HDR predict: quality=$quality, codec=${track?.codecs}, '
+        'playable=${prediction?.playable}, '
+        'presentation=${prediction?.presentation.name}, '
+        'selected=${prediction?.selected.strategy.name}, '
+        'presentable=$presentable',
+      );
+    }
+    return presentable;
+  }
+
   List<VideoItem> _tracksForQuality(int quality) =>
       data.dash?.video
           ?.where((track) => track.quality.code == quality)
@@ -485,6 +518,11 @@ class VideoDetailController extends GetxController
     }
     if (!eligibility.enabled) {
       SmartDialog.showToast(eligibility.message);
+      return false;
+    }
+    // 开播前预测（A7）：本机无法呈现为 HDR 的档位不请求，回落 SDR 档。
+    if (!await _hdrTierPresentable(quality)) {
+      SmartDialog.showToast('当前设备无法以 HDR 呈现该档位，请选择 SDR 画质');
       return false;
     }
     final selected = findVideoByQa(
@@ -1142,6 +1180,21 @@ class VideoDetailController extends GetxController
         if (fallback != null) {
           targetVideoQa = fallback.quality.code;
           plPlayerController.cacheVideoQa = targetVideoQa;
+        }
+      }
+      // 开播前预测（R1.2/A7）：「片源与显示能力是否一致」由 predict 决定。
+      // 预测不可呈现（不可播或仅 tone-map）的 HDR 档回落到最高 SDR 档。
+      if (_isHdrQuality(targetVideoQa) &&
+          !await _hdrTierPresentable(targetVideoQa)) {
+        final sdrVideos =
+            videoList.where((item) => !_isHdrQuality(item.id)).toList();
+        if (sdrVideos.isNotEmpty) {
+          final sdrTarget = sdrVideos
+              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+              .quality
+              .code;
+          targetVideoQa = sdrTarget;
+          plPlayerController.cacheVideoQa = sdrTarget;
         }
       }
       if (kDebugMode) {

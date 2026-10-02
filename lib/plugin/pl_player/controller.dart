@@ -34,7 +34,7 @@ import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen_request_queue.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
-import 'package:PiliPlus/plugin/pl_player/hdr_android.dart';
+import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
 import 'package:PiliPlus/plugin/pl_player/hdr_platform.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
@@ -66,7 +66,7 @@ import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
+import 'package:media_kit_video/media_kit_video.dart' hide HdrCapabilities;
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path/path.dart' as path;
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -79,7 +79,7 @@ class _InitializedVideoPlayer {
   const _InitializedVideoPlayer(this.player, this.video);
 
   final Player player;
-  final VideoController video;
+  final VideoController? video;
 }
 
 class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
@@ -192,7 +192,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Player? get videoPlayerController => _videoPlayerController;
 
   /// [videoController] instance of Player
-  VideoController? get videoController => _videoController;
+  ///
+  /// Android：HdrVideoSession 会话在拓扑切换时会替换控制器实例（R2.1），
+  /// 这里返回会话当前控制器；UI 通过 [hdrSurfaceGeneration] 感知替换。
+  VideoController? get videoController =>
+      _hdrVideoSession?.controller.value ?? _videoController;
 
   bool isMuted = false;
 
@@ -392,6 +396,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   late int cacheAudioQa = Pref.defaultAudioQa;
   bool enableHeart = true;
   late final String? hwdec = Pref.enableHA ? Pref.hardwareDecoding : null;
+  // Android：media-kit HDR 会话（R2）统一持有输出拓扑与数据空间编排；
+  // App 侧只保留选档预测、报告展示与事件消费（A8）。
+  HdrVideoSession? _hdrVideoSession;
+  StreamSubscription<HdrOutputEvent>? _hdrVideoEventSub;
+  int? _hdrQualityHint;
   HdrCapabilities _hdrCapabilities = const HdrCapabilities(
     unsupportedReason: 'not-probed',
   );
@@ -399,18 +408,24 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     kind: HdrSourceKind.unknown,
   );
   String? _hdrCodecHint;
-  String? _hdrProbedCodec;
   int _hdrSourceGeneration = 0;
   HdrPlaybackDecision _hdrDecision = const HdrPlaybackDecision(
     output: HdrOutputMode.sdr,
-    vo: 'gpu-next',
-    hwdec: 'auto',
     surface: 'texture',
     reason: 'source-not-detected',
   );
   final hdrSurfaceGeneration = 0.obs;
   final hdrDisplaySupportsHdr = false.obs;
   final hdrOutputError = RxnString();
+
+  /// 播放信息展示：会话 report.actual 的路由文案（「杜比视界 P8.4 · HLG 直出」）。
+  final hdrRouteInfo = RxnString();
+
+  /// 播放信息展示：降级提示（Degraded 事件的 App 侧最小处理）。
+  final hdrDegradeNotice = RxnString();
+
+  HdrVideoSession? get hdrVideoSession => _hdrVideoSession;
+
   StreamSubscription<Object?>? _hdrDisplaySubscription;
   void Function(bool displayHdr)? onHdrDisplayChanged;
   bool _hdrOutputRebuildInFlight = false;
@@ -433,10 +448,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         openGate: _playerSourceOperationGate,
         outputPublicationGate: _videoOutputPublicationGate,
       );
-  bool? _queuedHdrOutputRebuildHcpp;
-  bool? _queuedHdrOutputRebuildSurfaceView;
   bool? _queuedHdrOutputRebuildNativeSurface;
-  String? _lastHdrDiagnostic;
   String? _lastHdrVideoParamsDiagnostic;
   String? _lastHdrParameterReadback;
   String? _lastHdrNativeOutputAttempt;
@@ -785,9 +797,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       sourceGeneration = ++_hdrSourceGeneration;
       _processing = true;
       _hdrCodecHint = initialVideoCodec;
-      _hdrProbedCodec = null;
-      _queuedHdrOutputRebuildHcpp = null;
-      _queuedHdrOutputRebuildSurfaceView = null;
+      _hdrQualityHint = initialVideoQuality;
       // A source boundary needs a fresh native-output decision even when the
       // metadata tuple happens to match the preceding source.
       _lastHdrNativeOutputAttempt = null;
@@ -798,8 +808,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       );
       _hdrDecision = const HdrPlaybackDecision(
         output: HdrOutputMode.sdr,
-        vo: 'gpu-next',
-        hwdec: 'auto',
         surface: 'texture',
         reason: 'source-not-detected',
       );
@@ -965,11 +973,45 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
     assert(_videoController == null);
 
+    if (Platform.isAndroid) {
+      // Android：HDR 输出编排整体交给 media-kit HdrVideoSession（R2）。
+      // App 侧不探测设备、不选择输出拓扑；只保留能力快照（选档与
+      // 展示用）和事件消费。
+      final session = HdrVideoSession(player, policy: HdrOutputSelector.policy);
+      _hdrVideoSession = session;
+      session.controller.addListener(() {
+        if (!_fsDisposed) {
+          hdrSurfaceGeneration.value++;
+        }
+      });
+      _hdrVideoEventSub = session.events.listen(_onHdrOutputEvent);
+      // A new source can start while the capability query awaits; the stale
+      // path disposes the session and the local Player together.
+      final capabilities = await HdrOutputSelector.queryCapabilities(
+        player: player,
+      );
+      if (sourceGeneration != _hdrSourceGeneration ||
+          _playerCount == 0 ||
+          _fsDisposed) {
+        await _disposePlayerAfterVideoOutput(player, null);
+        return null;
+      }
+      final displayHdr = capabilities?.displayHdrTypes?.isNotEmpty ?? false;
+      hdrDisplaySupportsHdr.value = displayHdr;
+      debugPrint(
+        'HDR capabilities: displayTypes=${capabilities?.displayHdrTypes}, '
+        'p5Pipeline=${capabilities?.p5PipelineAvailable}, '
+        'bridge=${capabilities?.dataSpaceBridgeLoaded}, '
+        'ext=${capabilities?.dataSpaceExt}',
+      );
+      _startListeners(player, sourceGeneration: sourceGeneration);
+      return _InitializedVideoPlayer(player, _videoController);
+    }
+
     // A new source can start while the platform capability probe awaits.
     // Return the uncommitted local Player to its caller for disposal, but do
     // not let old codec/display facts overwrite the replacement source.
-    final codecHint = _hdrCodecHint;
-    final capabilities = await HdrPlatform.probe(codec: codecHint);
+    final capabilities = await HdrPlatform.probe();
     if (sourceGeneration != _hdrSourceGeneration ||
         _playerCount == 0 ||
         _fsDisposed) {
@@ -978,36 +1020,24 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
     _hdrCapabilities = capabilities;
     hdrDisplaySupportsHdr.value = _hdrCapabilities.displayHdr;
-    _hdrProbedCodec = codecHint;
     _hdrDecision = HdrDecision.choose(
       mode: Pref.hdrMode,
       source: _hdrSource,
       capabilities: _hdrCapabilities,
-      hwdec: hwdec ?? 'auto',
       allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
     );
-    if (Platform.isAndroid && !_hdrDecision.useHcpp) {
-      await HdrAndroid.setWindowHdrMode(hdr: false);
-      if (sourceGeneration != _hdrSourceGeneration ||
-          _playerCount == 0 ||
-          _fsDisposed) {
-        await _disposePlayerAfterVideoOutput(player, null);
-        return null;
-      }
-    }
     debugPrint(
       'HDR capabilities: platform=${_hdrCapabilities.platform}, '
       'display=${_hdrCapabilities.displayHdr}, '
       'headroom=${_hdrCapabilities.headroom}, '
       'potentialHeadroom=${_hdrCapabilities.potentialHeadroom}, '
       'decoder=${_hdrCapabilities.decoderHdr}, '
-      'vulkan=${_hdrCapabilities.vulkan}, '
-      'hcpp=${_hdrCapabilities.canHcpp}, '
       'reason=${_hdrCapabilities.unsupportedReason}',
     );
-    // The device capability alone must not force HCPP for SDR or an unknown
-    // source. The decision also includes the source metadata and user mode.
-    final useHcpp = _hdrDecision.useHcpp;
+    // The device capability alone must not force a native surface for SDR or
+    // an unknown source. The decision also includes the source metadata and
+    // user mode.
+    final useNativeSurface = _hdrDecision.useNativeSurface;
 
     // Keep output creation local until the source ownership is checked again.
     // A replacement can cross the capability-probe boundary while this native
@@ -1018,8 +1048,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       nextVideoController = await VideoController.create(
         player,
         configuration: _videoConfiguration(
-          hcpp: useHcpp,
-          nativeSurface: _hdrDecision.useNativeSurface,
+          nativeSurface: useNativeSurface,
         ),
       );
     } on Object catch (error) {
@@ -1031,32 +1060,28 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         await _disposePlayerAfterVideoOutput(player, null);
         return null;
       }
-      if (!useHcpp) {
+      if (!useNativeSurface) {
         _hdrCapabilities = _hdrCapabilities.copyWith(
           unsupportedReason: 'surface-init-failed:${error.runtimeType}',
         );
         nextVideoController = await VideoController.create(
           player,
-          configuration: _videoConfiguration(hcpp: false, texture: true),
+          configuration: _videoConfiguration(texture: true),
         );
       } else {
         _hdrCapabilities = _hdrCapabilities.copyWith(
-          hcpp: false,
-          unsupportedReason: 'hcpp-init-failed:${error.runtimeType}',
+          unsupportedReason: 'surface-init-failed:${error.runtimeType}',
         );
         _refreshHdrDecision();
         if (kDebugMode) {
           debugPrint(
-            'HCPP initialization failed; falling back to SurfaceView: $error',
+            'Native surface initialization failed; falling back to Texture: $error',
           );
         }
         try {
           nextVideoController = await VideoController.create(
             player,
-            configuration: _videoConfiguration(
-              hcpp: false,
-              surfaceView: true,
-            ),
+            configuration: _videoConfiguration(texture: true),
           );
         } catch (surfaceError) {
           if (sourceGeneration != _hdrSourceGeneration ||
@@ -1066,12 +1091,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             return null;
           }
           _hdrCapabilities = _hdrCapabilities.copyWith(
-            unsupportedReason:
-                'surface-init-failed:${surfaceError.runtimeType}',
+            unsupportedReason: 'surface-init-failed:${surfaceError.runtimeType}',
           );
           nextVideoController = await VideoController.create(
             player,
-            configuration: _videoConfiguration(hcpp: false, texture: true),
+            configuration: _videoConfiguration(texture: true),
           );
         }
       }
@@ -1095,44 +1119,44 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     return _InitializedVideoPlayer(player, nextVideoController);
   }
 
+  /// 非 Android 平台的控制器配置。Android 不再走此路径：输出拓扑与
+  /// 解码器选择由 media-kit HdrVideoSession 会话决定（R2），App 不做选择。
   VideoControllerConfiguration _videoConfiguration({
-    required bool hcpp,
     bool texture = false,
-    bool surfaceView = false,
     bool nativeSurface = false,
-  }) => VideoControllerConfiguration(
-    vo: Platform.isAndroid
-        ? hcpp
-              ? 'gpu'
-              : surfaceView
-              ? 'mediacodec_embed'
-              : null
-        : Platform.isMacOS && nativeSurface
-        ? 'libmpv'
-        : null,
-    enableHardwareAcceleration: hwdec != null,
-    androidAttachSurfaceAfterVideoParameters: false,
-    hwdec: hwdec,
-    enableAndroidSurfaceProducer: !hcpp && !texture,
-    usePlatformView: hcpp,
-    // Keep ordinary OHOS SDR playback on the verified Flutter Texture path.
-    // HCPP/native-surface is selected only when the HDR decision explicitly
-    // requests that output topology.
+  }) {
     // OHOS native HDR keeps the XComponent as an independent compositor
-    // layer even when the Android-specific HCPP capability is false.
-    useHCPP: hcpp || (Platform.operatingSystem == 'ohos' && nativeSurface),
-    useNativeSurface:
-        !texture &&
-        Pref.hdrMode == HdrMode.auto &&
-        (nativeSurface ||
-            Platform.isIOS ||
-            Platform.isMacOS ||
-            (Platform.operatingSystem == 'ohos' && hcpp)),
-  );
+    // layer even though the Android-only HCPP capability is gone.
+    final ohosNativeSurface =
+        Platform.operatingSystem == 'ohos' && nativeSurface;
+    return VideoControllerConfiguration(
+      vo: Platform.isMacOS && nativeSurface ? 'libmpv' : null,
+      enableHardwareAcceleration: hwdec != null,
+      hwdec: hwdec,
+      android: AndroidVideoOptions(
+        // Keep ordinary OHOS SDR playback on the verified Flutter Texture
+        // path. A native surface is selected only when the HDR decision
+        // explicitly requests that output topology.
+        usePlatformView: false,
+        useHCPP: ohosNativeSurface,
+        enableSurfaceProducer: !ohosNativeSurface && !texture,
+        attachSurfaceAfterVideoParameters: false,
+      ),
+      // The OHOS controller also reads this Darwin field for its
+      // native-surface candidate, so the HDR topology condition must stay
+      // platform-wide.
+      darwin: DarwinVideoOptions(
+        useNativeSurface:
+            !texture &&
+            Pref.hdrMode == HdrMode.auto &&
+            (nativeSurface || Platform.isIOS || Platform.isMacOS),
+      ),
+    );
+  }
 
+  /// 非 Android 平台的输出重建（macOS 原生 surface / OHOS XComponent）。
+  /// Android 不再走此路径：会话 API 在内部完成复核重建与降级（R2.3/R3.1）。
   Future<void> _rebuildVideoOutput({
-    required bool hcpp,
-    bool surfaceView = false,
     bool nativeSurface = false,
   }) async {
     final player = _videoPlayerController;
@@ -1143,7 +1167,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (kDebugMode && Platform.operatingSystem == 'ohos') {
       debugPrint(
         '[OhosOutputTrace] rebuild-start transaction=$transactionGeneration '
-        'hcpp=$hcpp surfaceView=$surfaceView nativeSurface=$nativeSurface '
+        'nativeSurface=$nativeSurface '
         'old=${old?.hashCode} sourceGeneration=$sourceGeneration '
         'hdrSurfaceGeneration=${hdrSurfaceGeneration.value}',
       );
@@ -1182,7 +1206,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       );
     }
 
-    final configureNativeColorSpace = hcpp && _hdrSource.hasNativeColorMetadata;
     if (old != null) {
       try {
         final platform = await old.platform.future;
@@ -1221,18 +1244,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       );
     }
     _lastHdrNativeOutputAttempt = null;
-    if (Platform.isAndroid && !hcpp) {
-      await HdrAndroid.setWindowHdrMode(hdr: false);
-      if (!isCurrent()) return;
-    }
     try {
       final nextController = await VideoController.create(
         player,
-        configuration: _videoConfiguration(
-          hcpp: hcpp,
-          surfaceView: surfaceView,
-          nativeSurface: nativeSurface,
-        ),
+        configuration: _videoConfiguration(nativeSurface: nativeSurface),
       );
       if (!await publishOutputIfCurrent(nextController)) return;
       if (kDebugMode && Platform.operatingSystem == 'ohos') {
@@ -1242,7 +1257,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           'hdrSurfaceGeneration=${hdrSurfaceGeneration.value}',
         );
       }
-      if (configureNativeColorSpace) {
+      if (nativeSurface && _hdrSource.hasNativeColorMetadata) {
         final applied = await _setHdrColorSpace(
           player,
           sourceGeneration: sourceGeneration,
@@ -1253,11 +1268,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             nativeOutput: false,
             nativeOutputCapable: false,
             nativeOutputActive: false,
-            hcpp: false,
             unsupportedReason: 'hdr-dataspace-after-rebuild-failed',
           );
           _refreshHdrDecision();
-          _requestHdrOutputRebuild(hcpp: false, surfaceView: true);
+          _requestHdrOutputRebuild(nativeSurface: false);
           return;
         }
         _hdrCapabilities = _hdrCapabilities.copyWith(
@@ -1278,32 +1292,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     } catch (error) {
       if (!isCurrent()) return;
       Object failure = error;
-      if (hcpp) {
-        _hdrCapabilities = _hdrCapabilities.copyWith(
-          hcpp: false,
-          unsupportedReason: 'hcpp-rebuild-failed:${error.runtimeType}',
-        );
-        _refreshHdrDecision();
-        try {
-          final fallbackController = await VideoController.create(
-            player,
-            configuration: _videoConfiguration(
-              hcpp: false,
-              surfaceView: true,
-            ),
-          );
-          if (!await publishOutputIfCurrent(fallbackController)) return;
-          if (Platform.isAndroid) {
-            await HdrAndroid.setWindowHdrMode(hdr: false);
-            if (!isCurrent()) return;
-          }
-          debugPrint('HDR output fallback: HCPP -> SurfaceView');
-          return;
-        } catch (surfaceError) {
-          failure = surfaceError;
-          if (!isCurrent()) return;
-        }
-      }
       if (!isCurrent()) return;
       _hdrCapabilities = _hdrCapabilities.copyWith(
         unsupportedReason: 'surface-rebuild-failed:${failure.runtimeType}',
@@ -1311,65 +1299,42 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       try {
         final fallbackController = await VideoController.create(
           player,
-          configuration: _videoConfiguration(hcpp: false, texture: true),
+          configuration: _videoConfiguration(texture: true),
         );
         if (!await publishOutputIfCurrent(fallbackController)) return;
-        debugPrint('HDR output fallback: SurfaceView -> Texture');
+        debugPrint('HDR output fallback: native surface -> Texture');
         return;
       } catch (textureError) {
         failure = textureError;
       }
       if (!isCurrent()) return;
       _hdrCapabilities = _hdrCapabilities.copyWith(
-        hcpp: false,
         unsupportedReason: 'output-rebuild-failed:${failure.runtimeType}',
       );
       _refreshHdrDecision();
-      if (Platform.isAndroid) {
-        await HdrAndroid.setWindowHdrMode(hdr: false);
-        if (!isCurrent()) return;
-      }
       hdrOutputError.value = 'video-output-rebuild-failed';
       debugPrint('HDR output rebuild failed: $failure');
     }
   }
 
-  void _requestHdrOutputRebuild({
-    required bool hcpp,
-    bool surfaceView = false,
-    bool? nativeSurface,
-  }) {
+  void _requestHdrOutputRebuild({bool? nativeSurface}) {
     final requestedNativeSurface =
         nativeSurface ?? _hdrDecision.useNativeSurface;
     if (_hdrOutputRebuildInFlight) {
-      _queuedHdrOutputRebuildHcpp = hcpp;
-      _queuedHdrOutputRebuildSurfaceView = surfaceView;
       _queuedHdrOutputRebuildNativeSurface = requestedNativeSurface;
       return;
     }
     _hdrOutputRebuildInFlight = true;
     unawaited(
       _rebuildVideoOutput(
-        hcpp: hcpp,
-        surfaceView: surfaceView,
         nativeSurface: requestedNativeSurface,
       ).whenComplete(
         () {
           _hdrOutputRebuildInFlight = false;
-          final queued = _queuedHdrOutputRebuildHcpp;
-          final queuedSurfaceView = _queuedHdrOutputRebuildSurfaceView ?? false;
           final queuedNativeSurface =
               _queuedHdrOutputRebuildNativeSurface ?? false;
-          _queuedHdrOutputRebuildHcpp = null;
-          _queuedHdrOutputRebuildSurfaceView = null;
           _queuedHdrOutputRebuildNativeSurface = null;
-          if (queued != null) {
-            _requestHdrOutputRebuild(
-              hcpp: queued,
-              surfaceView: queuedSurfaceView,
-              nativeSurface: queuedNativeSurface,
-            );
-          }
+          _requestHdrOutputRebuild(nativeSurface: queuedNativeSurface);
         },
       ),
     );
@@ -1409,42 +1374,27 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       mode: Pref.hdrMode,
       source: _hdrSource,
       capabilities: _hdrCapabilities,
-      hwdec: hwdec ?? 'auto',
       allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
     );
   }
 
-  Future<void> _refreshHdrCapabilitiesForCodec(String codec) async {
-    if (!Platform.isAndroid || codec == _hdrProbedCodec) return;
-    final sourceGeneration = _hdrSourceGeneration;
-    final player = _videoPlayerController;
-    final previousDecision = _hdrDecision;
-    final capabilities = await HdrPlatform.probe(codec: codec);
-    if (sourceGeneration != _hdrSourceGeneration ||
-        !identical(player, _videoPlayerController) ||
-        _playerCount == 0 ||
-        _fsDisposed) {
-      return;
-    }
-    _hdrProbedCodec = codec;
-    _hdrCapabilities = capabilities;
-    _refreshHdrDecision();
-    debugPrint(
-      'HDR capabilities refreshed for codec=$codec: '
-      'decoder=${capabilities.decoderHdr}, '
-      'profiles=${capabilities.decoderProfiles.join(",")}, '
-      'reason=${capabilities.unsupportedReason}',
-    );
-    if (_hdrOutputSignature(previousDecision) !=
-            _hdrOutputSignature(_hdrDecision) &&
-        _videoController != null) {
-      _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
-    }
-  }
-
   Future<void> refreshHdrDisplayCapabilities() async {
     final refreshGeneration = ++_hdrDisplayRefreshGeneration;
-    final capabilities = await HdrPlatform.probe(codec: _hdrCodecHint);
+    if (Platform.isAndroid) {
+      // Android：能力查询走 media-kit R1 快照（无 Player 时经插件通道），
+      // 不做设备探测；显示 HDR 能力变化由会话 CapabilityChanged 事件驱动。
+      final capabilities = await HdrOutputSelector.queryCapabilities(
+        player: _videoPlayerController,
+      );
+      if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
+      final displayHdr = capabilities?.displayHdrTypes?.isNotEmpty ?? false;
+      if (displayHdr != hdrDisplaySupportsHdr.value) {
+        hdrDisplaySupportsHdr.value = displayHdr;
+        onHdrDisplayChanged?.call(displayHdr);
+      }
+      return;
+    }
+    final capabilities = await HdrPlatform.probe();
     if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
     final displayHdrFlagChanged =
         capabilities.displayHdr != _hdrCapabilities.displayHdr;
@@ -1516,6 +1466,46 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     await _applyHdrOutputParameters(player);
   }
 
+  /// Android 会话事件消费（R3/R4）：事件只用于报告与提示，换源策略由
+  /// App 后续决策；这里做最小实现——统计日志、路由文案、降级提示。
+  void _onHdrOutputEvent(HdrOutputEvent event) {
+    if (_fsDisposed) return;
+    switch (event) {
+      case HdrRouteAppliedEvent(:final report):
+        // dvProfile 统计：每次播放一行 key=value，供默认顺序与样片优先级决策。
+        debugPrint(
+          HdrOutputSelector.dvProfileStatLine(
+            report,
+            quality: _hdrQualityHint,
+            codec: _hdrCodecHint,
+          ),
+        );
+        hdrRouteInfo.value = HdrOutputSelector.routeLabel(report);
+        hdrDegradeNotice.value = null;
+      case final HdrDegradedEvent degraded:
+        debugPrint(
+          'HDR degrade event: reason=${degraded.reason.name}, '
+          'diagnostic=${degraded.diagnostic}',
+        );
+        // 最小处理：播放信息提示「已降级 tone-map」。是否换源由 App 后续决策。
+        hdrDegradeNotice.value = '已降级 tone-map';
+      case final HdrCapabilityChangedEvent changed:
+        final displayHdr =
+            changed.capabilities.displayHdrTypes?.isNotEmpty ?? false;
+        if (displayHdr != hdrDisplaySupportsHdr.value) {
+          hdrDisplaySupportsHdr.value = displayHdr;
+          onHdrDisplayChanged?.call(displayHdr);
+        }
+      case final HdrErrorEvent error:
+        debugPrint(
+          'HDR error event: reason=${error.reason?.name}, '
+          'diagnostic=${error.diagnostic}',
+        );
+      case HdrReclassifiedEvent():
+        break;
+    }
+  }
+
   Future<bool> _setHdrColorSpace(
     Player player, {
     int? sourceGeneration,
@@ -1547,27 +1537,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         identical(player, _videoPlayerController) &&
         surfaceGeneration == hdrSurfaceGeneration.value;
     final source = _hdrSource;
-    if (!(Platform.isAndroid ||
-            Platform.isIOS ||
+    // Android 的 dataspace 应用已整体移交 media-kit 会话（R2.4）；
+    // 此处只保留 iOS/macOS/OHOS 的原生输出配置。
+    if (!(Platform.isIOS ||
             Platform.isMacOS ||
             Platform.operatingSystem == 'ohos') ||
         !source.hasNativeColorMetadata ||
         !isCurrent()) {
       return false;
-    }
-    if (Platform.isAndroid) {
-      if (!await HdrAndroid.setWindowHdrMode(hdr: true)) {
-        return false;
-      }
-      if (!isCurrent()) return false;
-      final handle = await player.handle;
-      if (!isCurrent()) return false;
-      final applied = await HdrAndroid.setColorSpace(
-        handle: handle,
-        transfer: source.transfer,
-      );
-      if (!applied) return false;
-      if (!isCurrent()) return false;
     }
     final handle = await player.handle;
     if (!isCurrent()) return false;
@@ -1961,24 +1938,37 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         'play=false seekTo=$seekTo source=${video.length > 120 ? '${video.substring(0, 120)}...' : video}',
       );
     }
+    final media = Media(
+      video,
+      start: seekTo,
+      httpHeaders: {
+        'User-Agent': BrowserUa.pc,
+        'Referer': HttpString.baseUrl,
+      },
+      extras: extras.isEmpty ? null : extras,
+    );
     final opened = await _playerLifecycle.openCurrent(
       player: currentPlayer,
       isCurrent: () =>
           sourceGeneration == _hdrSourceGeneration &&
           _playerCount > 0 &&
           identical(currentPlayer, _videoPlayerController),
-      open: (player) => player.open(
-        Media(
-          video,
-          start: seekTo,
-          httpHeaders: {
-            'User-Agent': BrowserUa.pc,
-            'Referer': HttpString.baseUrl,
-          },
-          extras: extras.isEmpty ? null : extras,
-        ),
-        play: false,
-      ),
+      open: (player) {
+        if (_hdrVideoSession != null) {
+          // Android：开播走会话 open 并传 hint（DASH codec/清晰度档 →
+          // HdrSourceDescriptor，R2.3）；选档换清晰度/换源同样到达这里。
+          // 会话内部完成复核重建与沿候选列表降级。
+          return _hdrVideoSession!.open(
+            media,
+            hint: HdrOutputSelector.descriptorFromDash(
+              quality: _hdrQualityHint,
+              codec: _hdrCodecHint,
+            ),
+            play: false,
+          );
+        }
+        return player.open(media, play: false);
+      },
       rebindListeners: (player) {
         _removeListeners();
         _startListeners(player, sourceGeneration: sourceGeneration);
@@ -2004,18 +1994,33 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           'buffering=${ctr.state.buffering} source=${ctr.current.last.uri}',
         );
       }
-      return ctr.open(
-        ctr.current.last.copyWith(start: ctr.state.position),
-        play: true,
-      );
+      final media = ctr.current.last.copyWith(start: ctr.state.position);
+      if (_hdrVideoSession != null) {
+        // Android：换源/重开走会话 open（会话内部处理复核重建，R2.3）。
+        return _hdrVideoSession!.open(
+          media,
+          hint: HdrOutputSelector.descriptorFromDash(
+            quality: _hdrQualityHint,
+            codec: _hdrCodecHint,
+          ),
+          play: true,
+        );
+      }
+      return ctr.open(media, play: true);
     }
     return null;
   }
 
   void retryVideoOutput() {
+    if (_hdrVideoSession != null) {
+      // Android：会话内建复核重建与候选降级（R2.3/R3.1），无 App 侧
+      // 输出重建入口；清掉遗留错误态即可。
+      hdrOutputError.value = null;
+      return;
+    }
     if (_videoController == null) {
       hdrOutputError.value = null;
-      _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
+      _requestHdrOutputRebuild();
       return;
     }
     if (kDebugMode) {
@@ -2151,15 +2156,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                 'Video track codec=$codec, id=${track.id}, title=${track.title}',
               );
             }
-            if (Platform.isAndroid && codec != _hdrProbedCodec) {
-              unawaited(_refreshHdrCapabilitiesForCodec(codec));
-            }
             break;
           }
         }
       }),
       stream.videoParams.listen((params) {
         if (sourceGeneration != _hdrSourceGeneration) return;
+        // Android：源复核、路由重建、dataspace 与报告全部由 HdrVideoSession
+        // 会话编排（R2.3/R3/R4），App 不再做拓扑或输出决策。
+        if (Platform.isAndroid) return;
         if (kDebugMode) {
           final diagnostic =
               'HDR videoParams: generation=$sourceGeneration, '
@@ -2217,29 +2222,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
               'nativeCandidate=$ohosNativeCandidate',
             );
           }
-          _requestHdrOutputRebuild(hcpp: _hdrDecision.useHcpp);
+          _requestHdrOutputRebuild();
         }
         unawaited(
           _applyHdrOutputParametersIfCurrent(player, sourceGeneration),
         );
-        final diagnostic =
-            'HDR decision: source=${_hdrSource.kind.name}, '
-            'primaries=${_hdrSource.primaries.name}, '
-            'transfer=${_hdrSource.transfer.name}, '
-            'matrix=${_hdrSource.matrix.name}, '
-            'dvProfile=${_hdrSource.observed('dolbyVisionProfile') ? (_hdrSource.dolbyVisionProfile ?? 'none') : 'unknown'}, '
-            'rpu=${_hdrSource.observed('rpuPresent') ? _hdrSource.rpuPresent : 'unknown'}, '
-            'el=${_hdrSource.observed('enhancementLayerPresent') ? _hdrSource.enhancementLayerPresent : 'unknown'}, '
-            'dvEnhancement=${_hdrSource.observed('dvEnhancement') ? _hdrSource.dvEnhancement.name : 'unknown'}, '
-            'dynamicMetadata=${_hdrSource.observed('dynamicMetadataPresent') ? _hdrSource.dynamicMetadataPresent : 'unknown'}, '
-            'output=${_hdrDecision.output.name}, '
-            'surface=${_hdrDecision.surface}, '
-            'vo=${_hdrDecision.vo}, hwdec=${_hdrDecision.hwdec}, '
-            'reason=${_hdrDecision.reason}';
-        if (_lastHdrDiagnostic != diagnostic) {
-          _lastHdrDiagnostic = diagnostic;
-          debugPrint(diagnostic);
-        }
         final nativeOutputAttempt = [
           _hdrSource.kind.name,
           _hdrSource.transfer.name,
@@ -2247,9 +2234,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _hdrSource.matrix.name,
           hdrSurfaceGeneration.value,
         ].join(':');
-        if ((_hdrCapabilities.canHcpp ||
-                darwinNativeCandidate ||
-                ohosNativeCandidate) &&
+        if ((darwinNativeCandidate || ohosNativeCandidate) &&
             _hdrSource.hasNativeColorMetadata &&
             (!outputTopologyChanged || darwinNativeCandidate) &&
             !_hdrOutputRebuildInFlight &&
@@ -2274,7 +2259,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                       mode: Pref.hdrMode,
                       source: _hdrSource,
                       capabilities: _hdrCapabilities,
-                      hwdec: hwdec ?? 'auto',
                       allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
                     );
                     debugPrint(
@@ -2285,22 +2269,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                       'nativeOutputActive=${_hdrCapabilities.nativeOutputActive}',
                     );
                     unawaited(_applyHdrOutputParameters(player));
-                  } else if (_hdrDecision.useHcpp) {
-                    _hdrCapabilities = _hdrCapabilities.copyWith(
-                      hcpp: false,
-                      unsupportedReason: 'hcpp-dataspace-failed',
-                    );
-                    _hdrDecision = HdrDecision.choose(
-                      mode: Pref.hdrMode,
-                      source: _hdrSource,
-                      capabilities: _hdrCapabilities,
-                      hwdec: hwdec ?? 'auto',
-                      allowDolbyVisionNative: _allowDiagnosticDolbyVisionNative,
-                    );
-                    _requestHdrOutputRebuild(
-                      hcpp: false,
-                      surfaceView: true,
-                    );
                   }
                   debugPrint(
                     'HDR dataspace ${applied ? 'applied' : 'fallback'}: '
@@ -3159,15 +3127,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _scheduleFullScreenDisposalCleanup();
     _hdrDisplaySubscription?.cancel();
     _hdrDisplaySubscription = null;
+    _hdrVideoEventSub?.cancel();
+    _hdrVideoEventSub = null;
     cancelLongPressTimer();
     _cancelSubForSeek();
 
-    // Window color mode is process-wide on Android. Do not leave a disposed
-    // HDR player forcing the next page's SDR content through HDR output.
-    unawaited(HdrPlatform.resetOutput());
-    if (Platform.isAndroid) {
-      unawaited(HdrAndroid.setWindowHdrMode(hdr: false));
-    }
+    hdrRouteInfo.value = null;
+    hdrDegradeNotice.value = null;
     _playerCount = 0;
     danmakuController = null;
     _stopOrientationListener();
@@ -3250,6 +3216,20 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     Player player,
     VideoController? video,
   ) async {
+    // The HDR session owns the current Android video output; dispose it (it
+    // stops media, restores owned mpv properties and closes its controllers)
+    // before the Player itself is terminated. It never disposes the Player.
+    final session = _hdrVideoSession;
+    if (session != null) {
+      _hdrVideoSession = null;
+      _hdrVideoEventSub?.cancel();
+      _hdrVideoEventSub = null;
+      try {
+        await session.dispose();
+      } catch (error) {
+        debugPrint('HDR session dispose failed: $error');
+      }
+    }
     if (video != null) {
       for (var attempt = 1; attempt <= 3; attempt++) {
         try {

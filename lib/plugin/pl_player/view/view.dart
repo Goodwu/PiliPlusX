@@ -1683,7 +1683,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               ),
             ),
           ),
-
         if (plPlayerController.enableTapDm)
           Obx(
             () {
@@ -2363,6 +2362,26 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     () {
                       final _ = plPlayerController.hdrSurfaceGeneration.value;
                       final videoFit = plPlayerController.videoFit.value;
+                      final hdrSession = plPlayerController.hdrVideoSession;
+                      if (hdrSession != null) {
+                        // Android：挂载 HdrVideo（会话伴随 widget，R2.1）。
+                        // 拓扑切换替换控制器时由 HdrVideo 内部跟随会话，
+                        // 无控制器时显示占位（避免帧观察到已释放的控制器）。
+                        return Transform.flip(
+                          flipX: plPlayerController.flipX.value,
+                          flipY: plPlayerController.flipY.value,
+                          child: HdrVideo(
+                            session: hdrSession,
+                            width: maxWidth,
+                            height: maxHeight,
+                            fit: videoFit.boxFit,
+                            fill: widget.fill,
+                            alignment: widget.alignment,
+                            aspectRatio: videoFit.aspectRatio,
+                            controls: null,
+                          ),
+                        );
+                      }
                       final videoController =
                           plPlayerController.videoController;
                       if (videoController == null) {

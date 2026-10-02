@@ -15,10 +15,8 @@ void main() {
       mode: HdrMode.auto,
       source: const HdrSourceMetadata(kind: HdrSourceKind.sdr),
       capabilities: const HdrCapabilities(),
-      hwdec: 'mediacodec-copy',
     );
     expect(decision.output, HdrOutputMode.sdr);
-    expect(decision.hwdec, 'mediacodec-copy');
   });
 
   test(
@@ -494,151 +492,16 @@ void main() {
     );
   });
 
-  test('HCPP topology differs from texture but not from HDR activation', () {
-    const pendingCapabilities = HdrCapabilities(
-      androidApi: 34,
-      displayHdr: true,
-      decoderHdr: true,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
-    );
-    const activeCapabilities = HdrCapabilities(
-      androidApi: 34,
-      displayHdr: true,
-      decoderHdr: true,
-      nativeOutput: true,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
-    );
-    final texture = HdrDecision.choose(
-      mode: HdrMode.auto,
-      source: hdr10,
-      capabilities: const HdrCapabilities(),
-    );
-    final pending = HdrDecision.choose(
-      mode: HdrMode.auto,
-      source: hdr10,
-      capabilities: pendingCapabilities,
-    );
-    final active = HdrDecision.choose(
-      mode: HdrMode.auto,
-      source: hdr10,
-      capabilities: activeCapabilities,
-    );
-    expect(
-      texture.outputTopologySignature,
-      isNot(pending.outputTopologySignature),
-    );
-    expect(pending.outputTopologySignature, active.outputTopologySignature);
-  });
-
-  test(
-    'HCPP requires the decoder capability as well as display capabilities',
-    () {
-      const capabilities = HdrCapabilities(
-        androidApi: 34,
-        displayHdr: true,
-        decoderHdr: false,
-        nativeOutput: true,
-        vulkan: true,
-        platformView: true,
-        hcpp: true,
-      );
-      expect(capabilities.canHcpp, isFalse);
-    },
-  );
-
-  test('HCPP is disabled when the active display is SDR', () {
-    const capabilities = HdrCapabilities(
-      androidApi: 35,
-      displayHdr: false,
-      decoderHdr: true,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
-    );
-    expect(capabilities.canHcpp, isFalse);
-    expect(capabilities.canNativeHdrCandidate, isFalse);
-  });
-
-  test('HCPP remains tone-mapped before dataspace proof', () {
-    const capabilities = HdrCapabilities(
-      androidApi: 34,
-      displayHdr: true,
-      decoderHdr: true,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
-    );
-    final decision = HdrDecision.choose(
-      mode: HdrMode.auto,
-      source: hdr10,
-      capabilities: capabilities,
-    );
-    expect(capabilities.canNativeHdr, isFalse);
-    expect(capabilities.canNativeHdrCandidate, isTrue);
-    expect(decision.output, HdrOutputMode.toneMappedSdr);
-    expect(decision.surface, 'native-hdr-candidate');
-    expect(decision.useHcpp, isTrue);
-  });
-
-  test('capability diagnostics can record an HCPP initialization fallback', () {
-    const capabilities = HdrCapabilities(
-      androidApi: 34,
-      displayHdr: true,
-      decoderHdr: true,
-      nativeOutput: false,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
-    );
-    final fallback = capabilities.copyWith(
-      hcpp: false,
-      unsupportedReason: 'hcpp-init-failed:PlatformException',
-    );
-    expect(fallback.canHcpp, isFalse);
-    expect(fallback.unsupportedReason, 'hcpp-init-failed:PlatformException');
-  });
-
-  test('HCPP initialization failure forces the playable texture fallback', () {
-    const capabilities = HdrCapabilities(
-      androidApi: 34,
-      displayHdr: true,
-      decoderHdr: true,
-      nativeOutput: false,
-      vulkan: true,
-      platformView: true,
-      hcpp: false,
-      unsupportedReason: 'hcpp-init-failed:PlatformException',
-    );
-    final decision = HdrDecision.choose(
-      mode: HdrMode.auto,
-      source: hdr10,
-      capabilities: capabilities,
-    );
-    expect(decision.output, HdrOutputMode.toneMappedSdr);
-    expect(decision.surface, 'texture');
-    expect(decision.useHcpp, isFalse);
-    expect(decision.reason, 'hcpp-init-failed:PlatformException');
-  });
-
   test('capability map preserves native output proof and decoder profiles', () {
     final capabilities = HdrCapabilities.fromMap({
-      'platform': 'android',
-      'androidApi': 35,
+      'platform': 'macos',
       'displayHdr': true,
       'decoderHdr': true,
       'nativeOutput': true,
-      'vulkan': true,
-      'platformView': true,
-      'hcpp': true,
       'displayFormats': ['hdr10', 'hlg'],
       'decoderProfiles': ['video/hevc:profile=2'],
     });
     expect(capabilities.canNativeHdr, isTrue);
-    expect(capabilities.canHcpp, isTrue);
     expect(capabilities.displayFormats, contains('hdr10'));
     expect(capabilities.decoderProfiles, contains('video/hevc:profile=2'));
   });
@@ -890,13 +753,9 @@ void main() {
 
   test('Dolby Vision and HDR Vivid stay tone-mapped without format proof', () {
     const capabilities = HdrCapabilities(
-      androidApi: 35,
       displayHdr: true,
       decoderHdr: true,
       nativeOutput: true,
-      vulkan: true,
-      platformView: true,
-      hcpp: true,
     );
     for (final kind in [HdrSourceKind.hdrVivid]) {
       final decision = HdrDecision.choose(

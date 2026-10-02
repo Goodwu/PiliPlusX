@@ -433,7 +433,6 @@ class HdrSourceMetadata {
 class HdrCapabilities {
   final String platform;
   final String nativeBackend;
-  final int? androidApi;
   final bool displayHdr;
 
   /// Current compositor headroom for the display containing the output.
@@ -452,9 +451,6 @@ class HdrCapabilities {
 
   /// Whether a configured native output is currently active and verified.
   final bool nativeOutputActive;
-  final bool vulkan;
-  final bool platformView;
-  final bool hcpp;
   final bool toneMapping;
   final Set<String> displayFormats;
   final Set<String> decoderProfiles;
@@ -465,7 +461,6 @@ class HdrCapabilities {
   const HdrCapabilities({
     this.platform = 'unknown',
     this.nativeBackend = 'none',
-    this.androidApi,
     this.displayHdr = false,
     this.headroom,
     this.potentialHeadroom,
@@ -473,9 +468,6 @@ class HdrCapabilities {
     this.nativeOutput = false,
     bool? nativeOutputCapable,
     bool? nativeOutputActive,
-    this.vulkan = false,
-    this.platformView = false,
-    this.hcpp = false,
     this.toneMapping = true,
     this.displayFormats = const <String>{},
     this.decoderProfiles = const <String>{},
@@ -507,21 +499,12 @@ class HdrCapabilities {
       displayHdr &&
       nativeOutputCapable;
 
-  /// HCPP is a provisional native-output path: the surface must exist before
-  /// its dataspace can be applied and verified against the actual stream.
+  /// Android HDR 输出不走本类的候选判定：Android 的拓扑/路由全面交给
+  /// media-kit 的 HdrVideoSession 会话 API（R2），App 只做选档预测与展示。
   bool get canNativeHdrCandidate =>
       canNativeHdr ||
-      canHcpp ||
       canOhosNativeSurfaceCandidate ||
       canDarwinNativeSurfaceCandidate;
-
-  bool get canHcpp =>
-      hcpp &&
-      displayHdr &&
-      decoderHdr &&
-      platformView &&
-      vulkan &&
-      (androidApi ?? 0) >= 34;
 
   HdrCapabilities copyWith({
     String? platform,
@@ -529,7 +512,6 @@ class HdrCapabilities {
     bool? displayHdr,
     double? headroom,
     double? potentialHeadroom,
-    bool? hcpp,
     bool? nativeOutput,
     bool? nativeOutputCapable,
     bool? nativeOutputActive,
@@ -538,7 +520,6 @@ class HdrCapabilities {
   }) => HdrCapabilities(
     platform: platform ?? this.platform,
     nativeBackend: nativeBackend ?? this.nativeBackend,
-    androidApi: androidApi,
     displayHdr: displayHdr ?? this.displayHdr,
     headroom: headroom ?? this.headroom,
     potentialHeadroom: potentialHeadroom ?? this.potentialHeadroom,
@@ -546,9 +527,6 @@ class HdrCapabilities {
     nativeOutput: nativeOutput ?? nativeOutputActive ?? this.nativeOutput,
     nativeOutputCapable: nativeOutputCapable ?? this.nativeOutputCapable,
     nativeOutputActive: nativeOutputActive ?? this.nativeOutputActive,
-    vulkan: vulkan,
-    platformView: platformView,
-    hcpp: hcpp ?? this.hcpp,
     toneMapping: toneMapping,
     displayFormats: displayFormats,
     decoderProfiles: decoderProfiles,
@@ -559,11 +537,9 @@ class HdrCapabilities {
 
   factory HdrCapabilities.fromMap(Map<Object?, Object?> values) {
     bool flag(String key) => values[key] == true;
-    final api = values['androidApi'];
     return HdrCapabilities(
       platform: values['platform'] as String? ?? 'unknown',
       nativeBackend: values['nativeBackend'] as String? ?? 'none',
-      androidApi: api is int ? api : null,
       displayHdr: flag('displayHdr'),
       headroom: values['headroom'] is num
           ? (values['headroom'] as num).toDouble()
@@ -579,9 +555,6 @@ class HdrCapabilities {
       nativeOutputActive: values['nativeOutputActive'] is bool
           ? values['nativeOutputActive'] as bool
           : flag('nativeOutput'),
-      vulkan: flag('vulkan'),
-      platformView: flag('platformView'),
-      hcpp: flag('hcpp'),
       displayFormats: (values['displayFormats'] as List<Object?>? ?? const [])
           .whereType<String>()
           .toSet(),
@@ -653,12 +626,8 @@ class PlayerSourceOperationGate {
 
 class HdrPlaybackDecision {
   final HdrOutputMode output;
-  final String vo;
-  final String hwdec;
   final String surface;
   final String reason;
-  final bool usePlatformView;
-  final bool useHcpp;
   final bool useNativeSurface;
   final String sourceProcessing;
   final String outputEncoding;
@@ -666,12 +635,8 @@ class HdrPlaybackDecision {
 
   const HdrPlaybackDecision({
     required this.output,
-    required this.vo,
-    required this.hwdec,
     required this.surface,
     required this.reason,
-    this.usePlatformView = false,
-    this.useHcpp = false,
     this.useNativeSurface = false,
     this.sourceProcessing = 'tone-map',
     this.outputEncoding = 'sdr',
@@ -681,11 +646,10 @@ class HdrPlaybackDecision {
   bool get isNativeHdr => output == HdrOutputMode.nativeHdr;
 
   /// Identifies the native output carrier, excluding color-processing state.
-  /// SDR and tone-mapped HDR share one texture, while HCPP uses a platform
-  /// view. A color metadata update must not rebuild an unchanged carrier.
-  String get outputTopologySignature => useHcpp
-      ? 'android-hcpp-platform-view'
-      : useNativeSurface
+  /// SDR and tone-mapped HDR share one texture. A color metadata update must
+  /// not rebuild an unchanged carrier. Android 拓扑由 media-kit 会话决定，
+  /// 不进入该签名。
+  String get outputTopologySignature => useNativeSurface
       ? 'native-surface'
       : 'flutter-texture';
 }
@@ -994,27 +958,26 @@ class HdrDecision {
 
   /// Selects a safe output. Native HDR is never selected on a mere source
   /// metadata hint; all three native capability facts must be true.
+  ///
+  /// Android 不使用该决策器选择输出：Android 的输出拓扑、解码器选择与
+  /// 数据空间全部由 media-kit HdrVideoSession 会话编排（R2），App 仅按
+  /// 预测选择档位。
   static HdrPlaybackDecision choose({
     required HdrMode mode,
     required HdrSourceMetadata source,
     required HdrCapabilities capabilities,
-    String hwdec = 'auto',
     bool allowDolbyVisionNative = false,
   }) {
     if (!source.isHdr) {
-      return HdrPlaybackDecision(
+      return const HdrPlaybackDecision(
         output: HdrOutputMode.sdr,
-        vo: 'gpu-next',
-        hwdec: hwdec,
         surface: 'texture',
         reason: 'source-is-sdr',
       );
     }
     if (mode == HdrMode.off) {
-      return HdrPlaybackDecision(
+      return const HdrPlaybackDecision(
         output: HdrOutputMode.toneMappedSdr,
-        vo: 'gpu-next',
-        hwdec: hwdec,
         surface: 'texture',
         reason: 'disabled-by-user',
       );
@@ -1033,8 +996,6 @@ class HdrDecision {
         !allowDolbyVisionNative) {
       return HdrPlaybackDecision(
         output: HdrOutputMode.toneMappedSdr,
-        vo: 'gpu-next',
-        hwdec: hwdec,
         surface: 'texture',
         reason: source.baseLayerPresent
             ? 'dolby-vision-p7-hdr10-bl-fallback'
@@ -1048,12 +1009,8 @@ class HdrDecision {
     if (nativeSource && capabilities.canNativeHdr) {
       return HdrPlaybackDecision(
         output: HdrOutputMode.nativeHdr,
-        vo: 'gpu-next',
-        hwdec: hwdec,
         surface: 'native-hdr',
         reason: 'display-decoder-and-output-ready',
-        usePlatformView: capabilities.canHcpp,
-        useHcpp: capabilities.canHcpp,
         useNativeSurface:
             capabilities.platform == 'ohos' || capabilities.platform == 'macos',
         sourceProcessing: source.kind == HdrSourceKind.dolbyVision
@@ -1062,29 +1019,23 @@ class HdrDecision {
         outputEncoding: 'pq-or-hlg',
       );
     }
-    // HCPP can be prepared before SurfaceControl has committed the stream's
-    // dataspace, but that is not proof of native HDR output. Keep mpv in the
-    // SDR tone-map mode until the native layer reports nativeOutput=true.
+    // A provisional native-surface candidate (OHOS XComponent / Darwin EDR)
+    // can be mounted before output proof. Keep mpv in the SDR tone-map mode
+    // until the native layer reports nativeOutput=true.
     if (nativeSource && capabilities.canNativeHdrCandidate) {
-      final useOhosNativeSurface = capabilities.canOhosNativeSurfaceCandidate;
+      final useNativeSurface =
+          capabilities.canOhosNativeSurfaceCandidate ||
+          capabilities.canDarwinNativeSurfaceCandidate;
       return HdrPlaybackDecision(
         output: HdrOutputMode.toneMappedSdr,
-        vo: 'gpu-next',
-        hwdec: hwdec,
         surface: 'native-hdr-candidate',
-        reason: 'hcpp-capabilities-awaiting-dataspace',
-        usePlatformView: capabilities.canHcpp,
-        useHcpp: capabilities.canHcpp,
-        useNativeSurface:
-            useOhosNativeSurface ||
-            capabilities.canDarwinNativeSurfaceCandidate,
+        reason: 'native-hdr-candidate-awaiting-output-proof',
+        useNativeSurface: useNativeSurface,
         sourceProcessing: 'awaiting-native-output-proof',
       );
     }
     return HdrPlaybackDecision(
       output: HdrOutputMode.toneMappedSdr,
-      vo: 'gpu-next',
-      hwdec: hwdec,
       surface: 'texture',
       reason: capabilities.unsupportedReason ?? 'native-hdr-unavailable',
     );

@@ -16,6 +16,8 @@ dependency_overrides:
     path: ../media-kit/media_kit
   media_kit_video:
     path: ../media-kit/media_kit_video
+  media_kit_android_dataspace_vendor:
+    path: ../media-kit/libs/android/media_kit_android_dataspace_vendor
   media_kit_libs_android_video:
     path: ../media-kit/libs/android/media_kit_libs_android_video
   media_kit_libs_ios_video:

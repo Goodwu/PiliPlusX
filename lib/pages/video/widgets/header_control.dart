@@ -774,7 +774,11 @@ class HeaderControlState extends State<HeaderControl>
                     dense: true,
                     title: const Text('播放信息', style: titleStyle),
                     leading: const Icon(Icons.info_outline, size: 20),
-                    onTap: () => showPlayerInfo(context, player: player),
+                    onTap: () => showPlayerInfo(
+                      context,
+                      player: player,
+                      plPlayerController: plPlayerController,
+                    ),
                   ),
                 ListTile(
                   dense: true,
@@ -800,6 +804,7 @@ class HeaderControlState extends State<HeaderControl>
   static Future<void> showPlayerInfo(
     BuildContext context, {
     required NativePlayer player,
+    PlPlayerController? plPlayerController,
   }) async {
     final hwdec = await player.getProperty('hwdec-current');
     final volume = player.state.volume.toStringAsFixed(0);
@@ -878,6 +883,32 @@ class HeaderControlState extends State<HeaderControl>
                       subtitle: Text(hwdec),
                       onTap: () => Utils.copyText('hwdec\n$hwdec'),
                     ),
+                    if (plPlayerController != null)
+                      Obx(() {
+                        final route =
+                            plPlayerController.hdrRouteInfo.value;
+                        final degrade =
+                            plPlayerController.hdrDegradeNotice.value;
+                        if (route == null && degrade == null) {
+                          return const SizedBox.shrink();
+                        }
+                        final text = [?route, ?degrade].join(' · ');
+                        return ListTile(
+                          dense: true,
+                          title: const Text('HDR 路由'),
+                          subtitle: Text(text),
+                          onTap: () => Utils.copyText('HDR route\n$text'),
+                          // A7 实机轮 seek 不变量调试钩子：长按触发 +60s
+                          // seek，用于验证 seek 后会话报告与输出正确。
+                          onLongPress: () {
+                            PlPlayerController.seekToIfExists(
+                              player.state.position +
+                                  const Duration(seconds: 60),
+                            );
+                            SmartDialog.showToast('调试：seek +60s');
+                          },
+                        );
+                      }),
                   ],
                 ),
               ),

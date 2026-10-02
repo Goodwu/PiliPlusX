@@ -3,8 +3,6 @@ package com.example.piliplusx
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.pm.ActivityInfo
-import android.media.MediaCodecInfo
-import android.media.MediaCodecList
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager.LayoutParams
@@ -19,12 +17,7 @@ class MainActivity : AudioServiceActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, hdrChannel)
             .setMethodCallHandler { call, result ->
-                if (call.method == "probe") {
-                    val arguments = call.arguments as? Map<*, *>
-                    result.success(
-                        probeHdrCapabilities(arguments?.get("codec") as? String),
-                    )
-                } else if (call.method == "setWindowHdrMode") {
+                if (call.method == "setWindowHdrMode") {
                     val arguments = call.arguments as? Map<*, *>
                     result.success(
                         setWindowHdrMode(arguments?.get("hdr") as? Boolean ?: false),
@@ -72,94 +65,9 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
-    private fun probeHdrCapabilities(codec: String?): Map<String, Any> {
-        val display = windowManager.defaultDisplay
-        val hdrTypes: List<Int> = if (Build.VERSION.SDK_INT >= 24) {
-            display?.hdrCapabilities?.supportedHdrTypes?.toList() ?: emptyList()
-        } else {
-            emptyList()
-        }
-        fun hdrTypeName(type: Int): String = when (type) {
-            1 -> "dolby-vision"
-            2 -> "hdr10"
-            3 -> "hlg"
-            4 -> "hdr10-plus"
-            else -> "unknown:$type"
-        }
-        val decoderProfiles = mutableListOf<String>()
-        var decoderHdr = false
-        val requestedCodec = codec?.lowercase().orEmpty()
-        fun codecMatches(mime: String): Boolean {
-            if (requestedCodec.isEmpty()) return true
-            return when {
-                requestedCodec.contains("hevc") ||
-                    requestedCodec.contains("h265") ||
-                    requestedCodec.contains("hvc1") -> mime == "video/hevc"
-                requestedCodec.contains("vp9") ||
-                    requestedCodec.contains("vp09") -> mime == "video/x-vnd.on2.vp9"
-                requestedCodec.contains("av1") ||
-                    requestedCodec.contains("av01") -> mime == "video/av01"
-                else -> false
-            }
-        }
-        try {
-            MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos
-                .filterNot { it.isEncoder }
-                .forEach { info ->
-                    info.supportedTypes
-                        .filter {
-                            it.equals("video/hevc", true) ||
-                                it.equals("video/x-vnd.on2.vp9", true) ||
-                                it.equals("video/av01", true)
-                        }
-                        .filter(::codecMatches)
-                        .forEach { type ->
-                            info.getCapabilitiesForType(type).profileLevels
-                                .forEach { profileLevel ->
-                                    if (profileLevel.profile == MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10 ||
-                                        profileLevel.profile == MediaCodecInfo.CodecProfileLevel.VP9Profile2 ||
-                                        (Build.VERSION.SDK_INT >= 29 &&
-                                            profileLevel.profile == MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10 &&
-                                            type.equals("video/av01", true))
-                                    ) {
-                                        decoderHdr = true
-                                        decoderProfiles += "$type:profile=${profileLevel.profile}"
-                                    }
-                                }
-                        }
-                }
-        } catch (_: Throwable) {
-            decoderProfiles += "probe-error"
-        }
-        val vulkan = Build.VERSION.SDK_INT >= 24 &&
-            packageManager.hasSystemFeature(
-                android.content.pm.PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL,
-                1,
-            )
-        val displayHdr = hdrTypes.isNotEmpty()
-        val platformView = Build.VERSION.SDK_INT >= 23
-        val hcpp = Build.VERSION.SDK_INT >= 34 && vulkan && platformView && displayHdr
-        return mapOf(
-            "platform" to "android",
-            "nativeBackend" to if (hcpp) "platform-view-dataspace" else "none",
-            "androidApi" to Build.VERSION.SDK_INT,
-            "displayHdr" to displayHdr,
-            "decoderHdr" to decoderHdr,
-            // Surface/PlatformView capability is not proof that the native
-            // HDR color space has been established. Keep this false until
-            // the HDR surface path explicitly sets and verifies it.
-            "nativeOutput" to false,
-            "nativeOutputCapable" to hcpp,
-            "nativeOutputActive" to false,
-            "vulkan" to vulkan,
-            "platformView" to platformView,
-            "hcpp" to hcpp,
-            "displayFormats" to hdrTypes.map(::hdrTypeName),
-            "decoderProfiles" to decoderProfiles,
-            "requestedCodec" to requestedCodec,
-            "unsupportedReason" to if (hcpp) "" else "android-hdr-capability-incomplete",
-        )
-    }
+    // 设备 HDR 能力探测（原 probeHdrCapabilities）已删除：Android 的能力
+    // 查询与路由全部由 media-kit 的 HdrCapabilities.query / HdrVideoSession
+    // 承担（R1/R2），App 侧不保留设备特定探测代码。
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
