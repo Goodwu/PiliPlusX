@@ -90,8 +90,9 @@ abstract final class HdrOutputSelector {
     }
     if (quality == 126 &&
         (normalized.contains('dolby') || normalized.contains('dv'))) {
-      // DV 档但 codec 串缺 profile：保守按 P5（库内对无 profile 的 DV
-      // 一律按 P5 处理，避免错误 hint 选到忽略 RPU 的路由）。
+      // DV 档但 codec 串缺 profile：保守按 P5（hint 只影响开播路由的
+      // 预配置；hint 错误由会话解码器复核的单次重建纠正，保守取 P5
+      // 避免任何忽略 RPU 的路由被错误 hint 选中）。
       return const HdrSourceDescriptor(
         codec: 'hevc',
         dynamicMetadata: HdrDynamicMetadata.dolbyVision,

@@ -449,15 +449,14 @@ class VideoDetailController extends GetxController
       capabilities: capabilities,
     );
     final presentable = HdrOutputSelector.isHdrPresentable(prediction);
-    if (kDebugMode) {
-      debugPrint(
-        'HDR predict: quality=$quality, codec=${track?.codecs}, '
-        'playable=${prediction?.playable}, '
-        'presentation=${prediction?.presentation.name}, '
-        'selected=${prediction?.selected.strategy.name}, '
-        'presentable=$presentable',
-      );
-    }
+    // 选档预测日志必须无条件输出（release 同样可见，A7 实机验收依据）。
+    debugPrint(
+      'HDR predict: quality=$quality, codec=${track?.codecs}, '
+      'playable=${prediction?.playable}, '
+      'presentation=${prediction?.presentation.name}, '
+      'selected=${prediction?.selected.strategy.name}, '
+      'presentable=$presentable',
+    );
     return presentable;
   }
 

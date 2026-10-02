@@ -196,7 +196,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// Android：HdrVideoSession 会话在拓扑切换时会替换控制器实例（R2.1），
   /// 这里返回会话当前控制器；UI 通过 [hdrSurfaceGeneration] 感知替换。
   VideoController? get videoController =>
-      _hdrVideoSession?.controller.value ?? _videoController;
+      hdrVideoSession.value?.controller.value ?? _videoController;
 
   bool isMuted = false;
 
@@ -398,9 +398,27 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   late final String? hwdec = Pref.enableHA ? Pref.hardwareDecoding : null;
   // Android：media-kit HDR 会话（R2）统一持有输出拓扑与数据空间编排；
   // App 侧只保留选档预测、报告展示与事件消费（A8）。
-  HdrVideoSession? _hdrVideoSession;
+  /// 会话实例用 Rxn 暴露：详情页 plPlayer() 的 Obx 依赖它感知会话创建，
+  /// 从而在 open 完成前先挂载播放器 UI（PlatformView 拓扑的输出绑定
+  /// 需要视频视图先挂载）。
+  final hdrVideoSession = Rxn<HdrVideoSession>();
   StreamSubscription<HdrOutputEvent>? _hdrVideoEventSub;
   int? _hdrQualityHint;
+
+  /// 视频视图（HdrVideo）挂载信号。Android 会话的 PlatformView 输出绑定
+  /// 依赖视图挂载，open 之前等待该信号（有界，超时兜底继续）。
+  final Completer<void> _hdrVideoViewReady = Completer<void>();
+  bool _hdrVideoViewReadyDone = false;
+
+  /// 由视图层在 HdrVideo（含占位）首次挂载时调用，幂等。
+  void onVideoViewMounted() {
+    if (_hdrVideoViewReadyDone) return;
+    _hdrVideoViewReadyDone = true;
+    if (!_hdrVideoViewReady.isCompleted) {
+      _hdrVideoViewReady.complete();
+    }
+  }
+
   HdrCapabilities _hdrCapabilities = const HdrCapabilities(
     unsupportedReason: 'not-probed',
   );
@@ -423,8 +441,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 播放信息展示：降级提示（Degraded 事件的 App 侧最小处理）。
   final hdrDegradeNotice = RxnString();
-
-  HdrVideoSession? get hdrVideoSession => _hdrVideoSession;
 
   StreamSubscription<Object?>? _hdrDisplaySubscription;
   void Function(bool displayHdr)? onHdrDisplayChanged;
@@ -842,6 +858,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (_playerCount == 0) {
         return;
       }
+      // 先让页面挂载播放器 UI 再 open：Android 会话的 PlatformView 输出
+      // 绑定需要 HdrVideo 视图先挂载（旧 Texture 路径在控制器创建时即建好
+      // 原生输出，可以"先开后挂"；PlatformView 路径不行）。onInit 只置
+      // videoState 与字幕，均为空安全，提前调用无副作用。
+      onInit?.call();
       // 配置Player 音轨、字幕等等
       await _createVideoController(
         dataSource,
@@ -871,7 +892,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
       if (sourceGeneration != _hdrSourceGeneration) return;
       await _initializePlayer();
-      onInit?.call();
     } catch (err, stackTrace) {
       // An older queued native open may fail after a replacement source has
       // already entered loading. Its error is diagnostic only; publishing it
@@ -978,7 +998,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // App 侧不探测设备、不选择输出拓扑；只保留能力快照（选档与
       // 展示用）和事件消费。
       final session = HdrVideoSession(player, policy: HdrOutputSelector.policy);
-      _hdrVideoSession = session;
+      hdrVideoSession.value = session;
       session.controller.addListener(() {
         if (!_fsDisposed) {
           hdrSurfaceGeneration.value++;
@@ -1947,6 +1967,26 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       },
       extras: extras.isEmpty ? null : extras,
     );
+    if (hdrVideoSession.value != null && !onlyPlayAudio.value) {
+      // Android 会话的 PlatformView 拓扑输出绑定需要 HdrVideo 先挂载
+      // （详情页此前"先开后挂"）。等待视图挂载信号，有界兜底：超时继续
+      // open，由会话自身的输出绑定超时/候选降级保底（Texture 路由不需要
+      // 视图）。audio-only 模式可能永远不挂视频视图，直接跳过等待。
+      await _hdrVideoViewReady.future.timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint(
+            'HDR video view not mounted before open; proceeding with open',
+          );
+        },
+      );
+      if (sourceGeneration != _hdrSourceGeneration ||
+          _playerCount == 0 ||
+          _fsDisposed ||
+          !identical(currentPlayer, _videoPlayerController)) {
+        return;
+      }
+    }
     final opened = await _playerLifecycle.openCurrent(
       player: currentPlayer,
       isCurrent: () =>
@@ -1954,11 +1994,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _playerCount > 0 &&
           identical(currentPlayer, _videoPlayerController),
       open: (player) {
-        if (_hdrVideoSession != null) {
+        if (hdrVideoSession.value != null) {
           // Android：开播走会话 open 并传 hint（DASH codec/清晰度档 →
           // HdrSourceDescriptor，R2.3）；选档换清晰度/换源同样到达这里。
           // 会话内部完成复核重建与沿候选列表降级。
-          return _hdrVideoSession!.open(
+          return hdrVideoSession.value!.open(
             media,
             hint: HdrOutputSelector.descriptorFromDash(
               quality: _hdrQualityHint,
@@ -1995,9 +2035,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
       }
       final media = ctr.current.last.copyWith(start: ctr.state.position);
-      if (_hdrVideoSession != null) {
+      if (hdrVideoSession.value != null) {
         // Android：换源/重开走会话 open（会话内部处理复核重建，R2.3）。
-        return _hdrVideoSession!.open(
+        return hdrVideoSession.value!.open(
           media,
           hint: HdrOutputSelector.descriptorFromDash(
             quality: _hdrQualityHint,
@@ -2012,7 +2052,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   void retryVideoOutput() {
-    if (_hdrVideoSession != null) {
+    if (hdrVideoSession.value != null) {
       // Android：会话内建复核重建与候选降级（R2.3/R3.1），无 App 侧
       // 输出重建入口；清掉遗留错误态即可。
       hdrOutputError.value = null;
@@ -3219,9 +3259,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // The HDR session owns the current Android video output; dispose it (it
     // stops media, restores owned mpv properties and closes its controllers)
     // before the Player itself is terminated. It never disposes the Player.
-    final session = _hdrVideoSession;
+    final session = hdrVideoSession.value;
     if (session != null) {
-      _hdrVideoSession = null;
+      hdrVideoSession.value = null;
       _hdrVideoEventSub?.cancel();
       _hdrVideoEventSub = null;
       try {

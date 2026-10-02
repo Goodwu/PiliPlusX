@@ -2362,11 +2362,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     () {
                       final _ = plPlayerController.hdrSurfaceGeneration.value;
                       final videoFit = plPlayerController.videoFit.value;
-                      final hdrSession = plPlayerController.hdrVideoSession;
+                      final hdrSession =
+                          plPlayerController.hdrVideoSession.value;
                       if (hdrSession != null) {
                         // Android：挂载 HdrVideo（会话伴随 widget，R2.1）。
                         // 拓扑切换替换控制器时由 HdrVideo 内部跟随会话，
                         // 无控制器时显示占位（避免帧观察到已释放的控制器）。
+                        // 首次挂载即通知控制器：会话 open 的 PlatformView
+                        // 输出绑定等待该视图。
+                        plPlayerController.onVideoViewMounted();
                         return Transform.flip(
                           flipX: plPlayerController.flipX.value,
                           flipY: plPlayerController.flipY.value,
