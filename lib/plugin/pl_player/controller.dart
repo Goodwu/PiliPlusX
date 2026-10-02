@@ -1401,8 +1401,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> refreshHdrDisplayCapabilities() async {
     final refreshGeneration = ++_hdrDisplayRefreshGeneration;
     if (Platform.isAndroid) {
-      // Android：能力查询走 media-kit R1 快照（无 Player 时经插件通道），
-      // 不做设备探测；显示 HDR 能力变化由会话 CapabilityChanged 事件驱动。
+      // Android：能力查询走 media-kit R1 快照（无 Player 时 P5 管线保守
+      // 按缺失处理，拿到 Player 后重新查询）；显示 HDR 能力变化由会话
+      // CapabilityChanged 事件驱动。
       final capabilities = await HdrOutputSelector.queryCapabilities(
         player: _videoPlayerController,
       );

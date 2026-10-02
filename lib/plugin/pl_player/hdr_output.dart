@@ -1,6 +1,3 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -18,41 +15,23 @@ abstract final class HdrOutputSelector {
   /// `allowExperimental`，在此构造 `HdrRoutingPolicy`，不新增设备判断。
   static const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
 
-  /// 最近一次能力快照（选档用）。有 Player 时由 [queryCapabilities] 用
-  /// `HdrCapabilities.query(player:)` 刷新；无 Player（首个视频页尚未建
-  /// 播放器）时经 media_kit_video 插件的 `HdrCapabilities.Get` 通道读取
-  /// （该通道由插件注册，与播放器实例无关）。此为 media-kit 的缺口：
-  /// 公开 API `HdrCapabilities.query` 强制要求 Player（用于 P5 管线探测），
-  /// 无 Player 时 P5 管线保守按不可用处理（P5 档将回落 SDR，报告缺口）。
+  /// 最近一次能力快照（选档用）。由 [queryCapabilities] 统一经
+  /// media-kit 公开 API `HdrCapabilities.query(player:)` 刷新：有 Player
+  /// 时探测 mpv fork 的 P5 管线；无 Player（首个视频页尚未建播放器）时
+  /// P5 管线保守按缺失处理（P5 档预测回落 SDR；P8.4/HDR10/HLG/SDR 预测
+  /// 不受影响）。拿到 Player 后应重新查询刷新 P5 结论。
   static HdrCapabilities? lastCapabilities;
 
-  /// 开播前能力查询（R1.1）。[player] 非空时走完整公开 API。
+  /// 开播前能力查询（R1.1）。[player] 可空直传 media-kit 公开 API，
+  /// 不再手工读插件通道兜底。
   static Future<HdrCapabilities?> queryCapabilities({Player? player}) async {
-    if (player != null) {
-      try {
-        lastCapabilities = await HdrCapabilities.query(player: player);
-        return lastCapabilities;
-      } on Object {
-        return lastCapabilities;
-      }
-    }
-    if (!lastPlatformIsAndroid) return lastCapabilities;
     try {
-      final raw = await const MethodChannel(
-        'com.alexmercerind/media_kit_video',
-      ).invokeMethod<Object?>('HdrCapabilities.Get');
-      // 无 Player 时无法探测 mpv fork 的 P5 管线：保守 false。
-      lastCapabilities = HdrCapabilities.parseSnapshot(
-        raw as Map<Object?, Object?>?,
-        p5PipelineAvailable: false,
-      );
+      lastCapabilities = await HdrCapabilities.query(player: player);
       return lastCapabilities;
     } on Object {
       return lastCapabilities;
     }
   }
-
-  static bool get lastPlatformIsAndroid => Platform.isAndroid;
 
   /// 由 DASH codec 字符串与清晰度档位构造源描述（R2.3 hint）。
   /// 纯跨平台映射：只看 codec 串与 Bilibili 档位编号，无任何设备判断。

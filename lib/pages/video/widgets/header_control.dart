@@ -779,6 +779,21 @@ class HeaderControlState extends State<HeaderControl>
                       player: player,
                       plPlayerController: plPlayerController,
                     ),
+                    // A7 实机轮 seek 不变量调试钩子的浅层备选入口：「播放
+                    // 信息」对话框需两次跳转且行条件渲染，长按路径过深。
+                    // 行为与对话框内「HDR 路由」行的长按完全一致（+60s
+                    // seek），仅当存在 HDR 路由报告时生效；播放信息入口
+                    // 本身不变。
+                    onLongPress: () {
+                      if (plPlayerController.hdrRouteInfo.value == null &&
+                          plPlayerController.hdrDegradeNotice.value == null) {
+                        return;
+                      }
+                      PlPlayerController.seekToIfExists(
+                        player.state.position + const Duration(seconds: 60),
+                      );
+                      SmartDialog.showToast('调试：seek +60s');
+                    },
                   ),
                 ListTile(
                   dense: true,
