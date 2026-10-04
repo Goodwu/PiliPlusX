@@ -1,0 +1,276 @@
+{
+  "checked_at": "2026-10-04T18:27:54.326220+00:00",
+  "objective": "完成macOS上PiliPlusX以上的剩余工作",
+  "completion": false,
+  "requirements": [
+    {
+      "requirement": "mpv0.36 final-package prevention",
+      "state": "local final gates and source reviews passed; committed in Pili f3ceacb468d7d35ac8e3b75a825286f1a72dcaac; latest commit not rebuilt/hosted",
+      "evidence": "Debug/Profile/Release embed ordering and real old-version rejection; fresh consumer final gates"
+    },
+    {
+      "requirement": "shared mpv/libplacebo color core",
+      "state": "reviewed r4 46 source nodes committed as252c5851e2ebbcb0876f3bb819303c21fbfe29cd, parent and all tree nodes independently matched; actual older r4 App binding PASS; local real pin integration Critical PASS; performance deferred with FAIL records retained; hosted incomplete",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/review.md"
+    },
+    {
+      "requirement": "4K60 current shared candidate small/fullscreen",
+      "state": "normal r4 default-off actual candidate UI4K window user stutter FAIL; current codec/fps not independently bound; fullscreen untested; older n1 PASS historical only",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/human-normal-4k60-window-acceptance.json"
+    },
+    {
+      "requirement": "P5 color",
+      "state": "current r4 exact Mystery Box sample user color PASS; HDR brightness UNKNOWN; smoothness FAIL severe stutter",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-p5-acceptance.json"
+    },
+    {
+      "requirement": "HDR brightness and actual output state",
+      "state": "current r4 P5 HDR brightness/output UNKNOWN; HLG no new color/brightness feedback; older accepted samples retained only in their candidate scope. Actual compositor/output validation remains incomplete",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-p5-acceptance.json"
+    },
+    {
+      "requirement": "PQ/HLG >=5min continuous play",
+      "state": "r4 HLG severe stutter FAIL; PQ user color/brightness/highlights PASS, initial stutter later improved, not full smoothness PASS; 59 telemetry samples over ~299s do not prove smooth playback",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-exit-result.json"
+    },
+    {
+      "requirement": "failed-frame publication and recovery two modes",
+      "state": "r2 actual BGRA8 and RGBA16F observedRecovery/observationComplete PASS; narrow failure-publication and same-epoch actual-consumer recovery scope",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-failed-frame-app-20261004-r2"
+    },
+    {
+      "requirement": "seek resize switching HDR/SDR cross-display matrix",
+      "state": "old r2 zoom/reverse/forward seek PASS; currentr4 pause/resume UNKNOWN, normalQuit+sameApp reentry/localHLGfirstframe observed. Arbitrary resize/outputreset/crossdisplay unproven; onlyoneconnecteddisplay available",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/first-p5-operation-result.json"
+    },
+    {
+      "requirement": "8K decode and P1/P2 matrix",
+      "state": "r2 P1 actual7680x4320 VideoToolbox BT709 SDR; fullscreen user smoothness PASS. P2 actual3840x2160 p010 DolbyVision BT2020 PQ; user color/brightness/highlights/smoothness 全部正常 PASS. DV profile5 and display HDR state not established",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-bootstrap-full-consumer-20261005-r2/human-acceptance.json"
+    },
+    {
+      "requirement": "affected-platform regression",
+      "state": "real iOS Runner simulator build PASS arm64/x86_64 after macOS diagnostic compileguard; Android shared core regression incomplete",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/ios-shared-runner-compile-20261004-r2/after-pods-result.json"
+    },
+    {
+      "requirement": "normal default-off final candidate and production release integration",
+      "state": "normal r4 actual candidate dualABI0.41 closure/load/sign/backend and artifact binding PASS; window smoothness FAIL retained. Formal integration committed in f3ceacb46, real core pin252c5851 and lock digest synchronized;87 pin integration CPU tests PASS. New diagnostic N1 commit delta not built/played; remote acquisition and hosted fresh unverified",
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/review-v1/review.md"
+    }
+  ],
+  "source_slice_validation": {
+    "snapshot": "/Users/wuweiwei1/src/media-kit-build/shared-source-snapshot-20261005-r4",
+    "V1": "PASS final r4 combination/API; review-v1/review.md",
+    "V2": "PASS final r4 identity and prior lifecycle evidence binding; review-v2/review.md",
+    "derived": "/Users/wuweiwei1/src/media-kit-build/shared-source-derived-validation-20261005-r1",
+    "dart_owner_tests": 7,
+    "flutter_viewport_tests": 9,
+    "texture_contract": "exit0",
+    "optimized_arm64_bridge": "exit0; full C headers/real Flutter SDK, no app/runtime",
+    "optimized_x86_64_bridge": "exit0; full plugin optimized object compile",
+    "ios_new_slice": "arm64+x86_64 complete 21 Swift plugin object compile exit0; no App/link/device",
+    "app_new_slice": {
+      "consumer_exit_code": 0,
+      "status": "published-candidate",
+      "App": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/SharedR4LocalHDR.app",
+      "runner_sha256": "235295187f09e7da4724847cf1fdd5977f119080649504c6d70688882905f2f4",
+      "mpv_sha256": "cbdb6b90c232873bf620abdde7a289a8f832e71d7dc060d05bd7505ab51373e8",
+      "double_ABI_final_gates": "PASS 0.41.0 runtime closure/load initialize0/signature/backend",
+      "source_binding": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/post-bootstrap-source-binding.json",
+      "artifact_review": "PASS_ARTIFACT_BINDING_ONLY; review-v1/review.md",
+      "P5_visual_acceptance": {
+        "color": "PASS",
+        "actual_HDR_output": "UNKNOWN",
+        "smoothness": "FAIL",
+        "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-p5-acceptance.json"
+      },
+      "other_visual_acceptance": "not yet tested for r4",
+      "HLG_visual_acceptance": {
+        "smoothness": "FAIL severe stutter",
+        "color_brightness": "UNKNOWN",
+        "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-hlg-acceptance.json"
+      },
+      "PQ_visual_acceptance": {
+        "color_brightness_highlight_details": "PASS",
+        "smoothness": "initial stutter, later improved; not full PASS",
+        "actual_HDR_output": "UNKNOWN",
+        "evidence": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-pq-acceptance.json"
+      }
+    },
+    "corrected_owner_fixture": "Debug/optimized run pass; independent V1 pass; r1 failure retained",
+    "fresh_recipe_prepare": "844 files tree SHA3015b139edddd283fb74a6865a0f8c4089ecb463a624eb4688260d440582ae44",
+    "other_independent_evidence": "6 Swift fixtures/9 viewport/composition contract/844 source tree pass; no App acceptance",
+    "repair": "completed; component Critical r2 PASS; exact inputs match r4",
+    "manifest_sha256": "702da85d5b8b6c3ff6e27e0ae6117efc6a6e435a8b181e4c016de4e8981d19d1"
+  },
+  "current_delivery_review": {
+    "production_r2_metadata_r1": "Critical REQUEST_CHANGES",
+    "blockers": [
+      "trusted committed checkout approved pin and lock required",
+      "fixed gate command/ABI/consumer App semantics required"
+    ],
+    "correction": "cross-host new protocol producer and metadata r1 frozen",
+    "V1": "independent cross-host protocol PASS; 9source nodes plus28/10/23CPU",
+    "V2": "independent cross-host protocol static/CPU PASS; same-artifact relocation, retained B1/B2 and6 extra argv checks; no hosted approval",
+    "hosted": "not run; actual approved pin null",
+    "CPU": "10release/28candidate/23metadata/3assets/1manifest/4tag PASS; synthetic fixtures only"
+  },
+  "playback_test_policy": {
+    "special_stutter_analysis": false,
+    "size_ABA_cancelled": true,
+    "future_tests": "collect GPU utilization/available temperature and frequency/system thermal state along with version/source/PID/time/window; missing readings explicit",
+    "cancelled_experiment_withdrawal": "complete; exact original app.dill source restored, 24 tests pass",
+    "latest_incidental_telemetry": {
+      "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/p5-incidental-telemetry.jsonl",
+      "pid": 91253,
+      "scope": "normal P5 playback; no dedicated stutter experiment",
+      "numeric_gpu_temperature_frequency": "unavailable explicitly null; system thermal state recorded separately"
+    }
+  },
+  "product_integration": {
+    "source": "derived-validation-20261005-r4",
+    "package_config_binding": "both main packages resolve derived r4; all46 input identities match",
+    "targeted_tests": {
+      "exit_code": 0,
+      "passed": 35,
+      "result": "/Users/wuweiwei1/src/media-kit-build/shared-source-derived-validation-20261005-r4/product-targeted-tests-result.json"
+    },
+    "targeted_analysis": {
+      "exit_code": 0,
+      "result": "/Users/wuweiwei1/src/media-kit-build/shared-source-derived-validation-20261005-r4/product-analysis-result.json"
+    },
+    "prior_failure": "r3 missing dolbyVision enum compile failure retained in prior result",
+    "App_runtime": "pending"
+  },
+  "stutter_architect_analysis": {
+    "status": "read-only report complete, not confirmed root cause",
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/report.md",
+    "priority": "shared full-source GL render/cross-API synchronization and scheduling backpressure",
+    "next": "accurate existing producer diagnostic collection during next ordinary required test; no dedicated experiment yet"
+  },
+  "packaging_gate_correction": {
+    "scope": "B1/B2 two production scripts only",
+    "review": "PASS independent Critical; original8+additional8 CPU checks",
+    "evidence": "/Users/wuweiwei1/src/media-kit-build/macos-packaging-gate-fixes-20261005-r1/review-v2/review.md",
+    "closure_sha256": "ad9775c9432046a22e79aaa8ad40397434313a32b4c44a7be8348582b0174c6b",
+    "wrapper_sha256": "a4562d0ac4ad216271470e8a9f60ad8e6421434797301dd6f4dd14a65b3bbbc9",
+    "runtime_acceptance": "not implied"
+  },
+  "normal_r4_candidate": {
+    "directory": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1",
+    "bootstrap_exit_code": 0,
+    "diagnostic_define": false,
+    "consumer_session": 2606,
+    "consumer_status": "terminal exit0",
+    "input_scope": "reused sealed local dependencies; not hosted fresh",
+    "visible_acceptance": "FAIL user: 极客湾视频卡顿; UI4K window; current codec/fps unbound",
+    "consumer_exit_code": 0,
+    "final_gate": "bothABI mpv0.41/21binary closure/load initialize0/sign/backend transport PASS",
+    "runner_sha256": "6b652d103326561c5506a1c908f04e8e1f6215d901c910675ba595865a8bc512",
+    "mpv_sha256": "e1e77186ae6737dd89af86b548e2ec84c1f1123eb186b25c8a1e494d087487ba",
+    "artifact_review": "PASS_ARTIFACT_BINDING_ONLY; review-v1/review.md 183 assertions",
+    "source_nodes": "46 match after bootstrap",
+    "diagnostic_environment": "launchctl value empty; no old player process at preflight",
+    "playback_pid": 22759,
+    "process_state": "normal menu Quit; independent ps absent",
+    "incidental_telemetry": "35 records; session4974 exit0; systemwide GPU; temp/frequency NULL"
+  },
+  "chrome_control": {
+    "sample": "BV1jP4y1s7px",
+    "user_observation": "60fps smooth; Activity Monitor GPU almost0",
+    "UI_quality": "Dolby Vision confirmed read-only",
+    "actual_decoder_stream_output": "USER_LOG_CONFIRMED VideoToolboxVideoDecoder HEVC Main10 3840x2160 BT2020 HLG; actual presentation and DV dynamic metadata still UNKNOWN",
+    "source_report": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/chrome-path-report.md"
+  },
+  "p84_dv_metadata": {
+    "source_path": "conditional supported",
+    "actual_hokkaido_run": "UNKNOWN; no samePTS side-data->repr.dovi->renderer evidence",
+    "report": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/p84-dv-metadata-report.md"
+  },
+  "next_remediation_design": {
+    "status": "REQUEST_CHANGES; no implementation",
+    "report": "/Users/wuweiwei1/src/media-kit-build/macos-remediation-design-review-20261005-r1/review.md",
+    "remaining": [
+      "GPU samples cannot be assigned to current frame",
+      "frameID/epoch propagation undefined",
+      "new diagnostic ABI/async buffer lifetime/manifest scope undefined"
+    ],
+    "direction": "user proposes performance as later topic; current focus commit preparation, no commit authorized"
+  },
+  "local_commits": {
+    "shared_core": "252c5851e2ebbcb0876f3bb819303c21fbfe29cd",
+    "pili": "f3ceacb468d7d35ac8e3b75a825286f1a72dcaac",
+    "pushed": false,
+    "verification": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/postcommit-verification.json",
+    "local_pin_review": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/review.md",
+    "performance_user_scope": "deferred to later topic; failures not erased",
+    "pending": [
+      "current-commit build/runtime acceptance",
+      "P8.4 metadata and actual HDR output evidence",
+      "full operation matrix and affected-platform regression",
+      "remote availability/hosted fresh/production qualification"
+    ]
+  },
+  "postcommit_diagnostic_bootstrap": {
+    "status": "compile_PASS_bootstrap_contract_FAIL",
+    "exec_session": 1226,
+    "evidence_directory": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1",
+    "pili_revision": "f3ceacb468d7d35ac8e3b75a825286f1a72dcaac",
+    "core_revision": "252c5851e2ebbcb0876f3bb819303c21fbfe29cd",
+    "product_source_nodes": 86,
+    "core_nodes": 46,
+    "purpose": "latest diagnostic delta compile validation; pending bootstrap never playable/distributable; no performance investigation",
+    "exec_exit": 0,
+    "pending_present": false,
+    "ordinary_guard_exit": 1,
+    "ordinary_guard_reason": "arm64 Mpv.framework is not mpv0.41.0",
+    "failed_artifact": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/failed-bootstrap.app",
+    "independent_analysis_agent": "/root/bootstrap_pending_build_order",
+    "independent_analysis_status": "running"
+  },
+  "bootstrap_info_dependency_correction": {
+    "source": "/Users/wuweiwei1/src/PiliPlusX/macos/Runner.xcodeproj/project.pbxproj",
+    "sha256": "e6f14277ae4a8db3089e9cb0ff65e15a27bf7afc677a7d31f0fb498696da9144",
+    "delta": "one target Info.plist input; original36 inputs retained",
+    "mechanical_checks": "PASS",
+    "critical_static": "PASS_STATIC_FOR_REAL_BUILD",
+    "static_review": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/review-v2",
+    "actual_incremental_build": {
+      "status": "compile_PASS_pending_PASS_strict_signature_FAIL",
+      "exec_session": 4588,
+      "evidence": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2",
+      "exit_code": 0,
+      "pending": true,
+      "final_sign_ran": false,
+      "strict_signature_exit": 1,
+      "ordinary_final_guard_exit": 1,
+      "ordinary_guard_rejects_pending": true
+    },
+    "target_plist_absent_case": "NOT_STARTED",
+    "committed": false,
+    "runtime_complete": false,
+    "next": "Specialist supplemental signature dependency analysis; no manual signing, no clean-only success substitution"
+  },
+  "bootstrap_derived_info_correction": {
+    "design_verdict": "PASS_DESIGN_FOR_IMPLEMENTATION",
+    "design_report": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-design-review-20261005-r1/review.md",
+    "writer": "/root/bootstrap_derived_info_implementation",
+    "implementation_status": "frozen",
+    "source_review": "PASS_SOURCE_FOR_REAL_BUILD",
+    "actual_build": "PASS_RELEASE_BOOTSTRAP_MATRIX_WITH_LIMITS",
+    "runtime_complete": false,
+    "preserve_framework_inputs": 37,
+    "no_performance_work": true,
+    "evidence": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3",
+    "remaining": [
+      "derived_missing_persisted_precondition",
+      "template_restored_activity_missing",
+      "Debug_Profile_actual_builds",
+      "shared_consumer",
+      "playback"
+    ],
+    "runtime_review": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/review.md",
+    "goal_complete": false
+  }
+}

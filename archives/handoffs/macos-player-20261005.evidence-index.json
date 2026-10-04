@@ -1,0 +1,2237 @@
+[
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/submission-description-draft.md",
+    "sha256": "37667ad149604d491be2137c54ca1ea77b94ebe288a2dd4db79339fc9883917b",
+    "bytes": 2220
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pili-commit-message.txt",
+    "sha256": "e69699e8309f6ed687c1b76c0788abaef1c00c90838f3eec1e3b0fdf9adc45c6",
+    "bytes": 1170
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/ledger-sop-refresh-binding.json",
+    "sha256": "e4a3072aaab67befff523c26523e665b99b7504fab2369817348840b8507b538",
+    "bytes": 551
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/media-kit-paths.txt",
+    "sha256": "0428577d0bfa54481ff7ae0357e637faae4ba429d48720f2417f313bcf58bee1",
+    "bytes": 2896
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/final-proposed-scope.md",
+    "sha256": "c818e34bb83b323f97985de38967bb5e3829b14df0741adf4c96fc18ec7f35d3",
+    "bytes": 7359
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/shared-core-local-commit.json",
+    "sha256": "138c217b9d91b8cbe0306ce9eedfda9287947eabba79e951358f7a83f6622551",
+    "bytes": 3601
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/isolated-r4-worktree-binding.json",
+    "sha256": "efab868346ad78b09d0a5b9494e7406178f57d4ffd3801eeef9815356d0c2f5d",
+    "bytes": 6435
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/hdr_output_transfer_api_test.dart.live-to-r4.diff",
+    "sha256": "82000a1f5a2bc388df4b3e80f756a6a0f4da18995574f907a6219574fdfd0ac2",
+    "bytes": 854
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/postcommit-verification.json",
+    "sha256": "83f4ad35a8722eaae9ed2a438b6f22d6e5155f1b96c343f1e7adf687f0275dcd",
+    "bytes": 253
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/diagnostic-autoplay-fix-dispatch.json",
+    "sha256": "d319ddc4bc4eb55843d058fae9db97511cc6c4636c4473ac03c97f20a50049df",
+    "bytes": 544
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/REPORT.md",
+    "sha256": "67b492a44e8d60c605e73a55dcc62023cf3ba2ca96f56621d259d2597c5b508e",
+    "bytes": 8163
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/scope.json",
+    "sha256": "60a609917006ecf5bc97348b76d2bf77b53e7520905d682e5dfc9b499dee33e8",
+    "bytes": 2291831
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pili-adjacent-decision-paths.txt",
+    "sha256": "0fa97ab192bac40ea9f10fc3921cb86c22ea3c88e64ffc562d546c0994dbee69",
+    "bytes": 1223
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pili-precommit-final-binding.json",
+    "sha256": "26706f8b052a96ba2d3f6fc6b78636c9bd9e261d7d47fe508bda4d4e1786d369",
+    "bytes": 17442
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pili-local-commit.json",
+    "sha256": "d040340cc7289640b88bcf34a83c1bf0ce5a0f196c46adfd104d508261751e42",
+    "bytes": 4742
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/adjacent-chain-inclusion.json",
+    "sha256": "f45e759e5fe4d5f11621bd8c4430bb7bc2d189ecd438ec962e99d8088bd561c2",
+    "bytes": 36740
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/final-proposed-scope.json",
+    "sha256": "2a50a238dfb24c8924fbed98570c91455951db7f669d0df7bc2957161d8ff2cd",
+    "bytes": 56913
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pin-integration-checks.json",
+    "sha256": "c45f61c2f8a46171f87d66379fac6331b6d7c628fae921053d1b2c774c07bde6",
+    "bytes": 508
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/approved-pin-local-integration.json",
+    "sha256": "c6f95695bcf527754d091e0c9a5ca9f8c08deca297f9c2e616b152d3e561458a",
+    "bytes": 9779
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/pili-reviewed-required-paths.txt",
+    "sha256": "d4ef0e882fc208c062e8b877b9990d8e02c1fad461146d5439626306b53d6c85",
+    "bytes": 751
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/isolated-r4-final-scope-verification.json",
+    "sha256": "cdb6abd59b16b7dae705344756b801bc4282f5b313a513f742c8df8e94093c84",
+    "bytes": 5434
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/hdr_route.dart.live-to-r4.diff",
+    "sha256": "8efc9b4b7bc4004f5494678f7d9a3d1139e6cab695b29dc7ecaa98ed1f3775d8",
+    "bytes": 3644
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/adjacent-chain-inclusion.md",
+    "sha256": "59557bfa931832c7f1ee77bc663215b0ce486b7dfea3e312b075c001ec4dbe87",
+    "bytes": 5665
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/product-dirty-binding.json",
+    "sha256": "cf1e7e89d4fbf3acc7969e906c9b90ee9be5f7a261705f4824bac4d18832b7b8",
+    "bytes": 49541
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/video_texture.dart.live-to-r4.diff",
+    "sha256": "f65c3d4833c1f36f4c61aa7b5755861ef55d66a1950c26bf985615089b4f8d75",
+    "bytes": 56319
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-current-fix-commit-preparation-20261005-r1/diagnostic-final-identity-verification.json",
+    "sha256": "fe6dba69f9bb38991d2dd8ae33ed0d11bb8e42625bc3fc613fadd91b73fe71da",
+    "bytes": 609
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/runner-docstring-increment.diff",
+    "sha256": "442d56d7e82cfa4e5b5ab57e089efcfe5a3a14b931d91a3721ae66834e142118",
+    "bytes": 736
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/input-binding.json",
+    "sha256": "4169e54bce4ced8ca94b7c7e28e11304fbbb6cd5cae8d17c559761de8bd6c98c",
+    "bytes": 2655
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/verdict.json",
+    "sha256": "8add31e0718b63c1c047a8c99089bf04233728d12c555f2fc9159256d9ae1b18",
+    "bytes": 1384
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/run_macos_shared_ci_candidate.py.diff",
+    "sha256": "0954bee6712a244f1dc53f5c468673ccbc58cef414d98949ccde865915f32b87",
+    "bytes": 566
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/macos-shared-ci-inputs.lock.json.diff",
+    "sha256": "58ec8e3e3031d3dd8b25af70042fc38a5436c17626fb6fca8a290b3e2829d1d1",
+    "bytes": 321
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/runner-docstring-increment.json",
+    "sha256": "37ce0cfe22f57453a5675598d66c4c6c4c530eab53cb2957c68f8b31aff06e43",
+    "bytes": 1269
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/review.md",
+    "sha256": "1fe5f6681fc16091812efed072c46719a9a2334219209542ddadb018ee096622",
+    "bytes": 4643
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/independent-commit-binding.json",
+    "sha256": "751f8c7272e2bf44d853d79c88a5833ac657c2c8dec74dab57db700887d592a8",
+    "bytes": 13863
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-committed-pin-review-20261005-r1/fetch_macos_shared_ci_inputs.py.diff",
+    "sha256": "e88f011b3831aaa60b6a69682eb4e049c5a6954e0c198b99c3da6b696c44c85d",
+    "bytes": 543
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/result.md",
+    "sha256": "60181e3914c71b459ede03febc48543183c370da1ac2eb5a800c64243c339767",
+    "bytes": 1352
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/checks-and-binding.json",
+    "sha256": "226325de63b53ddda1d290cc3bfb74c82cf2817d8673e79b0afd170409980b2a",
+    "bytes": 4855
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/review-snapshot-to-current.patch",
+    "sha256": "fbaa2b7e2f6478890d0fb5e27a6189ecb1947555b73e1b88faa368c9be69622f",
+    "bytes": 7747
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/review-v2/input-binding.json",
+    "sha256": "40ca243ff84e2f6c5eb592f4a8c73b4b80ab6e693d04384e0b3ad82dcc979f1f",
+    "bytes": 1106
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/review-v2/verdict.json",
+    "sha256": "ddccb5f8789413714a589494fc0df0d61b3add1517be90b2c133880f8046334c",
+    "bytes": 1105
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-diagnostic-autoplay-fix-20261005-r1/review-v2/review.md",
+    "sha256": "349f29d1330bd5f6d89593577774be504d5c18788e104eda2817d2e0bda74952",
+    "bytes": 3458
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/source-binding.json",
+    "sha256": "3167d7c1b2da2c6ab6ca463643010d7ffff9ee24fd1feb4a3e45f5c3eb2d51ed",
+    "bytes": 16204
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/bootstrap-build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/build-command.json",
+    "sha256": "a5c3e80d035d3e1dc4e34369bafd28a6c32703e4c95c9b17cccf0e6d53b49e86",
+    "bytes": 547
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/ordinary-guard-result.json",
+    "sha256": "144da67296fceb1811d61f2d0151c3430a2c648d471fc7cf0d6e401ce3941293",
+    "bytes": 356
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/ordinary-guard.stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/bootstrap-result.json",
+    "sha256": "cd6048f870b3936090b110a1e32057e41b5667f8e8bed4851f0aaa1cd897c751",
+    "bytes": 439
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/ordinary-guard.stderr.log",
+    "sha256": "714da9c4e7f87e0cda52c9374ee832c117f440375d83df2c9ab634bb58e7c4b1",
+    "bytes": 44
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/failed-artifact-preservation.json",
+    "sha256": "62a6bb79674d9c8ed48f1f29905f26e44ce873750313bdc17ff1ade330533720",
+    "bytes": 389
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/xcode-build-logs/3107CE67-4646-4CD3-810B-850676C08D02.xcactivitylog.selected-strings.txt",
+    "sha256": "58858dee5416e380923b9367e29eca1f97fe677a1fada0b85602afc55c9e7957",
+    "bytes": 52058
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/xcode-build-logs/A606EEAE-A628-476D-BFA3-7807B6B1F26A.xcactivitylog.selected-strings.txt",
+    "sha256": "0d71cdeaa79d799f9f090bb227f772a84f904e58fc629ecf98939c81523a1a0a",
+    "bytes": 52258
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/xcode-build-logs/A606EEAE-A628-476D-BFA3-7807B6B1F26A.xcactivitylog",
+    "sha256": "32ed31bdd03f61f20886b790b0a240552c11fac2b7e9cb61b3d935d99e06afb4",
+    "bytes": 62834
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/xcode-build-logs/3107CE67-4646-4CD3-810B-850676C08D02.xcactivitylog",
+    "sha256": "ef2e70631e2cd25edf8e6b02ad2bf54f4e4cdf8c100532210a031fd72a8f6d67",
+    "bytes": 80672
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/TASKS.md",
+    "sha256": "1d5d4553e499ad91bff6bffb13a8ca62f6450395ccd7c78579925f56c297f381",
+    "bytes": 65314
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/scripts/macos-shared-ci-inputs.lock.json",
+    "sha256": "c34957484aac278b31c2b672b7ef4ef89c8196eec6de0e356f6ad180420a613b",
+    "bytes": 5169
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-candidate-consumer.md",
+    "sha256": "94b02152335029b0f50f519e279d5003bd03e2a8258e77c3115723d87f4db4b8",
+    "bytes": 5764
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-production-release.md",
+    "sha256": "c7f6e686db8748838283af0eed989ed71521576910a5b152849e71ac0b7ec3ec",
+    "bytes": 5011
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-input-preparation.md",
+    "sha256": "87936ad90c067ead6e57fdac64b639426d0cab565c273f801e373bfc0b5a01b0",
+    "bytes": 8484
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-ci-input-acquisition.md",
+    "sha256": "672af133f85e1d79156d649923b3b950239e8aa311636f21cc157ecb86b83a10",
+    "bytes": 8863
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-product-dv-test-sop.md",
+    "sha256": "c6fb0e41d0f021264c122a512a485aa3fb1040f70e315632cb862ea751589f27",
+    "bytes": 13438
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-ci-candidate.md",
+    "sha256": "077e792f2162dbab45aeafbe8ee117148ebd3a22427f3497dd27dfd5aabdeb54",
+    "bytes": 6561
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/docs/plans/macos-shared-candidate-bootstrap.md",
+    "sha256": "c1b0474d01e1cb521c7c35620e48db0e9281cb5e241bd9658f606abacfe6822d",
+    "bytes": 3791
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r1/previous-product-source/archives/conversations/player-architecture-remediation.md",
+    "sha256": "7ab4027d83ea47c719c42ee839bad4ed156950c3c64fcbdf71b59da40e43ada8",
+    "bytes": 200314
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2/bootstrap-build.log",
+    "sha256": "4c72b4b0549e400725aad4fee6c661768178c7252b743b789c35927f93744fef",
+    "bytes": 676
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2/build-command.json",
+    "sha256": "ce180c572b1c3c6b718322c5cdbd478d406ba0a229c374d3a298c2469af37ea2",
+    "bytes": 818
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2/11D03CF4-26B1-45DF-85E0-0EAC02B901EE.xcactivitylog",
+    "sha256": "c238c26f1e9596f714e31e1b8a4d852a0125b35aa98c34c0af8cd368388f0fc3",
+    "bytes": 54016
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2/selected-graph.json",
+    "sha256": "c3f43dc06e7266e8bbd082aa902302afc0da88ba2d7c2238006110ecca39c9bc",
+    "bytes": 95156
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r2/bootstrap-verification.json",
+    "sha256": "d38270f12cb49fd3792122cc01faf16a066b8a8aff16e5b31fa70b2e4affb945",
+    "bytes": 2192
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/log-extraction-summary.txt",
+    "sha256": "f4dacb28681ab93ae645b90e627ea23563212461877bce4ad463c15acdbc93b1",
+    "bytes": 5651
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/source-binding.json",
+    "sha256": "a608ba99e896f544e3a955ddcf77d383e868402ac4baf6d71d7198bd01fb7083",
+    "bytes": 1464
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/matrix-summary.json",
+    "sha256": "12ac0e8d481668980e146e0b90925e86f564dd4e90f5942f749c4e8ec5654c2a",
+    "bytes": 3488
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change-precondition.json",
+    "sha256": "31202fd684a272a1e67cadd4f458c75a587341ea7639470f65d1cb557b834f26",
+    "bytes": 300
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/effective-pbx-after-build.diff",
+    "sha256": "b88712ddaa2af49e4f98d34dac50063ae67af24ef007cfe938ed011f542bb5c5",
+    "bytes": 6293
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/result.json",
+    "sha256": "94c2ad820aef8aa65b18c93ce009bd88f4a61e55c93818b0092bc56b3fba1f85",
+    "bytes": 5598
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/build-command.json",
+    "sha256": "c2f456defed06c5cfd9a28deb4f355c9e1e581f84786ca3f93f2ac74c5263190",
+    "bytes": 2344
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/04C5EBEE-A4DB-49A9-95A8-482472C77081.xcactivitylog",
+    "sha256": "7f2f7dd4d80f420645918b23d5ef42367f2ad9cbfb0392f78d56ba98dd1c3a10",
+    "bytes": 56460
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/activity-events.json",
+    "sha256": "dbd6469e7ead833bd968371818e742675e8302467c2392916417b69446f7d34a",
+    "bytes": 15364
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-to-legacy/build.log",
+    "sha256": "6eb7715f10d922a80a7e98240a5800be73b657460167dac2831e34370d6086ca",
+    "bytes": 6107
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/result.json",
+    "sha256": "4dc13ddfe743c0ddba9893115b44f111fdb7f52dea6cb1dd165f853c9b67fc98",
+    "bytes": 4597
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/build-command.json",
+    "sha256": "00d7755e07c90cf98b72717fad2a27afc5b681af872cc0b74c024c7551cd5094",
+    "bytes": 1971
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/91466410-65C3-4DA0-BA6A-93C8F232AFC6.xcactivitylog",
+    "sha256": "489a8e51f1c7666bbf549f014670f0399eeac754ee2fde1940b00c455a551e63",
+    "bytes": 84426
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/activity-events.json",
+    "sha256": "68f19b48d88d9a8b463a9ffd216b0fa9b92061d3c067b2f00317a3ba9456e580",
+    "bytes": 15361
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-first/build.log",
+    "sha256": "c9dc3c70655f34b2343554c60b4d144fafbc1cab9575a3e424208c0615cade17",
+    "bytes": 892
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/result.json",
+    "sha256": "17994d9093036ff01def630e36078ee47393112556088345be4c2e53edbcf36f",
+    "bytes": 4579
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/build-command.json",
+    "sha256": "cc7d05b722f239a877796c44559b613a0e775437e4abffc3d886ac92558228ac",
+    "bytes": 1952
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/activity-events.json",
+    "sha256": "02c374cf6b358323175fb992a014ba74884c1b60871dc31a30128e8dfe37580e",
+    "bytes": 14010
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/FF710200-1DE3-4D32-ACD9-BAE62DEE3A0C.xcactivitylog",
+    "sha256": "40a1dd362e9c3c1a6201fc635264082a854b026a51e6f28cf77a45c535512317",
+    "bytes": 42167
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/unknown-mode/build.log",
+    "sha256": "526c73a40730f11dc6fd4c9038184917f337bf1fc8e1c5f0ce9054a27b3fa3a2",
+    "bytes": 692
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/result.json",
+    "sha256": "c445e8ca9ec279e46fa229b4f6d9e12c6765cf7722b124ab0f176856f2c9dce1",
+    "bytes": 4600
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/build-command.json",
+    "sha256": "566c46f498e4464115ad621cc1fdb292b5ca6dd3038d6340998af3eecbae5a0d",
+    "bytes": 1974
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/BEC84ED0-359A-4754-9F87-DA5E5C0899FB.xcactivitylog",
+    "sha256": "2e2704202bb779b2b75c4281ef2596e4a5e53444ec99c1623476216dd5120ad1",
+    "bytes": 49407
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/activity-events.json",
+    "sha256": "01d3fb996ccf74f6c42d1e2e2d8687d9245e825178e89f72254404a03308a012",
+    "bytes": 1893
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-2/build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-restored/result.json",
+    "sha256": "1962e9a3b790f086ed22625915fa35808e6a94d9f9f8c5eb465cb7e00d5c367e",
+    "bytes": 4668
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-restored/build-command.json",
+    "sha256": "dfc97ba2748e97e8b090951e1b68baf3ed7b9e49b475489b7ed532af90fe1ffd",
+    "bytes": 2042
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-restored/activity-log-unavailable.json",
+    "sha256": "46976f5a570371d1c91fa1d2ea461fb283fbc4eafce7217c2a4594641f07c702",
+    "bytes": 120
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-restored/build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/73B24BEE-44BE-473F-B63A-08C32A2E83FA.xcactivitylog",
+    "sha256": "d582207c7996e636fe1b77c7002f52b2381f775b66611aa07e9d3d9b38272578",
+    "bytes": 50431
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/result.json",
+    "sha256": "a42e7e6244213cf17256fd46f5cf198b40a40d9280fbb5fb9c5fcb7b3eb30e69",
+    "bytes": 4666
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/build-command.json",
+    "sha256": "78a7d18429f8d76b82e4c00d2daa8bfc3bb4748874158b6e186b2c07eff873bb",
+    "bytes": 1969
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/activity-events.json",
+    "sha256": "6e75c0112a9eb3b42d62c4d28398953d79ef5f29a9d708bf1bbf840679c6fc75",
+    "bytes": 2211
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/template-change/build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/result.json",
+    "sha256": "1847351928cb3a701da4571997ba78d18ae604854cd084e717292c689197fb2a",
+    "bytes": 4555
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/build-command.json",
+    "sha256": "b661c07144ca06c8f62d09821415c4897160789cb6ad1666ea02a034848f8f58",
+    "bytes": 1929
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/15E0179F-26E7-4D63-9128-96FC43B314E3.xcactivitylog",
+    "sha256": "22b80fcd052c099de59fd2722b7447f86b73c0d6cee213e5a3dfdbcdb1ad57aa",
+    "bytes": 61547
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/activity-events.json",
+    "sha256": "cb3fbb45aa9aa130b5f98530160deca3f7af9db69813e5fffb6ad21ecdc3db71",
+    "bytes": 15375
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/switch-back-bootstrap/build.log",
+    "sha256": "a7a4bf9be30a0e566c5bd02076f29fe2a74e0262ec46832e7d4c4a3276b575b3",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/result.json",
+    "sha256": "d239558a91ced4a19397ec96d23e4b2956100c87a51a6fe4699115199ce3fff8",
+    "bytes": 3138
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/build-command.json",
+    "sha256": "8720552da60fd826acce9b7b0a7ea36d571bf3e1181ca548e556be798af9190d",
+    "bytes": 512
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/activity-events.json",
+    "sha256": "84ba3e7648b9b5b58b355a37cd7ffba82d71c5591b15eb7d4049b8cd54177d3c",
+    "bytes": 2222
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/ED86FE6A-6971-4AF6-B8E4-C70844C2E7BF.xcactivitylog",
+    "sha256": "8c9babf996ce1f16c8c66474715f60a6670a794253c366b30c5fa52599f3224c",
+    "bytes": 50434
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-target-and-derived/build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/missing-files-precondition/precondition.json",
+    "sha256": "1008e837281d34a7e0378e4792d183048fe326e85678724d16db753521f7555a",
+    "bytes": 880
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/result.json",
+    "sha256": "d7ad7a68924b47a3ad5af3329870743325141274d02d036dd7f514e1b44e354e",
+    "bytes": 4600
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/build-command.json",
+    "sha256": "46082f84e6c4317afe22d2b8bc7eeb709e2b3c08111ebb6b1e9e661d08f0ec47",
+    "bytes": 1974
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/selected-graph.json",
+    "sha256": "e7952c16a4490dc4026482cd1bf3178f2cc52998c9e9b930add7d7539cbb907e",
+    "bytes": 160869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/5EA2E2DF-8BC6-4978-B04E-69AD99DFBFBF.xcactivitylog",
+    "sha256": "4d0af99ad89ecaee447644533f0c22132b15c6d9cb4efea76a4422ee68da83ac",
+    "bytes": 49052
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/activity-events.json",
+    "sha256": "1ee9ea584860c450052bdc8d09b82988cab7063a3851b4899b54ac1858035c53",
+    "bytes": 1893
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/incremental-repeat-1/build.log",
+    "sha256": "08b94bee5226f03ec8c5b8d4091d864107a2600e9c0cd685e88bc03c814412d5",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-postcommit-diagnostic-bootstrap-20261005-r3/previous-product-source/docs/plans/macos-shared-candidate-bootstrap.md",
+    "sha256": "c1b0474d01e1cb521c7c35620e48db0e9281cb5e241bd9658f606abacfe6822d",
+    "bytes": 3791
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/evidence.json",
+    "sha256": "37fb8e909aa5764634d6c9ddaf9c678268482ff58a5cdf4bcea8ccefd504f115",
+    "bytes": 7924
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/17ccadfa0a3ddeec851b6c67edca93de-selected-graph.json",
+    "sha256": "bfe25eed4e6be3218dcd577fc3e833fb84d2c9db2f48338458ebf8d66dd8e4cd",
+    "bytes": 23929
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/result.json",
+    "sha256": "ae5e0f376646188c5c1c4655c22509e3dfee79bab2ef32ef10a47f3e722d15c8",
+    "bytes": 310
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/input-binding.json",
+    "sha256": "6a8875e98ebc40dfb4d999c427a5648361f647ba158fdd7ab3c3c81524be8c31",
+    "bytes": 1564
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/REPORT.md",
+    "sha256": "a83e9b8c33faa4573265a3e7614e67fab6c5dae3bc78700dc1ab07ee52ee8792",
+    "bytes": 5316
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/52c00ac6e227f1e8d5ee2157714f1401-selected-graph.json",
+    "sha256": "c5648a5c861727758f9504244e6a7289258be6efe4928a4b4d63f94a91c6d635",
+    "bytes": 23929
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/r2/runtime-evidence.json",
+    "sha256": "a6e2236b205a833e1675d03f1439c56437eeb7db25bbed2d8512ac483eb64db2",
+    "bytes": 1694
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/r2/official-source-binding.json",
+    "sha256": "3cd1d6fed7e827d4ff3acbd08ee1173af16f4bec14de2f09ed4fb014cb45154a",
+    "bytes": 3686
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/r2/result.json",
+    "sha256": "1cac57a915bec9bc6f1f738289d63a3219a36ec61c4ae78573dd57d00295221a",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-pending-order-analysis-20261005-r1/r2/REPORT.md",
+    "sha256": "9f79495292e59e4c17f9662ecac1dbc9b0c12e4d287ac0eabb652710148dbbcf",
+    "bytes": 6714
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/mechanical-result.json",
+    "sha256": "415b399912237f44efc933188ef6b9a9f61e2d6c9695395657369b8515c65454",
+    "bytes": 1580
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/git-diff.txt",
+    "sha256": "8d0175d1474d880f3b72bd0a6f33975a59c3e21d7b90d908e373724d3fb69981",
+    "bytes": 624
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/project.pbxproj.diff",
+    "sha256": "c6f02c24053c899e6375d70bb74c18076c04198cce73e5e78ad75f8beb3b9522",
+    "bytes": 460
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/review-v2/verdict.json",
+    "sha256": "7f2fb0d0712183788ec5f3a73e5b37d6d30ffdbb71c5fef8f8cf7e59a5a2ac00",
+    "bytes": 511
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/review-v2/independent-evidence.json",
+    "sha256": "e16329397d3affb86079232f266aaf9ad3a9fa8b9b72bcc181717211eafc57fe",
+    "bytes": 5055
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-info-dependency-fix-20261005-r1/review-v2/review.md",
+    "sha256": "600b3f0f4a0ed1af8c54211ce7e23a8a7b5354980d0e6d2584bf758b5fc76537",
+    "bytes": 5193
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-design-review-20261005-r1/input-binding.json",
+    "sha256": "b1483d757ad43032070515ab811920b7ce2a2bb2adfb4ec9dfa3dc2114537fe7",
+    "bytes": 2857
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-design-review-20261005-r1/r2-independent-log-check.json",
+    "sha256": "078a5086ce1d236a2e4cf9fc8dbf4cece8b4a990bab590cbb836b172071f8d6e",
+    "bytes": 1205
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-design-review-20261005-r1/verdict.json",
+    "sha256": "9da9b848b0cf3430b90ce9ddd96fdb283bde2bb5094195353aa5b898b2704d49",
+    "bytes": 431
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-design-review-20261005-r1/review.md",
+    "sha256": "9f52cb40b877f04dce0f262e30bb8a8de801b8532ce333973f492ec25baf31f4",
+    "bytes": 9156
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/RESULT.md",
+    "sha256": "790bcd6d0adbc9215726e94c6b424fe8643e9669b6071fb4f74554e202175946",
+    "bytes": 4826
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/baseline-before-task.diff",
+    "sha256": "ef439b0c7188e2f731bf3cfca95925f034ef5eea520f3a1bfa2971a2ae270e1e",
+    "bytes": 569
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/git-status-after.txt",
+    "sha256": "5418c31e47dd3f4427885bf71f5b0969242952a84dda3a43c8b783f7070bec79",
+    "bytes": 442
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/commands.txt",
+    "sha256": "b0f89b5c5538aa18fdae4ab85c7824cf9e3d6dcb8c7a1d9935a5f4fa5ceca181",
+    "bytes": 652
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/python-version.txt",
+    "sha256": "f615dc9512de8b165e2b595e5cdc608a3ba7927ae92f959c5b42ec3d58e2ffa8",
+    "bytes": 14
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/implementation-input-sha256.json",
+    "sha256": "1b4d84930eef3cff8c2a9154a38722111f615544c7c130e275d760873d6d9c0e",
+    "bytes": 1050
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/first-test-invocation-error.log",
+    "sha256": "8b62c49aaf39842581ca3d936ff28e2be499d2e67dcbc86ea6454fd2e0d4dd2d",
+    "bytes": 158
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/python_syntax.log",
+    "sha256": "3ae3aef2ae11c1b4d75cf63a31783cf95a3139c8fbddec776c07c1bc70fcbe09",
+    "bytes": 18
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/macos_shared_bootstrap_test.log",
+    "sha256": "0528fb78bba2e32970a710dc3f80c488573569eec49e31153702524de78d3fe7",
+    "bytes": 421
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/macos_bundle_info_test.log",
+    "sha256": "5a0ebbc762e6b5163f875b5a32fc664d48339e39c0055bc627887002cc603f15",
+    "bytes": 104
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/plutil_lint.log",
+    "sha256": "a48b05dad755ab7a52a8e0f75b52dbcfcb5cab659bc8929417e2aaf5d7d0bbd1",
+    "bytes": 71
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/first-new-test-assertion-failure.log",
+    "sha256": "4829658193cdfc967dbd82fd7fbf8c69a5a668ffd1e9ca196680a786dbd3ed1a",
+    "bytes": 285
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-20261005-r1/logs/bash_n.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/source-binding.json",
+    "sha256": "886ee98557b2ebf2e2fbf322f28dd24b6b6073f4270f7d5c94a8e09d8d1d803f",
+    "bytes": 1122
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/test-results.json",
+    "sha256": "5ff86d91a5a18582175d2e2d2340541a739b08925e2c4cdb73adba4e576b7243",
+    "bytes": 469
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/verdict.json",
+    "sha256": "f37e5c42f48e8a318ca6c35198668c74b7fb47b0d50cefb421e2838e6c6bea42",
+    "bytes": 542
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/independent-checks.json",
+    "sha256": "5f2aefeb0e0da8016fdd038591abc231c3b9ef8818312770a9f9bf1997de145a",
+    "bytes": 727
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/macos_bundle_info_test.py.log",
+    "sha256": "bd6ae93e9210538d978297e471dbd2daf562cbd6c92e3a7ec9cd971bf58cf4c3",
+    "bytes": 104
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/macos_shared_bootstrap_test.py.log",
+    "sha256": "56750b8e6b64a8e89836358490a00f7ae5ec0e53ef61dd7448746fcc04cdb7a0",
+    "bytes": 421
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-implementation-review-20261005-r1/review.md",
+    "sha256": "faa873b1fe5e4c228f42defe0778003f7723890a654e0aee21770f77d82a8349",
+    "bytes": 4473
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/preparation.json",
+    "sha256": "9678a201dd321b1505d300a49487d96ffc48b5690a798491d2aa207b1fd3a003",
+    "bytes": 413
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/post-bootstrap-source-binding.json",
+    "sha256": "e1b124849383c0253c7d50e1d661970c5906d1f12f94bb9984d3edb6868fd7ef",
+    "bytes": 5662
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/bootstrap-build.log",
+    "sha256": "04e4cb52c4a38e7a1e449f739f27c0b6e3ced5b1b6e0b355626254af0d9858d0",
+    "bytes": 16728
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/build-command.json",
+    "sha256": "40ce33abb5eb6164aafb24bc9554ad091a4b5f11aa18f4ba89eb72b82bd637e9",
+    "bytes": 489
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/consumer-command.json",
+    "sha256": "f3bc3b73b30865274d0110335f08b94b9206a7db0c5f20715efd5062e4726f43",
+    "bytes": 1280
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/SharedR4Normal.shared-core.json",
+    "sha256": "4965fa4c44ff544a7141dc39aefcd75855fe0213037714d704a34d66408d83cc",
+    "bytes": 39747
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/SharedR4Normal.shared-backend.json",
+    "sha256": "9afe2d0dae07f8ca238d20e0d83caf0eb6bd0a7312d7951bb6ac40612e43caf3",
+    "bytes": 2283
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/human-normal-4k60-window-acceptance.json",
+    "sha256": "a4a33df92693c05258c5e1c8709bb370274f362638b8beaa8118ceb72d08da66",
+    "bytes": 884
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/consumer-script-identity.json",
+    "sha256": "6f3ee5177e5325cfd44c4cb740dde7edb89d26df49f1782e59049582337c4eff",
+    "bytes": 1130
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/normal-4k60-playback-context.json",
+    "sha256": "8a15b7e80e6466a8123e4bf4ee0417811d941049362c54b83251e75d4e78db0b",
+    "bytes": 652
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/normal-window-exit-and-telemetry-summary.json",
+    "sha256": "53a21f7c5032fef92dd7395dafe119dc3dfa2b1602f381f2093d6ffccdb66e12",
+    "bytes": 426
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/consumer.log",
+    "sha256": "80a9e2d8042f48bc7d53c8f7a1fe362ea0b9739a16644734bb3cca89d3bb653f",
+    "bytes": 25365
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/review-v1/independent-binding.json",
+    "sha256": "2debbaa965981b40d3fc5e3cb895571f64e63ea61a198b9fa5467f33af3a512c",
+    "bytes": 46709
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/review-v1/review.md",
+    "sha256": "fcf685062bc10d5bf5bfb74c786b74ce609c07277d612f76d9f0f12d87c2ed4f",
+    "bytes": 4757
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-1.log",
+    "sha256": "0817a35d0c8686e8eb7291940927b40b7a07f77f0c0251fb257795ac889596b9",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-16.log",
+    "sha256": "8ac81633ce82a135c64e84ef99af0f7cca9ff125a8adb52604f6ba022d94ffb8",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-17.log",
+    "sha256": "6ac3513da32eefda51872379753e478b5e583dc97040f604dbae6cb6c50280f7",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/inputs-before-package.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-0.log",
+    "sha256": "d9015db8351527a468962ba68d07ed5d0aa508be7787791bd1430e0667024771",
+    "bytes": 209
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-2.log",
+    "sha256": "a7f59f7be219a560ab0383f33ed9f524e398e5afc6311b929e4cccdea99534b8",
+    "bytes": 209
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-15.log",
+    "sha256": "2845af1e408fc4b5d18fbecf8bfa4e26860c75ed13715349e1462c55f86160a2",
+    "bytes": 210
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-14.log",
+    "sha256": "bcf50d0df77bdd24beb72e345b6b4e88580369ed4c127d736ca4ce9ccc3f59c6",
+    "bytes": 216
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-3.log",
+    "sha256": "cceba114fd3f93c8dd936911b57f67501e5d57544b3279cb85d92167e45f8588",
+    "bytes": 206
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/staged-gates.json",
+    "sha256": "8745963036d4001e6b9c97d59a8d8d217abfc79cb5e9a2c8f5fb86e446923852",
+    "bytes": 36341
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-7.log",
+    "sha256": "524dbd813ce1c9c937c28352626d1eb99ccb8effbc07618d6e0055f288adfbc3",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/source-app-signature.log",
+    "sha256": "4487d46abdcfd42196755958d6c987287984fd7de7a9be9372ae36ccbaf31587",
+    "bytes": 198
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-10.log",
+    "sha256": "ead61426eb95699c1527217922d06c525e68a75bb54e7402b9a538f07015aacb",
+    "bytes": 210
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-11.log",
+    "sha256": "fcf4d16fce2cd560d6c8e5873f3f23dad131def9f1d7a357e6408ed9c83a68f1",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-6.log",
+    "sha256": "c25b9f9c4b91a298cbaf46e31a767f4a1f5d4dd926406f617dbd016fb3efccbf",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/result.json",
+    "sha256": "fd1a7817e21b433f82a5a9d871fa02b665b7728efaced93447e8e2cdf5006254",
+    "bytes": 36341
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/final-bundle-gates.log",
+    "sha256": "a19b024ab0749738eff33719aa429b028ff69f4731288b4397ded7d203128a6c",
+    "bytes": 920
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-4.log",
+    "sha256": "d74e2f04913581fac74888ebbe692657745921db977b65065a99f06d1b099f16",
+    "bytes": 203
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-13.log",
+    "sha256": "d3a179bdbcc7b212bc2e11b007890fce554198d2efbc925e83049875825c6dbe",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-12.log",
+    "sha256": "72ed18d97fad9bdd1fc79afce4d3438b870de4d1695c6eb7c51dc518d98f608e",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-5.log",
+    "sha256": "483263c7a90cfb55ca33fae2e6d9d91ed9b1e6a768950895caf0eddc61d83c12",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/source-bridge-arm64.log",
+    "sha256": "9d277cf3c9ffecba89687188c9de6ee54fbff5a6a8e2c354f1ac633253aa7b2d",
+    "bytes": 327
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-app-envelope-verify.log",
+    "sha256": "dbbc91500e0ff19cd7907113905d970cc8cbd1baf072c40d967e6972a9802ebd",
+    "bytes": 180
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/inputs-after-package.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/inputs-before-build.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/shared-build.log",
+    "sha256": "200b614b436fd28a917b96f24a1c120dd9e0b244828dc1e15085b4d95f2f6adc",
+    "bytes": 6281
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-8.log",
+    "sha256": "8875b1ba1dca51002450f4725654601313224af7b4291cd245cf9477bc4f9420",
+    "bytes": 206
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-9.log",
+    "sha256": "25db7f1f7342984396753d7f4f058068d6d34c80b6f960c7a54afc1be8c1aa37",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-19.log",
+    "sha256": "ab4540b896e863e411228234d706de33a2c630bbae4acfe332b20fd8682173f4",
+    "bytes": 204
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-app-envelope-sign.log",
+    "sha256": "71e49546c41fa8f104ac624f76bb9bdcc0cf30c612092027753b947d0e420f20",
+    "bytes": 379
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-signature-18.log",
+    "sha256": "8d61398db1f7ce7ccbcebc4ef2bccfd3905da6124612d511b1a71e32bce379cc",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/shared-package.log",
+    "sha256": "b760aef9a6739dc3a2672201c31678fc6aa03a59602a4b15229880c4a4c05dc4",
+    "bytes": 9160
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/runtime-envelope.json",
+    "sha256": "c0e55537fdd2f33e13613eafa9868043d83bb183aaaa5c40097b7c72e762a2f1",
+    "bytes": 33244
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/logs/source-bridge-x86_64.log",
+    "sha256": "7749de121d45b9e5f055052a7b29a82239cf4d85ec5676a1b69d3caef1091bc5",
+    "bytes": 329
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/build-state.json",
+    "sha256": "2b09a8081e565be34bd5c14d85c1519f7ced380ad21c5c72518e8894c97ec353",
+    "bytes": 863429
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/prepare.log",
+    "sha256": "32678be5c12428a5fd694c52e00ed63045b9781e44872aac58229971ecfc40f6",
+    "bytes": 1311
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/published/approved-slices.json",
+    "sha256": "11783ebb7a7c132e9b795bdbb7a04ca27a56722aabb7078e5f3dcd612c5ce7ec",
+    "bytes": 162
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/published/publication-identity.json",
+    "sha256": "7269582972311dbced0b5fd0f652e5b3e15397509368d6c0f453f13cf6607e76",
+    "bytes": 98
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/published/slice-manifest.json",
+    "sha256": "eeb5522e5487d1e9859b97413bbbcaf5e685e8de5cedf9960c657d7dc14e11c7",
+    "bytes": 2095
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/published/arm64/slice-manifest.json",
+    "sha256": "e46ae15d7683cbc731f17160c8ff16bc5d754e689fccd1cd4b428804094fe2a5",
+    "bytes": 410944
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/published/x86_64/slice-manifest.json",
+    "sha256": "c7791ec4e8db096e3c759eaf669bc58c3002d84b9dd265b15f54e16ff0f5c139",
+    "bytes": 410954
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/.editorconfig-checker.json",
+    "sha256": "e2255c2958bef8bb19c10c97a95dac93f3b953bb7774d641853b7d06645bb87c",
+    "bytes": 117
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/README.md",
+    "sha256": "966edbfa16ddf85277733494f6458c3546e35e445f530f7d92310362e9006979",
+    "bytes": 8717
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/setup.log",
+    "sha256": "2262cac14740c618c41ad4a7708a7ff9e698f4cc9db89e3a866d34d8aacad825",
+    "bytes": 15154
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/compile.log",
+    "sha256": "313eb44fc2cc9f7a54ad43398b1bc036bbb06ebe9f61e13678b6f32971d2f105",
+    "bytes": 38869
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/setup.log",
+    "sha256": "02611c44ca85ad4524f9240c74f6311fdce680ac4dbe6b4f8af42414510bd0d3",
+    "bytes": 15168
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/compile.log",
+    "sha256": "45f156e92e5689dae13e685f7c2a95e6c22b2710da288b0d8d463a18209d2aa4",
+    "bytes": 38872
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/compile_commands.json",
+    "sha256": "ec443881a5a0ff8396d612b017015d1e436bfd81ad5febaace98bd738ca60035",
+    "bytes": 350225
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-private/cmd_line.txt",
+    "sha256": "660af442039dbc00c84ba8db97c0663f8768d0e6b6c55024f298d59ba22df48f",
+    "bytes": 960
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-logs/meson-log.txt",
+    "sha256": "d1529a3ed3ba94bc096ddc063a5395f6593d4fbd80aed87260d55a85a0a2cfa6",
+    "bytes": 182153
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-logs/meson-setup.txt",
+    "sha256": "73d18cc38f0651b7010bf305f1bf4a63615d999e4d2d54437c644da33eddf350",
+    "bytes": 13904
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-buildsystem_files.json",
+    "sha256": "a65c6466bf79333fcacb02e51ee41b798c66259a977c058560792faebdddea1f",
+    "bytes": 1601
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-benchmarks.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-buildoptions.json",
+    "sha256": "764e5d6e1d817403563ab2db6029d1ce5fc9180e11265b4b4ba98adb3931e61e",
+    "bytes": 40805
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-machines.json",
+    "sha256": "ce96b3802bbf6ce44f8332ed834108266bec92c3257abf2dafba5f690907a0b6",
+    "bytes": 692
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-dependencies.json",
+    "sha256": "939972de92f90858c5de32a8bede81e184021f92873b6fd5a397c59535a3eff8",
+    "bytes": 6546
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-installed.json",
+    "sha256": "0ae45c089ffd6b49b14874861d558828604849fa2fc5e23d3c779306535ef00a",
+    "bytes": 982
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-compilers.json",
+    "sha256": "2b6e3535dcffd406964d6ce780fd0520cb6c4797f639978b9c8d9059d7df81f9",
+    "bytes": 1478
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/meson-info.json",
+    "sha256": "9975b47838704edafbe5e1e20b91a3b9c501451bc021707d66c721d3033ce276",
+    "bytes": 1291
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-tests.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-projectinfo.json",
+    "sha256": "32c25351995a0d7bdebfe9203e9f814583e97ba0e179d056627052e82a3ded0f",
+    "bytes": 181
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-install_plan.json",
+    "sha256": "d43e26cc9044da503f3647f7f9fa3acabe39a05860c409803209d5562afa9b1a",
+    "bytes": 1468
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/meson-info/intro-targets.json",
+    "sha256": "02178aadc02cf587cc9ca316983693d3df9467b850c0a81be5010b77e9bb4e7d",
+    "bytes": 71840
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/x86_64/build/osdep/mac/swift.abi.json",
+    "sha256": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "bytes": 149
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/compile_commands.json",
+    "sha256": "1656611a71841f335771dd87aa1dba5a5b1ac51a2aaf3276cc585c21acd18846",
+    "bytes": 349553
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-private/cmd_line.txt",
+    "sha256": "5bfa2abac6e787666b288a954a124d7bbb0e58ed4069006028c22376c6067545",
+    "bytes": 956
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-logs/meson-log.txt",
+    "sha256": "4236d1243470ee3ce3a501489967a89ca2025f7437001c9bdcf0f459df06a250",
+    "bytes": 181678
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-logs/meson-setup.txt",
+    "sha256": "a3359d7e96107022ddb68695dda30ce474f286bffa72f805c523969113790236",
+    "bytes": 13895
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-buildsystem_files.json",
+    "sha256": "a65c6466bf79333fcacb02e51ee41b798c66259a977c058560792faebdddea1f",
+    "bytes": 1601
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-benchmarks.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-buildoptions.json",
+    "sha256": "a280c73c54ac499dd4aa7135de209ebe45f982df9fe33221710ac1cc170b22f3",
+    "bytes": 40799
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-machines.json",
+    "sha256": "50fe87b57402f4204d67e4d638372d6eebb1694be0721363daad84878f3a571b",
+    "bytes": 692
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-dependencies.json",
+    "sha256": "7f60cc8dcc0ad4a6d980db459025952ee7d794ca52c3ab8de1dfde9f2d6f5f53",
+    "bytes": 6544
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-installed.json",
+    "sha256": "fe97b1aeb16ddf92ee45c46f54554dc88cda5fcb55f414f7e59c9eb09c258aa8",
+    "bytes": 980
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-compilers.json",
+    "sha256": "ca0763204160ebc794c12567f3fc1f8d6b29961f2d11a84946a7272aa3777f1d",
+    "bytes": 1474
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/meson-info.json",
+    "sha256": "f5c8c086173fbb1e26beb44bd9534f6902d2bf42611d54184a5b52a505000363",
+    "bytes": 1289
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-tests.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-projectinfo.json",
+    "sha256": "32c25351995a0d7bdebfe9203e9f814583e97ba0e179d056627052e82a3ded0f",
+    "bytes": 181
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-install_plan.json",
+    "sha256": "e42bb2e329f44276e914df281bf99254b8663242ea852a589a800a641d1b78b9",
+    "bytes": 1466
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/meson-info/intro-targets.json",
+    "sha256": "324cc1a5be1dd209e45cabd878b8dd190be6420fafb71e5514e28288b7dbc6de",
+    "bytes": 71781
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/arm64/build/osdep/mac/swift.abi.json",
+    "sha256": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "bytes": 149
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/DOCS/compile-windows.md",
+    "sha256": "49022b6ae45f4ac495755aa2fccc90de39e9e2b8bfea5050193d42c06f83cb2f",
+    "bytes": 10008
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/DOCS/tech-overview.txt",
+    "sha256": "88b4a2e232a6223e6fe078c295c23f6320b3f577396856dd95a19f532ec0ba8d",
+    "bytes": 31223
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/DOCS/contribute.md",
+    "sha256": "0f425c93f99636839d4a6855382a14f8c0e8758d750ba06a1648b69e4c573b59",
+    "bytes": 13444
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/DOCS/release-policy.md",
+    "sha256": "e654e806c98cad039b5e6fa3463c19ef3beafa4a4e592524adf69fa3c8bc765a",
+    "bytes": 4122
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/DOCS/interface-changes/example.txt",
+    "sha256": "0c60657b7f1d472e3cad37a8d95e9ef8d28ca699e976c3bfceab85c9f53e6c5b",
+    "bytes": 60
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/repack_zimg.log",
+    "sha256": "8b290819ca94371ad32e2e2c1eb13561387df1ca1ce6ff2c1b256d01a60130f8",
+    "bytes": 334
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/repack_sws.log",
+    "sha256": "8b290819ca94371ad32e2e2c1eb13561387df1ca1ce6ff2c1b256d01a60130f8",
+    "bytes": 334
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg6/repack.txt",
+    "sha256": "e61c5facef6ff74328b57975a6dd7378988834ab6e7facc7efa41a107ffc6fdb",
+    "bytes": 22702
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg6/zimg_formats.txt",
+    "sha256": "21cf5a73b7f86fa4b3f60b57cb66c7b0d6d4f0cb3b4438b910a6164fa190046b",
+    "bytes": 11703
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg6/img_formats.txt",
+    "sha256": "dfd548d4ea695b654f32c2a2319ce035fee6fc18cd59c31a1653f77d886c41d9",
+    "bytes": 98616
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg6/draw_bmp.txt",
+    "sha256": "75302807bd0f380e8ec8a320c7ec7edb662e1ba0b5910904804a4d5fc8d83ea3",
+    "bytes": 20310
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg7/repack.txt",
+    "sha256": "ff8827729700cf9dfe1c9689e224a164cfa576b35721743d9a21e5b777d12e17",
+    "bytes": 22702
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg7/zimg_formats.txt",
+    "sha256": "3a20253437c1fa98b2b4a6c018dba291e6ec730775e2c4e11c81cdc9fd350ab7",
+    "bytes": 11703
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg7/img_formats.txt",
+    "sha256": "6792534b28449a0e8dfd4cf4d19fd30b1c420d8d8490181108018e4e95bdb878",
+    "bytes": 98622
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/test/ref/ffmpeg7/draw_bmp.txt",
+    "sha256": "0e2367ff35097400c1754eaa15e5235b5673df2d1d071a2e3e107fd1838e9c30",
+    "bytes": 20310
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/TOOLS/lua/README.md",
+    "sha256": "209efc14802ce3c413abc6eacb5c7bb179c63f1d4745b2aa6a3e9774c064405a",
+    "bytes": 623
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/source/TOOLS/mpv-osd-symbols.sfdir/README.md",
+    "sha256": "5c8b0a79a661a64fce46585db68a3e5ba3c31061772e460991549ab4235f4db0",
+    "bytes": 698
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/slice-staging/arm64/slice-manifest.json",
+    "sha256": "b2222346a13f13995b74c5ba0d62a6228cd0accfccbeae52de630e9ae8dfaf9b",
+    "bytes": 410953
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-normal-candidate-20261005-r1/work/slice-staging/x86_64/slice-manifest.json",
+    "sha256": "16e0353c0ce3266ddc4c36298e11357f016e50a0afe2415ceedcf5e4b1685d1c",
+    "bytes": 410963
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/hlg-telemetry-context.json",
+    "sha256": "a143b411f6b92b768998a580b5c2b07fe6aeaf9b66412496e61dae68d2fa6fd2",
+    "bytes": 597
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/first-p5-operation-result.json",
+    "sha256": "40f34af951df71f1f969121ccb0c1534afe341c949c8c97b9633d271e5c20f06",
+    "bytes": 371
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/incidental-telemetry-summary.json",
+    "sha256": "97e5128e779c87169646ccfce7fcf9ebdcce17f34724fccf2d548d29f9095275",
+    "bytes": 2661
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/flutter.stdout.log",
+    "sha256": "6a2666dac23189993d0d401962db42fe7145bdea3e1655f3e32f01ee72f12e3a",
+    "bytes": 207
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/consumer.stdout.log",
+    "sha256": "4bf0f6d541080c9ee695cf44787d958c9eee9362503d3dfc15147a7410b5138d",
+    "bytes": 25374
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/post-bootstrap-source-binding.json",
+    "sha256": "742eca205982cbbd754ef8c5c3a33cd51e5bc417f4bcf30217c631570bbd3381",
+    "bytes": 3376
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/recipe-prior-identity-binding.json",
+    "sha256": "cf4a3f2562b801b01ae04808dd872dad9a855888e99bebb39db96ee91411916d",
+    "bytes": 991
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-exit-result.json",
+    "sha256": "0fcd44b3561906eac425fdefa0845622b16956c69971e85ffddd76792a6d247f",
+    "bytes": 231
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/hlg-exit-result.json",
+    "sha256": "9c9b1f5e728b93d586f8def33bfd88b6a93e801598ae2e49520e84b368d76236",
+    "bytes": 248
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/p5-telemetry-context.json",
+    "sha256": "510544e030789257e24f5661f5f815a1f6adfc0439fdd8982e217cb15c8f2fec",
+    "bytes": 603
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/source-review-build-receipt.json",
+    "sha256": "630f8b906d3f16089597e88cd45c0a8052f510824ce0e2dde7deeac8a622fe39",
+    "bytes": 6385
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/hlg-runtime-images.txt",
+    "sha256": "f60cf96e03ad5d98c4f30eb34c4e69b4d1c2c5691e5713ce074054aefc56d6e2",
+    "bytes": 1564013
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/build-command.json",
+    "sha256": "4fcaa0b83fa0295df985e6277b0f0e61c40f6f43af98e1f32098ee7c4e6370a2",
+    "bytes": 488
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/bootstrap-binding.json",
+    "sha256": "2219ab6afa64e510adde62c64ac9bb2d010ae5c08f56b8b68210d282f961ee77",
+    "bytes": 56012
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-hlg-acceptance.json",
+    "sha256": "9c2b39e20072fbeca6cd5edc78ff01e1f527c3f0a8d658cb3eed007b87ce8c1e",
+    "bytes": 818
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/hdr-output-evidence-gap.json",
+    "sha256": "e6a540046b07ff3ec8bc80e30fa9091bf414babf3b95ff6ab693f7f6c552f9ea",
+    "bytes": 563
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/standalone-homebrew-mpv-binding-20261005.json",
+    "sha256": "9ada51d3b4bc9e01835fa7521275f2be0fcc34ae6b5f0043cb9a7ba550bcfb46",
+    "bytes": 8500
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-pq-acceptance.json",
+    "sha256": "b5af0b69dc27dde50f97c46565204a799dbbb1985345028beed12aa113dd24de",
+    "bytes": 1289
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/completion-audit-before-requirement-refresh.json",
+    "sha256": "889651f4ad4d1c51b0d36099021f6a048922f28e269bf130237394cc19ecbffd",
+    "bytes": 8915
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-opt-in-environment.json",
+    "sha256": "192814af872a653d0a1fd2dc44391a208e86cc70b7e568a6560d4aa4dc346554",
+    "bytes": 251
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/consumer-execution.json",
+    "sha256": "8e63c25ba359dd512bc6b3a96b515ec483b3d59bd6d230ef7ac4ae35ede168d6",
+    "bytes": 1206
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/runtime-images.txt",
+    "sha256": "ca9f7e23759bf4d6dddbd2a6be7019191fe69c779ebe1c77b28aebf666d61a89",
+    "bytes": 1550320
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/normal-exit-crash-report-check.json",
+    "sha256": "8877f2ef99c0675dec806e628118a66f031a6dc5edc6d9ec34a2d71402ebbbb6",
+    "bytes": 201
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/consumer.stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/flutter.stderr.log",
+    "sha256": "12e5b3b8a9afcb6be5a9afd8a76179db769876bc15265de7f0fda960776dcf2a",
+    "bytes": 42713
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/live-session.json",
+    "sha256": "02fd34a64c466e8cf68daee9d9f63867c0e049f0bbf8fe0ab38054a40bad75a9",
+    "bytes": 261
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/SharedR4LocalHDR.shared-backend.json",
+    "sha256": "dc39dd20da1b8a797e119e984c552e3d52c47b7306968d54de32f6a9173014c0",
+    "bytes": 2303
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/source-review-build-receipt-analysis-supplement.json",
+    "sha256": "1b1da77aa5a94394460e32729bd50d8ec5d6fbad0fbeef2d762eebacfd968591",
+    "bytes": 359
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-same-host-other-clients-control.json",
+    "sha256": "c8cef7425d38733949d8d8af800f4c6ac7adc21b3e24f256036ab3501c417570",
+    "bytes": 1027
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/remaining-completion-gates.md",
+    "sha256": "fb1a0b9ef1eaaf22652046f6a887cd625cc6de5b7e06bbe5d32eecbb8172eacb",
+    "bytes": 2673
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-p5-acceptance.json",
+    "sha256": "8830914af896cd386ab91a8db378d2bf71e7a69850a3ddaa42e6db4c4956e274",
+    "bytes": 1225
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-telemetry-context.json",
+    "sha256": "441c852175a8642344f8cd5cdbf9b088f900c4b8f9f0ef30edc19666dec982ca",
+    "bytes": 949
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/SharedR4LocalHDR.shared-core.json",
+    "sha256": "f23245e03e50ad7103ea41af3baea200d313754b52f7537c25bbcfaac5d92d5a",
+    "bytes": 39755
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/human-standalone-mpv-control.json",
+    "sha256": "a7b56199015757a01b540e519a752654d1344785ec75826059d09bdaa72747a2",
+    "bytes": 431
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-producer-diagnostics-final/collection.json",
+    "sha256": "e426e0346310bcdd247c42f4e7c883de1aaad952fa7de83fff51bdb292236f42",
+    "bytes": 631
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/independent-binding.json",
+    "sha256": "0ab00cc3ee951ab6b1c3f619a4e170e2eddac558d5ed252417ec638fd75795a7",
+    "bytes": 2667
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/original-evidence-binding.json",
+    "sha256": "6c97624e6f6b1f6ab231d1bdb8be96eae201b36ad2f01730e7b860caf9b5b03e",
+    "bytes": 1227
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/verdict.json",
+    "sha256": "bfd84dfb32760a936456e5d01ac9423e977ae7c882b7232838dec75ab5039a35",
+    "bytes": 5090
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/SHA256SUMS.json",
+    "sha256": "0ba253d3fc6a5f8fd67633919ac793809683b389fbbc218afd9960c507258014",
+    "bytes": 580
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/human-p5-acceptance.json",
+    "sha256": "8830914af896cd386ab91a8db378d2bf71e7a69850a3ddaa42e6db4c4956e274",
+    "bytes": 1225
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/review.md",
+    "sha256": "e496e9af7bcb9916f17228b825517d4aa4f10e0bf758b5f047b42f45942119bb",
+    "bytes": 2303
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/review-v1/local-package-source-boundary.json",
+    "sha256": "0a0bbe7d6816c0cab0cc60d1f59475ed99fc6b9dbd4e0890ffbef6e48b170de9",
+    "bytes": 3153
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-existing-output-diagnostics/collection.json",
+    "sha256": "775836d6fe40111cbbe65868055f461ff88a462c351ea4ec2efd15dbda207a2a",
+    "bytes": 940
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-output-diagnostics-bounded-final/collection.json",
+    "sha256": "40502438c3baaf7845e84f391512d44cc33343336f7388cfdb3084659ec758f6",
+    "bytes": 1025
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-output-diagnostics-later-snapshot/collection.json",
+    "sha256": "7c36920f684e3c53a1da2a5837a91636769d53d6dd1cc1a16a4478304b2568e2",
+    "bytes": 848
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-1.log",
+    "sha256": "e4552a90e370d81b5668344b59e3fb58e51efe4ded9906eec9eee74072ec7114",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-16.log",
+    "sha256": "5a579aef285afeb7fdf5ee3875220c49f522ff935483180b7f9f1907eb67b7ad",
+    "bytes": 212
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-17.log",
+    "sha256": "10dd9b5d43a108755afe6344682ad2b5a5b17c95e397397406082ec13125b1d2",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/inputs-before-package.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-0.log",
+    "sha256": "95a8dc61610f594456d889fbd4ffd02486019a7b73facbb79a73222db480f4f6",
+    "bytes": 214
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-2.log",
+    "sha256": "15b2f43e89102ac460a9d9ca05253409a05a6596393926c2b2faf97b80644249",
+    "bytes": 214
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-15.log",
+    "sha256": "1e8903805f94ef328a3a05a812de71e3ab7195b506a633236104709e732016ca",
+    "bytes": 215
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-14.log",
+    "sha256": "9ae27544b3666737e8a33cbe69a7e53b2e8f46033d5467faea443f542df63fee",
+    "bytes": 221
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-3.log",
+    "sha256": "1a5b15eac1f8c0b9979e2f7857115fce456b357976caa3222563d78723fca070",
+    "bytes": 211
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/staged-gates.json",
+    "sha256": "d1b70795914eab52d1b2dca7b314855ab4c561994b99138ca2d6a2bd67bcf366",
+    "bytes": 36350
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-7.log",
+    "sha256": "4fbd8e225477d5b05b25a8f23bba8796c8db115bb0020d5aa618dcfab85d1eba",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/source-app-signature.log",
+    "sha256": "4487d46abdcfd42196755958d6c987287984fd7de7a9be9372ae36ccbaf31587",
+    "bytes": 198
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-10.log",
+    "sha256": "3581fabccc303c78fa8e51bdb0fa122bb76db67e83a3faf58a8add0f0cf4e389",
+    "bytes": 215
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-11.log",
+    "sha256": "14581cbb1e0ac1cfef2718ae6580d8f654d712d159a49f51d496e1962ed09b8d",
+    "bytes": 212
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-6.log",
+    "sha256": "a30e78115140c4e58369586b4a1b34833a98fba2ee6942261e128126be58ba6d",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/result.json",
+    "sha256": "65ac8a4357353e301eaf01fff1c9e8fe2cba971aa7f29161996b13a7d8076955",
+    "bytes": 36350
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/final-bundle-gates.log",
+    "sha256": "52eeedf44433559dffdebbda2646b09d88023ec12b4ef3a76e86ede09b488e43",
+    "bytes": 930
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-4.log",
+    "sha256": "d20c22e535e7545e2ca4e89a76b2b733b6b77d9f32970cdac09eaf3716ff0b8f",
+    "bytes": 208
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-13.log",
+    "sha256": "3bbb23dc18e9a39acd62d42d7848d563c4bee792efe2d656cca74cec94a35f04",
+    "bytes": 212
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-12.log",
+    "sha256": "8d3db558c7f53185f13f54e6b31bcdc0f76f429711be3e631ec10f003ac1e68c",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-5.log",
+    "sha256": "b64b7f6ebcde1fb06fcb2f08921cec9318c52ee7ed8201f73fc6a74d353fcef4",
+    "bytes": 212
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/source-bridge-arm64.log",
+    "sha256": "4363fa0d0b6284d1ae2f734eee9d31088ff86d47bf430034e0847e8f663d2f9c",
+    "bytes": 330
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-app-envelope-verify.log",
+    "sha256": "701b26d91a34d5e35c95c3665ba7a827d4e999890add91425094f008dc37de3b",
+    "bytes": 185
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/inputs-after-package.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/inputs-before-build.log",
+    "sha256": "d4c273cf8c46f0abe6f0502e7dbad988ab81b6087e3cbe703768840b2b837fc6",
+    "bytes": 432
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/shared-build.log",
+    "sha256": "c2f4e725c36c36ecdcd473d1161d437304dc1493227465c7c6adda7664f1e130",
+    "bytes": 6341
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-8.log",
+    "sha256": "821c51c10261f8c19f877d9ec865b0c0e5ea0116cc6e67d5068640a2388ad8b9",
+    "bytes": 211
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-9.log",
+    "sha256": "5e58d856708c214065fe75b9a3ab66b6a60adc5594cac422a5f41031e172ee36",
+    "bytes": 212
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-19.log",
+    "sha256": "beae7067ad0a1782059b4330585f52799d947b303f3a76dfd36bcf1af9aaa392",
+    "bytes": 209
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-app-envelope-sign.log",
+    "sha256": "2e810df037c733c2ff0277597a65a8cbd70765c6921da64e9a3f6865ae58bf92",
+    "bytes": 389
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-signature-18.log",
+    "sha256": "f51f1e49f92e89c742a65531ecf6b313bbe56a3bf709759c50acdad679ef41c1",
+    "bytes": 213
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/shared-package.log",
+    "sha256": "3a0d626892fb18e5614f3980747a0f9105e91c2e1bfb531a470664df26f4b0d7",
+    "bytes": 9231
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/runtime-envelope.json",
+    "sha256": "115c91bf6704abc5be8ec360a927928af7a1380b23c9f589c88fbb87130a2cb1",
+    "bytes": 33244
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/logs/source-bridge-x86_64.log",
+    "sha256": "2ff2a990e44073d9a37181bd228938a3e217ffc517b464681c26cd345659acf7",
+    "bytes": 332
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/build-state.json",
+    "sha256": "e656416da79896648c7aa217d8e8d4d753b8e88d99c2534aebe7514dfa5c4f35",
+    "bytes": 863447
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/prepare.log",
+    "sha256": "304ec0f165a6a4e8a8e98dae1c20b5d2572e75d68c58c7f1e0aa87726d38779c",
+    "bytes": 1317
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/published/approved-slices.json",
+    "sha256": "d74bb114e497679ff88327ba799dd4041f716121944ec3de476e0f79a59ac210",
+    "bytes": 162
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/published/publication-identity.json",
+    "sha256": "3f21d5b701b2dc5c2d3a6c51f8c8637921bf56f54b281a2ee2aa160ade3f942e",
+    "bytes": 98
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/published/slice-manifest.json",
+    "sha256": "555b6257b732bf1dfb63abd434f5f6849010f2b09c14a2cc9b836890733b2199",
+    "bytes": 2107
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/published/arm64/slice-manifest.json",
+    "sha256": "6412dc631830e404b0a821e3e11e445c7e8f880984f635705761a8178c2e1e43",
+    "bytes": 410951
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/published/x86_64/slice-manifest.json",
+    "sha256": "ea3e2c3a6fd84c087f48d51db004905544ac6fbc6c8ef74e57449bab90f6f617",
+    "bytes": 410961
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/.editorconfig-checker.json",
+    "sha256": "e2255c2958bef8bb19c10c97a95dac93f3b953bb7774d641853b7d06645bb87c",
+    "bytes": 117
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/README.md",
+    "sha256": "966edbfa16ddf85277733494f6458c3546e35e445f530f7d92310362e9006979",
+    "bytes": 8717
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/setup.log",
+    "sha256": "ff5c7eb9afff1b90c188c9711e213b76aa7f4790ea155cd4da063b730dff086d",
+    "bytes": 15220
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/compile.log",
+    "sha256": "ab4c05d990e91534c3ec20cd3665732af1b1e0a14aff26b446b0ebdb9ae43209",
+    "bytes": 38878
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/setup.log",
+    "sha256": "3e4a94945a208a7833bd9f67b8571fa78843d0eaa1bec8b5801c7958fb3f9929",
+    "bytes": 15234
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/compile.log",
+    "sha256": "110729f9277e0b825f50a38427faa2b57d99b8a460c90dae731aa83f8576e823",
+    "bytes": 38881
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/compile_commands.json",
+    "sha256": "6045536a5f26fef2ee1db68ec335be002662b5ae94cc7ed740eb52f81f97f78a",
+    "bytes": 350897
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-private/cmd_line.txt",
+    "sha256": "091a46f7781f6ebb34b50168fe42dd14e320a4076772940dbf79af9a58079815",
+    "bytes": 969
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-logs/meson-log.txt",
+    "sha256": "b7f17c1785ca0efd1aa12afb8db73edf1664200623694410d53efc2dd3bcc078",
+    "bytes": 183080
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-logs/meson-setup.txt",
+    "sha256": "02dc356d5a935eea3b5b824fc8f64d010ccd7fe075087fb226a6ad210a1d93f1",
+    "bytes": 13955
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-buildsystem_files.json",
+    "sha256": "94f47081fe83bcfcff4702b0fbaa2de6f68d6b8fd599e7086245943092558a49",
+    "bytes": 1637
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-benchmarks.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-buildoptions.json",
+    "sha256": "670ab914c72f7bc594b78f1c6633f4d483c671549e7e2152551e4739565946b6",
+    "bytes": 40808
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-machines.json",
+    "sha256": "ce96b3802bbf6ce44f8332ed834108266bec92c3257abf2dafba5f690907a0b6",
+    "bytes": 692
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-dependencies.json",
+    "sha256": "939972de92f90858c5de32a8bede81e184021f92873b6fd5a397c59535a3eff8",
+    "bytes": 6546
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-installed.json",
+    "sha256": "b46c5de69720b9814eefecd031f935417522f2888cd1277a39f7e5d82e0b7991",
+    "bytes": 1000
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-compilers.json",
+    "sha256": "2b6e3535dcffd406964d6ce780fd0520cb6c4797f639978b9c8d9059d7df81f9",
+    "bytes": 1478
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/meson-info.json",
+    "sha256": "09b22040203471c3276a9efb91dc5be9953c768b20ca99faefbc26f09b9985de",
+    "bytes": 1300
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-tests.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-projectinfo.json",
+    "sha256": "32c25351995a0d7bdebfe9203e9f814583e97ba0e179d056627052e82a3ded0f",
+    "bytes": 181
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-install_plan.json",
+    "sha256": "8e017c1d9c37f7882e3dd55722f12f3ebbc93a486e7fb95889c5215e1ab72175",
+    "bytes": 1486
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/meson-info/intro-targets.json",
+    "sha256": "5c11d122a6d1cc06013a1391e34df5b66308e507462b4757c908bc54b8859af3",
+    "bytes": 72980
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/x86_64/build/osdep/mac/swift.abi.json",
+    "sha256": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "bytes": 149
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/compile_commands.json",
+    "sha256": "e3884f4edf035176f0b657eac67222614a6f82d178a9eb38fbc52a1ae6f5ee06",
+    "bytes": 350225
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-private/cmd_line.txt",
+    "sha256": "d51efe5c450ad7b77366273876cd59dbef26398b0a60d6e648368365752d8b7c",
+    "bytes": 965
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-logs/meson-log.txt",
+    "sha256": "4efa78c497d5f4f9c04a4c4aba41d611d8d5bbdde550097826bd062dc0b37166",
+    "bytes": 182605
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-logs/meson-setup.txt",
+    "sha256": "b9afdccd3f3e6e7364bc0dca3b95e95ccc71545a16f8ae494ea3c12fbf694260",
+    "bytes": 13946
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-buildsystem_files.json",
+    "sha256": "94f47081fe83bcfcff4702b0fbaa2de6f68d6b8fd599e7086245943092558a49",
+    "bytes": 1637
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-benchmarks.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-buildoptions.json",
+    "sha256": "59b3b666b5b3d5be39e59b9ec97278c6dcbfc7371fda3476c7382232a967c31e",
+    "bytes": 40802
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-machines.json",
+    "sha256": "50fe87b57402f4204d67e4d638372d6eebb1694be0721363daad84878f3a571b",
+    "bytes": 692
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-dependencies.json",
+    "sha256": "7f60cc8dcc0ad4a6d980db459025952ee7d794ca52c3ab8de1dfde9f2d6f5f53",
+    "bytes": 6544
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-installed.json",
+    "sha256": "66b02bca4a682e194c783756b0a65291d3a7ec912b2d177b25e9a9c8b32bd726",
+    "bytes": 998
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-compilers.json",
+    "sha256": "ca0763204160ebc794c12567f3fc1f8d6b29961f2d11a84946a7272aa3777f1d",
+    "bytes": 1474
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/meson-info.json",
+    "sha256": "e0910db609c5f1c31c7bd35cf87cf2b910cfe979e8e5595a3d54f24f5dae32bb",
+    "bytes": 1298
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-tests.json",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "bytes": 2
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-projectinfo.json",
+    "sha256": "32c25351995a0d7bdebfe9203e9f814583e97ba0e179d056627052e82a3ded0f",
+    "bytes": 181
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-install_plan.json",
+    "sha256": "d2fe51635e5ab2c77fe393154fee725323813c939c6817375fc41ffe842778e1",
+    "bytes": 1484
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/meson-info/intro-targets.json",
+    "sha256": "6ec70d731f6fcdfbdbb3a7b8b28973547abdb956a1d75703e538ecd9a8743299",
+    "bytes": 72921
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/arm64/build/osdep/mac/swift.abi.json",
+    "sha256": "4277ac6b49f8511196028a5ac20f5b1b1dfa754c24615d34068089f0b1739728",
+    "bytes": 149
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/DOCS/compile-windows.md",
+    "sha256": "49022b6ae45f4ac495755aa2fccc90de39e9e2b8bfea5050193d42c06f83cb2f",
+    "bytes": 10008
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/DOCS/tech-overview.txt",
+    "sha256": "88b4a2e232a6223e6fe078c295c23f6320b3f577396856dd95a19f532ec0ba8d",
+    "bytes": 31223
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/DOCS/contribute.md",
+    "sha256": "0f425c93f99636839d4a6855382a14f8c0e8758d750ba06a1648b69e4c573b59",
+    "bytes": 13444
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/DOCS/release-policy.md",
+    "sha256": "e654e806c98cad039b5e6fa3463c19ef3beafa4a4e592524adf69fa3c8bc765a",
+    "bytes": 4122
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/DOCS/interface-changes/example.txt",
+    "sha256": "0c60657b7f1d472e3cad37a8d95e9ef8d28ca699e976c3bfceab85c9f53e6c5b",
+    "bytes": 60
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/repack_zimg.log",
+    "sha256": "8b290819ca94371ad32e2e2c1eb13561387df1ca1ce6ff2c1b256d01a60130f8",
+    "bytes": 334
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/repack_sws.log",
+    "sha256": "8b290819ca94371ad32e2e2c1eb13561387df1ca1ce6ff2c1b256d01a60130f8",
+    "bytes": 334
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg6/repack.txt",
+    "sha256": "e61c5facef6ff74328b57975a6dd7378988834ab6e7facc7efa41a107ffc6fdb",
+    "bytes": 22702
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg6/zimg_formats.txt",
+    "sha256": "21cf5a73b7f86fa4b3f60b57cb66c7b0d6d4f0cb3b4438b910a6164fa190046b",
+    "bytes": 11703
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg6/img_formats.txt",
+    "sha256": "dfd548d4ea695b654f32c2a2319ce035fee6fc18cd59c31a1653f77d886c41d9",
+    "bytes": 98616
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg6/draw_bmp.txt",
+    "sha256": "75302807bd0f380e8ec8a320c7ec7edb662e1ba0b5910904804a4d5fc8d83ea3",
+    "bytes": 20310
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg7/repack.txt",
+    "sha256": "ff8827729700cf9dfe1c9689e224a164cfa576b35721743d9a21e5b777d12e17",
+    "bytes": 22702
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg7/zimg_formats.txt",
+    "sha256": "3a20253437c1fa98b2b4a6c018dba291e6ec730775e2c4e11c81cdc9fd350ab7",
+    "bytes": 11703
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg7/img_formats.txt",
+    "sha256": "6792534b28449a0e8dfd4cf4d19fd30b1c420d8d8490181108018e4e95bdb878",
+    "bytes": 98622
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/test/ref/ffmpeg7/draw_bmp.txt",
+    "sha256": "0e2367ff35097400c1754eaa15e5235b5673df2d1d071a2e3e107fd1838e9c30",
+    "bytes": 20310
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/TOOLS/lua/README.md",
+    "sha256": "209efc14802ce3c413abc6eacb5c7bb179c63f1d4745b2aa6a3e9774c064405a",
+    "bytes": 623
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/source/TOOLS/mpv-osd-symbols.sfdir/README.md",
+    "sha256": "5c8b0a79a661a64fce46585db68a3e5ba3c31061772e460991549ab4235f4db0",
+    "bytes": 698
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/slice-staging/arm64/slice-manifest.json",
+    "sha256": "687a41be497ac6f61ffd7cf0cbec7f683f10b5a54435338ddc28d41d2b8af27d",
+    "bytes": 410960
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/work/slice-staging/x86_64/slice-manifest.json",
+    "sha256": "38a2f620294481106e670170ead8023c03b534eaa8b9660a0235d015a0204b61",
+    "bytes": 410970
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-existing-output-diagnostics/review-hdr/result.json",
+    "sha256": "06bdf3ec21cc228414416e0bfa3589955239cadcd12c30dc5edd254369e0de32",
+    "bytes": 6571
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/shared-r4-local-hdr-candidate-20261005-r1/pq-existing-output-diagnostics/review-hdr/review.md",
+    "sha256": "c813c71551330eb6d614e017d8093604be54f13fb5ba8524a0405bb1905890d8",
+    "bytes": 4113
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/chrome-path-sources.json",
+    "sha256": "643d7f76fb978fe3bad53c026f20028793e11ae995595455577bddcd7496068a",
+    "bytes": 4047
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/report.md",
+    "sha256": "22ca3a81c8bdb9c0e6d14d9c604fbc2c836b1edc7adb6a79c8578eeee7617d7d",
+    "bytes": 13776
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/ios-bilibili-hd-p5-user-control-20261005.json",
+    "sha256": "7822ad4ef562b28e4743de59f95eb59456729fe6dab7b2f27ebedba3d36fded4",
+    "bytes": 566
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/libplacebo-and-native-hdr-passthrough.md",
+    "sha256": "ea4732ba4a37e896f5cf19ecf9a42be26211321c51d4b5307bcdd3cb2a253acc",
+    "bytes": 15784
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/pq-derived-summary.json",
+    "sha256": "2586d8cbf202921a6cff2ddb10166fffa2196a3603a2d5592a4c109faaacc47e",
+    "bytes": 615
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/producer-window-summary.json",
+    "sha256": "ea7f827a4199c6c40825c909d8ca5329e166eaa61634e3feff71077ee663de0f",
+    "bytes": 979
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/chrome-user-media-internals-20261005.json",
+    "sha256": "ca0f93e54cb4e2ba3ec451e34b0d7c421c978c270a4b75c45978d0025b0e1cf5",
+    "bytes": 1012
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/libplacebo-native-hdr-sources.json",
+    "sha256": "8a84fcfde53ca2d4e13d9acbb9be6e566f135fba0c25e4583cefcc5da90c0b17",
+    "bytes": 4187
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/inputs.json",
+    "sha256": "20730266f468c60d8bb23900c4ba8b09486383178ebb4237c977cf8015041180",
+    "bytes": 5823
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/next-normal-test-collection-plan.md",
+    "sha256": "b5134b1bd3307ae2efdbbfeb15f4c0e0f961a548276931754da804eabd819c9c",
+    "bytes": 6098
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/chrome-path-report.md",
+    "sha256": "a6b1ade9feb33ab07456cf697e77d005446366aa2e52f001d1d51b859d2b31c3",
+    "bytes": 7723
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/p84-dv-metadata-inputs.json",
+    "sha256": "fddac8167caf1b5c6861c8aeca349cb2df3787bb86eaf9ac32f9b8c41b7c9721",
+    "bytes": 2476
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/next-remediation-design.md",
+    "sha256": "7b580a15d6107369427275b6ec6ca25c4147d3ee442fa369e31e48b2e9010843",
+    "bytes": 11509
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-r4-stutter-architect-20261005-r1/p84-dv-metadata-report.md",
+    "sha256": "f524bb44312404395cfbc10117356075b8a4b1ef17a70849b71fb8c34eacae35",
+    "bytes": 4515
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/input-binding.json",
+    "sha256": "436827cdb0e3107154cef3489b396ba1319bc7df23e1adc99c9490309a70684c",
+    "bytes": 11889
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/independent-matrix.json",
+    "sha256": "be8d325ac777eb84ee024bfeb5a45fe72c9e6e209b9323796a44a8a90add1eb0",
+    "bytes": 17706
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/verdict.json",
+    "sha256": "6401b8577f7c6d8a18bc07a0b278cfc696186f0392d8a41e4ba56f8460ad7671",
+    "bytes": 496
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/pbx-semantic-diff.json",
+    "sha256": "d5e2496ba739c628b6c491ccdd673dc3d7d65e0a45cc13ff147df84e8c396c08",
+    "bytes": 1597
+  },
+  {
+    "path": "/Users/wuweiwei1/src/media-kit-build/macos-bootstrap-derived-info-runtime-review-20261005-r1/review.md",
+    "sha256": "706d541d21e5f8ecbef562b28610d9ce77db7f21f4cf2e6173eebeee7d87e8ff",
+    "bytes": 5021
+  }
+]

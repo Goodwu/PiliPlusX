@@ -1,37 +1,31 @@
 #!/usr/bin/env bash
 # Runs after Flutter/Pods embed, before Xcode's final application signing.
 set -euo pipefail
-[[ $# -eq 1 ]] || { echo "usage: $0 APP_PATH" >&2; exit 2; }
+[[ $# -eq 2 ]] || { echo "usage: $0 APP_PATH MODE" >&2; exit 2; }
 app=$1
-mode=${PILIPLUSX_MPV_BUNDLE_MODE-legacy}
+mode=$2
 case "$mode" in
   legacy|shared-candidate-bootstrap) ;;
   *) echo "FAIL: unknown PILIPLUSX_MPV_BUNDLE_MODE: $mode" >&2; exit 2 ;;
 esac
 python3 - "$app" "$mode" <<'PY_BOOTSTRAP'
 from pathlib import Path
-import os, plistlib, sys, tempfile
+import plistlib, sys
 info = Path(sys.argv[1]) / 'Contents/Info.plist'
 if info.is_symlink() or not info.is_file():
     raise SystemExit('FAIL: regular application Info.plist required')
-values = plistlib.loads(info.read_bytes())
+try:
+    values = plistlib.loads(info.read_bytes())
+except (OSError, plistlib.InvalidFileException, ValueError) as error:
+    raise SystemExit(f'FAIL: invalid application Info.plist: {error}')
+if not isinstance(values, dict):
+    raise SystemExit('FAIL: application Info.plist top level must be a dictionary')
 key = 'MediaKitSharedBootstrapPending'
 if sys.argv[2] == 'legacy':
     if key in values:
         raise SystemExit('FAIL: bootstrap pending; use a fresh normal build or shared candidate consumer')
-else:
-    if key in values and values[key] is not True:
-        raise SystemExit('FAIL: invalid bootstrap pending value')
-    values[key] = True
-    fd, name = tempfile.mkstemp(prefix='.bootstrap-', dir=info.parent)
-    try:
-        with os.fdopen(fd, 'wb') as stream:
-            plistlib.dump(values, stream)
-        os.chmod(name, info.stat().st_mode & 0o777)
-        os.replace(name, info)
-    finally:
-        if os.path.lexists(name):
-            os.unlink(name)
+elif key not in values or values[key] is not True:
+    raise SystemExit('FAIL: bootstrap Info.plist must contain strict boolean true')
 PY_BOOTSTRAP
 if [[ "$mode" == shared-candidate-bootstrap ]]; then
   echo 'Bootstrap only: shared consumer must complete all final package gates'

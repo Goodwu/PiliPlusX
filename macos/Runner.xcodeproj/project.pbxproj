@@ -185,6 +185,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 33CC10FB2044A3C60003C045 /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
+				A04D04102026100500000001 /* Prepare Bundle Info */,
 				5190B88ACAD3AAF5B1766AE1 /* [CP] Check Pods Manifest.lock */,
 				33CC10E92044A3C60003C045 /* Sources */,
 				33CC10EA2044A3C60003C045 /* Frameworks */,
@@ -384,12 +385,31 @@
 				"$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Uchardet.framework/Versions/A/_CodeSignature",
 				"$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Xml2.framework/Versions/A/Xml2",
 				"$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Xml2.framework/Versions/A/_CodeSignature",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
 			outputPaths = ();
 			name = "Enforce modern mpv";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\n\"$PROJECT_DIR/../scripts/ensure_macos_mpv_bundle.sh\" \"$TARGET_BUILD_DIR/$WRAPPER_NAME\"\n";
+			shellScript = "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\n\"$PROJECT_DIR/../scripts/ensure_macos_mpv_bundle.sh\" \"$TARGET_BUILD_DIR/$WRAPPER_NAME\" \"${PILIPLUSX_MPV_BUNDLE_MODE-legacy}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A04D04102026100500000001 /* Prepare Bundle Info */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = (
+				"$(PROJECT_DIR)/Runner/Info.plist",
+				"$(PROJECT_DIR)/../scripts/prepare_macos_bundle_info.py",
+			);
+			name = "Prepare Bundle Info";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/PiliPlusX-BundleInfo.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -euo pipefail\n\"$PROJECT_DIR/../scripts/prepare_macos_bundle_info.py\" \"$PROJECT_DIR/Runner/Info.plist\" \"$DERIVED_FILE_DIR/PiliPlusX-BundleInfo.plist\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -483,7 +503,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/PiliPlusX-BundleInfo.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -609,7 +629,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/PiliPlusX-BundleInfo.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -629,7 +649,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/PiliPlusX-BundleInfo.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

@@ -1,17 +1,31 @@
 # macOS shared candidate bootstrap
 
-The normal Xcode hook defaults to `PILIPLUSX_MPV_BUNDLE_MODE=legacy`. Its archive,
-mpv version, dependency, dual-architecture, loading and signing checks remain in
-place. Unknown modes fail before modifying the App or acquiring dependencies.
+Runner's early `Prepare Bundle Info` phase derives
+`$(DERIVED_FILE_DIR)/PiliPlusX-BundleInfo.plist` from the unchanged
+`Runner/Info.plist` source. The same derived input is configured for Debug,
+Profile and Release, so Xcode's normal `ProcessInfoPlistFile` still expands build
+settings and owns the final App Info.plist. The generator defaults an unset
+`PILIPLUSX_MPV_BUNDLE_MODE` to `legacy`; an empty or unknown value fails.
+
+The normal Xcode hook passes the selected mode to `ensure_macos_mpv_bundle.sh`.
+In `legacy`, the derived plist has no pending key and the existing archive, mpv
+version, dependency, dual-architecture, loading and signing checks remain in
+place. Unknown modes fail before the App is changed or dependencies are acquired.
 
 An independent candidate build may explicitly set
-`PILIPLUSX_MPV_BUNDLE_MODE=shared-candidate-bootstrap`. The hook marks the build's
-Info.plist with `MediaKitSharedBootstrapPending=true` and skips legacy runtime
-acquisition and embedding. Xcode must still finish signing that source App.
+`PILIPLUSX_MPV_BUNDLE_MODE=shared-candidate-bootstrap`. The derived input contains
+the strict boolean `MediaKitSharedBootstrapPending=true`; the final Xcode
+bootstrap hook only verifies that value and does not edit the App. Xcode must
+finish signing that source App, and the final bundle guard still rejects pending
+before ordinary package checks.
 This is an intermediate build, unsuitable for distribution. The ordinary final
 bundle guard rejects any presence of the pending key, regardless of its value or
-environment variables. A normal incremental build encountering the key also
-fails; use a fresh normal build rather than silently clearing it.
+environment variables. Switching back to legacy recomputes the derived plist
+from the clean source template, removing the key without inheriting stale output.
+The generator compares deterministic bytes and leaves an unchanged derived file
+untouched. These source contracts do not establish that a particular installed
+Xcode version builds the expected dependency graph or signs the final App; keep
+those checks attached to the actual build evidence.
 
 Pass the signed intermediate App to the existing sealed-input consumer:
 

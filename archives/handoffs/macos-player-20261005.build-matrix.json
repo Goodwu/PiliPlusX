@@ -1,0 +1,122 @@
+{
+  "rows": [
+    {
+      "scenario": "incremental-first",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "incremental-repeat-1",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "incremental-repeat-2",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "missing-target-and-derived",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "switch-back-bootstrap",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "switch-to-legacy",
+      "build_exit": 0,
+      "pending": null,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 0,
+      "bootstrap_contract_pass": false,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "template-change",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": true
+    },
+    {
+      "scenario": "template-restored",
+      "build_exit": 0,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": true,
+      "raw_activity_captured": false
+    },
+    {
+      "scenario": "unknown-mode",
+      "build_exit": 1,
+      "pending": true,
+      "strict_signature_exit": 0,
+      "ordinary_guard_exit": 1,
+      "bootstrap_contract_pass": false,
+      "raw_activity_captured": true
+    }
+  ],
+  "effective_source_binding": [
+    {
+      "path": "macos/Runner.xcodeproj/project.pbxproj",
+      "sha256": "01ccfedc1b1d6632635fd5e133e3eb5b7da40ffc2d1a69219ac7e4cc41291c80",
+      "matches_reviewed": false
+    },
+    {
+      "path": "scripts/prepare_macos_bundle_info.py",
+      "sha256": "ec0b180c60dfdbe7cfd8bc6f2ae3064f8508af52a8f82b4ed7f7f94dfbcc6f37",
+      "matches_reviewed": true
+    },
+    {
+      "path": "scripts/ensure_macos_mpv_bundle.sh",
+      "sha256": "2e7c5dd96851ff54684f5922d2b30f4b4c5482f9f1e44fa1c63c1ad9795bd467",
+      "matches_reviewed": true
+    },
+    {
+      "path": "test/macos_shared_bootstrap_test.py",
+      "sha256": "a456df2af07b11f7639e9ed10ed11bbfc7b38961d59db53110996f0d434e30ed",
+      "matches_reviewed": true
+    },
+    {
+      "path": "test/macos_bundle_info_test.py",
+      "sha256": "b354a121633f0be096ac9b8950326aadab4e0da8697a14976e02b9a750b6939f",
+      "matches_reviewed": true
+    },
+    {
+      "path": "docs/plans/macos-shared-candidate-bootstrap.md",
+      "sha256": "a04b81a695e94ce1e82855ff4f6e0abb3506579d2edbac1fe0a1ec7b13db7fea",
+      "matches_reviewed": true
+    }
+  ],
+  "source_template_restored": true,
+  "actual_debug_profile_builds": "not_run",
+  "consumer": "not_run",
+  "playback": "not_run",
+  "effective_pbx_diff_review": "pending"
+}

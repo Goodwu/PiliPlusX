@@ -66,18 +66,18 @@ class BootstrapTests(unittest.TestCase):
             p.write_text('#!/bin/sh\necho native-tool-reached >&2\nexit 99\n')
             p.chmod(0o755)
         env['PATH'] = str(tools) + os.pathsep + os.environ['PATH']
-        return subprocess.run(['bash', str(SCRIPTS / name), str(self.app)],
+        command = ['bash', str(SCRIPTS / name), str(self.app)]
+        if name == 'ensure_macos_mpv_bundle.sh':
+            command.append(mode if mode is not None else 'legacy')
+        return subprocess.run(command,
                               env=env, text=True, capture_output=True)
 
-    def test_explicit_bootstrap_only_marks_without_native_tools(self):
+    def test_explicit_bootstrap_validates_read_only_without_native_tools(self):
+        self.write_info(True, True)
         before = m.app_tree(self.app)
         result = self.shell('ensure_macos_mpv_bundle.sh', 'shared-candidate-bootstrap')
         self.assertEqual(result.returncode, 0, result.stderr)
-        after = m.app_tree(self.app)
-        self.assertEqual({k:v for k,v in before.items() if k != 'Contents/Info.plist'},
-                         {k:v for k,v in after.items() if k != 'Contents/Info.plist'})
-        self.assertIs(plistlib.loads(self.info.read_bytes())[m.PENDING], True)
-        self.assertEqual(plistlib.loads(self.info.read_bytes())['Unrelated'], 'preserved')
+        self.assertEqual(m.app_tree(self.app), before)
         self.assertEqual(self.shell('ensure_macos_mpv_bundle.sh', 'shared-candidate-bootstrap').returncode, 0)
 
     def test_unknown_mode_rejects_before_modification(self):
@@ -97,7 +97,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertNotIn(m.PENDING, plistlib.loads(self.info.read_bytes()))
 
     def test_pending_presence_rejected_by_legacy_and_guard_even_with_mode(self):
-        for value in (True, False, 'true', 0):
+        for value in (True, False, 'true', 0, 1):
             self.write_info(value, True)
             before = m.app_tree(self.app)
             for script in ('ensure_macos_mpv_bundle.sh', 'verify_macos_mpv_bundle.sh'):
@@ -109,11 +109,13 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(m.app_tree(self.app), before)
 
     def test_bootstrap_malformed_pending_rejected(self):
-        self.write_info(False, True)
-        before = m.app_tree(self.app)
-        result = self.shell('ensure_macos_mpv_bundle.sh', 'shared-candidate-bootstrap')
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(m.app_tree(self.app), before)
+        for include, value in ((False, None), (True, False), (True, 0), (True, 1), (True, 'true')):
+            self.write_info(value, include)
+            before = m.app_tree(self.app)
+            result = self.shell('ensure_macos_mpv_bundle.sh', 'shared-candidate-bootstrap')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('strict boolean true', result.stderr)
+            self.assertEqual(m.app_tree(self.app), before)
 
     def test_guard_checks_info_before_missing_framework_or_version(self):
         self.write_info(True, True)
