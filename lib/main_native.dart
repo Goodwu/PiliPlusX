@@ -8,6 +8,8 @@ import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
 import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/pages/video/local_diagnostic/local_video_diagnostic.dart';
+import 'package:PiliPlus/pages/video/local_diagnostic/policy.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
@@ -44,6 +46,8 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart'
+    show initializeDarwinMpvOwnerBroker;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -110,8 +114,11 @@ Future<void> _initAppPath() async {
 }
 
 void main() async {
+  final localDiagnosticOnly =
+      localVideoDiagnosticBuildEnabled && Platform.isMacOS;
   ScaledWidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  await initializeDarwinMpvOwnerBroker();
   await _initAppPath();
   try {
     await GStorage.init();
@@ -120,13 +127,13 @@ void main() async {
     if (kDebugMode) debugPrint('GStorage init error: $e');
     exit(0);
   }
-  await DanmakuFont.init();
+  if (!localDiagnosticOnly) await DanmakuFont.init();
   ScaledWidgetsFlutterBinding.instance.scaleFactor = Pref.uiScale;
   await Future.wait([
-    _initDownPath(),
+    if (!localDiagnosticOnly) _initDownPath(),
     _initTmpPath(),
-    CacheManager.ensureInitialized(),
-    ?FontUtils.init(),
+    if (!localDiagnosticOnly) CacheManager.ensureInitialized(),
+    if (!localDiagnosticOnly) ?FontUtils.init(),
   ]);
   Get
     ..lazyPut(AccountService.new)
@@ -148,7 +155,7 @@ void main() async {
       );
     }
   } else if (Platform.isMacOS) {
-    await setupServiceLocator();
+    if (!localDiagnosticOnly) await setupServiceLocator();
   }
 
   if (Platform.operatingSystem == 'ohos') {
@@ -158,9 +165,11 @@ void main() async {
     );
   }
 
-  Request();
-  Request.setCookie();
-  RequestUtils.syncHistoryStatus();
+  if (!localDiagnosticOnly) {
+    Request();
+    Request.setCookie();
+    RequestUtils.syncHistoryStatus();
+  }
 
   SmartDialog.config.toast = SmartConfigToast(displayType: .onlyRefresh);
 
@@ -298,6 +307,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (light, dark) = getAllTheme();
+    final localDiagnosticOnly =
+        localVideoDiagnosticBuildEnabled && Platform.isMacOS;
     return GetMaterialApp(
       title: Constants.appName,
       theme: light,
@@ -308,7 +319,14 @@ class MyApp extends StatelessWidget {
       fallbackLocale: const Locale("zh", "CN"),
       supportedLocales: const [Locale("zh", "CN"), Locale("en", "US")],
       initialRoute: '/',
-      getPages: Routes.getPages,
+      getPages: localDiagnosticOnly
+          ? [
+              GetPage(
+                name: '/',
+                page: () => const LocalVideoDiagnosticEntryPage(),
+              ),
+            ]
+          : Routes.getPages,
       defaultTransition: Pref.pageTransition,
       builder: FlutterSmartDialog.init(
         toastBuilder: CustomToast.new,

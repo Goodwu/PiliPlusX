@@ -1,6 +1,7 @@
 import Cocoa
 import Darwin
 import FlutterMacOS
+import media_kit_video
 import VideoToolbox
 
 // Keep these declarations opaque: libavcodec is embedded by media-kit rather
@@ -105,6 +106,11 @@ class MainFlutterWindow: NSWindow {
     applyOpaqueWindowAppearance()
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    let appDelegate = NSApp.delegate as? AppDelegate
+    MediaKitVideoPlugin.recordWakeupShutdownDiagnostic("host.engine.registrationAttempt", fields: [
+      "delegateMatched": appDelegate == nil ? 0 : 1,
+    ])
+    appDelegate?.registerMediaKitEngine(flutterViewController.engine)
 
     let channel = FlutterMethodChannel(
       name: "piliplusx/hdr_capabilities",

@@ -13,17 +13,10 @@ void main() {
       ),
     );
 
-    expect(helper, contains('await platform.disposeForRebuild();'));
-    expect(helper, contains('await player.dispose();'));
-    expect(
-      helper.indexOf('await platform.disposeForRebuild();'),
-      lessThan(helper.indexOf('await player.dispose();')),
-    );
     expect(
       helper,
-      contains('preserving player for safe teardown'),
-      reason:
-          'an output-release failure must not fall through to libmpv destroy',
+      contains('PlayerTeardownTransaction<Player, VideoController>()'),
+      reason: 'production close path must use the behavior-tested barrier',
     );
   });
 
@@ -35,22 +28,25 @@ void main() {
     expect(source, contains('class _InitializedVideoPlayer'));
     expect(
       source,
-      contains(
-        'await _disposePlayerAfterVideoOutput(player, initialized.video);',
-      ),
-      reason: 'a stale init must release its own immutable player/output pair',
+      contains('initialized.lease.publishIfCurrent('),
+      reason: 'the final shared publication gate owns transfer or disposal',
+    );
+    expect(
+      source,
+      contains('PlayerInitializationTransaction<'),
+      reason:
+          'probe/output lifecycle uses the injectable production transaction',
+    );
+    expect(
+      source,
+      contains('final candidate = await transaction.run('),
+      reason: 'source replacement completion follows the tested transaction',
     );
     expect(
       source,
       contains(
-        'await _disposePlayerAfterVideoOutput(player, nextVideoController);',
+        'final Map<Player, _BlockedPlayerTeardown> _blockedTeardowns',
       ),
-      reason: 'a stale local output must release before its Player terminates',
-    );
-    expect(source, contains('for (var attempt = 1; attempt <= 3; attempt++)'));
-    expect(
-      source,
-      contains('final Map<Player, VideoController> _blockedTeardowns'),
     );
     expect(source, contains('_scheduleBlockedTeardownRetry();'));
   });

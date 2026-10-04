@@ -78,13 +78,15 @@ jobs:
       PRERELEASE: ${{ needs.context.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.context.outputs.source_sha }}
       - uses: actions/download-artifact@v7
         with:
           pattern: release-*
           path: release-assets
           merge-multiple: true
       - name: Verify all platform assets and metadata
-        run: python3 scripts/verify_release_assets.py release-assets
+        run: python3 scripts/verify_release_assets.py release-assets --expected-source "${{ needs.context.outputs.source_sha }}" --source-checkout "$GITHUB_WORKSPACE"
       - name: Create or resume draft release
         run: |
           set -euo pipefail

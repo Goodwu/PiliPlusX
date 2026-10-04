@@ -1,11 +1,21 @@
+<!-- authoritative current 2026-10-05：用户授权本地提交不推送。media-kit共享r4已本地提交252c5851e2ebbcb0876f3bb819303c21fbfe29cd，46已审源码节点匹配提交树，额外仅两context文档。Pili86路径正确性/打包切片已审核；真实pin及两固定lock摘要已同步，Critical PASS_LOCAL_PIN_INTEGRATION，candidate28/inputs36/metadata23 tests PASS，实际revision/lock加载正确。诊断N1修正17tests/analyze及增量Critical PASS；最新诊断增量未build/实屏。性能后续专题，r4卡顿FAIL/HDR与metadata未知不关闭；hosted fresh/远程commit可取得/正式发布未验证。唯一CurrentState见archives/conversations/player-architecture-remediation.md。 -->
 # TASKS.md
+
+<!-- 2026-10-04 失败app纠正：modern临时包在Intel探针失败时未写回，最终失败app仍SPM旧Mpv SHA95a8ef30，独立门禁exit1拒绝非0.41。此前单独arm64加载及22项closure仅对应旧失败app，撤销现代包验证含义；构建内modern21项静态闭包仍有效。失败产物不用于验收，待Rosetta恢复后完整重建。 -->
+
+<!-- 2026-10-04 最终新诊断Release构建59318 exit1：Intel smoke Bad CPU type；主机arch -x86_64 /usr/bin/true亦失败且Rosetta receipt缺失，环境前置不足。保持universal门禁。双架构静态closure与独立arm64 NOW/initialize0 PASS，不能替代Intel动态/最终签名/build。等待用户自行完成官方Rosetta许可确认安装后完整重建。demo本地4K59.94已获用户“播放流畅”反馈，Pili产品流畅性/HDR仍开放。 -->
 
 ## Now（当前推进，最多 3 条）
 
 - [ ] 修复 macOS `BV1vY4y1N7TY` Dolby Vision 亮度不足
+  - latest: 2026-10-03 解锁后真实复现：PID74826 同BV，produced在约6秒到159后整个诊断窗口恒定，播放时钟推进、seek重播仍旧尾帧。Native日志7680x3840为drawableSize，不能称CVPixelBuffer大小。独立Specialist/V2确认SwappableObjectManager.releaseHeld谓词反转，完成buffer仍held、busy反available；直接production Swift测试修前4 FAIL(含frame3耗尽)，最小交换分支后busy保护/完成归还/幂等/1000轮转PASS，V2 PASS。Debug重建门禁通过，PID79802同BV seek01:52后produced持续增长到4411、lastDrawn4409，未复现原159停滞。≥5min及seek/fullscreen/resize/quit重入/HDR显示验收仍进行，未提交推送。
   - status: in_progress
   - context: archives/conversations/player-architecture-remediation.md
-  - acceptance: 正式 macOS 产物使用可追溯的 modern libmpv（mpv 0.41+、libplacebo/Vulkan）并完成同一 DV 输入、同一时间点的 HDR/SDR 对照；日志确认 `dolbyvision/pq` 识别、`target-peak=400`、`tone-mapping=bt.2390`、原生 EDR 可见帧和高光观感达到参考播放器。当前原正式包仍为 mpv 0.36/libplacebo disabled；本地 modern arm64 预览已验证可行，但尚未形成正式 universal 依赖。
+  - acceptance: 正式 macOS 产物使用可追溯的 modern libmpv（mpv 0.41+、libplacebo/Vulkan）并完成同一 DV 输入、同一时间点的 HDR/SDR 对照；日志确认 `dolbyvision/pq` 识别、`target-peak=400`、`tone-mapping=bt.2390`、原生 EDR 可见帧和高光观感达到参考播放器。当前默认 Release 已形成 mpv 0.41.0 universal 依赖并通过双架构加载门禁；显示效果仍须同候选运行验收。
+  - latest: 2026-10-03 新纠正：原modern包仅静态PASS，真实NOW加载暴露libplacebo349/360 ABI不匹配，Intel缺Swift类；Homebrew库minOS26也高于app12。已新增加载、minimum OS、slice及runtime缓存身份门，重建Intel slice真实无输出initialize0；双架构四库源码builder已完成修复及实际构建；默认Release与最新Debug完整构建、最终包加载/签名重验通过。五场景仍因Mac锁屏开放，不能沿用旧候选验收。
+  - latest: 2026-10-03 当前：三次全屏进出及正常Quit无新IPS，180秒状态/生产关联采样候选已build、全仓100测试、analyze与V1通过。CUA明确Mac locked无法启动，已撤销临时launchctl环境且无运行进程；需人工解锁后同候选采样，五场景仍开放。证据media-kit `archives/experiments/macos-ppx-completion-20261003.md`。
+  - latest: 2026-10-03 续轮：修复空排队被误转换为false导致的无限输出重建（V1 PASS、行为测试6 PASS）；稳定Debug重建及全仓95测试通过，固定BV PID13261的15秒窗口完成394帧（此前25），一次全屏进入/退出已出图。仍需五场景完整验收；证据见media-kit `archives/experiments/macos-ppx-completion-20261003.md`。
+  - latest: 2026-10-03：默认 Debug 包的 mpv 0.36 混入已通过 Xcode 全配置末尾封装门禁修复；CI/手动脚本同样验证最终包。固定归档 SHA、两切片 0.41.0、arm64 21 库闭包及签名均通过，旧包/错误归档/缺失库拒绝。稳定源码构建、89 项测试与 V1 审核通过；连续帧及 macOS 五场景仍开放，未提交或推送。
   - latest: 已通过 `gh run download` 获取 `Goodwu/libmpv-darwin-build` 分支 `experiment/mpv-041-b3-opengl` commit `bc52bbaedf02fcf11d8042ce1e7799815a2e8405` 的成功 Actions artifact（run `34097910903`），并新增 `scripts/build_macos_goodwu_hdr.sh`、`scripts/package_macos_goodwu_mpv_hdr.sh` 固化构建。最终包 `build/macos/Build/Products/Debug/PiliPlusX-goodwu-hdr-final.app` 的 `Mpv.framework` 已确认 universal mpv 0.41.0，进程实际加载分支 libmpv、libplacebo、Vulkan、shaderc 和 FFmpeg，且同一 BVID 可播放；旧正式包与最终包均已定位到约 50% 播放位置完成画面对照，最终包高光明显恢复；已通过无 `/opt/homebrew` 绝对依赖、`codesign --verify --deep --strict`、45 项 HDR 测试和 Dart analyze。旧正式 `PiliPlusX.app` 仍嵌入 mpv 0.36.0；需要将 Goodwu artifact 依赖正式纳入发布流水线并补齐播放器日志中的 Dolby Vision/target-peak/tone-mapping 证据，任务保持 in_progress。
   - latest: architect 三轮独立审核均为 FAIL。已修复线性 RGBA16F 层的 PQ metadata 错配实验、reset 旧配置回灌、窗口屏幕 headroom、Metal command 完成状态、videoParams 决策绕过、Dart reset 事务版本和 verifier 正则；修复后源码 `flutter build macos --debug --no-pub`、45 项 HDR 测试、analyze、diff check 均通过，`PiliPlusX-goodwu-hdr-final3.app` 可打包并实际播放目标 BVID，画面不再出现已报告的立即发白现象。仍未达成：active 必须绑定成功首帧、Darwin active false 双向同步及 display refresh 顺序、完整 GL→Metal fence/lease、arm64/x86_64 modern 依赖能力一致性、同源同 PTS 光度验收；按用户要求，未将任务标记 done。
   - latest: final4 运行采样仍持续为 `bgra8Unorm`，未据此宣称 HDR 已打通；按 architect 建议将 OpenGL→Metal 生产者栅栏改为 `glFinish()`，补充 native gate 诊断字段，并修正 macOS Dolby Vision 在 display reset 后直接 return、导致 native 配置未重新下发的问题。45 项 HDR 测试、analyze、diff check、macOS debug build 通过，`PiliPlusX-goodwu-hdr-final7.app` 已重新打包；architect 复审进行中，任务保持 in_progress。
@@ -66,6 +76,8 @@
 
 - [ ] 补齐 controller source/output 完整时序覆盖
   - status: in_progress
+  - latest: 2026-10-03 最终 macOS controller 可控调用链补测：增加 PlayerLifecyclePorts 默认原生适配器，production 创建参数/配对/屏障顺序保持；15 个真实公开 controller 场景覆盖 source/open、probe/output 迟到、初始化 probe/output/fallback 等待中关闭、重建等待中关闭、部分订阅失败回滚、共享引用与真实监听、重建失败/fallback/retry、queued 最新拓扑及屏障失败定时重试。全量134 PASS，专项15 PASS，analyze No issues（v3-final日志，v2磁盘失败轮不得引用）。production controller b681776f、ports3893e67b；测试96912ca6。此production源码的默认Debug/Release均重新构建且mpv门禁PASS，产物摘要见final-candidate-identities.json。fake边界仅证明controller编排，不能证明native admission/render-context-free ACK、可见长播/退出重入/HDR显示；Android session未验证。Mac仍锁屏，未提交或推送。
+  - latest: 2026-10-03 补审确认 119 项现有测试中的 transaction/orchestrator/helper 与源码契约不能替代真实 controller 全调用链；正在新增默认行为不变的 native 依赖注入，测试走公开 getInstance/setDataSource/retryVideoOutput/dispose 并初始化临时 Hive/Accounts。已有构建候选仍绑定改造前源码，改造后需 V2 复审及重新构建，尚不算验收完成。
   - context: archives/conversations/player-architecture-remediation.md
   - acceptance: 以可控依赖覆盖 source 切换、复用 Player open、codec probe、output rebuild、非末引用释放和最终 dispose 的真实调用链；证明无旧源回写、永久 in-flight、失效输出发布或共享监听丢失。2026-09-17 已新增 opaque-handle lifecycle orchestrator，生产 `Player.open`/listener rebind 已接入同一 open gate；44 项 HDR 定向测试覆盖 probe/output 迟到释放、重叠 open 与 final-dispose 顺序。初始 `_initPlayer`、rebuild 和 controller 最终释放尚未完整改由该编排器执行，任务继续进行。
 
@@ -138,3 +150,20 @@
 - 每个活跃任务必须有唯一 context、可验证 acceptance 和明确状态：todo / in_progress / blocked / done。
 - 同一总目标和其重复子项不得同时作为活跃进度；因候选版本或验收口径变化重新打开的任务必须写明失效原因。
 - 每次实质推进更新本文件和当前 conversation；已完成工作及其证据只保留在对应 conversation，不在本文件复述。
+
+<!-- macos-normal-n1-small-window-human-pass-20261004 -->
+- 2026-10-04：正常共享核心候选 n1（NormalShared.app，PID 96885），BV1heam6TExz、UI 4K，小窗口收到用户直接反馈“流畅”，该项实屏验收通过。相同候选全屏验收仍待进行；不转移旧候选反馈，不推定源帧率或 HDR 状态。
+
+
+<!-- 以下为此前构建和验收历史，当前结论见文件顶部及唯一CurrentState。 -->
+<!-- 提交准备当前：共享r4隔离46nodes PASS；Pili唯一范围86paths已定，产品源码/诊断N1/必要legacy依赖/正式release接线审核完成；17诊断tests/analyze PASS。SOP刷新为Python入口及真实限制，性能后续专题，r4播放FAIL/HDR与metadata未知不关闭。等待共享core本地提交授权→真实revision pin有界审核→Pili提交；未stage/commit/push，hosted仍未验证。 -->
+<!-- authoritative current: macOS剩余交付未完成，未提交推送。唯一Current State见archives/conversations/player-architecture-remediation.md。source r4 V1/API+V2及35产品CPU/analyze PASS；新App双ABI0.41 closure/load/sign/backend与产物绑定V1 PASS。P5颜色PASS/HDRUNKNOWN/严重卡顿FAIL，HLG严重卡顿FAIL；PQ颜色亮度高光PASS、开头卡顿后改善非完整流畅PASS。附带采样P5/HLG/PQ35/17/59条归档，温度频率未读到。原生架构师已完成只读分析：libplacebo可能参与瓶颈但未唯一归因；HDR10系统托管路径条件可行，当前线性EDR非DV直通。用户补充独立mpv播放Mystery Box也卡顿，版本/配置/后端尚未绑定，无新实验。正式协议静态CPU V1/V2 PASS，真实pinNULL/hosted未验证；精确交付盘点完成；十输入Critical复审REQUEST_CHANGES：closure外部依赖误PASS及wrapper并发覆盖空目标，限定两脚本修复及8项CPU回归PASS，其余八输入SHA保持；新包macos-packaging-gate-fixes-20261005-r1独立Critical PASS，8原回归+8补充检查通过；正常default-off r4候选bootstrap session92184 exit0；最终consumer session2606 exit0，双ABI0.41/21binary closure/load/sign/backend PASS；产物V1 PASS_ARTIFACT_BINDING_ONLY；normal PID22759播放BV1heam6TExz/4K窗口，用户确认极客湾视频卡顿，normal4K窗口流畅FAIL；附带采样session4974 exit0/35records；正常菜单Quit后PID22759缺失，当前无Pili播放。复用封存本机依赖非hosted fresh，非播放验收。 -->
+<!-- 2026-10-04 当前：主机升级重启27.0.1/26A434、43GiB空闲。用户确认独立纯Flutter空窗口与demo冷启动首页各自打开时，应用及Finder均流畅，旧首页卡顿未复现。demo PID14097 Runner74f5441d/Mpv2d3db36a签名复核PASS，相同持久化本地DV P5 4K59.94已播放出图，等待视频/普通窗口分别反馈。上一系统actualFBO 2160/1080近似同PTS完成28.37–28.92/41.78–41.93每秒，非屏幕FPS，不能单因果定论；A/B未完成A/B/A。Pili属性诊断V2、139串行tests/analyze PASS但未重建Pili；连续流畅性/HDR及最终操作矩阵仍开放，无提交推送。 -->
+<!-- 2026-10-03 当前：Runner49f86b6/App70b6dc19 Release及最终mpv0.41门禁PASS。completed-render→Flutter消费诊断V1/实际Swift集成PASS；PID86174匹配15:00–15:45 full完成59.9285/s首次copy57.2142/s，small完成59.9328/s首次copy58.0464/s，均noWritable0。copy不是屏幕FPS；之前不同片段small长fence不能归因窗口。下一步有界通知时间链定位；正常Quit无新IPS。80281 DV历史支持，用户连续流畅性/HDR亮度/完整矩阵仍开放，未提交推送。 -->
+<!-- 2026-10-03 崩溃审计纠正：PID48712/52595退出附近新IPS均SIGSEGV，mp_client_send_property_changes事件回调栈；退出安全门FAIL，三轮进程消失不算通过。优先定位回调释放顺序。 -->
+<!-- 2026-10-03 当前：Mac已解锁。最新Release 4K60长播5m55s进度持续，149.334s产帧59.919fps；SDR隐藏native提交0。HDR激活及HDR/SDR往返、退出重开播放三轮有运行证据。实际屏幕流畅性/HDR参考亮度/最新候选完整操作矩阵仍开放；Debug/Profile/Release最终mpv0.41门禁PASS，未提交推送。 -->
+<!-- 2026-10-03 补充：修复SPM自动embed晚于校验导致的真实mpv0.36回退。Enforce phase已声明18 vendor Copy+18 CodeSign的36输入，实构建图确认全部先guard、最终app签名后guard；默认Release及完成后独立双架构加载/签名门禁PASS，V1 PASS。SDR hidden draw guard Release已生成；启动时Mac再次锁屏，未完成新候选4K60可见/HDR首帧验收，已撤销诊断环境。 -->
+<!-- 2026-10-03 4K60：BV1heam6TExz实选3840x2160 AVC/VideoToolbox SDR。Release PID575有效154.382秒生产57.526fps；隐藏native虽float/active=false仍提交7644次，故原生present计数不代表屏幕。macOS已加float||active绘制guard，V1/parse/contracts PASS，Release对照重建中；用户流畅性、HDR首帧与亮度验收仍开放。以下锁屏信息为历史状态，Mac已解锁。 -->
+<!-- 2026-10-03 显示几何候选PID92100：drawable8K→1510x755，源4KRGBA16F保持；近似同视频段actual18.466→29.519fps，仍有116.667ms长帧，待用户实屏接受。12 tests/V1/build gate PASS，不关闭流畅性或HDR亮度验收。 -->
+<!-- 2026-10-03 最新实机反馈：PID79802 pool修复后仍严重卡顿，小窗口亦然；流畅性验收未通过。produced/lastDrawn不能替代实际presentedTime，正在补呈现计数和绘制尺寸证据。 -->
+<!-- 2026-10-03：默认 flutter build macos --release --no-pub 完整通过（192.5 MB）。最终 Release app 独立重验通过：arm64/x86_64 各 21 个闭包二进制、mpv 0.41.0、最低系统版本、RTLD_NOW、mpv_initialize=0、deep/strict 签名；Mpv SHA-256 2d3db36a5a8ff9f63fe52ca6657f65982035258b84ccf27964ffd95add93f179。日志 /tmp/ppx-release-final-20261003.log 与 /tmp/ppx-release-final-verification-20261003.log。生命周期 V2 静态复审与打包门禁 V1 PASS，119 项测试通过。可见播放/长播/退出重入/HDR 显示仍待 Mac 解锁验收；未提交推送。 -->

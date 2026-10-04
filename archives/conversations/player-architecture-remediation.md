@@ -2,8 +2,322 @@
 
 ## Current State
 
+目标：完成 macOS 上 PiliPlusX 剩余工作。当前提交正确性和打包修复；性能优化按用户意见留后续专题，整体交付与运行验收仍有未闭合项。
+
+- 用户2026-10-05授权本地提交，不推送。media-kit共享核心已在隔离分支`codex/macos-shared-hdr-fix`提交`252c5851e2ebbcb0876f3bb819303c21fbfe29cd`；父基线`d24a59537faa8fde59b53d5b0c151b5c44a795bc`。46个已审代码节点逐一匹配提交树，仅额外两份任务/会话文档满足Git hook，原工作树其他Android改动保留。
+- Pili提议切片共86路径，来源`macos-current-fix-commit-preparation-20261005-r1/final-proposed-scope.json/.md`及`macos-pili-final-source-snapshot-20261005-r1`。正式release.yml接线、必要辅助脚本、产品34源码/测试均已独立审核；三份诊断修正以final snapshot及增量Critical为准。后续pin和真实状态文档更新由最终提交绑定覆盖旧snapshot身份。
+- 正式锁`reviewed_media_kit_revision`现为真实提交`252c5851e2ebbcb0876f3bb819303c21fbfe29cd`；lock SHA`8c3ec367b8d89e74d0b2ce6beefb74e240a5defa85846b8bc899b54a69766ab9`。candidate与acquirer固定摘要同步保留严格比较，实际`load_approved_revision`/`load_lock`加载正确。pin Critical `PASS_LOCAL_PIN_INTEGRATION`，证据`macos-committed-pin-review-20261005-r1`；candidate28、inputs36、metadata23 CPU测试全部通过。共享commit尚未推送，固定远程来源能否取得、hosted fresh及正式发布未验证。
+- 共享r4独立V1/API+V2 PASS，原46节点清单33交付+13验证。退出等待handler排空、回调重入明确拒绝、Darwin完成帧归还纠正。产品35定向CPU测试/analyze PASS。诊断N1关闭：autoplay:false初始化、挂载后显式play，await init/mount期间关闭后守卫阻止新发播放；最终17测试/analyze三文件PASS、Critical `PASS_N1_SOURCE_CORRECTION`。该诊断增量未重新构建或实机播放，源码契约/helper测试不等于widget/native接受。
+- 实际正常r4 App完成源/产物V1绑定，最终两ABI mpv0.41/21binary闭包/加载initialize0/签名/backend PASS；包位于`shared-r4-normal-candidate-20261005-r1/SharedR4Normal.app`。其`BV1heam6TExz`4K窗口反馈卡顿。P5颜色PASS、HDR实际输出UNKNOWN、严重卡顿FAIL；HLG严重卡顿FAIL；PQ颜色亮度高光PASS，开头卡顿后改善，非完整流畅PASS。旧候选接受不能转移。
+- 防mpv0.36门禁保留普通Debug/Profile/Release末尾embed/sign顺序及双ABI实际最终校验；closure外部依赖误PASS和wrapper并发覆盖已修并独立Critical PASS。必要legacy命名脚本补审SOURCE_ONLY PASS；独立旧CLI非原子发布及失败缓存残留为有范围限制的已知项，不作为独立发布入口。
+- 性能专题仅保留已采证据和架构交接：P5/HLG/PQ/normal附带GPU及thermal采样，温度/频率不可用；libplacebo参与瓶颈未唯一归因。系统HDR10/sample-buffer路线条件可行但尚未实现；当前线性EDR不是系统DV直通。P8.4动态metadata实际应用、同帧EDR/输出证明、最终操作/长播/退出重入回归及Android/iOS设备影响仍未闭合。性能设计REQUEST_CHANGES保留后续，不新增实施。
+- 本地提交范围排除`build_macos_goodwu_hdr.sh`、`build_macos_shared_candidate.sh`、`native/shared_backend_perf_probe.c`及原工作树无关改动。SOP已更新为Python bootstrap/consumer及当前已知限制。无推送、release或记忆更新。
+
+## Historical State (retained evidence; superseded by Current State)
+
+### 提交准备前的 Current State（已由上述状态替代）
+
+目标：完成 macOS 上 PiliPlusX 剩余工作。整体未完成；未提交、推送或更新记忆。保留无关 Android/iOS 改动。
+
+- 最终共享源码 r4：`/Users/wuweiwei1/src/media-kit-build/shared-source-snapshot-20261005-r4`，33交付+13验证节点；manifest SHA702da85d5b8b6c3ff6e27e0ae6117efc6a6e435a8b181e4c016de4e8981d19d1，diff SHA4038e789f546a37484a4017db915a9af9758f0fa7d6afd5b4bd809778208daca。独立V1/API与V2组合身份审核均PASS；报告review-v1/review.md、review-v2/review.md。退出修复等待实际事件handler排空后销毁，回调内重入明确拒绝；旧fixture已适配async dispose，相关依赖preload与已审字节一致。新增DV枚举只用于状态报告，未开启native DV路线。
+- 隔离产品集成：derived-validation-r4的media_kit/media_kit_video及private product offline Pubget通过，46输入身份与实际package_config路径绑定；controller/teardown/local diagnostic 35项CPU测试全部通过，product-targeted-tests-result.json。旧r3缺枚举18PASS/2loadFAIL保留历史，已由r4修复。不以CPU测试替代App/实屏。
+- 下一步：用private product与derived-r4构建新的诊断Release bootstrap，随后完整shared consumer封装及双ABI版本/闭包/加载/签名/backend门；新App bootstrap构建session97002 terminal exit0，118.2MB，Runner e2af48a62e5ff4cc7a372db7d3bb10f4a04f6e160da0868da760039baf401e4c、arm64/x86_64且pending=true；完整consumer session72007 terminal exit0，已发布SharedR4LocalHDR.app；Runner235295187f09e7da4724847cf1fdd5977f119080649504c6d70688882905f2f4/Mpvcbdb6b90c232873bf620abdde7a289a8f832e71d7dc060d05bd7505ab51373e8，双ABI0.41闭包/加载initialize0/签名/backend门通过。新工作目录与derived-r4 recipe，已有local sealed依赖复用，不称hosted fresh。日志shared-r4-local-hdr-candidate-20261005-r1。产品定向analyze exit0/No issues。最终shared App已生成，原生picker实际起播P5 3840x2160/profile5/level9，PID91253、vmmap绑定及180s附带GPU/热状态采集启动；用户反馈“颜色正常，亮度不确定是否是HDR，卡顿严重”：本r4 P5颜色PASS、实际HDR/亮度验收UNKNOWN、流畅度FAIL；human-p5-acceptance.json已绑定App/源/PID。产物来源V1 PASS_ARTIFACT_BINDING_ONLY，review-v1报告；只core/video两主包与46输入绑定，实际macOS wrapper字节等baseline，其余平台本地overrides不称完整hosted不可变链，正常测试附带GPU/热状态保留，不专门分析卡顿。原normal r2和local HDR r1保持只读，历史播放验收不得迁移新源码。
+- 历史实屏结果：BV1heam6TExz 4K60小窗口/全屏多轮通过；normal r2的BV11f4y1K7Wx P1 8K SDR与P2 4K DV通过，zoom/seek/三轮退出重入有证据。local HDR r1的明确P5从头颜色亮度流畅通过；北海道HLG颜色亮度通过，流畅度曾FAIL且窗口拖动掉帧，后有所改善；PQ早期候选颜色亮度流畅通过，最新组合需复验。暂停恢复、最终长播/完整操作矩阵仍开放。
+- mpv0.36防回退：Debug/Profile/Release末尾embed/sign排序及两ABI最终guard、实际旧包拒绝已有本机证据；正式共享发布尚未取得hosted交付资格。
+- 正式cross-host协议r1独立V1/V2静态CPU范围PASS，10release/28candidate/23metadata/3assets/1manifest/4tag通过。可信committed来源、固定7gate脚本SHA/argv/ABI与完整App绑定，consumer不访问producer机器路径。真实批准media-kit pin仍NULL，hosted fresh/发布未验证；最终具体可审核slice与实屏完成后再请求必要提交推送授权，不伪造pin。
+- 平台范围：相同native字节的macOS双ABIoptimized plugin和iOS simulator双ABI21Swift object compile通过；不等于新完整App或iOS实机HDR。共享核心Android受影响回归仍待。
+- 用户约束：不专门分析卡顿原因；尺寸A/B/A实验已精确撤回，withdrawal-r2按旧app.dill恢复完整source字节，24CPU测试通过。GPU/热状态只在正常播放验收顺带记录，外部采样工具已准备但未采样；不可读GPU温度/频率明确缺失。r4首轮P5已原生菜单正常Quit，PID91253独立ps缺失；35条附带GPU/thermal采样完成，system thermal fair、数字GPU温度/频率缺失，未作降频因果结论。暂停恢复UNKNOWN，证据first-p5-operation-result.json；用户补充退出视频窗口后Finder拖动立即流畅，已绑定human-p5-acceptance.json；仅时间关联，不据此判降频或渲染根因。同App正常重入PID93734，原生picker实际播放北海道HLG/P8.4，3840x1920/profile8/level7；用户反馈严重卡顿，本r4 HLG流畅度FAIL、颜色亮度未获新反馈；human-hlg-acceptance.json。已原生菜单Quit，PID93734独立ps缺失，附带采样留档hlg-exit-result.json；当前无播放进程。
+- 显示环境最近证据仅一块M27P20、1920x1080@60、Apple M4；跨显示器实测未具备条件。EDR headroom不等于实际HDR输出或物理亮度验收。
+- 完整审计仍completion=false，位于聊天worktree archives/experiments/artifacts/macos-ppx-completion-20261003/shared-candidate-pipeline-20261004/remaining-delivery-audit-20261004.json。被替换Current State全文保留在derived-validation-r4/previous-current-state-before-r4.md。
+
+- 后续独立只读工作包：原native Reviewer盘点macOS精确交付slice/live与frozen身份，输出macos-final-delivery-inventory-20261005-r2；native Specialist /root/r4_hdr_output_evidence_plan只核actual HDR输出证据与正常播放最小验证方案，输出r4-hdr-output-evidence-plan-20261005-r1，不分析卡顿/不运行GPU/不改源码。外部source-review-build-receipt.json绑定r4不可变manifest/diff、三审核报告SHA及真实App，同时明确delivery_approved=false、P5/HLG流畅度FAIL；未改冻结manifest。
+
+- HDR证据边界只读确认：framePresented/active来自Metal commandBuffer completed，不能等同drawable presented；已有opt-in帧状态分别记录实际drawablePresented/RGBA16F/epoch/GPU完成，未读actual layer colorspace/wantsEDR及同呈现帧extended-range内容。hdr-output-evidence-gap.json记录缺口，Specialist最小正常验证方案仍运行，不分析卡顿。P5/HLG附带采样35/17条原始SHA及system-wide利用率范围已汇总incidental-telemetry-summary.json；不推断因果。
+
+- 用户新增同机对照：本机iOS版bilibili客户端与Chrome播放同一段杜比视界视频均未复现卡顿，human-same-host-other-clients-control.json。支持后续正常回归重点对比本候选播放/输出路径；对照实际选流/codec/分辨率/HDR输出未采集，不能单独区分media-kit与产品或证明具体GPU原因。维持不专门分析卡顿约束。交付盘点r2已完成：9正式协议文件全部匹配已审freeze（4tracked M/5untracked），53相邻路径记录hash/status及已有证据，UNKNOWN不意味着从未审核；真实pinNULL/hosted未验证，不纳入Android dirty。
+
+- HDR只读方案已完成r4-hdr-output-evidence-plan-20261005-r1/PLAN.md：先普通回归外部保存既有日志；严格同帧层配置/presented关联需默认关闭的metadata instrumentation及重建，无GPU readback，物理亮度另验。现同r4 App第三次正常重入PID98276，原生picker实际播放地球Online PQ 3840x1920；临时existing frame diagnostic启动环境已立即恢复，container实际tmp已定位并保存pq-existing-output-diagnostics，GPU/thermal附带300s session34724已terminal exit0，原始日志最终另存pq-output-diagnostics-bounded-final，不覆盖初始已审快照。用户PQ反馈颜色/亮度/高光细节正常PASS，开头卡顿现在好一些，流畅度仅partial recovery非全程PASS；human-pq-acceptance.json。实际HDR输出另核，不分析卡顿。原始PQ诊断两文件采集时点SHA冻结供Specialist只读核HDR子门；来源Reviewer查找完整生产必要UNKNOWN路径的已有准确审核绑定，不重复语义审核。
+
+- 最新用户方向：用户明确要求架构师分析可能卡顿原因，原生architect /root/macos_r4_stutter_architect 只读分析已完成，报告macos-r4-stutter-architect-20261005-r1/report.md；实际PQ前95.93s produced15.23/s、有效drawablePresented14.95/s，后83.82s26.84/26.56，decoder0/bufferfalse而VOdrop1675。优先共享全源GL浮点生产/硬解纹理GPUcopy/GL同步与调度反压，非已确认根因；双完整渲染/旧固定timer/mainwait被当前代码反证。现仅补现有producer诊断准确开关/输出位置及下一次普通normal候选回归附带采集方案，不执行新专项实验。此次授权覆盖架构分析；先不新增专项实验/改代码/重建。此前不专项分析约束保留历史，不再作为禁止本次只读架构分析的当前状态。PQ既有HDR快照独立审核完成：实际RGBA16F3840x1920/floatEnabled active/epoch3、GPUcompletion与正drawablePresented增长窄PASS；严格同帧actualEDR/target/provider缺字段UNKNOWN，review-hdr报告已冻结。
+
+- PQ PID98276已原生菜单正常Quit并独立ps缺失，pq-exit-result.json；当前无播放。漏归档第三日志media-kit-flutter-consumption已唯一保存pq-producer-diagnostics-final：架构师去重3695successful tokens全覆盖，0–90s render3.43ms/fence59.65ms，90–120s4.05/29.10，120–180s29.88/.0178（render包含mpv节拍等待非GPU时间）。mainnotify很小/noWritable0/Fluttercopy5，下调通知与双消费嫌疑；GLcompletion等待上游GPU/driver/sync为优先，仍未唯一归因。下一采集方案已完成，无需新诊断代码或实验。用户进一步明确要求架构师验证libplacebo可能瓶颈与DV/HDR10直通可行性，已授权同architect只读代码+官方资料，输出libplacebo-and-native-hdr-passthrough.md，未实施新路径。正式交付十必要文件冻结macos-final-chain-review-20261005-r1的native Critical已终态REQUEST_CHANGES：B1闭包门禁接受存在的App外部依赖，B2包装器普通rename可覆盖最后检查后出现的空目录。其余8输入静态覆盖；未认定实际r4 App存在外部依赖或历史门禁失败。修复包macos-packaging-gate-fixes-20261005-r1已冻结：closure ad9775c9432046a22e79aaa8ad40397434313a32b4c44a7be8348582b0174c6b，wrapper a4562d0ac4ad216271470e8a9f60ad8e6421434797301dd6f4dd14a65b3bbbc9；8项定向CPU测试及py_compile PASS，其他8输入SHA不变。原Critical终态PASS，8原回归+8补充检查通过，CPU窗口释放；有效新SHA来自result.json及review-v2/snapshot/input-binding.json，frozen-source-manifest.json为旧baseline副本不能当新源码清单。正常default-off r4候选shared-r4-normal-candidate-20261005-r1 bootstrap session92184开始（--release --no-pub，无诊断define），旧诊断bootstrap已独立保存previous-diagnostic-bootstrap.app；bootstrap session92184已exit0；最终consumer session2606已exit0，fresh work/published/output，实际SharedR4Normal.app双ABI0.41/21binary closure/load initialize0/sign/backend PASS；Runner 6b652d103326561c5506a1c908f04e8e1f6215d901c910675ba595865a8bc512，Mpv e1e77186ae6737dd89af86b548e2ec84c1f1123eb186b25c8a1e494d087487ba。normal_r4_artifact_binding独立V1终态PASS_ARTIFACT_BINDING_ONLY（183 assertions）；复用封存本机依赖非hosted fresh，正常PID22759已播放BV1heam6TExz，UI4K/1.0x/窗口，14:26→14:34进度前进；独立当前decode fps未读到，旧59.94指标不迁移，用户明确“极客湾视频卡顿”，当前normal4K窗口流畅FAIL，human-normal-4k60-window-acceptance.json；不能迁移旧候选PASS。附带GPUthermal采集session4974终态exit0，35records，systemwideGPU 86–100%，thermalfair，temp/freqNULL；PID22759原生菜单Quit后ps缺失，当前无Pili播放。normal所有诊断默认关闭。无旧Pili进程、launchctl诊断环境为空。不重开已批准9protocol节点。
+
+- 用户新增独立mpv对照：播放Mystery Box也复现卡顿，human-standalone-mpv-control.json；exact binary/version/config/实际输出路径尚未绑定，降低仅Pili业务层假设，不独立证明libplacebo根因。Architect扩展官方/SDK分析已完成libplacebo-and-native-hdr-passthrough.md：libplaceboGPU工作可能瓶颈一部分，GLfinish区间含复制/驱动/同步不能等同库shader时间；HDR10系统样本层条件可行，P8.4官方10bit+metadata路径，P5优先受支持压缩asset系统入口；当前linearEDR非DV直通，第三方HDR10外屏系统将DV/HLG转HDR10，nativeDV信令不承诺。未实施/实验。
+
+- 架构师libplacebo/原生HDR可行性只读报告已完成：当前P5经共享libplacebo映射为线性EDR，非原生DV直通；HDR10系统托管输出条件可行，P5宜先考虑系统托管压缩资产路径，接入需要新后端。用户补充独立mpv播放Mystery Box也复现卡顿，已保存human-standalone-mpv-control.json并纳入报告；随后用户提供启动命令与配置，root实时只读归档standalone-homebrew-mpv-binding-20261005.json：/opt/homebrew/bin/mpv v0.41.0、libplacebo7.360.1、FFmpeg9.0.2，gpu-next/VideoToolbox、BT2020 PQ target/peak400/bt.2390/compute-peak=yes。lowres-clean命名profile未在用户命令显式选择；有效GPU API/context及运行时脚本尚未绑定，不能唯一归因libplacebo。无新专项播放实验。
+
+- 用户新增Chrome对照明确样片BV1jP4y1s7px：主观60fps流畅、活动监视器GPU几乎0；CUA只读当前标签确认播放器选择“杜比视界”。架构师读取本机Chrome154.0.8037.97匹配tag源码，macOS默认平台DV门控未启用，存在10bitYUV→系统AVSampleBufferDisplayLayer等路径，仍不能证明当前选中流/动态元数据/呈现后端。chrome://media-internals导航被浏览器安全策略拒绝，已请求用户手动提供相关轨道/decoder/size/color字段；禁止替代surface/CDP绕过该拒绝。此对照不等同本地MysteryBox P5。
+
+- P8.4独立架构核查终态：p84-dv-metadata-report.md，条件源码通路存在，linear EDR不会自动绕过inputDV；实际北海道r4该轮同PTS side-data→repr.dovi→renderer证据缺失，应用DV metadata UNKNOWN，不能断言完整DV或HLG-only。
+
+- 用户新增明确P5对照：同Mac运行的iOS版哔哩哔哩HD播放BV1Gt26BJEBT“基本流畅”，保存ios-bilibili-hd-p5-user-control-20261005.json。实际selected stream/profile/codec/resolution/fps/bitrate/nativeDV/EDR未独立绑定，不等同MysteryBox同字节AB；交架构师只读补充系统路径可行性依据。
+
+- 下一整改设计next-remediation-design.md完成，SHA 7b580a15d6107369427275b6ec6ca25c4147d3ee442fa369e31e48b2e9010843，默认关闭GPU分段计时+同PTS DOVI链优先，按证据选择shared优化，系统sample-buffer后端保留HDR10/HLG/P8.4/P5全部硬门。原Critical只读设计审核终态REQUEST_CHANGES，macos-remediation-design-review-20261005-r1/review.md：GPU历史样本不可挂当前帧、frameID/epoch跨decode/copy/mapper/mix合同缺失、新ABI/输出buffer异步生命周期及16文件manifest扩展不明确。作为后续性能专题交接保留，已停止细化；未实施新诊断/后端/实验，现有播放FAIL未关闭。
+
+- 用户询问能否完整修复提交，并提出性能优化可后续专题。当前转准备可审阅提交范围与依赖顺序，未授权/执行stage、commit或push；共享正确性/打包修复可独立成果，完整DV/HDR仍有实际P8.4metadata/输出证据与正式pin/hosted缺口。只读normal_r4_artifact_binding整理两repo精确切片macos-current-fix-commit-preparation-20261005-r1；性能设计Critical只收尾现有审核，不新增实施或播放实验，卡顿FAIL保留为后续专题已知问题。
+
+- 提交准备已完成scope/REPORT，三live差异确为此前刻意隔离r4内容，未推翻derived46/actual产物PASS。Root创建managed worktree /Users/wuweiwei1/.codex/worktrees/macos-reviewed-r4/media-kit 基于d24a59537faa8fde59b53d5b0c151b5c44a795bc，仅复制并逐节点验证已审46nodes，无stage/commit，原live Android内容保留；isolated-r4-worktree-binding.json存证。Pili36/38产品节点匹配privateproduct、2ledger更新，但部分产品全文件独立精确source审核仍UNKNOWN。顺序共享core授权commit→真实pin有界审核→Pili精确切片commit；尚未授权commit/push。
+
+- macOS提交收尾产品源审查已分派：native Critical Reviewer `/root/product_commit_scope_review`，输入 `macos-current-fix-commit-preparation-20261005-r1/product-dirty-binding.json`，仅审核必要Dart/init/teardown/HDR/local diagnostic及测试的精确当前差异，输出 `macos-product-commit-source-review-20261005-r1`。独占该证据目录，不修改产品、不构建/播放、不stage/commit/push，不开展性能优化；重点确定混杂Android/iOS切片与默认关闭诊断、退出资源所有权，终态待。
+
+- 提交收尾增量核验：Lead独立复验isolated r4 baseline/46节点字节与mode/link/完整dirty集合，outside_allowlist与missing_changes均空、index空，`isolated-r4-final-scope-verification.json` PASS。产品Critical已冻结34源码/测试节点全部匹配候选绑定，默认诊断入口false，最终语义结论待。Reviewer `/root/normal_r4_artifact_binding`新增只读33 adjacent chain引用闭包及既有审核范围纳入决策，独占新增`adjacent-chain-inclusion.json/.md`；不改产品、不构建、不提交。
+
+- 产品精确source审核终态：`macos-product-commit-source-review-20261005-r1/review.md`，Critical `PASS_WITH_NON_BLOCKING_FINDINGS_PRODUCT_SOURCE_ONLY`；34节点冻结/终态无漂移，未见新macOS源码阻断，依赖r4 owner admission/drain；不背书workflow/pin/运行验收。N1诊断页提前播放已修，最终17 tests/analyze PASS及增量Critical PASS_N1_SOURCE_CORRECTION；Android mixed hunks属于共享会话所有权适配，不机械删除，设备回归仍未知。首次Worker创建被agent thread limit拒绝（dispatch.json已保存）；Critical终态后重试native Worker `/root/diagnostic_autoplay_correction`成功，仅独占local diagnostic页与必要测试，输出`macos-diagnostic-autoplay-fix-20261005-r1`，禁止性能/构建/GPU/Git，测试待Lead串行许可后执行。
+
+- 相邻构建链纳入决策终态：`adjacent-chain-inclusion.json/.md`，33节点中27必须纳入（3待审）、3干净Pub基线不新增commit、3optional/perf排除。不可排除`build_macos_mpv_x86.py`（prepare导入/constants且default执行）、`verify_macos_mpv_slice.py`及`package_macos_goodwu_mpv_hdr.sh`（普通Flutter防0.36闭包）；原生Critical `/root/remaining_packaging_source_review`独占新证据目录`macos-remaining-packaging-source-review-20261005-r1`，仅补审这三文件及必要调用关系，不测试/build/GPU/Git。diagnostic Worker获唯一CPU测试窗口，测试与analyze终态待。
+
+- 诊断N1最终关闭：三个当前文件/`final-snapshot`/`checks-and-binding.json`字节一致（Lead独立复验PASS）；初始化autoplay:false，await init/mount期间关闭后的mounted/_closing与源所有权守卫阻止新发play。最终格式后17 tests/analyze三文件PASS；原Critical `PASS_N1_SOURCE_CORRECTION`，`macos-diagnostic-autoplay-fix-20261005-r1/review-v2`已冻结停写。纯helper行为与页面接线源码契约不扩展为widget/native/实屏验收。提交草案保留性能FAIL、输出metadata未知及pin/hosted缺口，最终scope汇总Reviewer仍在核正式release workflow，未stage/commit/push。
+
+- 三必要辅助脚本Critical终态`PASS_WITH_NON_BLOCKING_FINDINGS_SOURCE_ONLY`，`macos-remaining-packaging-source-review-20261005-r1`冻结无漂移；选定普通路径未发现成功返回仍嵌0.36绕过，非阻断缓存残留/直接CLI非原子/manifest provenance限制保留，无新增运行验收。诊断N1三个节点17 tests/analyze3items PASS，`macos-diagnostic-autoplay-fix-20261005-r1/checks-and-binding.json`/patch已归档，原Critical `/root/product_commit_scope_review`有界增量复审review-v2中；不替代widget/native/实屏验收。最后范围汇总Reviewer followup被agent thread limit拒绝，待当前工作终态再恢复，不stage/commit/push。
+
+
+- 最终唯一Pili提议范围已冻结86paths，`final-proposed-scope.json/.md`；release.yml两个接线修改V1 PASS且正式发布必需。Lead已刷新SOP：用Python bootstrap/consumer替代被排除旧shellfrontend，区分normal/diagnostic、最新诊断增量未build、r4卡顿与HDR未知、历史参考身份及连续UI最新布局要求。此文档刷新使原86清单中的SOP字节过期，需以后续最终文档绑定为准。共享core46本地提交授权已向用户请求，未收到回复；pinNULL不填假revision，未stage/commit/push。
+
+
+
+### Prior current-state audit trail (superseded)
+
+
+- macos-shared-r2-quit-reentry-three-rounds: 三轮原生菜单Quit→独立ps旧PID缺失→精确同App启动→首页/搜索固定BV/列表P2→实际首帧均通过，PID32375→42054→42823→43073。第二轮初始black loading后枫叶寺庙出图，第三轮同样出图。三轮首帧重入窄PASS，quit-reentry-three-rounds.json保存，不称长期稳定/每次重启独立流畅验收。CI worker四文件已创建8/8CPU通过，尚在末次边界核查冻结，不真实下载/build/sign/GPU。
+
+- macos-shared-r2-quit-reentry-round1: 原生菜单Quit后PID32375独立ps缺失，当前日期DiagnosticReports无PiliPlusX匹配；精确同App重新启动，首页→搜索历史固定BV→播放列表P2蓝色选中且寺庙门口首帧出图，一轮正常Quit/reentry窄PASS。新PID及证据quit-reentry-round1.json；三轮门尚余两轮，不等同无崩溃长稳。
+
+- macos-shared-r2-dv-sdr-dv-reset: 同PID32375逐次P2→P1→P2，菜单实际读回P1 7680x4320/nv12/BT709/BT1886/sigPeak0，返回P2 3840x2160/p010/dolbyvision/BT2020/PQ/sigPeak4.929096并最终出图。输入解码参数重置窄PASS，dv-sdr-dv-parameter-reset.json保存；不作为compositor实际HDR输出重置/多轮切换耐久通过。
+
+- macos-shared-r2-fullscreen-three-rounds: 精确候选PID32375/P2在同分集重开后逐轮f→状态→Escape→状态，三轮均player-only进入、详情/播放列表/原生close返回恢复，progress9→15/20→24/29→31%；首轮全屏与第三轮返回实屏出图。三轮UI往返观察PASS，fullscreen-transitions-three-rounds.json保存；不扩展为连续流畅/HDR输出保持/resize或Quit-reentry门。用户此前P2“全部正常”实屏样片PASS保持。
+
+- macos-shared-r2-p2-human-pass: 用户对已置前当前候选BV11f4y1K7Wx/P2“4K杜比视界”的颜色、亮度、高光细节及流畅度直接反馈“全部正常”，当前样片实屏PASS，绑定SharedCandidate.app/Runner901e5c10/PID32375/human-acceptance.json。不扩展为DV P5 profile已证明、实际屏幕HDR状态、同PTS参考或完整长播/操作矩阵；这些仍开放。CI worker约400行主编排已实施，workflow/tests/doc与冻结尚待，不实际build/sign/GPU。
+
+- macos-shared-r2-seek-observation-incomplete: 当前P2已观察00:50→00:59→01:09→01:51及鹿/枫叶场景出图；坐标与Right/Space操作未隔离自然播放时间及暂停状态，不能证明seek至少10秒，保留seek-observation-incomplete.json，不计该操作门PASS。CI四文件worker仍运行，未并行构建签名GPU。
+
+- macos-shared-r2-loaded-image-binding: ps确认PID32375仍运行精确SharedCandidate.app；vmmap实际Mpv.framework与libplacebo.dylib均加载自该候选Contents/Frameworks，已保存runtime-images-pid32375.txt并绑定human-acceptance.json。仅运行库来源证据，不替代屏幕HDR/颜色或持续流畅验收。CI worker仍实施四文件CPU工作包。
+
+- macos-shared-ci-candidate-implementation-dispatched: architect完整只读方案完成。native team_worker /root/shared_ci_candidate_implementation独占新增workflow/mac-shared-candidate.yml、run_macos_shared_ci_candidate.py、macos_shared_ci_candidate_test.py、macos-shared-ci-candidate.md四文件，按已批准lock来源硬门、全fresh链、临时依赖隔离、现有bootstrap/consumer/finalgates编排；仅CPU/mock，不下载/实际构建签名GPU/Git，不改生产配置及已有消费者，完成冻结shared-ci-candidate-validation-20261005-r1并停写。后续V1与来源V2独立审核。当前revision null必须拒绝，真实hosted仍未完成；未授权提交推送。
+
+- macos-shared-ci-source-policy-design: architect初步方案使用既有lock.reviewed_media_kit_revision（当前null硬失败），不允许任意dispatch SHA自批；source_ref完整40hex且绑定workflow GITHUB_SHA，candidate临时dependency overrides统一Git URL/ref，真实锁完整集合/path复验；保留Rosetta双ABI与实际CGL门，hosted缺能力fail不skip。完整方案待。Lead只读preflight：arm64/Xcode27.0/Python3.11.17/可用16GiB，未启动fresh构建，当前P2实屏观察与构建签名GPU串行。
+
+- macos-ci-fresh-chain-design: native Scout /root/ci_remaining_inventory完成只读定位：mac.yml目前仅legacy0.41且固定media-kit0fa6；fresh runtime builder CLI已存在，但hosted未接线，最近prepare用已有本机runtime；recipe+Swift bridge不可变已批准revision缺失，pubspec refs混合。bootstrap候选模式实现及真实完整consumer已PASS，故旧acquisition计划“ensure无skip/bootstrap策略未实现”已过期。native architect /root/shared_ci_workflow_design负责只读候选手动workflow全fresh链方案与failclosed来源政策，无写入/构建/签名/GPU/Git权限，不改默认生产、不虚构revision、不commit/push。Lead独占账本。
+
+- macos-ci-remaining-inventory-dispatched: native team_scout /root/ci_remaining_inventory只读任务，核mac.yml/runtime builder/preparer/acquirer/lock与docs，输出hosted fresh链精确CLI连接、本机runtime依赖及不可变revision缺口。无写入/构建/签名/GPU/Git权限；Lead负责Current State整合。当前候选P2实屏反馈待，保持视频供观察。
+
+- macos-shared-r2-p2-decode-verified: 当前BV11f4y1K7Wx P2蓝色选中并实际出图，播放信息3840x2160/VideoToolbox/p010/dolbyvision/BT.2020/PQ/sigPeak4.929096；仅证明DV输入识别与硬解，不据此断言DV profile5或屏幕HDR输出。用户实屏颜色/亮度/流畅已反馈“全部正常”，当前样片PASS。证据：shared-bootstrap-full-consumer-20261005-r2/human-acceptance.json。
+
+- macos-shared-full-consumer-r2-human-fullscreen-pass: 当前SharedCandidate.app/PID32375/Runner901e5c10，BV11f4y1K7Wx P1/UI8K，用户直接反馈“全屏流畅”，当前候选全屏流畅度实屏PASS；当前播放信息已核验7680x4320/VideoToolbox/nv12/BT.709/BT.1886，P1实际为8K SDR；P2已切换，独立颜色亮度验收待。独立V1真实bootstrap→consumer构建封装发布PASS，20库身份保持、source不变、双ABI0.41最终门禁及sidecars绑定通过；嵌入空requirements保留，合成cdhash designated identity重签后变化。色彩亮度、完整回归及hosted不可变默认CI仍待。证据：shared-bootstrap-full-consumer-20261005-r2/human-acceptance.json。
+
+- macos-shared-full-consumer-real-r2-pass-20261005: session51656 terminal0，完整realshared两ABI编译/RuntimeApp仅envelope签/privatecore封装/最终包gate/backend通过，candidate shared-bootstrap-full-consumer-20261005-r2/SharedCandidate.app，Runner901e5c102b199d4d7e771c9ee6ce6dd7e311f30c855199fc45a40ba0d91e71cb。Root核20锁库签前后whole/thin/CDHash完全相同，source_app_unchanged=true，final pending键不存在/shared=true；input保留pending。原V1真实runtime只读复核PASS。source已有iOS编译兼容guard，旧n1物理接受不自动转移；新包运行/完整矩阵及hosted不可变revision/defaultCI仍未完成。
+
+- macos-shared-full-consumer-real-r2-running-20261005: bootstrap复制边界修正轮1原V1PASS，source App preflight98040exit0。首次full execute因预检已建logs而exit2拒绝existing-output，保留r1原日志未覆盖；fresh shared-bootstrap-full-consumer-20261005-r2完整consumer session51656真实运行，source signatures/两ABI bridge/inputs已进shared build，arm64 meson compile -j2 live。按原严格gate构建，不启App/GPU并行，不称最终PASS。command/result/log绑定新目录，最终Runtime envelope20锁库保持及pending清除/最终backend尚待。
+
+- macos-real-bootstrap-build-pending-rejection-pass-20261005: session46606真实FlutterRelease bootstrapexit0/193.1MB，新共享macOS Swift含iOSguard编译成功。Info pending=true，codesign deepstrict0，普通verify_macos_mpv_bundle exit1明确pending拒绝，原argv/rawgates/Runnerhash shared-bootstrap-real-build-20261005-r1。中间App不用于播放/发布。writer P1复制链接修正轮1CPU22+40+27全0冻结shared-bootstrap-validation-20261005-r3/review-v1-round1，原V1增量复核中；完整shared consumer最终链仍待。
+
+- macos-bootstrap-v1-copy-boundary-fix-build-20261005: 原V1 REQUESTCHANGES P1 core复制后内部absolute symlink仍指源，末尾drift不能保护源；原writer第1最小修正轮仅复制后立刻app_tree精确比较+负例，未放宽合法relative。Lead真实中间source App Flutter Release bootstrap session46606启动，只验证已核hook/新macOS Swift，暂不消费尚未复审core；mode仅subprocess环境，无全局设置。writer暂停CPUtest，保持build/sign串行，待终态后freeze/V1。完整最终候选仍pending，不把中间build成功认成发布。
+
+- macos-ci-real-inputs-prepare-pass-20261005: no-strip获取/签名真实链获独立V1窄PASS。Lead把真实raw四归档/header与signed Ass完整framework context输入原preparer，session37668 prepare0及57327 sealed verify0，输出shared-ci-prepared-inputs-r2/inputs。实际使用现有已验本机runtime-work/runtime-directory与冻结local recipe，故仅证明真实CI acquired/context→prepare连接，不等于hosted fresh runtime build/不可变revision。bootstrap7文件冻结review-v1/19+40+27CPU0交原V1实现审核，无livebuild/sign。iOS真实完整compilePASS、n1小窗全屏流畅PASS仍保持，整体未完成。
+
+- macos-ci-no-strip-real-sign-pass-20261005: fresh r2 fetch/verify session52519与sign/verify-contexts58694各stage0/1/2/3真实exit0。Root读真实3份Xcode日志均无strip-unsigned-binaries及strip命令；signedcontexts manifest9bcd968eb8c3440581bb542e0431bab82a752dd6aeb24e5ba8c592efce15108d已独占发布，五derivation payload/resource差异实际检查。原V1只读实际运行增量审核中；不称正式CI或生产发布已完成。bootstrap consumer私有runtime App envelope签名衔接正在补CPU验证，锁20库不重签；iOS完整Runnercompile已PASS。
+
+- macos-ci-no-strip-fresh-fetch-r2-start: Lead按增量V1PASS版fresh目录shared-ci-real-acquisition-no-strip-r2启动fetch→verify session52519，原r1rawseal不复用/不reseal，sign阶段尚未启动。bootstrap初版CPU19/consumer31/prepare27 terminal0，但writer发现Runtime.app替库后外层签名可能失效，不能据mockPASS称真实链闭合；授权consumer仅private runtime stage保留entitlements/requirements/flags重签App envelope、严格验签且锁20库whole/thin/CDHash不变，core signed-source gate保留，无bypass。补有意义CPU tests后冻结V1，正式CI/默认发布仍未接线。
+
+- ios-real-runner-compile-pass-20261004: iOS diagnostic macOS compileguard经Critical V2PASS后freshRunner r2原Swift错误消除，首轮因Pods/Manifest.lock缺失sandboxFAIL；保留before快照，pod install --deployment exit0，Podfile.lock/Manifest一致且git status ios无tracked改动。相同真实workspace命令重编session83579 terminal0/BUILD SUCCEEDED，media_kit_video实际arm64+x86_64 simulator swiftmodules存在，无stub/无签名。证据ios-shared-runner-compile-20261004-r2/after-pods-result与rawlog。仅关闭iOS真实编译项，不证明iOS播放/屏幕HDR；macOS新源码compile与新包回归仍待。禁strip7文件增量V1源码证据PASS，真实fresh获取/签名待；bootstrap恢复CPU窗口。
+
+- ios-macos-presented-guard-frozen-20261004: 原生Worker最小diff已冻结ios-presented-handler-macos-guard-20261004-r1，Lead核liveSHA6b7b8221与diff，仅diagnostic注册块#if macOS，原present/completion/lease不变。原Critical V2审核中，真实compile重试仍待。签名禁stripwriter报告36CPUtests终态0及精确fingerprint functions不变，待冻结原V1后fresh真实fetch/sign；bootstrap另一writer恢复独立CPU窗口。无提交/推送。
+
+- ios-presented-compile-boundary-20261004: Scout核当前ObjC SDK头MTLDrawable确有addPresentedHandler/iOS10.3，撤销“iOS SDK未提供API”解释；真实Swift simulator编译仍报缺成员，确切import原因未定。iOS caller从不传presentedHandler，macOS提供诊断，已分派原生Worker /root/ios_presented_compile_fix独占common/darwin MetalSurfaceBlitter.swift仅诊断注册块#if os(macOS)，保留completion/lease/present顺序与真实presented证据；最小freeze后Critical V2，再真实iOS/macOScompile。不改部署版本、不将completion伪作presented。
+
+- ios-shared-runner-real-compile-fail-20261004: Lead真实Runner.xcworkspace/Runner Debug generic iOS Simulator编译，fresh DerivedData，CODE_SIGNING_ALLOWED=NO/disableAutomaticPackageResolution；session76776 terminal65。真实SPM media_kit_video生产Swift MetalSurfaceBlitter.swift:166错误CAMetalDrawable无addPresentedHandler，未使用stub。完整argv/result/raw日志media-kit-build/ios-shared-runner-compile-20261004-r1。原Scout只读定位共享symlink/API职责与最小平台guard，不将compile失败当环境缺框架。两个脚本writer已知无livebuild，可串行CPU验证。iOS仍未通过，不动既有Android/iOS用户改动。
+
+- macos-ci-sign-strip-root-cause-20261004: 原V1只读定位首个Ass/arm64 strsize12488→12496，Intel12512→12520；Root重读tool0060真实Xcode日志确认五框架builtin-copy带strip-unsigned-binaries并执行strip -D -S -no_atom_info，超出纯copy/sign契约。不忽略LC_SYMTAB或stringtable指纹。原native Worker独占acquisition script/hosttemplate/test/doc，授权最小禁strip设置+显式argv，并在比较前落before/after payload/结构差异；CPU测试/冻结V1后再串行真实sign重试，不改源库或放宽签名/代码门。原bootstrap Worker范围独立继续实施；n1小窗/全屏用户流畅PASS已退出。
+
+- macos-ci-real-sign-context-fail-20261004: n1小窗/全屏均用户流畅PASS后native menu正常Quit，ps96885 exit1无进程。真实CI签名session68373 terminal：stage2 sign-contexts exit2，拒绝 signing changed code payload/ABI/minOS/UUID/install ID/dependencies；stage3未执行，保留原argv/receipts/stdout/stderr及sign-logs，不放宽指纹/签名门，原Reviewer只读定位具体差异。candidate bootstrap按V1边界授权原Worker仅ensure/verifier/core/consumer+专用tests/docs最小闭环，默认发布与pubspec/workflow/native不改，CPU串行检查可运行，无提交。
+
+- macos-normal-n1-fullscreen-human-pass-20261004: 用户直接反馈“全屏流畅”，当前n1/PID96885/BV1heam6TExz/UI4K小窗口与同候选全屏流畅度均实屏PASS。源FPS尚未重新采证；不扩展为HDR/P5或完整操作矩阵验收。下一正常退出后串行CI sign-contexts→verify-contexts。
+
+- macos-candidate-bootstrap-design-20261004: 原Worker发现只在ensure early-return会允许复用已有0.41 source App通过普通guard，不能保持发布闭环。拟显式candidate bootstrap标Info MediaKitSharedBootstrapPending=true、普通bundle verifier无条件拒pending、shared core packager仅在私有stage嵌并校验shared slices后清marker再签名/完整最终门/发布。最小至少ensure+verifier+packager三处，已交原V1只读设计审核，尚未授权代码写入；默认发布不改、无env bypass、不猜revision。n1全屏播放及人类流畅度pending保持。
+
+- macos-ci-wiring-audit-20261004: 原Scout只读确认mac.yml仍legacy ensure/build/texture-tone-map上传，未接shared acquire→prepare→builder→consumer；Runner无条件legacy ensure为candidate bootstrap缺口，acquisition lock reviewed_media_kit_revision=null。pubspec Git refs混420fba3/0fa6，而正式lock gate要求全部0fa6，本机path lock不能证明hosted解析。下一设计包交原Worker仅提出默认关闭candidate-only hook方案，不写源码、不猜SHA、不改默认workflow；实际shared recipe/bridge不可变revision与完整host签名/CI串行验收仍待。当前n1全屏播放不受影响。
+
+- macos-ci-real-source-classification-20261004: 对真实fetch得到的5个framework只读运行已审核inspect_framework，逐ABI lipo/otool/codesign真实工具及payload/minOS/installID/tree不变检查exit0。5 ARM均valid-linker-code-without-bundle-resources，5 Intel均unsigned-code，与冻结窄分类契约一致；日志及完整payload身份在shared-ci-real-acquisition-20261004-r1/readonly-source-classification.json及对应logs。未重签、未hostbuild、未运行GPU；不能替代sign-contexts/verify-contexts实际验收。n1全屏实屏反馈仍pending，不打断播放。
+
+- macos-normal-n1-small-pass-full-visible-20261004: 用户直接回复“流畅”关闭正常n1/PID96885/BV1heam6TExz/UI4K小窗口实屏流畅度；CUA重新绑定exact app后f实际进入player-only全屏并出图，当前全屏反馈pending。remaining-delivery-audit已按r2实际两模式observedRecovery证据纠正旧r1未完成状态，仍不把失败恢复证明扩展到HDR/长播/全部生命周期。原Scout只读核正式CI/bootstrap缺口，无构建签名或播放干扰。
+
+- macos-ci-real-fetch-verify-pass-20261004: Root真实固定fetch→verify session92026 terminal0，各exit0，10项download日志及raw acquisition-manifest保存shared-ci-real-acquisition-20261004-r1，实际ZIP→framework/header重派生来源闭合；sign-contexts/verify-contexts未执行。用户指出交互问题卡未见，Lead改为直接聊天验收提问；normal n1重启PID96885，固定BV/4K从08:36续播出图，用户直接回复“流畅”，n1当前小窗口实屏流畅度PASS；重新绑定CUA exact app后f已实际进入player-only全屏，等同候选全屏流畅度反馈；前PID92698退出试次不计。当前不build/sign/GPU并行，正式CI/iOS及完整矩阵仍待。
+
+- macos-real-ci-fetch-start-20261004: normal n1小窗实屏问答无回复仍pending，Flutter AX控件未可靠返回pause，不冒称暂停；Root正常menu Quit且ps无PID92698，保留试次不PASS。核CI7冻结SHA后启动真实fetch→verify session92026，独立目录shared-ci-real-acquisition-20261004-r1，尚未终态/签名。Scout确认SPM18个iOS XCFramework缓存ZIP均匹配Package checksum，Flutter engine存在，可离线真实Runner模拟器compile而非stub；拟独立DerivedData/不签名/disableAutomaticResolution，真实执行排在host签名串行之后，尚不称iOS通过。
+
+- macos-ci-acquisition-v1-pass-20261004: 原Reviewer实现V1 PASS、7live/frozen SHA全一致、独立33tests exit0；prepare27/consumer30原始日志/result核实。真实试验硬顺序fetch→verify→sign-contexts→verify-contexts，须真实代码payload/resource、两ABI/fullcontext strict及源不变/原始argv/工具日志；不以CPU替真实签名，不放宽门禁。目前normal n1小窗实屏问答pending，继续保持播放；原Scout获独立只读iOS framework/真实编译输入定位任务，不下载/build/GPU。正式CI/immutable revision及产品矩阵仍开放。
+
+- macos-ci-acquisition-v1-frozen-review-20261004: CI writer已停止源码，固定10输入/downloader/独立host3模板/test/doc共7文件冻结shared-ci-acquisition-validation-20261004/review-v1；Root核7live/frozen SHA匹配，实际读ci-v2-result exit0与33tests原始OK、host结构plutil0；writer原始prepare27/consumer30也exit0，session83771 terminal。原Reviewer V1实施PASS，独立重跑33tests exit0。未实际下载ZIP/hostbuild/sign，recipe+bridge不可变revision/workflow/bootstrap仍待；默认ensure/preparer/consumer/pubspec未改。normal n1 PID92698小窗4K持续、用户流畅问答pending，不打断验收去build/GPU。
+
+- macos-normal-shared-candidate-n1-runtime-20261004: normal product49023/consumer90519 terminal0，最终双ABI mpv0.41闭包/加载/签名/backend门通过；NormalShared.app Runner2ba8bcb4/Mpv5022834e，normalbuild无诊断Dartdefine、failurediagnostics=false/无failureenv、shared=true。CUA exactpath启动PID92698，正常首页/登录态可见，经搜索历史固定BV1heam6TExz起播，控件4K/29s/1018s，多帧更新。当前小窗实屏问答pending，n1源FPS尚未重新采证、同候选全屏与操作矩阵pending；不迁移v8/v10验收。identity/runtime记录media-kit-build/shared-normal-candidate-20261004-n1，正式CI默认未接线。
+
+- macos-normal-shared-candidate-n1-build-20261004: 原Critical完成r2真实运行报告窄scope PASS（失败未发布/同代恢复实际消费者；不代物理色彩亮度流畅或完整释放）。BGRA准确恢复身份attempt10/sequence7；RGBA attempt11/sequence10/lease10。Root确认无App/build、21GiB空闲后启动normal-entry Release session49023，无local diagnostics Dartdefine，日志media-kit-build/shared-normal-candidate-20261004-n1/product-build.log；正常候选封装/runtime矩阵尚待，不启默认CI，不提交。
+
+- macos-real-failed-frame-r2-both-observed-recovery-20261004: v3-r1 V2 PASS后Root product24520/consumer1305/sign+gates7655均terminal0；两ABI SwiftFileList绑定7冻结生产源。BGRA8 PID83052/E2三distinct token后arm，attempt9 depth8→9 rawmpv-4无mark/push/token、slot归还current保持，attempt10正常0且Flutter消费确恢复attempt10/sequence7。RGBA16F PID83543/E5三token后arm，attempt10 depth16→17 raw-4无发布、attempt11正常0，lease10的completion成功+presentedTime65214.992734同token/slot配对，active=true、observedRecovery。两mode overflow/drop/publication/missing均0；UI SDR色条出图、P5航拍→山云更新，两者正常Quit且ps无PID。报告/identity完整r2/BGRA8-runtime与RGBA16F-runtime，原Critical运行证据窄范围PASS；不将此转为新候选物理颜色/亮度/流畅PASS，旧r1 incomplete保留。iOS/正式CI/最终正常包及完整矩阵仍pending。
+
+- macos-native-failed-frame-v3-r1-v2-pass-build-20261004: 原Critical增量V2 PASS，跨lease P2关闭，无新增阻断；核8live/frozen SHA、7raw receipts及10组fixture。Root检查无App/reference/build占用、磁盘22GiB，重新核冻结身份后启动r2诊断Release session24520，原始日志media-kit-build/shared-failed-frame-app-20261004-r2/product-build.log。shared consumer及双signed mode app已完成，两真实observedRecovery见上条；iOS仍pending，不迁移v10观感验收。
+
+- macos-native-failed-frame-v3-r1-frozen-20261004: 修正版仅helper dd747014/test7574f9e变更，另6源同v3；Root独立核8live/frozen SHA匹配。final25906 terminal0，7raw receipts0，跨lease arming/recovery/identity负例及同lease双序正例通过。唯一freeze media-kit-build/shared-failed-frame-v3-r1-freeze-20261004，原Critical增量V2已PASS（见上条）；Root sealed inputs-v2 --verify session13925 terminal0，r2目录已准备但未build/App/GPU，等待复审。iOS仍独立pending。
+
+- macos-native-failed-frame-v3-review-changes-20261004: 原Critical正式V2 REQUEST CHANGES仅1 P2：同token跨lease的completion/presented可误拼资格/恢复。其余transition/defaultoff/预算/生产拒旧及8SHA/7raw receipts核实。Lead授权原writer第1次最小修正，仅helper+fixture，按lease绑定token/slot再配对、token去重，补arming/recovery交叉负例，新freeze后原Critical增量复审。r2仅argv准备，未build/GPU；真实两模式与iOS仍pending。任务卡failed-frame-v3-review-changes-20261004.json。
+
+- macos-native-failed-frame-v3-frozen-20261004: writer已停止，唯一冻结media-kit-build/shared-failed-frame-v3-freeze-20261004含8源manifest/原始final日志；Root独立核live/frozen全部SHA匹配，final receipts7步骤exit0（failure/Completed/Swappable compile+run及optimized bridge）。session58922 terminal0，初轮另存不覆盖。untagged正常lease与overflow不注入负例已补。原Critical已完成V2 REQUEST CHANGES（跨lease配对见上条），修正复审通过前不App/GPU；iOS实际编译、新两模式真实failure/recovery和最终产品验收仍pending。
+
+- macos-ci-fixed-input-implementation-20261004: 原CI writer完成具体设计，Lead授权其单写固定下载清单/安全获取脚本/独立Xcode signing-host模板、新tests及说明；仅代码+CPU/mock，不实际签名/build/GPU，不改mac.yml/pubspec/ensure/preparer/consumer。冻结后V1，Root串行真实验证完整context，再接候选workflow；默认发布不切换。immutable recipe+bridge revision与候选bootstrap hook仍待，不能用dependencies-only缩减完整CI交付目标。任务卡ci-fixed-input-implementation-task-20261004.json。
+
+- macos-formal-ci-source-audit-20261004: 原只读审查已完成：正式CI未运行，local lock为path overrides，不能当正式依赖结果；需新不可变media-kit revision、uchardet固定来源接线及Predidit固定下载→Xcode完整签名context→libass派生来源链。五个原始SourcePackages完整framework strict验签均失败，与inputs-v2已签App副本字节不同；后续发现ARM有display/CDHash、Intel无LC，撤回整体未签名简称，等待binary-only strict/linker签名分类证据，不将签后SHA冒充下载SHA，也不在consumer重签。原agent继续只读明确实际CLI/固定清单/候选workflow_dispatch设计，尚未改workflow或启用生产。官方uchardet HTTPS实际200/exit0，archive e97a60cf/header33224938与已审核header一致；Root已读原始stdout/argv，冻结shared-ci-design-evidence-20261004-uchardet。证据formal-ci-input-source-audit-20261004.json。
+
+- macos-v3-implementation-and-ci-contract-20261004: 原writer v3已实现NativeFrameRegistry三真实修改点锁内old/new+sequence、锁外observer及configure/reset reason标签，正在做producer-confirmed+同token消费者证据有界乱序配对；transition缺序时禁止arm，尚未测试/冻结/V2，不build。独立CI来源只读运行：Root实读pubspec.yaml混用420fba3e与0fa6，正式mac.yml统一lock要求0fa6；本地pubspec.lock为path overrides，不是正式git resolved结果，未跑CI不能声称真实job失败。shared默认发布与不可变来源仍开放。
+
+- macos-failure-prearm-direction-review-20261004: 原writer只读确认epoch入口publishDisplayHeadroom/setFloatOutputEnabled/advanceOutputEpoch三类，实际trial触发原因未被日志记录，SDR draw早退前headroom发布仅假设。原warmup3只producer成功，BGRA仅旧token3消费，float前三约50ms，不能证明消费稳态。拟unarmed真实消费者distinct token成功+actual显示事实后arm，prearm transition清eligible保留reason，armed后仍永久cancel、不硬编码epoch0/延时；原Critical方向复核接受边界后，Lead已授权原writer单写v3：same-token消费者资格、prearm清资格不续预算、armed后永久取消、NativeFrameRegistry.swift三真实修改点锁内快照/锁外有序只读observer（NativeSurfaceOutput仅reason标签，NativeSurfaceViewRegistry不改）；默认关闭无新诊断锁/IO。CPU窗口空闲，禁止App/GPU/commit，冻结后须新V2。实际切代原因仍未知，不能认headroom根因。完整交付11项audit在shared-candidate-pipeline-20261004/remaining-delivery-audit-20261004.json，正式CI仍旧pin未接shared，目标不complete。
+
+- macos-real-failed-frame-float-incomplete-20261004: RGBA16F signed独立候选PID58736真实打开同P5并读回3840x2160/profile5level9；JSON实际modeRGBA16F/epoch3，attempts3稳定成功2即epochChangedDuringRender取消，无injected，result incomplete/observationComplete false。采证取消后视频仍呈现寺庙红伞帧，未把画面当失败恢复通过。完整报告/identity在media-kit-build/shared-failed-frame-app-20261004-r1/RGBA16F-runtime，正常Quit后ps无进程。BGRA8与float均暴露startup采证边界问题，原writer已获v3授权并实施，未冻结/复审；不能用旧V2/CPU PASS替代两实际试次。
+
+- macos-real-failed-frame-bgra8-incomplete-20261004: Root新diagnostic product4487 exit0（两ABI SwiftFileList包含5生产源），sealed consumer47123 exit0，独立BGRA8/RGBA16F signed copy最终门37679 exit0。BGRA8 PID57971真实SDR BT709720p30选片出图，JSON modeBGRA8证明LaunchServices环境gate生效；epoch0前三成功，第4实际depth8→9 rawmpv -4，token nil/markProduced false/push false、失败slot回available且current保持；第5正常depth8成功publish，Flutter只消费旧token3；第6后真实epochChanged取消，result incomplete/observationComplete false，不能认恢复消费通过。完整JSON/identity在media-kit-build/shared-failed-frame-app-20261004-r1/BGRA8-runtime。正常Quit后检查进程；后续RGBA16F试次也incomplete，见上条；原writer已获v3授权实施，真实两模式复验仍待。
+
+- macos-pq-user-acceptance-and-failure-app-build-20261004: 用户确认当前v10 PQ样片“颜色亮度正常，播放流畅”，观感PASS；末尾检查5s/304s，用户明确“回到片头是我操作的”，因此撤销异常判断，精确连续5min范围不据末尾重置推断。正常menu Quit后pgrep无产品进程。Root核media_kit_video local实际依赖与六冻结SHA，新diagnostic Release源码构建session4487及sealed consumer47123均terminal exit0，日志/media-kit-build/shared-failed-frame-app-20261004-r1/product-build.log；真实两模式结果见上方，均incomplete。新候选包含失败帧诊断，不迁移v10用户验收到新包。
+
+- macos-hlg-694s-pq-start-20261004: v10 PID31075固定HLG北海道从起播未seek实际读回694s/1170s，11m34s及多次画面更新已证明持续运行；用户先前亮度/细节正常，流畅度问答仍pending，不升级为完整长播实屏通过。CUA动作异常由实际/tmp路径绑定解决，未重启。正常返回入口后重选固定PQ地球Online，17:52:29+08起播3840x1920森林帧，中途帐篷帧更新，无seek；PQ后续用户确认颜色亮度正常且流畅，末尾回片头为用户操作，精确连续5min未据末尾读数确认。独立失败帧CPU六步及r1构建已PASS，真实试次均incomplete，v3实施中。
+
+- macos-native-failed-frame-v2-pass-20261004: 原Critical复审六冻结SHA V2 PASS限源码/诊断契约，三阻断关闭；默认nil不求值actualgetter/实际renderer关闭无新增诊断lookup锁、允许既有gate锁。完整bridge日志已读PASS；Root独立复跑session76629 terminalexit0，新failure/原Completed/原Swappable compile+run六步均exit0，六SHA前后匹配；原始日志与argv/results在/private/tmp/ppx-failure-v2-lead-regressions-20261004。CPU不代表真实App/GPU。冻结manifest /private/tmp/ppx-shared-failed-frame-review-v2-20261004/source-sha256.json。两模式真实mpv注入/恢复/可见帧仍pending。HLG当前已超过6min墙钟且多次实屏帧变化，用户亮度正常，稳定性问答pending；CUA点击报noWindowsAvailable，但读取正常，未重新启动进程。
+
+- macos-p5-v10-user-overall-color-pass-20261004: 用户对当前v10同一Mystery Box P5连续播放多个场景明确反馈“整体颜色正常”，继沙漠单帧后，当前v10样片颜色实屏验收PASS。限此候选/输入/当前显示环境，不扩展至新fresh-v2、HDR亮度、5分钟长播或跨屏；4K60全屏同共享候选仍待证据。Root记录用户原话，不用截图或input识别替代。native失败帧六源码V2已PASS，真实注入/恢复实验仍待。
+
+- macos-shared-consumer-fresh-v2-pass-20261004: 原Reviewer签名inputs-v2 V1 PASS（仅输入准备/验签契约），Root55373真实terminal exit0；共享双ABI源码编译49.306s、20 locked runtime库精确嵌入、两ABI21binary闭包/签名/dlopen NOW/initialize0、mpv0.41及empty-target transport门均PASS，独占发布FreshSharedDiagnosticV2.app。sealed manifest f7a63317、build identity83a5b24a、Mpv844d19e3，sourceApp tree4e8ba3c2保持。诊断AOT，不是正常入口最终包；真实视频、颜色/HDR、长播与发布默认仍pending，production_default_enabled=false。此前fresh-v1未签FF失败保留历史；签名输入与consumer完整封装阻塞现已解除。新native失败帧诊断不在该旧Runner中，六源码V2已PASS，真实失败注入验收仍单独开放。
+
+- macos-shared-consumer-fresh-build-20261004: consumer最终V1 PASS绑定eef63cc/script、df82fb/test、94b02152/doc，冻结review-v1；30tests与真实CPU两次exit0仅inputs-checked-only。Root真实fresh完整consumer session26217已terminal exit2；显式Release diagnostic source、inputs-v1及固定recipe，独立fresh-work-v1/fresh-published-v1/fresh-consumer-v1-logs，命令recommended-fresh-command.json。真实双ABIcompile exit0，runtime嵌入签名预检因raw FF libavcodec未签名失败；无FreshSharedDiagnostic.app/sidecar/private staging残留，backend/GPU未执行。原输入与publication保留，不重启v1。nativewriter已恢复串行CPUfixture，默认ensure/CI未改。
+
+- macos-failed-frame-native-implementation-20261004: local_p5_entry_review只读确认depth mismatch可由生产共享mpv返回真实参数错误，TextureHW失败returnUnpublished/跳markProduced/push，Flutter通知读旧帧允许；合成ABI测试不够。Lead按routing授权team_worker_escalated /root/shared_failed_frame_diagnostics仅native默认关闭诊断包，三重signed candidate/shared/one-shot gate，同mode/epoch真实负status及下一正常成功attempt，消费者token绑定actual retained buffer。先范围设计确认再CPU fixture，禁止app build/GPU/UI/commit；Root持候选plist开关。证据计划failed-frame-diagnostic-plan.json，真实运行验收仍缺。consumer脚本及tests已落盘；语法阻断与sidecar/work/published/log路径重叠缺口修复，Root复跑30 tests exit0（含execute整链成功与finalgate/inputs/source drift失败拒绝），均CPU/mock边界，真实build/package未执行。原Reviewer独立增量复审及writer doc/冻结交付进行中。
+
+- macos-remaining-runtime-evidence-20261004: Root复核当前TextureHW真实renderStatus/target diagnostics/content-valid/degradation守卫及epoch后markProduced路径；现shared_render_bridge_test只验证ABI、registry与pool租用，不是实际mpv失败后恢复验收。已给原V1 reviewer只读授权梳理真实render→pool→Flutter/native边界与默认关闭的诊断注入方案，无native写入/GPU/build。当前Release Runner93401da8与v10 Runner8efc0039不同签名，但Root实际核两App.framework/Versions/A/App SHA同为7c222b04，确认当前Release仍为v10诊断AOT，不能认正常入口默认关闭；最终正常候选须单独build与实屏回归。SOP已替换旧Homebrew参考为实际同源native参考PID46092，明确SDR100nit不能证明HDR亮度。Mac已解锁，当前准确同PTS对照仍未完成。
+
+- macos-p5-reference-runtime-46092-20261004: v10正常Quit且pgrep无进程后CUA串行启动最新DVP5Reference，actual gpu-next/macvk/Vulkan、VideoToolbox/P010/dolbyvision/PQ，paused PTS10.010000。Root实际核验demo容器文件SHA3e610d3b与MysteryBox同源，纠正Scout按文件名误判不同视频；8/8 runner manifest与24/24 external closure静态匹配为Scout证据。参考请求SDR BT709/BT1886/100nit/bt2390，独立feature库，不能据此认定productHDR亮度或单变量性能通过。参考控制窗可见，视频窗尚未捕获；CUA随后明确Mac locked，人工解锁请求已发，不绕过。runtime日志已复制到reference-player；真实颜色验收开放。
+
+- macos-local-p5-autoplay-v10-20261004: 自动播放修复V1源码复审PASS，14 writer tests/analyze PASS。v10 Release98866 exit0及双架构packaging/empty-backend门通过；CUA启动exact v10，NSOpenPanel选固定Mystery Box P5后未手动play/refresh，即自动海滩帧和轨道1/hevc/profile5/level9、3840x2160。实际进程 44283 /private/tmp/ppx-shared-local-p5-candidate-20261004-v10/PiliPlusX.app/Contents/MacOS/PiliPlusX。无全局callback/renderer改动。v9正常Quit无进程且近期无新增IPS；v10样片颜色已获用户整体正常反馈；HLG亮度观感已通过，P5/PQ HDR亮度及完整运行矩阵仍未完成。证据v10-first-runtime.json。
+
+- 2026-10-04 本地入口初版独立V1 FAIL：Get.put LocalDiagnosticIntro→CommonIntro.onInit读取缺失bvid/cid，无法到达播放；final generation1无实际换源/closing保护。原Worker第1修正轮进行中，须真实intro初始化测试、绑定DirectFileSource identity并逐native read检查current，独立复审前不build/UI。Root新增完整旧链路/7helpers合并86 tests exit0（session51130），不能覆盖该init错误或替代运行。证据shared-candidate-pipeline/local-entry-review/first-pass.json。当前无诊断候选v9，当前v8保持此前P1/P2部分回归身份。
+
+- 2026-10-04 v8/PID11346/BV11f4y1K7Wx独立部分回归：P1控制条8K、香炉/秋景可见；persistent播放列表选P2“4K杜比视界”blue+switch toast，P2香炉/寺院夕阳可见、控制条杜比。未采集实际decode尺寸/完整菜单，不能关闭8K矩阵。宽泛quality regex误点metadata4K标签→search，已Escape返回/Space恢复出图；返回paused时黑图现象保留，未定根因，不归为颜色失败。证据shared-candidate-pipeline/v8-8k-partial-regression.json；停止重复不可靠控制条点击。
+
+- 2026-10-04 本地诊断实现边界已明确：compile flag默认false/Release显式启用，startup极简页复用实际PlPlayerController/PLVideoPlayer/VideoDetailController与no-op intro，禁止下载fixture/网络历史副作用；DirectFileSource source-boundary heartbeat guard及退出真实teardown验证，selected video track真实profile只读查询。Worker实施中，尚未build/UI验收。Lead构建脚本支持唯一第五参数--local-video-diagnostics，语法/unknown-option拒绝/diff check PASS；V1审核排队。参考mpv0.41/PL360/FFmpeg9.0.2与现有config已重核验并冻结reference-player/identity.json，不改配置/不启动；旧其他P5样片接受仅历史，当前同源对照仍缺。
+
+- 2026-10-04 最新CUA只读复核v8：BV1heam6TExz进度100%/极客湾尾帧，related videos与native close均可见，当前已非fullscreen播放。未用截图或自然EOS代替用户全屏反馈；旧“当前全屏播放”状态失效。独立入口Scout确认FileSource仍可heartbeat/写watchProgress，禁止直接伪装下载fixture播放；诊断入口实施包须隔离这两项副作用。
+
+- 2026-10-04 本地P5输入已重新ffprobe/SHA核验并保存shared-candidate-pipeline/local-p5-input.json（Mystery Box / 3840x2160 / 60000/1001 / profile5 / compatibility0）。只读入口审计确认产品仅B站离线下载FileSource、无任意本地文件入口；macOS复用VideoController/Player.open，不是Android HdrVideoSession。无DASH hint不必永久SDR，已有videoParams纠正，但map未传DVprofile，不能以源文件外部记录声称产品已识别P5。新Worker `/root/local_p5_product_entry` 工作包：显式默认关闭的编译flag下选择本地文件、复用产品controller/view/output、无用户下载/历史或网络副作用；writer限诊断helper/FileSource/pages，禁止渲染/色彩改动，先计划后实施，V1独立审核待完成。当前v8全屏不受影响，尚未新增构建或本地产品播放。
+
+- 2026-10-04 用户明确接受same-v8/PID11346/BV1heam6TExz当前4K60小窗口“播放流畅”。该可见验收覆盖这次共享候选，不替代P5色彩/HDR亮度。已CUA f进入full（AX player-only/无close或related界面），全屏实屏问题已发，等待用户；采样已区分初期window和此次full切换，不把全段当固定几何比较。
+
+- 2026-10-04 v8/PID11346/BV1heam6TExz 4K60有界诊断已保存：最后179.001秒source59.940060/VideoToolbox，decoder drop0/render drop290（111秒后至末样本未再增长）；SDR BGRA/floatEnabledfalse/surfaceActivefalse，native drawablePresented0。用户小窗口接受已绑定acceptance-summary.json，全屏待反馈；采样混合window/full，计数不能替代可见帧率或用于固定几何因果对照。证据shared-candidate-pipeline/4k60-11346。
+
+- 2026-10-04 独立180sec证据复核：56–59秒吞吐/呈现下降与drop上升时间相符，decoder/缓冲/池耗尽/Metal失败无对应证据，数秒恢复；79.33ms为累计fence max，不能时间绑定该事件，撤销该峰值直接因果暗示。根因未定，建议同段/窗口/诊断配置v8与既有baseline受控对照。Root seek尝试09:44后Right及10:53后drag，控制条即时复核不完整，drag未执行（缺可见控件），不将>=10sec seek计PASS；当前视频仍出图，保留未知。
+
+- 2026-10-04 PID11346有界180sec采样已terminal(stopped=true)，5339completedRender/renderFailures0/noWritable0；native RGBA16F/active持续、Metal失败0，含启动阶段179.60秒drawable增量平均29.738/s（非稳定段指标）。最后mpv179.002秒decoderdrop0/renderdrop21，增长集中56–59秒。全窗口存在启动playing=false/buffering=true，需剔除后分析，不称全程无缓冲。完整快照shared-candidate-pipeline/diagnostic-180sec-11346/summary.json；seek测试现可开始。
+
+- 2026-10-04 PID11346诊断最新发现：56–59sec mpv drop0→8→18→21、decoder0/playing true/buffering false；对应两秒native窗口16.72/23fps，Metal失败0、池noWritable0、renderFailures0，fence累计max79.33ms。Root该窗口未操作UI，仍不能排除系统/GPU/内容负载原因；不再将初期drop0概括为整轮无丢帧。快照已冻结shared-candidate-pipeline/diagnostic-drop-window-11346，独立只读证据复核已请求。180sec采样仍进行中，暂不seek污染自然播放基线。
+
+- 2026-10-04 same-v8诊断实例PID11346，launch前启用FRAME_PACING并在launch后撤销launchctl环境（无颜色参数变更）。实际sandbox jsonl已生成，最新source29.97fps、native rgba16Float3840x1920/surfaceActive/floatEnabled/registryPresented=true，produced/Metalcompleted/drawablePresented持续增长、失败0；最近windowPresented约29.98fps，mpv decoder/render drop0。仅当前有界窗口，不代表产品4K60/P5颜色或HDR亮度验收。日志已快照归档shared-candidate-pipeline及v8-native-output-summary.json；180秒采样进行中。
+
+- 2026-10-04 PID10143产品播放信息实读：3840x1920/VideoToolbox/P010、dolbyvision limited BT2020 PQ、sigPeak4.929096、rate1，画质DV/codec DVH1。该界面不显示DV profile/native-output，不能声称产品已确认P5/EDR；同源颜色参考和输出链仍待补。播放信息/更多菜单已关闭，未改画质参数。去除签名媒体地址后证据shared-candidate-pipeline/v8-product-decode-info.json。
+
+- 2026-10-04 v8三轮native Quit/reopen固定BV已观察：7665→9030→10000→第三轮新进程；每次菜单Quit后pgrep无PiliPlusX，DiagnosticReports无PiliPlusX报告；三次重开分别日落/汽车内饰/车内相机画面实际出图。当前第3次固定页面14%继续，color/brightness仍pending。证据shared-candidate-pipeline/v8-quit-reentry.json。该记录不代表5分钟连续HDR、seek/resize、失败恢复或可见流畅度通过。
+
+- 2026-10-04 PID9030固定杜比视频逐轮f/Escape三次UI进入/返回已观察：首轮退出全屏按钮/杜比00:52，后两轮player-only/no chrome，三次返回均related videos及close恢复，progress5→6→8%，最后相机画面已出图。第二轮截图仅捕获未判读；此证据关闭三轮UI往返观察，不能关闭连续流畅、色彩/亮度、resize或退出重入×3。证据shared-candidate-pipeline/v8-fullscreen-transitions.json。
+
+- 2026-10-04 v8生命周期实测：PID7665原生PiliPlusX菜单Quit后独立pgrep无候选进程、当前DiagnosticReports无PiliPlusX报告；精确同路径重开首页→固定BV成功首帧（日落/24mm字幕）出图。仅一轮Quit/reentry；尝试批量f/Escape后第二轮未进入full，Escape退到search，三轮门禁不通过，需逐轮状态复核；不将尝试计成功。快捷键super+q被应用处理成点赞而未Quit，已点击撤销赞并见灰色/取消赞反馈，后续只用原生Quit菜单。颜色/亮度问答仍pending。
+
+- 2026-10-04 v8 PID7665实际vmmap绑定当前候选内Mpv/libplacebo/FFmpeg（证据shared-candidate-pipeline/v8-runtime-images.txt），非外部库推断。固定杜比视频画面由人物→溪流熊群且进度85%→95%，持续可见变化；一次全屏画面与Escape回窗口已观察，不能记三轮完整矩阵。未获得用户颜色/亮度反馈，未确认实际DV profile及同PTS参考；仍pending。
+
+- 2026-10-04 Mac已解锁，CUA nativeAppCount24；目标恢复推进。确认无旧Pili实例后CUA启动精确v8路径，PID7665。固定BV1vY4y1N7TY/Linksphotograph/19:30已实际出图、截图跨熊/人物场景变化，控制条16:55→17:02且杜比选项已确认。实屏颜色/亮度async问题已发，等待用户；截图不能判断EDR亮度，也不能证明P5 profile。尚未同PTS参考或完整矩阵，未完成。
+
+- 2026-10-04 candidate封装增量独立复审PASS。v8实际封装exit0；注入post-copy/second-sidecar失败均无app/sidecars/staging遗留（仅编排测试）。published内部output及原始dangling symlink拒绝；最后symbolic防护由Lead复核，未改渲染核心。日志temporary loaded-image路径为历史探针执行路径，final framework hash绑定当前包，不作为当前路径。冻结证据聊天 `shared-candidate-pipeline-20261004`。产品P5/亮度/4K60/lifecycle/8K验收仍开放，未提交推送。
+
+- 2026-10-04 candidate pipeline v7 session97256已exit0，完整Flutter Release及最终botharch门禁通过；Mpv262167e1/Runner ec6b07c7。独立增量审核发现output输入交叉隔离、canonical identity及失败半成品/sidecar覆盖缺口，Root已修：build前path preflight、规范摘要、同父staging完成全gate后发布、sidecar exclusive写入及失败只清理本次staging。published子目录output实际拒绝exit2；修正版v8封装session92219已exit0，最终两arch门禁通过，app及sidecars已发布；失败注入清理尚待验证。日志 `/private/tmp/ppx-shared-package8.log`，增量复审已请求。最新CUA仍Mac locked，视频/可见验收开放。
+
+- 2026-10-04 共享发布封装入口 `scripts/package_macos_shared_build.py` 实际v6封装exit0：绑定build-state、recipe hash、完整844源码、published完整文件及两arch exact运行依赖；最终Mpv262167e1双架构加载/签名/实际opengl-next空target门禁通过，不代表颜色或可见验收。新增显式 `scripts/build_macos_shared_candidate.sh` 连接正常Flutter Release构建与该封装；bash语法及missing-input拒绝通过，完整pipeline session97256进行中，日志 `/private/tmp/ppx-shared-candidate-build7.log`，目标v7；独立增量审核已请求。默认发行配置未变，无提交推送。
+
+- 2026-10-04 macOS 剩余工作保持进行中，未提交或推送。用户要求同一跨平台色彩/渲染核心；禁止 macOS/Pili P5 shader 补偿。旧 production 候选 BV1heam6TExz 小窗口、全屏流畅已获用户确认，但 DV P5 偏色未验收；不得把旧候选结果移用于新候选。
+- 隔离 mpv 0.41 共享 renderer/hwdec v4 已冻结，arm64 library `fad79005a6772e47fa60efcd4256cf5b09efc43fe84e5658c44597c88738224d`。macOS opengl-next 复用同一核心，VideoToolbox RECT 平面同格式 GPU 归一化到 2D，无 CPU copy 或平台色彩补丁。构建、frontend/P4 fixture 与独立源码复审通过。新增真实CGL/RA/PL两帧测试exit0、独立只读复核通过：两个中点实际±0.5 offset/0.5权重，像素均值和A/B/A2方向断言通过，归一化6planes、map/unmap3/3、target lease5/5、errors0；16file hash与冻结核心一致。仅合成NV12 decoder，不能证明VT/P010/DV色彩或全部硬件lease生命周期。显示色彩及完整性能验收仍缺。
+- 最终库真实 P5 4K59.94/VT 测试有持续变化且有限像素、无 sticky 渲染降级；timed 4K约25秒掉帧54，perf约26秒掉帧78。render平均3.687ms含目标等待、glFinish平均6.949ms，仅为该探针数据，不证明产品流畅或颜色正确。证据位于聊天 worktree `archives/experiments/artifacts/macos-ppx-completion-20261003/shared-core-p5-v4-runtime-20261004`。
+- media-kit Swift桥接候选已 opt-in 接入：固定 ABI、按实际目的buffer确定编码、203参考域/UI白相对headroom、同epoch snapshot、失败不发布、paused headroom变化锁外通知重新渲染、pool锁内原子lease与completion归还。25文件优化编译及ABI/epoch/实际pool lease测试通过；Release构建成功。绝对显示nit未知、BGRA消费编码仍待运行验证。
+- 同一v4源码 x86_64 规范化库摘要 `d2e6f3c54341fb99c5b5ef5526d005f88ede5baefc66e9785e89347326b57093`，signed Intel CPU fixture exit0。最终独立候选 `/private/tmp/ppx-shared-candidate-20261004-v5/PiliPlusX.app` 的Mpv SHA `262167e1e494ba85653a1feadf629c3e64725e44eefbcf1febbe2480d7ddc9ca`，双架构closure/NOW/initialize/minOS/signature通过；未UI启动。当前源码HDR/quality eligibility/transaction report/rebuild queue/controller lifecycle五组75项Dart回归exit0，不替代native生命周期或屏幕验收。
+- 最终候选真实linked-framework CGL opengl-next门禁：arm64与Rosetta x86_64均exit0，empty render target_acquired/content_valid=1，error/hooks/import_failed=0；不代表视频内容或显示验收。source16文件afterhash校验通过；新候选打包脚本已将该门禁列为必需，并限制Runner双架构；v5使用持久builder freshly-built slices完整打包exit0，Runner SHAec6b07c7314e9c032b3cfbc622f8cd5ff9ea5cf4dc9d3cddf9cd5623222cf540，两架构bridge marker检查只作辅助freshness，输入bridge与最终Runner摘要分别记录，dladdr核对实际loaded-image与最终framework、清理DYLD环境，失败/超时保存日志，结构化sidecar绑定manifest/probe/framework hash。独立只读复审未发现新增阻断。final-bundle arm64 P5 4K读回30样本29变化finite0/诊断无错误，约26秒掉帧84，性能仍开放。证据聊天archives/experiments/artifacts/macos-ppx-completion-20261003/shared-final-bundle-gates-20261004。
+- 离屏性能证据纠正：同candidate-v3/同P5文件/3840x2160/from-start串行 A→B→A，固定5ms轮询last成功采样drop53→callback完整排空0→恢复轮询66；另callback单event轮0，decoder均0。各轮1500渲染、30像素样本29变化finite0。callback完整排空render含targetwait15.647ms/finish0.958ms；GPU早提交可与目标等待重叠，不能解读为GPU算力加速。last drop在约1450帧非1500最终快照；此前离屏84等不能直接归因共享核心性能缺陷。统计vo-passes异步避免渲染线程同步getter死锁；按固定0.41实现纠正target_time ns而API注释us。首轮探针死锁失败保留并已TERM；最新正常采样均terminal。回调/析构独立源码复审通过，随后修正SHUTDOWN仅跳内层的问题、提前结束不得PASS（该末尾修改尚未重跑）。证据聊天archives/experiments/artifacts/macos-ppx-completion-20261003/shared-perf-callback-comparison-20261004。此结果不替代产品性能或颜色显示验收。
+- 共享源码可复现性补强：media-kit `tool/shared_gpu_next/verify_source.py` 从固定baseline archive叠加16修改后的hash校验完整844files，digest `3015b139edddd283fb74a6865a0f8c4089ecb463a624eb4688260d440582ae44`；fresh prepare发布前也强制完整树校验。正向fresh prepare通过，修改未打补丁README及新增extra源码、empty manifest均拒绝（完整16-key门禁），prepare模块与直接CLI导入兼容检查通过，证据聊天shared-full-source-verification-20261004。持久macOS shared builder已完成两ABI transitive依赖inspect/哈希锁，输出路径隔离、整目录atomic发布、完整published文件集合门禁已修；实际fresh与resume构建成功，最终独立只读复核通过；确认fresh/resume/identity拒绝与atomic发布证据，声明范围仍是外置runtime candidate slices；发现旧arm64 prefix PL349库minOS27，不能误用，显式选当前reviewed framework minOS12依赖。未改变正式默认包。
+- 持久builder最新实际状态：fresh v4 arm64/x86_64各252targets构建exit0、整目录atomic发布；actual --resume确实执行两arch compile(noop)exit0并保留发布全文件hash。源码README、dependency header、jobs参数变更三实际CLI负例各exit2；prefix/header/repo/app/nested路径、部分架构/最终dep检查失败不发布、sidecar/flatmap/extra/symlink修改也有受控编排拒绝证据。最初三轮setup失败（machinefile引号、显式SDK、pc includedir）均保留，修的是构建脚本，冻结共享源码不变。builder-review-v1独立最终复核已通过（未由审核者重跑），未把候选slice外置运行时称为portable bundle。
+- fresh slices arm64 dcfd390c6be53c18a5e75e1f0eca976f3f21d1f41c616e66ff4ece5433e948c5、x86_64 48536316d2c91e7799a311782c611d9af0479ae14fc6da4d7d6f0cdf7109d9fd。最终candidate-v5 botharch实际P5/VT/4K/BT.2390各1500render退出0，30读回样本29变化finite0/诊断无错误，last成功drop采样5/8，decoder0，非屏幕性能或颜色通过。日志明确color decoding/reshaping/bt2390 tone map；target400为实验参考，不是实测显示nit。证据聊天shared-durable-builder-final-candidate-20261004。Mac重新CUA确认仍锁屏，继续等待人工解锁。
+- 永久旧mpv门禁已覆盖最终产物双架构加载、版本、ABI/minOS与SPM copy/sign排序。共享核心正式builder集成、真实VT完整lease回归、最终颜色/HDR亮度、4K60、操作/退出重入矩阵、8K回归仍未完成。当前Mac锁屏，人工解锁请求已发出；不绕过锁屏。
+
+
+
+### Superseded checkpoints archived 2026-10-04
+
+- macos-hlg-longplay-start-20261004: 同v10 PID31075经正常返回入口及NSOpenPanel重选固定北海道HLG/P8.4样片，自动起播3840x1920，17:40:09+08记录开始；中途狐狸帧与初始人物帧不同，未seek，5min持续/人眼流畅验收尚pending，用户已答“亮度与亮部细节正常”，当前HLG样片亮度观感PASS；actual HDR输出状态不能仅据此通过。初始UIprofile未知不冒称runtime元数据确认。native writer修复三阻断，报告新CPU fixture与CompletedRender/Swappable回归exit0；完整bridge编译session31149仍运行，未V2/未App/GPU。
+
+- macos-p5-desert-user-color-pass-20261004: 用户明确反馈“沙漠画面颜色正常”，绑定当前v10 PID31075固定Mystery Box P5/3840x2160/profile5level9、暂停UI10s沙漠人物。该片段实屏颜色验收PASS；实际PTS小数未知，不能宣称与参考10.01完全同帧，也不扩展至全片、HDR亮度/长播或fresh-v2候选。Fresh-v2完整封装已PASS但未启动；保持v10当前画面。原native failed-frame writer现已恢复并实施三项V2修复，未App/GPU，待CPU回归及复审。
+
+- macos-current-ui-and-signature-freeze-20261004: Mac现已解锁；参考gpu-next暂停PTS10.01的视频窗已实际捕获，正常Quit后切回既有已审核v10。当前进程31075，固定Mystery Box P5已播放至98s末帧；控制条连续唤醒并点击进度条后，实际从鹿片段约48s跳转至沙漠人物10s，播放三角及AX播放证实暂停状态；实际PTS小数未知，不能称与参考10.01准确同帧。用户已确认当前沙漠颜色正常，限该片段；HDR亮度仍未验收。签名inputs-v2三源文件、SHA及真实prepare/verify日志已冻结至shared-inputs-validation-20261004/review-v2，required V1随后恢复并PASS，fresh-v2已成功；当前v10沙漠颜色已获用户确认，其他场景仍开放。
+
+- macos-signed-inputs-v2-implementation-20261004: 原writer只读signature-audit-v2证实11flat有效ARM签名但Intel无LC/signature，5flat两ABIstrictPASS，4framework来源完整bundle两ABIstrictPASS且binary hash等旧lock。Lead授权prepare/test/doc单写修复：stage独立thin仅签确无签Intel、lipo新whole，保留已签ARM thinSHA/CDHash，坏已签拒绝；4完整framework验证context安全复制入sealed payload并绑定相同binaryhash，verify不依赖原ctx或deferred。签名派生后真实inspect/newlock+新inputs-v2，旧inputs/work不改；Root已实际复跑27项prepare+signature/context CPU/mocked tests exit0（坏签/签失败/lipo破坏/standalonecontext/链接逃逸拒绝），不代替真实签名。真实inputs-v2 prepare/verify结果均exit0，manifest f7a63317；实际20库strict签名、11 unsigned Intel派生及11 signed ARM保留，4完整context独立验签。原Reviewer V1启动因账户usage limit错误（提示Oct10 2026 05:11恢复）失败，按AGENTS停止实施/新tests/build/GPU，writer已要求冻结已有证据。原Reviewer随后恢复并V1 PASS，fresh-v2完整封装已通过（见当前条目）；颜色验收仍pending。
+
+- macos-failed-frame-critical-native-unavailable-20261004: 原必需V2创建返回agent thread limit reached；writer完成后资源状态变化，Root重试team_reviewer_critical创建/root/failed_frame_diagnostics_review_retry成功，已完成冻结版V2 REQUEST CHANGES：旧E completion/copy在E+1新begin前误计恢复、overflow/违规/缺lease证据仍可完成、attempt上限无终态/freeze后GL仍可改结果；需组合负例及原回归，尚未运行app/GPU。复审后恢复原writer followup再次返回agent thread limit reached，implementation保持停止，禁止generic/direct或Lead自审替代。native writer9434 CPU全bridge优化编译/ABIfixture已terminalexit0并已冻结（TextureHW66bcca7f/helper fe236bfe）；新CPUfixturePASS仅合成status，原Completed/Swappable回归未跑。仍缺attempt上限终止原因、freeze后停止GL查询修正；Lead命令不再新编辑/tests/appbuild/GPU。默认关闭诊断，既有App未重建；真实failure/recovery及V2未通过。错误/任务卡见failed-frame-critical-role-unavailable.json。签名输入修复包仍可推进，整体目标不标blocked/complete。
+
+- macos-shared-consumer-fresh-v1-failure-20261004: Root26217真实terminal exit2；共享双ABIbuilder真实exit0/43.616s，完整publication保留。Runtime签名预检libavcodec.dylib失败not signed at all，Goodwu raw FF复制字节未经prepare签名却已锁。三final输出及private staging实际均无残留，sourceApp/旧inputs/work保留。不绕过签名、不在consumer重签locked字节；原writer获只读设计任务核20库签名并提出stage签unsigned flat→real inspect→new lock方案，未授权改旧payload。须new inputs-v2/fresh identity及V1后重跑。nativewriter恢复串行CPUfixture，无GPU/UI/commit。
+
+- macos-shared-candidate-consumer-20261004: Lead授权原shared writer单写新增scripts/build_macos_shared_candidate.py、test/build_macos_shared_candidate_test.py及docs/plans/macos-shared-candidate-consumer.md，接入sealed verify→shared builder→独立runtime stage exact whole-file embed→现共享packager→staged final gates→exclusive app/sidecar发布；禁止重签locked库、修改normal sourceApp或默认ensure/mac.yml。Root实际确认两ABI20库install ID与整文件SHA映射完全一致，证据ci-runtime-consumer-requirements.json。当前只实施/CPU与编排tests，完成V1前不执行真实fresh build/最终GPU/UI；默认共享生产仍开放，颜色/亮度验收不变。
+
+- macos-shared-ci-input-preparation-20261004: 正式mac.yml仍fetch modern archive并走normal ensure，未调用shared recipe，锁定media-kit旧commit不含共享bridge/recipe。新增独立scripts/prepare_macos_shared_inputs.py、test/prepare_macos_shared_inputs_test.py和docs/plans/macos-shared-input-preparation.md，明确固定归档/headers/runtime/closure身份，真实stage inspect→独占payload发布→最终路径真实inspect→atomic sealed。真实固定输入prepare-v1-result.json exit0，输出/Users/wuweiwei1/src/media-kit-build/shared-inputs-validation-20261004/inputs-v1，sealed manifest b6873bec9e1d836f3c5a92b629d1633281e012f79822ff0b4d1adb8d78c32e6a；最新冻结验证session32046实际exit0；17项编排tests由Root复跑exit0，existing-output/wrong-archive/extra-file三项真实负例exit2。冻结副本、live与source-sha256.json一致，V1 PASS仅限输入准备/消费者契约；路径逃逸P2已关闭。实际prepare为修复前运行，修复后对同sealed payload真实verify通过，并未冒称重做fresh prepare。证据shared-inputs-validation-20261004/review-v1。仍需独立候选app runtime精确嵌入consumer桥，不能只建slice称CI完成。默认ensure/workflow未改，生产开关仍等P5/Android/运行验收；不可变media-kit来源仍缺。参考实屏受Mac锁阻塞，但CI准备可推进，整体未完成。
+
+- macos-local-p5-v9-track-seek-20261004: PID38193 手动刷新实际MPV轨道为1/hevc/DV profile5/level9，timeline drag由14s到56s并从面具人物更新为水中鹅，固定文件授权及大于十秒seek已有可见证据。诊断页遗漏正常页playCallback，open(play:false)后未主动play，故自动播放不通过；writer正补挂载后显式play与成功播放后track读回，不复制网络回调或改renderer。用户偏色反馈仍pending，关闭重选及参考同PTS仍开放。证据v9-first-runtime.json。
+
+- macos-local-p5-v9-runtime-20261004: 构建33345 exit0，v9双架构packaging/empty-backend gate PASS；旧v8原生Quit且pgrep无进程，CUA启动exact v9 PID38193。真实NSOpenPanel选固定Mystery Box P5文件，UI尺寸3840x2160/duration98s；点击视频区后彩色海滩棕榈树帧可见。初始暗帧不能归因失败，Root space与点击影响暂停；track profile/level仍未知，由writer只读检查。用户实屏偏色反馈已请求，颜色/HDR不算完成；seek/关闭重选/参考同PTS仍待。
+
+- macos-local-p5-entry-repair-20261004: V1增量只读复审PASS，入口SHA a26e60eaea310e0de2d236296cc3320b6794af4834d916c5a63096925db96189；原intro缺bvid/cid初始化与假generation两阻塞已关闭，10定向tests/analyze PASS为writer证据，reviewer未重跑。v9显式local-video-diagnostics Release构建session33345进行中，日志/tmp/ppx-shared-local-p5-v9-build-20261004.log。实际文件授权/出图/seek/关闭重选与P5颜色/HDR亮度仍开放；不将源码PASS作为实包验收，无提交推送。
+
+
+- macos-reference-init-correction-20261004: writer与Critical分别复核43014源，`options ? initialize(h) : MPV_ERROR_OPTION_ERROR`因load-scripts=-5令options=false；旧日志initialize=-7是harness合成门禁失败，mpv_initialize实际未调用。撤销下条“mpv_initialize=-7”实际库失败解读，不归因VF/macvk/driver。当前无Lua/JS构建无需不存在的脚本选项；worker显式记录unsupported-script-policy和initialize_called/options_valid，并仅在实际调用后记录mpv返回。颜色选项不改，旧日志保留更正。
+
+- macos-p5-reference-first-runtime-20261004: 独立V2源/启动门禁PASS（source c894b12d、Runner44b7f38d、closure3338c32f覆盖26文件）后Root核所有SHA且无并行播放/构建，通过CUA启动参考PID43014。UI明确initialization failed/no color result；mpv_initialize=-7，主色彩/VO/context等set0，load-scripts=-5不存在。已记录destroy-begin/complete，原生Quit且pgrep无进程。没有GPU/swapchain/颜色结果，不归因P5失败。writer补失败分支bounded logdrain以查具体延迟选项错误，原Critical只审增量；没有猜调tone/换库/替换产品。
+
+- macos-p5-native-reference-build-20261004: 隔离arm64固定mpv0.41 native reference库构建76679已由worker复核exit0，无重启。SHA958e5b4d5617ded29acce98294a597d8dad56a0437d8b839a5d58c39a0718433；headless NOW/initialize0，实际gpu-context含macvk/displayvk，gpu-api含vulkan，vulkan-device存在。构建源/FFmpeg9.0.1/libass归档及同产品依赖SHA绑定，仅启用必要Vulkan/videotoolbox-pl能力；cplayer=false保留。产物在/private/tmp/ppx-p5-reference-20261004，不改production/cache，明确同源不同feature库非原同库。AppKit宿主尚在制作，未启动任何参考UI、未获P5颜色验证；探针枚举不是context/有效帧验收。脚本、manifest和能力probe归档聊天artifacts/p5-native-reference-build-20261004。
+
+- macos-runtime-render-capability-gap-20261004: 精确同库arm64 headless探针mpv0.41/FFmpeg9.0.1/libplacebo7.349确认实际configuration含vulkan=disabled、shaderc=disabled、cplayer=false，gpu-api/gpu-context choices仅auto、vulkan-device unavailable，故当前库不能执行计划的native macvk gpu-next参考。现有marker/closure/NOW/signature门禁仍证明版本/链接安全，但不能证明真实Vulkan渲染能力；撤销包有Vulkan库即路径可用的推断。不用失败参考判断P5颜色。worker改为隔离固定版本arm64 native-gpu-next reference库可行性，禁止覆盖production/cache；参考不同库时必须明确identity差异与因果局限。探针源码/json/manifest及摘要已归档聊天artifacts/p5-render-capability-20261004。最终统一libplacebo嵌入渲染/真实feature门禁仍须实现并验证，P5偏色未解决。
+
+- macos-unified-renderer-review-20261004: Architect只读审查指出实验opengl-next仅CPU plane上传且空hwdec_devices，未复用vo_gpu_next硬解mapper；直接替换可能损失VideoToolbox零拷贝/4K60。其set_parameter不实现ICC/ambient，linear HDR目标分支亦不满足当前extended-linear BT2020合同；不得单改API字符串+16F冒认正确HDR。最终应共享gpu-next帧映射/libplacebo色彩、选项、metadata与target策略，平台适配导入/显示，验证一次且仅一次转换。隔离同库gpu-next参考harness正在制作。Pili32025从4K持续播放到进度41%后已通过原生Quit菜单退出，pgrep确认无进程，当前DiagnosticReports无本轮新IPS；键盘super+q第一次未结束，未把尝试当成功，最终菜单退出有效。该单轮不算三轮退出重开完整矩阵。
+
+- macos-unified-color-requirement-20261004: 用户明确要求跨平台使用同一套代码。最终修复边界：media-kit/libplacebo统一P5 reshape、色彩管理/HDR策略及状态；平台只适配解码、Surface/Metal/显示与生命周期，Pili仅声明偏好消费状态。禁止在Pili补macOS专属P5转换或legacy手写shader作为收敛交付。现隔离AppKit同库gpu-next参考仅用于因果验证，opengl-next/libplacebo共享backend隔离PoC需架构及源码审查、运行颜色/同步/重入/双架构门禁后才能采纳。Android已通过路径不得因统一改造无证据回退。
+
+- macos-4k60-fullscreen-accepted-20261004: 用户确认最终PID32025 BV1heam6TExz当前4K“全屏播放流畅”，结合此前小窗口流畅反馈，当前两种尺寸实际观感已获接受。CUA完成三轮enter/Escape返回且每轮播放器页恢复；控制wake/space会影响暂停状态，最后明确space恢复，键盘Right一次已发送但缺直接进度增量证据，不能记seek≥10通过。三轮界面恢复不替代退出重开×3、窗口缩放、HDR≥5分钟及同源颜色/亮度验收。DV P5偏色未解决，仍需正确reshape同源参考与修复，不关闭总体任务。
+
+- macos-4k60-visible-20261004: 用户确认最终PID32025 BV1heam6TExz当前4K小窗口“播放流畅”。已使用即时wake/AX/点击进入全屏且出图；wake点击会暂停播放，明确space恢复，当前等待全屏实屏反馈。仅一次进入，尚不算全屏往返×3/缩放或完整矩阵。固定P5偏色依然未通过，不能因SDR4K流畅关闭HDR颜色问题。
+
+- macos-4k60-final-running-20261004: 最新通过最终gate候选PID32025，CUA从搜索历史打开精确BV1heam6TExz，已可见连续播放，控制条position00:07/duration16:58/画质4K；实屏小窗口流畅反馈待回。当前未启用诊断观测，不能据截图新增实际FPS结论。P5偏色只读调查发现demo与Pili nativeHDR都依赖vo=libmpv OpenGL结果，Metal EDR复制本身不证明P5 reshaping正确；仅为待验证源码链，未调色/修改路径。产品颜色/亮度与完整矩阵仍开放。
+
+- macos-final-candidate-20261004: Rosetta恢复后Release重建28301 exit0（192.9MB），完成后独立最终gate34933 exit0，两架构mpv0.41/NOW/initialize0/closure/strict签名PASS。Runner d98016c36f22f3463e285c4d6a7bc28d4fa41fea4b80cb034a65d0c7006aea90，App97c76b021c49678f036e44d97d0410ec99dec37e5584add728f080f9cadb57c6，Mpv2d3db36a；新Dart属性与native时间链/FBO诊断纳入实际包。已CUA启动到首页，尚未完成本候选播放矩阵。用户另明确当前DV P5偏色，不能算完成；此前demo本地流畅反馈仅关闭该次流畅子项，不关闭颜色/HDR验收。只读Specialist正在定位demo/Pili色彩路径，等待用户确认偏色对象。未提交推送。
+
+- macos-rosetta-restored-20261004: 用户完成Rosetta安装；主机 `/usr/bin/arch -x86_64 /usr/bin/true` exit0已复验，之前Intel执行环境阻塞解除。确认无存活xcodebuild/demo/Pili后启动完整Release重建session28301，日志 `/tmp/ppx-final-properties-fbo-release-rosetta-20261004.log`。保留双架构及最终包门禁，构建进行中，不沿用失败app的任何modern加载结论；实屏产品流畅性/HDR与最终矩阵仍开放，未提交推送。
+
+- macos-failed-app-correction-20261004: 追查ensure脚本确认modern包先在mktemp内验证，Intel执行失败使其尚未ditto回最终app。失败最终app Mpv SHA95a8ef30仍为SPM旧库，独立最终gate exit1明确“arm64 ... not mpv 0.41.0”。因此下条独立静态closure22项及此前独立arm64 NOW/initialize0仅验证失败旧app，撤销将其视为modern验证的表述；构建内modern临时包closure21项有效，但Intel动态未执行。未发生成功构建/交付旧0.36，失败产物不启动验收。四份日志及SHA保存聊天artifacts/host-rosetta-build-failure-20261004。Rosetta前置仍未恢复；完整双架构重建及产品验收仍开放。
+
+- macos-final-build-environment-20261004: 最终新诊断Release session59318 exit1，实际门禁已验证pin源码/Intel切片身份及双架构21库闭包，但启动x86_64 smoke返回Bad CPU type。独立 `/usr/bin/arch -x86_64 /usr/bin/true` 同错，RosettaUpdateAuto receipt不存在，说明当前主机不具备Intel执行前置；不是据此认定包ABI失败。主程序仍含x86_64/arm64，未缩架构/跳门。构建后独立静态closure成功（22 binaries，含新增实际产物状态），动态加载/最终签名及最终产品运行不能记PASS。请求用户通过官方Rosetta安装流程自行确认许可后再跑同一完整build。原日志 `/tmp/ppx-final-properties-fbo-release-20261004.log`，未提交推送。
+
+- macos-demo-acceptance-20261004: 用户补充确认“目前demo窗口播放流畅”，绑定当前27.0.1/26A434、PID14097、Runner74f5441d、持久化本地DV P5 4K59.94与原单播放器配置。普通窗口在播放期间的拖动反馈未单独确认；此前空闲首页及纯Flutter均获流畅反馈。该局部验收不能替代Pili网络4K60/DV或HDR亮度验收，也不能单独确定系统升级/重启/磁盘/负载中哪项解释旧卡顿。demo已正常退出且pgrep无进程；Pili最终新Dart属性/FBO时间链候选Release构建session59318进行中，日志 `/tmp/ppx-final-properties-fbo-release-20261004.log`，不得提前记构建通过。未提交推送。
+
+- macos-host-control-20261004: 主机已升级重启至27.0.1/26A434、磁盘约43GiB空闲；旧27.0长期运行/近满磁盘样本不能当当前性能基线。独立不含media-kit/mpv的纯Flutter Release空窗口，用户确认它与Finder均流畅；正常退出后冷启动demo首页PID14097，用户也确认首页与Finder都流畅，故此前“只启动demo就卡顿”当前未复现。相同demo Runner74f5441d/Mpv2d3db36a签名复核通过，已进入相同持久化本地DV P5 4K59.94片段且出图，正在等待视频与普通窗口分别的实屏反馈。不得扩张为空窗口证明视频Texture无问题，也不得据系统变化宣称卡顿根因已确定。最终Pili新诊断重建、4K60/DV流畅性、HDR参考亮度及同候选完整操作矩阵仍开放，未提交推送。
+
+- macos-demo-local-20261003: 已用真实media_kit_test原单播放器/默认配置，本地HEVC Main10/DV P5 4K59.94播放。纠正旧黑屏结论：PID13315初始化/纹理注册/open均完成，error明确输入文件不存在；启动后补回sandbox tmp文件并重载即出图/推进，无初始化死锁证据。用户确认demo小窗口仍明显卡顿。最新demo Runner5582bdfb/App4738297c/Mpv2d3db36a；最终源码构建/analyze与mpv0.41双架构closure/NOW/initialize/signature PASS，observer V1、host adapter V2 PASS。single session80–140s完成21.52/s、首次copy21.13/s，fence均值42.72ms，notifyMainWait0.0605ms。现有setSize页同文件A/B/A：默认→请求1080p→还原2160p完成30.63→46.00→28.97/s，fence均值28.92→17.36→30.85ms；该页mute/loop共同条件，无新增Dart observer。支持输出像素相关生产等待，但实际FBO WH未记录/不同PTS/计数不是屏幕FPS，根因仍待补证。当前fork非纯上游，不能直接归责media-kit；Pili同文件同配置对照未完成。输入tmp需持久化；证据聊天archives/experiments/macos-ppx-completion-20261003.md。
+
+- macos-wakeup-shutdown-20261003: 同步owner/FFI及最终terminateNow屏障整包限定V2 PASS；观测IO失败隔离修正V1 PASS。普通最终Release构建session50403及独立双架构mpv0.41/NOW/initialize0/closure/strict签名门禁session32607均exit0，Runner8b004616、App70b6dc19、Mpv2d3db36a。Mac已解锁。前观测候选PID72088真实Quit记录reply0→reply1、engineCount1、lookup hit1、owner clearedCount1；这证明实际屏障被调用，不把进程消失当退出安全验收。最终候选PID76416实际BV1heam6TExz 4K AVC/VideoToolbox SDR可见；全屏37.318s旧produced计数率59.944/s，小窗口视频1072x603约48.45s该计数率57.524/s，采样playing=true/buffering=false，隐藏native enqueue0；Critical复核发现BGRA无可写槽仍noteFrameProduced，故撤销严格成功产帧率解释，尚未证明本次空池。独立completed-render token→Flutter consumption诊断现已V1/Release集成并运行，最新Runner49f86b6及匹配PTS结论见macos-4k60-current；旧redraw计数行为保持。小窗口缺帧定位与实屏流畅性、最终PID76416真实Quit记录reply0→1/lookup hit1/clearedCount1，检查无新IPS；已默认关闭诊断重开，同BV小窗口seek07:54，完整Quit/reopen矩阵及Cancel/HDR亮度仍开放。PID80281固定DV确认3840x1920 P010/dolbyvision/PQ、RGBA16F active，小窗口有效present样本约30fps；三轮全屏出图恢复、seek03:05/09:02/14:58出图，seek后space恢复播放，亮度和连续观感仍未验收。任意直接engine shutdown宿主仍需显式prepare API。未提交推送；证据聊天media-kit archives/experiments/macos-wakeup-shutdown-20261003.md。
+
+- macos-4k60-current-20261003: 最新Runner49f86b6/App70b6dc19/Mpv2d3db36a。独立completed-render token与Flutter同pool锁buffer/token快照诊断V1 PASS、普通Release集成及最终mpv0.41门禁PASS。PID86174实际BV1heam6TExz 4K、3840x2160 BGRA8 SDR；约15:00–15:45 full完成渲染59.9285/s首次copy57.2142/s，small完成59.9328/s首次copy58.0464/s，均noWritable0。更早small不同PTS fencep9525.69ms没有在同片段复现，窗口大小不能单独定根因。完成批次与copy均不等于独特解码内容或屏幕FPS，连续流畅性未验收；继续callback/main/worker/publication/notify/copy有界时间链。86174正常Quit，无新IPS。证据聊天archives/experiments/macos-ppx-completion-20261003.md及artifacts/4k60-completed-copy-matched-pts.json。 有界request时间链源码V1及24生产Swift typecheck PASS，已集成demo Release但尚未集成Pili最新包。app只读mpv诊断完成：从旧app.dill提取精确b681776f源码，只替换诊断区；关键初始化/监听/释放区字节保持，最终V2 PASS、串行全量139 tests PASS、analyze No issues，仍待Pili实际重建。
+- macos-mpv-embed-order-20261003: 已真实复现SPM自动copy在旧脚本后覆盖mpv0.41为0.36（最终gate拒绝）。Xcode Enforce phase现明确依赖18 vendor Copy+18 CodeSign的36个输入，实际构建图与独立V1确认全部先guard、最终app签名后guard。最终Release保留Mpv SHA2d3db36a；续轮默认Debug和Profile构建及最终独立门禁也PASS，三个模式都验证36输入排序。未提交推送。
+- macos-hdr-geometry-current-20261003: drawable按实际viewport改尺寸，源4KRGBA16F保持；旧几何对照actual18.466→29.519fps仍有116.667ms长帧，用户严重卡顿反馈未关闭。此前8b004616候选80281 DV P010/PQ→RGBA16F active，小窗口drawable1072x536，有效present样本约30fps；三轮全屏、seek03:05/09:02/14:58出图恢复。只证明操作恢复及有限present，连续流畅性、同源同PTS参考播放器亮度和旧夜景白点分类仍缺验收。
+
+- macos-controller-timing-final-20261003: 2026-10-03 最终 macOS controller 可控调用链补测：增加 PlayerLifecyclePorts 默认原生适配器，production 创建参数/配对/屏障顺序保持；15 个真实公开 controller 场景覆盖 source/open、probe/output 迟到、初始化 probe/output/fallback 等待中关闭、重建等待中关闭、部分订阅失败回滚、共享引用与真实监听、重建失败/fallback/retry、queued 最新拓扑及屏障失败定时重试。全量134 PASS，专项15 PASS，analyze No issues（v3-final日志，v2磁盘失败轮不得引用）。production controller b681776f、ports3893e67b；测试96912ca6。此production源码的默认Debug/Release均重新构建且mpv门禁PASS，产物摘要见final-candidate-identities.json。fake边界仅证明controller编排，不能证明native admission/render-context-free ACK、可见长播/退出重入/HDR显示；Android session未验证。Mac已解锁；最新Release运行证据见上述4K60条目，未提交或推送。
+
+- macos-final-release-20261003: 最新ordinary Release192.7MB构建session72032 exit0及完成后独立最终门禁97627 exit0；mpv0.41双架构NOW/initialize0/21库闭包/最低系统/strict签名PASS。Runner49f86b6、App70b6dc19、Mpv2d3db36a，已含completed-render消费诊断V1 PASS；Debug/Profile只保留此前版本历史门禁。新增时间链已V1/实际demo Swift构建PASS；Pili最新49f包尚不含时间链及新增Dart属性诊断，不能冒认集成。未提交推送。
+
 - status: in_progress
-- updated: 2026-09-30
+- updated: 2026-10-03
+- macos-runtime-correction-20261003: 原modern包版本/闭包/签名静态通过不等于可加载；新增NOW探针发现arm64要求libplacebo349而旧封装使用360，Intel缺Swift类，Homebrew库minOS26高于app12。正在将双架构四库源码构建与重建Intel slice接入默认Xcode/CI；现Intel新slice加载/initialize0及minOS12已实证，四库fresh/verified resume已通过，默认Debug双架构NOW加载及initialize0通过；完整Release已通过默认构建与独立双架构加载重验。详情见media-kit archives/experiments/macos-ppx-completion-20261003.md；当前实际流畅性与HDR参考亮度验收仍开放，未提交推送。
 - objective: 完成 macOS、Android 与 OHOS 的播放器功能验收闭环：控制条/手势/seek、竖横屏全屏、持续播放、HDR 颜色亮度及 source/output 生命周期。所有结论必须绑定代码、候选平台产物、测试或目标设备运行证据。
 - scope: `/Users/wuweiwei1/src/PiliPlusX`；开发诊断状态，不恢复生产包、不清理应用数据。OHOS 实体机 UI 只通过 HDC 脚本；Android 模拟器通过 ADB 验证；macOS 依据对应运行操作说明采集本机功能与显示证据。三平台分别记录产物、环境和 verdict，不允许跨平台替代验收。
 - authoritative-plan: `docs/plans/player-architecture-remediation-plan.md`
@@ -76,6 +390,17 @@
 
 ### 唯一有效状态
 
+- 当前阻断：Mac已锁屏，CUA明确无法自动解锁，未启动180秒诊断候选。该候选build、100测试、analyze与V1通过；全屏进出3次及正常Quit无新IPS已有证据。解锁后继续同候选关联采样与五场景，不绕过锁屏。
+
+- 续轮修复输出重建队列空值被转换false的无限续发回归；V1 PASS，定向6项/全仓95项测试与稳定Debug构建通过。PID13261固定BV15秒完成394帧，一次全屏进入/退出出图；五场景仍开放。证据入口media-kit `archives/experiments/macos-ppx-completion-20261003.md`。
+
+- 2026-10-03 当前 macOS 产品阻断：默认 Debug 包实际仍为 mpv 0.36.0，原交接的 modern 身份不成立。已用固定 archive SHA 重封装，并将同一门禁加入 Xcode 最后 embed 阶段（Debug/Profile/Release）；普通 Flutter 构建已成功、包内 Mpv SHA 为 `44112e778650a87160028f4a9efb60e9c02cb506db5da1924605bee492205f24`。实际 app 为 arm64；两 Mpv 切片版本检查及 app 架构运行库闭包检查通过，不能声称全应用 universal 支持。
+- Android 的提前 `onInit` 被无条件用于非 Android，导致首次普通 controller 尚未发布时页面不挂载。已恢复非 Android 初始化完成后通知并加陈旧 source/dispose 门禁；native surface 监听绑定移至共享 pair 发布之后。定向 5 项与 analyze 通过，V1 静态复审 PASS。
+- 同一候选 PID `98972` 的固定 `BV1vY4y1N7TY` 首帧及控制条可见；播放信息确认 VideoToolbox/p010、3840×1920、dolbyvision/pq。截图跨进度（02:10、06:08、全屏06:28）仍是同一视频画面，持续呈现尚未通过，不能把首帧或进度变化算作五场景产品验收。原生输出返回类型消费的旧 bool/Map 判断与库 `HdrTransactionReport` 不兼容已修复；真实报告行为测试、V1 复审通过，稳定源码构建与全仓 89 项测试通过。证据入口：media-kit `archives/experiments/artifacts/macos-ppx-completion-20261003/`。
+- macOS 五场景仍开放；Android HDR Phase 1 接入已有对应实机证据，OHOS P13/P14 基线按 TASKS 对应记录保留。跨平台 framework 尚未开始；不以本轮 macOS 验证替代其他平台。
+
+### 2026-09-18 验收基线（历史证据，以 TASKS 当前状态为准）
+
 1. **P9 cycle-3 exit 已定位：**唯一 raw action 后，同 PID `7545`、view `0`、epoch `1` 的 HCPP `seq=83/84` 和 Flutter global Down/Up 已到达，但没有 fullscreen-button pointer/callback/trigger。动作前的 accessibility 节点是 `opacity=0`；`fullscreen-button-fresh` 将它当作当前目标，实际输入落到播放器并只唤出控制条。23 秒后出现的 `owner-1-5-exit` execute 属于前一轮已经触发的请求，不能关联或回写本试次。`tool/ohos/verify_player_button_input_trial_real_device.sh` 现仅把 opacity-zero fresh 节点作为“一次 wake”的依据，wake 后重抓布局才允许唯一 raw action。marker 判定已提取至 `tool/ohos/verify_player_button_markers.py`：离线测试覆盖 opacity-zero 旧布局、错误 PID/view/epoch、乱序、旧 action offset 与已消费迟到标记，全部 fail-closed。`python3 test/ohos_player_button_verifier_test.py`、`bash -n`、`py_compile`、`flutter test test/plugin/pl_player/hdr_test.dart test/plugin/pl_player/player_touch_trace_test.dart`（47 项）均通过。
 2. **有效通过基线：**P9 严格单轮在 PID `2783` 完成 initial enter、exit、re-enter，三份 action record 均绑定 PID/viewId/epoch 且四标记 PASS；方向、持续出帧和 native HDR decision 同时通过。该基线仅覆盖 P9、所载脚本、该设备和该视频状态；颜色仍为 INCONCLUSIVE。
 3. **controller 状态：**source-operation、native-output attempt、非末引用释放、codec probe 和 output publication 已有首轮修复与定向回归。本轮另修复 `_initPlayer` 的输出候选发布竞态：`VideoController.create` 完成前 source 可能已替换，现仅在 source generation、Player count 和 dispose 状态仍有效时才写入共享 `_videoController` 并注册监听；过期候选经 `disposeForRebuild` 释放。新建的 opaque-handle `PlayerLifecycleOrchestrator` 不依赖 media-kit：其 44 项 HDR 定向测试可控覆盖 probe 迟到、output create 迟到、重叠 open 的唯一 listener rebind 与 final-dispose 的 invalidate-first 顺序；生产 `_createVideoController` 已通过同一个 orchestrator 的 `openCurrent` 及共享 `PlayerSourceOperationGate` 运行 Player.open。`dart analyze lib/plugin/pl_player/controller.dart lib/plugin/pl_player/models/hdr.dart`、`flutter test --no-pub test/plugin/pl_player/hdr_test.dart`（44 项）和 `git diff --check` 通过。初始 `_initPlayer`、output rebuild 与 controller 最终 dispose 还未完整接入该编排器，不能把该局部覆盖称为完整调用链验收；除这些覆盖及其暴露的确定性缺口外，不重新打开已修复项。
@@ -96,10 +421,10 @@
 
 ### 当前下一步
 
-1. 在具备 HDR 显示器后，对 macOS final10 候选完成同一 DV 源、同一 PTS 的高光/中灰 HDR/SDR 对照，并取得持续 `rgba16Float → successful frame → active=true` 及 reset/切屏恢复证据；此前不能宣布亮度验收通过。
+1. 先完成当前门禁构建候选上的连续帧证据，再执行 macOS 五场景；通过后才推进同源同 PTS 亮度与输出切换验收。旧 final10 不再是当前候选。
 2. 为 controller 补齐 `_initPlayer`、output rebuild 与最终 dispose 的真实调用链时序覆盖，保持 source/output 失效结果不发布、资源可释放和共享监听不丢失的门禁。
 3. 使用 P13 候选从完整前置重跑 `BV1sA4y1D7ZA` 的竖屏 SDR/Texture `--vertical --cycles 3` 矩阵；中断试次不拼接。随后再分别完成 PQ、surface 重建、HLG/HDR Vivid 和同源颜色对照。
-4. Android 模拟器的已知播放 ANR 仍在修复中：已固化退出/重进脚本并确认旧候选的同步 mpv 属性栈，公开属性 API 异步化后仅有单轮通过。下一步为脚本增加指定 BVID/首帧身份门禁，再以连续退出/重进试次判定；Android 模拟器结果不替代 Android HDR 真机验收。
+4. Android 模拟器 ANR 修复已有严格五轮通过（见 TASKS），不重开旧缺口；当前新增回归按最终候选与库会话 API 验收。
 
 ### 历史工作笔记（非当前状态；不得据此重开任务）
 
@@ -209,3 +534,14 @@
 - 2026-09-17：补齐 source switch 与 asynchronous HDR codec probe 的 generation/Player identity publish guard；本地 45 项定向回归、目标 analyze、shell/diff checks 均通过。实体机仍为空，P8 runtime 与完整 lifecycle 注入矩阵尚未完成。
 - 2026-09-17：primary 与 fallback output rebuild 都改走可测 `VideoOutputPublicationGate`，新增过期 candidate 只释放不发布、current candidate 单次发布回归；47 项定向测试和 analyze 均通过。HDC 仍 Empty，P8 未运行且不包含随后 lifecycle gate 变更。
 - 2026-09-17：重启本机 HDC server 后仍无 target，client/server 版本一致。P8 runtime 与所有剩余实体机验收因设备不可发现而 blocked；未执行破坏性设备操作。
+
+
+默认 Debug 最新 controller 完整构建 PASS（第一次因磁盘满在 ditto 失败，清理本次可重建 native 中间文件后重试成功）。真实旧 mpv0.36 反向测试 EXIT=1，FAIL arm64 Mpv.framework is not mpv 0.41.0。Release/Debug 及反向测试日志已归档到 artifacts/macos-ppx-completion-20261003。CUA 再次明确 Mac locked，automatic unlock failed；没有绕过锁屏，运行验收保持待人工解锁。未提交推送。
+
+
+## macOS 真实停帧根因与缓冲池修复
+
+2026-10-03 解锁后真实复现：PID74826 同BV，produced在约6秒到159后整个诊断窗口恒定，播放时钟推进、seek重播仍旧尾帧。Native日志7680x3840为drawableSize，不能称CVPixelBuffer大小。独立Specialist/V2确认SwappableObjectManager.releaseHeld谓词反转，完成buffer仍held、busy反available；直接production Swift测试修前4 FAIL(含frame3耗尽)，最小交换分支后busy保护/完成归还/幂等/1000轮转PASS，V2 PASS。Debug重建门禁通过，PID79802同BV seek01:52后produced持续增长到4411、lastDrawn4409，未复现原159停滞。≥5min及seek/fullscreen/resize/quit重入/HDR显示验收仍进行，未提交推送。
+
+<!-- macos-normal-n1-small-window-human-pass-20261004 -->
+- 2026-10-04：正常共享核心候选 n1（NormalShared.app，PID 96885），BV1heam6TExz、UI 4K，小窗口收到用户直接反馈“流畅”，该项实屏验收通过。相同候选全屏验收仍待进行；不转移旧候选反馈，不推定源帧率或 HDR 状态。

@@ -43,6 +43,7 @@ import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/download_panel/view.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
+import 'package:PiliPlus/pages/video/local_diagnostic/policy.dart';
 import 'package:PiliPlus/pages/video/medialist/view.dart';
 import 'package:PiliPlus/pages/video/note/view.dart';
 import 'package:PiliPlus/pages/video/post_panel/view.dart';
@@ -72,7 +73,8 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show Options;
-import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'    show ExtendedNestedScrollViewState;
+import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
+    show ExtendedNestedScrollViewState;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -105,6 +107,7 @@ class VideoDetailController extends GetxController
   late SourceType sourceType;
   late BiliDownloadEntryInfo entry;
   late bool isFileSource;
+  bool isLocalVideoDiagnostic = false;
   late bool _mediaDesc = false;
   late final RxList<MediaListItemModel> mediaList = <MediaListItemModel>[].obs;
   late String watchLaterTitle;
@@ -338,6 +341,11 @@ class VideoDetailController extends GetxController
 
   late final watchProgress = GStorage.watchProgress;
   void cacheLocalProgress() {
+    if (!shouldPersistLocalPlaybackProgress(
+      localDiagnostic: isLocalVideoDiagnostic,
+    )) {
+      return;
+    }
     if (plPlayerController.playerStatus.isCompleted) {
       watchProgress.put(cid.value.toString(), entry.totalTimeMilli);
     } else if (playedTime case final playedTime?) {
@@ -370,7 +378,8 @@ class VideoDetailController extends GetxController
     super.onInit();
     plPlayerController.onHdrDisplayChanged = _hdrDisplayChangedCallback;
     args = Get.arguments;
-    videoType = args['videoType'];
+    isLocalVideoDiagnostic = isLocalVideoDiagnosticArgs(args);
+    videoType = args['videoType'] ?? VideoType.ugc;
     if (videoType == VideoType.pgc) {
       if (!isLoginVideo) {
         _actualVideoType = VideoType.ugc;
@@ -379,9 +388,9 @@ class VideoDetailController extends GetxController
       _actualVideoType = VideoType.pgc;
     }
 
-    bvid = args['bvid'];
-    aid = args['aid'];
-    cid = RxInt(args['cid']);
+    bvid = args['bvid'] ?? '';
+    aid = args['aid'] ?? 0;
+    cid = RxInt(args['cid'] ?? 0);
     epId = args['epId'];
     seasonId = args['seasonId'];
     pgcType = args['pgcType'];
@@ -390,9 +399,19 @@ class VideoDetailController extends GetxController
     isVertical = RxBool(args['isVertical'] ?? false);
 
     sourceType = args['sourceType'] ?? SourceType.normal;
-    isFileSource = sourceType == SourceType.file;
+    isFileSource = sourceType == SourceType.file || isLocalVideoDiagnostic;
     isPlayAll = sourceType != SourceType.normal && !isFileSource;
-    if (isFileSource) {
+    if (isLocalVideoDiagnostic) {
+      // These are UI layout placeholders only. Source dimensions, duration,
+      // codec, quality, and HDR metadata remain unknown until mpv reports them.
+      firstVideo = VideoItem(
+        quality: VideoQuality.high1080,
+        width: 1,
+        height: 1,
+      );
+      defaultST = null;
+      data = PlayUrlModel();
+    } else if (isFileSource) {
       initFileSource(args['entry']);
     } else if (isPlayAll) {
       watchLaterTitle = args['favTitle'];
@@ -893,7 +912,9 @@ class VideoDetailController extends GetxController
     if (seek == .zero) seek = null;
     seek ??= getFirstSegment();
     await plPlayerController.setDataSource(
-      isFileSource
+      isLocalVideoDiagnostic
+          ? DirectFileSource(args['localVideoPath'] as String)
+          : isFileSource
           ? FileSource(
               dir: args['dirPath'],
               typeTag: entry.typeTag!,
@@ -909,14 +930,14 @@ class VideoDetailController extends GetxController
           ? null
           : Duration(milliseconds: data.timeLength!),
       isVertical: isVertical.value,
-      aid: aid,
-      bvid: bvid,
-      cid: cid.value,
+      aid: isLocalVideoDiagnostic ? null : aid,
+      bvid: isLocalVideoDiagnostic ? null : bvid,
+      cid: isLocalVideoDiagnostic ? null : cid.value,
       autoplay: autoplay ?? _autoPlay.value,
       epid: isUgc ? null : epId,
       seasonId: isUgc ? null : seasonId,
       pgcType: isUgc ? null : pgcType,
-      videoType: videoType,
+      videoType: isLocalVideoDiagnostic ? null : videoType,
       onInit: () {
         videoState.value = true;
         setSubtitle(vttSubtitlesIndex.value);
@@ -924,8 +945,10 @@ class VideoDetailController extends GetxController
       width: firstVideo.width,
       height: firstVideo.height,
       volume: volume,
-      initialVideoQuality: firstVideo.quality.code,
-      initialVideoCodec: firstVideo.codecs,
+      initialVideoQuality: isLocalVideoDiagnostic
+          ? null
+          : firstVideo.quality.code,
+      initialVideoCodec: isLocalVideoDiagnostic ? null : firstVideo.codecs,
       autoFullScreenFlag: autoFullScreenFlag,
     );
 
@@ -1185,8 +1208,9 @@ class VideoDetailController extends GetxController
       // 预测不可呈现（不可播或仅 tone-map）的 HDR 档回落到最高 SDR 档。
       if (_isHdrQuality(targetVideoQa) &&
           !await _hdrTierPresentable(targetVideoQa)) {
-        final sdrVideos =
-            videoList.where((item) => !_isHdrQuality(item.id)).toList();
+        final sdrVideos = videoList
+            .where((item) => !_isHdrQuality(item.id))
+            .toList();
         if (sdrVideos.isNotEmpty) {
           final sdrTarget = sdrVideos
               .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
@@ -1486,7 +1510,8 @@ class VideoDetailController extends GetxController
   }
 
   void makeHeartBeat() {
-    if (plPlayerController.enableHeart &&
+    if (!isLocalVideoDiagnostic &&
+        plPlayerController.enableHeart &&
         !plPlayerController.playerStatus.isCompleted &&
         playedTime != null) {
       try {
@@ -1519,7 +1544,7 @@ class VideoDetailController extends GetxController
       plPlayerController.onHdrDisplayChanged = null;
     }
     cid.close();
-    if (isFileSource) {
+    if (isFileSource && !isLocalVideoDiagnostic) {
       cacheLocalProgress();
     }
     introScrollCtr?.dispose();
@@ -1535,7 +1560,7 @@ class VideoDetailController extends GetxController
   }
 
   void onReset({bool isStein = false}) {
-    if (isFileSource) {
+    if (isFileSource && !isLocalVideoDiagnostic) {
       cacheLocalProgress();
     }
 

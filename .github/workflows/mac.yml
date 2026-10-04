@@ -4,23 +4,23 @@ on:
   workflow_call:
     inputs:
       tag:
-        description: "tag"
+        description: Release tag
         required: true
         type: string
       ref:
-        description: Immutable source commit to build
+        description: Immutable source commit; must equal the peeled release tag commit
         required: true
         type: string
   workflow_dispatch:
     inputs:
       tag:
-        description: Asset label for an ad-hoc build
+        description: Release tag to build
         required: true
         type: string
 
 jobs:
   build-mac-app:
-    name: macOS arm64
+    name: macOS shared release (ARM64 hosted)
     runs-on: macos-26
     permissions:
       contents: read
@@ -29,90 +29,63 @@ jobs:
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
       PILIPLUSX_SKIP_POINTER_FILTER_PATCH: "1"
     steps:
-      - name: Checkout code
+      - name: Checkout exact release source
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || inputs.tag }}
 
-      - name: Setup flutter
+      # This gate runs before setup-flutter, package installation, Pub, or any
+      # SDK/package patch. Missing or malformed approved revisions fail here.
+      - name: Validate source and approved shared inputs
+        run: python3.11 scripts/run_macos_shared_release.py --preflight
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version-file: pubspec.yaml
 
-      - name: Set and Extract version
-        shell: pwsh
-        run: lib/scripts/build.ps1
+      - name: Build and verify shared release distribution
+        run: python3.11 scripts/run_macos_shared_release.py
 
-      - name: Use reproducible dependencies
-        run: scripts/prepare_ci_dependencies.sh
-
-      - name: Resolve release dependencies before SDK patch
-        run: scripts/flutter_pub_get_with_retry.sh
-
-      - name: Apply Patch
-        shell: pwsh
-        run: lib/scripts/patch.ps1 macOS
-
-      - name: Resolve pinned dependencies
-        run: scripts/flutter_pub_get_with_retry.sh
-      - name: Remove OHOS-only package platform cases
-        run: python3 scripts/prepare_standard_flutter_package_compat.py --workspace "$GITHUB_WORKSPACE"
-
-      - name: Verify media-kit lock
-        run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
-
-      - name: Build Mac
+      - name: Generate and verify release metadata
+        if: success()
+        shell: bash
         run: |
-          flutter build macos --release --dart-define-from-file=pili_release.json --no-pub
-
-      - name: Fetch pinned mpv 0.41 archive
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: scripts/fetch_goodwu_mpv_archive.sh "$RUNNER_TEMP/libmpv-macos.tar.gz"
-
-      - name: Bundle mpv 0.41 runtime closure
-        run: |
-          brew install libplacebo shaderc vulkan-loader little-cms2
-          scripts/package_macos_goodwu_mpv_hdr.sh \
-            build/macos/Build/Products/Release/PiliPlusX.app \
-            "$RUNNER_TEMP/libmpv-macos.tar.gz" \
-            build/macos/Build/Products/Release/PiliPlusX-mpv041.app
-
-      - name: Verify macOS architecture
-        run: |
-          app=build/macos/Build/Products/Release/PiliPlusX-mpv041.app
-          python3 scripts/verify_binary_arch.py "$app/Contents/MacOS/PiliPlusX" --platform macos --arch arm64
-          codesign --verify --deep --strict "$app"
-
-      - name: Prepare Upload
-        run: |
-          npm install --global create-dmg
-          create-dmg --no-code-sign build/macos/Build/Products/Release/PiliPlusX-mpv041.app
-
-      - name: Rename DMG
-        run: mv PiliPlusX*.dmg PiliPlusX_macos_${{ inputs.tag }}.dmg
-
-      - name: Generate macOS release manifest
-        run: |
+          set -euo pipefail
+          distribution_dir="$(find "$RUNNER_TEMP/piliplusx-shared-candidate" -mindepth 2 -maxdepth 2 -type d -name distribution -print -quit)"
+          test -n "$distribution_dir"
+          source_sha="${PILIPLUSX_SOURCE_SHA:-$(git rev-parse HEAD)}"
           mkdir -p release-metadata/macos
-          cp PiliPlusX_macos_${{ inputs.tag }}.dmg release-metadata/macos/
-          python3 scripts/release_manifest.py release-metadata/macos \
-            --platform macos --abi arm64 \
-            --media-kit-commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63 \
-            --hdr-backend texture-tone-map \
-            --native-library-version Goodwu_libmpv_macos@0.41.0+bc52bba
-          python3 scripts/verify_release_manifest.py release-metadata/macos
-          mv release-metadata/macos/manifest.json PiliPlusX_macos_${{ inputs.tag }}.manifest.json
-          mv release-metadata/macos/SHA256SUMS PiliPlusX_macos_${{ inputs.tag }}.SHA256SUMS
+          cp "$distribution_dir"/* release-metadata/macos/
+          media_kit_commit="$(python3.11 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["approved_media_kit_revision"])' release-metadata/macos/*.shared-distribution.json)"
+          python3.11 scripts/release_manifest.py release-metadata/macos \
+            --platform macos --abi universal-arm64+x86_64 \
+            --git-commit "$source_sha" \
+            --media-kit-commit "$media_kit_commit" \
+            --hdr-backend shared-gpu-next \
+            --native-library-version mpv@0.41.0+shared-gpu-next
+          python3.11 scripts/verify_release_manifest.py release-metadata/macos \
+            --expected-source "$source_sha" \
+            --source-checkout "$GITHUB_WORKSPACE"
+          dmg_path="$(find "$distribution_dir" -maxdepth 1 -type f -name '*.dmg' -print -quit)"
+          prefix="${dmg_path%.dmg}"
+          cp release-metadata/macos/manifest.json "$prefix.manifest.json"
+          cp release-metadata/macos/SHA256SUMS "$prefix.SHA256SUMS"
 
-      - name: Upload macos release
+      - name: Upload successful shared release payloads
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
           name: release-macos-arm64
-          path: |
-            PiliPlusX_macos_*.dmg
-            PiliPlusX_macos_*.manifest.json
-            PiliPlusX_macos_*.SHA256SUMS
+          path: ${{ runner.temp }}/piliplusx-shared-candidate/*/distribution/*
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: ignore
+          name: macos-shared-release-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/piliplusx-shared-candidate-diagnostics/result.json

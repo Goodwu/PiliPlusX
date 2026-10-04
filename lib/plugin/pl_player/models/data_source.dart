@@ -38,3 +38,14 @@ class FileSource extends DataSource {
              : path.join(dir, typeTag, PathUtils.audioNameType2),
        );
 }
+
+/// An explicitly selected local file used by the opt-in macOS playback
+/// diagnostic. Unlike [FileSource], this path is not part of a Bilibili
+/// download entry and has no companion audio file.
+class DirectFileSource extends DataSource {
+  DirectFileSource(String path) : super(videoSource: path, audioSource: null);
+}
+
+/// True only for the explicit local-diagnostic path; ordinary files and
+/// network sources must retain their normal playback side effects.
+bool isLocalDiagnosticSource(DataSource source) => source is DirectFileSource;

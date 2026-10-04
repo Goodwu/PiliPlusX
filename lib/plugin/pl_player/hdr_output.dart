@@ -138,6 +138,7 @@ abstract final class HdrOutputSelector {
     final transferName = switch (actual.outputTransfer) {
       HdrOutputTransfer.pq => 'PQ',
       HdrOutputTransfer.hlg => 'HLG',
+      HdrOutputTransfer.dolbyVision => '杜比视界',
       HdrOutputTransfer.sdr => 'SDR',
     };
     final routeName = switch (actual.strategy) {
