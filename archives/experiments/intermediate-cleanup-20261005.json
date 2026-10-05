@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-05",
+  "removed": [
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/test_cache",
+      "KiB": 162272
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/unit_test_assets",
+      "KiB": 5428
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/flutter_plugin_android_lifecycle/intermediates",
+      "KiB": 2820
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/audio_session/intermediates",
+      "KiB": 3148
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/share_plus/intermediates",
+      "KiB": 2712
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/dynamic_color/intermediates",
+      "KiB": 15720
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/audio_service/intermediates",
+      "KiB": 4172
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/macos/SDKStatCaches.noindex",
+      "KiB": 29016
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/macos/SDKExplicitPrecompiledModules",
+      "KiB": 905912
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/macos/ModuleCache.noindex",
+      "KiB": 656068
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/macos/CompilationCache.noindex",
+      "KiB": 56
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/macos/Build/Intermediates.noindex",
+      "KiB": 903092
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/jni_flutter/intermediates",
+      "KiB": 2580
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/native_device_orientation/intermediates",
+      "KiB": 2908
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/chat_bottom_container/intermediates",
+      "KiB": 2924
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/app/intermediates",
+      "KiB": 589236
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/package_info_plus/intermediates",
+      "KiB": 2880
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/app_links/intermediates",
+      "KiB": 2812
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/url_launcher_android/intermediates",
+      "KiB": 2916
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/saver_gallery/intermediates",
+      "KiB": 3456
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/permission_handler_android/intermediates",
+      "KiB": 3116
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/connectivity_plus/intermediates",
+      "KiB": 2552
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/live_photo_maker/intermediates",
+      "KiB": 2840
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/image_cropper/intermediates",
+      "KiB": 9820
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/flutter_volume_controller/intermediates",
+      "KiB": 2784
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/flutter_inappwebview_android/intermediates",
+      "KiB": 28368
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/image_picker_android/intermediates",
+      "KiB": 3420
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/flutter_displaymode/intermediates",
+      "KiB": 2724
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/media_kit_libs_android_video/intermediates",
+      "KiB": 186648
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/battery_plus/intermediates",
+      "KiB": 2544
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/device_info_plus/intermediates",
+      "KiB": 2844
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/jni/intermediates",
+      "KiB": 23324
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/wakelock_plus/intermediates",
+      "KiB": 2832
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/media_kit_video/intermediates",
+      "KiB": 18180
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/shared_preferences_android/intermediates",
+      "KiB": 10324
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/android_file_picker/intermediates",
+      "KiB": 2656
+    },
+    {
+      "path": "/Users/wuweiwei1/src/PiliPlusX/build/media_kit_android_dataspace_vendor/intermediates",
+      "KiB": 3316
+    }
+  ],
+  "total_KiB": 3608420,
+  "verified_absent": true
+}

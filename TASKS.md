@@ -167,3 +167,8 @@
 <!-- 2026-10-03 显示几何候选PID92100：drawable8K→1510x755，源4KRGBA16F保持；近似同视频段actual18.466→29.519fps，仍有116.667ms长帧，待用户实屏接受。12 tests/V1/build gate PASS，不关闭流畅性或HDR亮度验收。 -->
 <!-- 2026-10-03 最新实机反馈：PID79802 pool修复后仍严重卡顿，小窗口亦然；流畅性验收未通过。produced/lastDrawn不能替代实际presentedTime，正在补呈现计数和绘制尺寸证据。 -->
 <!-- 2026-10-03：默认 flutter build macos --release --no-pub 完整通过（192.5 MB）。最终 Release app 独立重验通过：arm64/x86_64 各 21 个闭包二进制、mpv 0.41.0、最低系统版本、RTLD_NOW、mpv_initialize=0、deep/strict 签名；Mpv SHA-256 2d3db36a5a8ff9f63fe52ca6657f65982035258b84ccf27964ffd95add93f179。日志 /tmp/ppx-release-final-20261003.log 与 /tmp/ppx-release-final-verification-20261003.log。生命周期 V2 静态复审与打包门禁 V1 PASS，119 项测试通过。可见播放/长播/退出重入/HDR 显示仍待 Mac 解锁验收；未提交推送。 -->
+
+- [x] 清理不再使用的构建中间产物（2026-10-05）
+  - status: done
+  - context: archives/conversations/intermediate-cleanup-20261005.md
+  - acceptance: 清单中的缓存/编译目录已全部删除并核验不存在；保留产物、源码、证据与未完成实验。
