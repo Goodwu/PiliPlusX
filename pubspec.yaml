@@ -138,7 +138,7 @@ dependencies:
   media_kit_video: 1.2.5
   # R5 厂商 dataspace 私有回退子包：插件自动注册（只读门禁），App 不直接
   # import；声明为直接依赖以便 Flutter 打包其 Android 插件（源由 overrides
-  # 钉定到 Goodwu/media-kit 420fba3e）。
+  # 钉定到 Goodwu/media-kit 23e58ec4）。
   media_kit_android_dataspace_vendor: 1.0.0+1
   mime: ^2.0.0
   native_device_orientation:
@@ -213,10 +213,10 @@ dependency_overrides:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: media_kit
-      # HDR 会话 Phase 1（S11 发布）。media_kit_video 420fba3e 依赖同 ref 的
+      # HDR 会话 Phase 1（S11 发布）。media_kit_video 23e58ec4 依赖同 ref 的
       # media_kit API（fileLoadedEpoch/NativeHandleLifecycle），0fa6afe9 缺失，
       # 故一并钉定（flutter pub get + analyze 验证）。
-      ref: 420fba3ec895d63e4ff878b0bf9ff84fae95d6c9
+      ref: 23e58ec43b9e9316fbc02757025450b83f26b6c2
   media_kit_libs_android_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
@@ -247,13 +247,13 @@ dependency_overrides:
       url: https://github.com/Goodwu/media-kit.git
       path: media_kit_video
       # S12：HDR 能力路由 Phase 1（HdrVideoSession/HdrCapabilities/predict）。
-      ref: 420fba3ec895d63e4ff878b0bf9ff84fae95d6c9
+      ref: 23e58ec43b9e9316fbc02757025450b83f26b6c2
   media_kit_android_dataspace_vendor:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/android/media_kit_android_dataspace_vendor
       # R5 厂商 dataspace 私有回退子包：自动注册、只读门禁，App 侧零设备代码。
-      ref: 420fba3ec895d63e4ff878b0bf9ff84fae95d6c9
+      ref: 23e58ec43b9e9316fbc02757025450b83f26b6c2
   cached_network_image_ce:
     git:
       url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git
