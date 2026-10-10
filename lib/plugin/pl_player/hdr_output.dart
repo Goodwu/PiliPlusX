@@ -16,10 +16,10 @@ abstract final class HdrOutputSelector {
   static const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
 
   /// 最近一次能力快照（选档用）。由 [queryCapabilities] 统一经
-  /// media-kit 公开 API `HdrCapabilities.query(player:)` 刷新：有 Player
-  /// 时探测 mpv fork 的 P5 管线；无 Player（首个视频页尚未建播放器）时
-  /// P5 管线保守按缺失处理（P5 档预测回落 SDR；P8.4/HDR10/HLG/SDR 预测
-  /// 不受影响）。拿到 Player 后应重新查询刷新 P5 结论。
+  /// media-kit 公开 API `HdrCapabilities.query(player:)` 刷新。P5 管线
+  /// 由引擎 attach 时的原生探针一次性探测并缓存快照，`player` 参数仅
+  /// 保留兼容、不再参与读取；无 Player 时快照缺省，P5 档预测保守回落
+  /// SDR（P8.4/HDR10/HLG/SDR 预测不受影响）。
   static HdrCapabilities? lastCapabilities;
 
   /// 开播前能力查询（R1.1）。[player] 可空直传 media-kit 公开 API，
@@ -109,11 +109,14 @@ abstract final class HdrOutputSelector {
   }
 
   /// 「片源与显示能力是否一致」的 App 决策：预测可呈现（能开播且呈现为
-  /// HDR）才请求 HDR 档，否则回落 SDR 档。
+  /// HDR 或原生杜比视界）才请求 HDR 档，否则回落 SDR 档。
+  /// `nativeDolbyVision` 是库侧 DV 成熟度提升后的默认呈现
+  /// （nativeDV 直通），与 `nativeHdr` 同属可呈现 HDR 输出。
   static bool isHdrPresentable(HdrRoutePrediction? prediction) {
     return prediction != null &&
         prediction.playable &&
-        prediction.presentation == HdrPresentation.nativeHdr;
+        (prediction.presentation == HdrPresentation.nativeHdr ||
+            prediction.presentation == HdrPresentation.nativeDolbyVision);
   }
 
   /// report.actual 到播放信息文案的映射（R4.2 示例：

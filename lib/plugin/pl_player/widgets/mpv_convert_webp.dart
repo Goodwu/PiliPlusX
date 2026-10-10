@@ -71,8 +71,10 @@ class MpvConvertWebp {
     calloc.free(level);
   }
 
-  void dispose() {
-    Initializer(_mpv).dispose(_ctx);
+  Future<void> dispose() async {
+    // Initializer.dispose 自 wakeup drain 化起为异步屏障；必须等屏障
+    // 完成再 terminate，避免与未排空的事件回调竞争同一 ctx。
+    await Initializer(_mpv).dispose(_ctx);
     _mpv.mpv_terminate_destroy(_ctx);
     if (!_completer.isCompleted) _completer.complete(false);
   }
