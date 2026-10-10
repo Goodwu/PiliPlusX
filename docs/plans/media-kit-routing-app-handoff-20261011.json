@@ -3,26 +3,31 @@
   "taskId": "MK-ROUTING-20261011",
   "centralPlan": "Goodwu/media-kit:docs/plans/media-kit-routing-implementation-20261011.md",
   "centralLedger": "Goodwu/media-kit:routing/MK-ROUTING-20261011:docs/plans/media-kit-routing-handoff-20261011.json",
+  "centralPR": 4,
   "repository": "Goodwu/PiliPlusX",
   "branch": "routing/MK-ROUTING-20261011",
   "baseBranch": "fix/darwin-video-output-rebuild-barrier",
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
   "supersededObservedBase": "73afb9b66ce44bf142fa17165c46c54be8c89731",
+  "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
   "pullRequest": null,
   "mediaKitBranch": "routing/MK-ROUTING-20261011",
   "latestObservedMediaKit": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
   "mediaKitSourceCheck": {"runId": 38073735220, "conclusion": "success", "notFullNativeAcceptance": true},
-  "status": "registered_before_implementation",
-  "completed": [],
-  "requiredWork": [
-    "Replace personal cached_network_image_ce absolute path with the declared Git source; keep local sibling media-kit sources consistent.",
-    "Run actual App Python/Flutter tests and available source build against the latest media-kit task branch, recording both resolved source heads.",
-    "Verify .dart_tool/package_config.json resolves all media-kit packages to that checkout, not historical pinned releases.",
-    "Use the existing App SDK/package patch process when required; record patches and reject unexplained source mutation.",
-    "Do not use historical native APK/JAR/so as candidate acceptance; full native App build remains required, distinct from Dart/assets bundle compilation.",
-    "Complete remaining query/predict/report integration when B2 lands; current query interface has not yet changed."
+  "status": "implementation_checkpoint_awaiting_ci",
+  "completed": [
+    {"id": "APP-portable-overrides", "status": "implemented", "commitAnchor": "ci(app): verify latest media-kit sources and run App tests/bundle [MK-ROUTING-20261011]", "note": "Personal absolute cache path replaced with the already-declared Git source. All media-kit packages remain sibling checkout paths."},
+    {"id": "APP-source-resolution-verifier", "status": "implemented", "tests": {"localPythonPassed": 8}, "note": "Check ten actual package roots, reject cached/foreign/missing/duplicate roots; record App/library commits. This is not binary provenance."},
+    {"id": "APP-source-CI", "status": "implemented_not_run", "workflow": ".github/workflows/routing-source-integration.yml", "note": "All Python modules; whole App Flutter analyze/tests; current App SDK/package patches in isolated toolchain; Dart/assets bundle only. No historical APK/JAR/so downloaded as a new candidate."}
   ],
-  "resumptionRule": "Read this branch and central PR4 before coding. This App branch already exists; never recreate an alternative implementation branch. Reconcile newer base/branch commits and never force-push or reset user changes.",
-  "checkpointPolicy": "Commit and push each recoverable stage before long builds or handoff, verify remote content, keep implemented/tested/blocked separate.",
-  "nextAction": "Add portable dependency override, source-resolution verification and read-only App tests/build CI on this branch. No App build/test pass is claimed at registration."
+  "requiredWork": [
+    "Inspect actual workflow execution and fix concrete dependency/toolchain/source test failures without weakening checks.",
+    "Verify both branch heads and actual package_config binding before and after tests.",
+    "Full current-source native APK/App build remains open. Do not call Dart/assets bundle an installable build or native acceptance.",
+    "Complete query/predict/report integration when B2 lands; query interface has not changed yet.",
+    "Preserve source freshness, app user changes, stage pushes and exact CI evidence."
+  ],
+  "resumptionRule": "Read this existing branch and central PR4. Do not recreate another App branch. Reconcile newer base/branch commits, no force-push/reset. Implemented files remain implemented even if CI fails.",
+  "checkpointPolicy": "Commit/push before long validation; read back remote commit, keep implemented/tested/blocked distinct.",
+  "nextAction": "Run current App source workflow, inspect Python and Flutter preparation/test/build results; then record exact run/head and continue integration. No App CI/build pass claimed yet."
 }

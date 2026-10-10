@@ -1,0 +1,129 @@
+name: Routing App source integration
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+  pull_request:
+    branches: [fix/darwin-video-output-rebuild-barrier]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-app-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  python-tests:
+    name: App Python regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Run all App Python test modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-routing-tools
+          git rev-parse HEAD > ci-routing-tools/source.txt
+          python3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee ci-routing-tools/tests.log
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-app-python-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ci-routing-tools
+          if-no-files-found: error
+
+  app-source:
+    name: App analyze, tests and Dart bundle (latest media-kit source)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      EXPECTED_APP_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: routing/MK-ROUTING-20261011
+          path: media-kit
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: false
+          pub-cache-path: ${{ runner.temp }}/routing-app-pub-cache
+      - name: Record current sources and toolchain
+        run: |
+          set -euo pipefail
+          mkdir -p ci-routing-results
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          library_head=$(git -C ../media-kit rev-parse HEAD)
+          remote_head=$(git -C ../media-kit ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          test "$library_head" = "$remote_head"
+          { printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$library_head"; flutter --version; } | tee ci-routing-results/source.txt
+          printf '%s\n' 'Scope: source analyze/tests and Dart/assets bundle, NOT APK or native-library acceptance.' | tee ci-routing-results/scope.txt
+      - name: Resolve the current source dependency graph
+        id: resolve
+        run: |
+          set -euo pipefail
+          flutter pub get 2>&1 | tee ci-routing-results/pub-get.log
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output ci-routing-results/source-resolution-before.json
+      - name: Apply current App SDK and package patches in the isolated toolchain
+        id: prepare
+        run: |
+          set -euo pipefail
+          export GITHUB_WORKSPACE="$(pwd)"
+          pwsh -NoLogo -NoProfile -File lib/scripts/patch.ps1 android 2>&1 | tee ci-routing-results/toolchain-patches.log
+          git -C "$FLUTTER_ROOT" diff --stat | tee ci-routing-results/flutter-patch-stat.txt
+          git diff --exit-code -- lib test
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output ci-routing-results/source-resolution-patched.json
+      - name: Analyze the App
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub 2>&1 | tee ci-routing-results/analyze.log
+      - name: Run all Flutter App tests
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee ci-routing-results/flutter-tests.log
+      - name: Compile the App Dart and assets bundle without historical native binaries
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter build bundle --debug --no-pub 2>&1 | tee ci-routing-results/bundle-build.log
+          test -s build/flutter_assets/kernel_blob.bin
+          sha256sum build/flutter_assets/kernel_blob.bin | tee ci-routing-results/kernel-sha256.txt
+      - name: Check source freshness and package resolution after testing
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output ci-routing-results/source-resolution-after.json
+          cmp ci-routing-results/source-resolution-before.json ci-routing-results/source-resolution-after.json
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$(git -C ../media-kit ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)"
+          test "$EXPECTED_APP_SHA" = "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)"
+          git diff --exit-code -- lib test
+          git -C ../media-kit diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-app-source-${{ env.EXPECTED_APP_SHA }}
+          path: app/ci-routing-results
+          if-no-files-found: error
