@@ -426,7 +426,10 @@ void main() {
         initialVideoQuality: 125,
       );
       final oldOutput = harness.outputs.single;
-      expect(oldOutput.configuration.vo, 'libmpv');
+      // The probe models native HDR intent; the host still chooses its VO.
+      // _videoConfiguration pins libmpv only on macOS, not on Linux.
+      expect(oldOutput.configuration.vo, Platform.isMacOS ? 'libmpv' : null);
+      expect(oldOutput.configuration.darwin.useNativeSurface, isTrue);
 
       harness.players.single.videoParams.add(
         const VideoParams(
