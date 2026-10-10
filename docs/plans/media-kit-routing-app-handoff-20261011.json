@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "centralPlan": "Goodwu/media-kit:docs/plans/media-kit-routing-implementation-20261011.md",
+  "centralLedger": "Goodwu/media-kit:routing/MK-ROUTING-20261011:docs/plans/media-kit-routing-handoff-20261011.json",
+  "repository": "Goodwu/PiliPlusX",
+  "branch": "routing/MK-ROUTING-20261011",
+  "baseBranch": "fix/darwin-video-output-rebuild-barrier",
+  "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
+  "supersededObservedBase": "73afb9b66ce44bf142fa17165c46c54be8c89731",
+  "pullRequest": null,
+  "mediaKitBranch": "routing/MK-ROUTING-20261011",
+  "latestObservedMediaKit": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
+  "mediaKitSourceCheck": {"runId": 38073735220, "conclusion": "success", "notFullNativeAcceptance": true},
+  "status": "registered_before_implementation",
+  "completed": [],
+  "requiredWork": [
+    "Replace personal cached_network_image_ce absolute path with the declared Git source; keep local sibling media-kit sources consistent.",
+    "Run actual App Python/Flutter tests and available source build against the latest media-kit task branch, recording both resolved source heads.",
+    "Verify .dart_tool/package_config.json resolves all media-kit packages to that checkout, not historical pinned releases.",
+    "Use the existing App SDK/package patch process when required; record patches and reject unexplained source mutation.",
+    "Do not use historical native APK/JAR/so as candidate acceptance; full native App build remains required, distinct from Dart/assets bundle compilation.",
+    "Complete remaining query/predict/report integration when B2 lands; current query interface has not yet changed."
+  ],
+  "resumptionRule": "Read this branch and central PR4 before coding. This App branch already exists; never recreate an alternative implementation branch. Reconcile newer base/branch commits and never force-push or reset user changes.",
+  "checkpointPolicy": "Commit and push each recoverable stage before long builds or handoff, verify remote content, keep implemented/tested/blocked separate.",
+  "nextAction": "Add portable dependency override, source-resolution verification and read-only App tests/build CI on this branch. No App build/test pass is claimed at registration."
+}
