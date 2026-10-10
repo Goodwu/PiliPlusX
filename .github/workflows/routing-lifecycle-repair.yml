@@ -1,0 +1,66 @@
+name: Routing lifecycle fixture repair
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    if: ${{ github.repository == 'Goodwu/PiliPlusX' && github.ref == 'refs/heads/routing/MK-ROUTING-20261011' && contains(github.event.head_commit.message, '[routing-lifecycle-check]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Repair only the platform assertion and preserve handoff checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          name = 'test/plugin/pl_player/player_controller_lifecycle_test.dart'
+          path = Path(name)
+          source = path.read_text()
+          old = "      expect(oldOutput.configuration.vo, 'libmpv');"
+          new = "\n".join([
+              "      // The probe models native HDR intent; the host still chooses its VO.",
+              "      // _videoConfiguration pins libmpv only on macOS, not on Linux.",
+              "      expect(oldOutput.configuration.vo, Platform.isMacOS ? 'libmpv' : null);",
+              "      expect(oldOutput.configuration.darwin.useNativeSurface, isTrue);",
+          ])
+          if source.count(old) != 1:
+              raise SystemExit('Lifecycle test anchor changed; inspect before editing')
+          path.write_text(source.replace(old, new, 1))
+          changed = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines()
+          if changed != [name]:
+              raise SystemExit('Unexpected changed paths')
+          subprocess.run(['git', 'add', '--', name], check=True)
+          PY
+          git diff --cached --check
+          git diff --cached
+      - name: Persist on the same branch with an unchanged-head check
+        shell: bash
+        env:
+          ROUTING_WRITE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/routing-askpass.sh"
+          printf '%s\n' '#!/bin/sh' 'case "$1" in *Username*) printf "%s\n" x-access-token ;; *) printf "%s\n" "$ROUTING_WRITE_TOKEN" ;; esac' > "$askpass"
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          trap 'rm -f "$askpass"' EXIT
+          test "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)" = "$EXPECTED_HEAD"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test(player): assert host VO while preserving native intent and pair handoff [MK-ROUTING-20261011]'
+          git push origin HEAD:refs/heads/routing/MK-ROUTING-20261011
+          git rev-parse HEAD
