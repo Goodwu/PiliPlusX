@@ -10,24 +10,33 @@
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
   "supersededObservedBase": "73afb9b66ce44bf142fa17165c46c54be8c89731",
   "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
-  "pullRequest": null,
+  "pullRequest": 1,
   "mediaKitBranch": "routing/MK-ROUTING-20261011",
   "latestObservedMediaKit": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
-  "mediaKitSourceCheck": {"runId": 38073735220, "conclusion": "success", "notFullNativeAcceptance": true},
-  "status": "implementation_checkpoint_awaiting_ci",
+  "mediaKitSourceCheck": {"runId": 38073735220, "conclusion": "success", "darwinViewportRunId": 38073735128, "darwinViewportConclusion": "success", "notFullNativeAcceptance": true},
+  "status": "ci_environment_repairs_awaiting_rerun",
   "completed": [
-    {"id": "APP-portable-overrides", "status": "implemented", "commitAnchor": "ci(app): verify latest media-kit sources and run App tests/bundle [MK-ROUTING-20261011]", "note": "Personal absolute cache path replaced with the already-declared Git source. All media-kit packages remain sibling checkout paths."},
-    {"id": "APP-source-resolution-verifier", "status": "implemented", "tests": {"localPythonPassed": 8}, "note": "Check ten actual package roots, reject cached/foreign/missing/duplicate roots; record App/library commits. This is not binary provenance."},
-    {"id": "APP-source-CI", "status": "implemented_not_run", "workflow": ".github/workflows/routing-source-integration.yml", "note": "All Python modules; whole App Flutter analyze/tests; current App SDK/package patches in isolated toolchain; Dart/assets bundle only. No historical APK/JAR/so downloaded as a new candidate."}
+    {"id": "APP-portable-overrides", "status": "implemented", "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579", "doNotRepeat": true},
+    {"id": "APP-source-resolution-verifier", "status": "implemented", "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579", "tests": {"localPythonPassed": 8}, "note": "Ten package root checks; not native-binary provenance.", "doNotRepeat": true},
+    {"id": "APP-source-CI", "status": "implemented", "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579", "workflow": ".github/workflows/routing-source-integration.yml", "doNotRepeat": true}
   ],
+  "ci": {
+    "runs": [
+      {"id": 38074205303, "event": "push", "headSha": "223031bb30b8f4cea5ad1f740eabe425fd659579", "python": {"ran": 225, "failures": 1, "errors": 4, "skipped": 3, "reason": "macOS signing/publication paths intentionally reject Linux"}},
+      {"id": 38074264046, "event": "pull_request", "headSha": "223031bb30b8f4cea5ad1f740eabe425fd659579", "sourceResolve": "failed_exact_Flutter_3.47.2_required_but_runner_3.47.7", "flutterTests": "blocked_before_execution", "bundleBuild": "blocked_before_execution"},
+      {"id": 38074264361, "workflow": "existing Build", "conclusion": "startup_failure", "note": "Legacy workflow not changed/disabled. Required reusable-workflow ref inputs and pinned release checks need separate review; no all-CI-green claim."}
+    ],
+    "repairsInThisCheckpoint": ["Run the complete Python suite on macOS with Python3.13; no tests removed", "Use current App pubspec's exact Flutter compiler contract; App and media-kit source heads remain latest, not reverted"],
+    "acceptance": "No full App Flutter test/bundle/native pass yet. Re-read exact-head run after this checkpoint."
+  },
   "requiredWork": [
-    "Inspect actual workflow execution and fix concrete dependency/toolchain/source test failures without weakening checks.",
-    "Verify both branch heads and actual package_config binding before and after tests.",
-    "Full current-source native APK/App build remains open. Do not call Dart/assets bundle an installable build or native acceptance.",
-    "Complete query/predict/report integration when B2 lands; query interface has not changed yet.",
-    "Preserve source freshness, app user changes, stage pushes and exact CI evidence."
+    "Inspect new run, fix concrete dependency/toolchain/source failures without weakening checks.",
+    "Verify both branch heads and actual package roots before and after tests.",
+    "Full latest-source native APK/App build remains open. Dart/assets bundle is not an installable APK.",
+    "Finish query/predict/report integration with B2; query interface has not changed yet.",
+    "Reconcile existing Build workflow startup failure; do not hide it by disabling required checks."
   ],
-  "resumptionRule": "Read this existing branch and central PR4. Do not recreate another App branch. Reconcile newer base/branch commits, no force-push/reset. Implemented files remain implemented even if CI fails.",
-  "checkpointPolicy": "Commit/push before long validation; read back remote commit, keep implemented/tested/blocked distinct.",
-  "nextAction": "Run current App source workflow, inspect Python and Flutter preparation/test/build results; then record exact run/head and continue integration. No App CI/build pass claimed yet."
+  "resumptionRule": "Continue this App branch and PR1. Implementations223031bb already exist. No new duplicate branch, no force-push/reset, no reapplication of completed stages.",
+  "checkpointPolicy": "Commit/push recoverable stages promptly, read back, keep tests/implementation/blockers distinct.",
+  "nextAction": "Observe latest-source App CI with corrected macOS Python host and declared Flutter toolchain. Record exact new run; investigate subsequent actual errors and complete builds/tests."
 }
