@@ -255,6 +255,7 @@ jobs:
         uses: ./.github/workflows/ios.yml
         permissions: write-all
         with:
+            ref: ${{ github.event.pull_request.head.sha || github.sha }}
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
 
     mac:
@@ -262,6 +263,7 @@ jobs:
         uses: ./.github/workflows/mac.yml
         permissions: write-all
         with:
+            ref: ${{ github.event.pull_request.head.sha || github.sha }}
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
 
     win_x64:
