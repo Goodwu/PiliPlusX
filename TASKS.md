@@ -11,8 +11,9 @@
 - CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。此为历史向量；当前CI03已清零，旧pending/62info/34info不再当前状态。
 - CORE-CI03 App1965ba0e+库bd9b9f85 source run38155973408 SUCCESS：严格分析No issues、211Flutter/1Chrome/263Python、Web/bundle/10包来源与freshness通过，中央6111284247。包名与6315处URI精确迁移，产品/native身份不变。最新App c51fd0973+库12966e7a source38156848733 SUCCESS：211Flutter/1Chrome/268Python、strict/Web/bundle/来源/freshness通过；库source38156773328 video591+3原mac跳过/lab298/strict通过。详见context。
 - 最新已核对Appf179+库915：Android/Linux/macOS真实bootstrap成功（各211Flutter/strictclean/bundle/来源），Python本轮各309；source38159246222/Build38159246432因Windows未知SDK修改失败，Build另6Release前置失败。Windows短路径/longpaths/完整拒绝前diff与hash窄修V1 29+19+13/Actionlint通过，待新runner验证；新库R01d8b98已推送独立255/strict通过，旧CI不重标。
+- native输入门四新文件critical复审43+2及真实LLVM反例通过：成功诊断/不可读dynsym拒绝、全ZIP CRC。接受账本空，未授权DEVICE/native候选；实际Android/Pink接线另审，设备验收未完成。
 - file URI来源核验本机转换已修，13目标+5关联及V1独立13通过，10包/非本地/路径逃逸门保留；真实Windows runner仍待验证。
-- 用户明确要求归并DV001与media-kit PR#5：PR5最新86c186f0以routing主线为base，DV001最新1095a43；CORE独立critical通过三md切片，库e162cb3c已部分归并，DEVICE修原配方，归并后最新完整向量P5/P8.4重测，未归并不能结项。
+- 用户明确要求归并DV001与media-kit PR#5：PR5最新5b279611以routing主线为base，DV001最新1095a43；三md初始切片及新增16行已独立复核并分别归库e162/aeaf，DEVICE修原配方，归并后最新完整向量P5/P8.4重测，未归并不能结项。
 - Release Python随机路径、OHOS工具链约束及iOS/mac pointer兼容修复已分别审查并提交；真实Release作业验收仍开放。继续CORE-R01、真实选项闭环；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
 
 ## Now（当前推进，最多 3 条）

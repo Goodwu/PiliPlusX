@@ -2,13 +2,13 @@
 
 ## Current State
 
-当前已推送App f179e21a7c20f9f167232c060f90f32d702c19bd；库8b98c67a293876bd4af3f36ff245968ca848b41e（R01d新检查点）。最新已核对CI只证明旧f179+915：source38159246222/Build38159246432均失败，Android/Linux/macOS实际bootstrap通过（各strict零问题/211Flutter/bundle/真实SDK及package补丁/10routing与全部261roots/前后final新鲜度），Android另Chrome/Web通过，本轮Python两run各309。Windows original SDK tracked PNG修改被拒绝，路径261字符是嫌疑，实际原文件工作hash/diff缺口保留；Build另6Release前置失败。证据/tmp/mk-routing-ci04-20261012/summary.json，未改标最新库。
+当前已推送App b1978a9602b74ca2821d1d36ea27560381c7c03a；库8b98c67a293876bd4af3f36ff245968ca848b41e（R01d新检查点）。新库8b98 source38160404717独立核对video628+3原mac Linux跳过、lab298及strict通过；Darwin9成功，新App两source仍真实执行中，Python本轮各316（非旧309）。下面完整旧运行只证明f179+915：source38159246222/Build38159246432均失败，Android/Linux/macOS实际bootstrap通过（各strict零问题/211Flutter/bundle/真实SDK及package补丁/10routing与全部261roots/前后final新鲜度），Android另Chrome/Web通过，本轮Python两run各309。Windows original SDK tracked PNG修改被拒绝，路径261字符是嫌疑，实际原文件工作hash/diff缺口保留；Build另6Release前置失败。证据/tmp/mk-routing-ci04-20261012/summary.json，未改标最新库。
 
 CI04 Windows窄修已完成V1独立29 bootstrap+19workflow+13来源/Actionlint通过，待本检查点提交后真实runner验证：runner.temp/rb短根（sdk s/flutter/cache p/results r/fallback f）统一；App首次checkout/SDK前longpaths及LF；未知SDK先收齐status/working/indexdiff与HEAD/index/worktree hash或readError再拒绝。不得ignore/reset原SDK，220字符静态路径计算不证明原因或实际修复成功。来源、真实补丁、roots/hash/freshness/失败归档门保留。
 
 34info已于CI03清零，DEVICE旧8bed+a3向量34info不覆盖当前严格分析。库R01a/R01b/R01c已实现，R01d刚推送8b98c67a普通scalar decoder复核/原子entry-epoch/单review预算/代次与MIME/frame/报告绑定；两critical问题修复后独立255与strict通过，两门删除负例红灯保留。预算不包括open admission，不能抢占同步native FFI。真实carrier、copy/software catalog及auto/prefer/require有效配置闭环仍开放；experimental默认false，true主测/false回归。
 
-native输入门四新文件仍dirty未提交，critical发现nm exit0/no-symbols误当absence及APK额外成员CRC漏验，原worker修复中。接受账本空，不授权DV001；实际Release workflow/native候选/ABI/签名/设备未验。正式mac tag、各平台来源/ABI门不删除。
+native输入门四新文件两critical漏检已修并独立复审通过：完整dynsym与nm交叉核对、exit0诊断拒绝、全部ZIP流式CRC；43unit+2既有ABI通过，真实LLVM原strong/去section反例拒绝与正常合成SO通过。本检查点待提交，尚未接线Release。接受账本空，不授权DV001；实际Release workflow/native候选/ABI/签名/设备未验。正式mac tag、各平台来源/ABI门不删除。
 
 DV001仍1095a43原PR修复未回交；PR5最新5b279611文档16行已归主线aeafc6c3，原与导入6hash及V1原文/5链接核验，两个脚本未导入。新188/34info/244为DEVICE旧向量声称，原manifest日志未入PR；AVC EOS不等于dvh1/HDR，UX归因未证，dvh1菜单后e2e仍缺。DV001与PR5最终归并、完整manifest、最新P5/P8.4/truefalse/普通Session/owner/YUV arm实机复测必需。保留LG FULL/range1及owner/ACK/lease，主PR不merge/publish。
 
