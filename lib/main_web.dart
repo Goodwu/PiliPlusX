@@ -65,8 +65,8 @@ class _WebPlayerPageState extends State<WebPlayerPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Expanded(
-                child: const HtmlElementView(viewType: 'piliplus-sdr-video'),
+              const Expanded(
+                child: HtmlElementView(viewType: 'piliplus-sdr-video'),
               ),
               const SizedBox(height: 12),
               Row(

@@ -276,7 +276,7 @@ void main() {
           events.add('probe');
           return const HdrCapabilities();
         },
-        createOutput: (_, __) async {
+        createOutput: (_, _) async {
           events.add('create-output');
           outputStarted.complete();
           await releaseOutput.future;
@@ -284,7 +284,7 @@ void main() {
         },
         disposeOutput: (output) async => events.add('dispose-output:$output'),
         disposePlayer: (player) async => events.add('dispose-player:$player'),
-        publish: (_, __, ___) => events.add('publish'),
+        publish: (_, _, _) => events.add('publish'),
         open: (_) async => events.add('open'),
         rebindListeners: (_) => events.add('rebind'),
       );
@@ -326,13 +326,13 @@ void main() {
           await releaseProbe.future;
           return const HdrCapabilities(decoderHdr: true);
         },
-        createOutput: (_, __) async {
+        createOutput: (_, _) async {
           events.add('create-output');
           return 'output-a';
         },
         disposeOutput: (output) async => events.add('dispose-output:$output'),
         disposePlayer: (player) async => events.add('dispose-player:$player'),
-        publish: (_, __, ___) => events.add('publish'),
+        publish: (_, _, _) => events.add('publish'),
         open: (_) async => events.add('open'),
         rebindListeners: (_) => events.add('rebind'),
       );

@@ -96,7 +96,7 @@ void main() {
     var filterCalls = 0;
     PlayerSinglePointerGestureDecision? decision;
     final recognizer = _TestScaleGestureRecognizer()
-      ..singlePointerMoveFilter = (startPosition, __, ___) {
+      ..singlePointerMoveFilter = (startPosition, _, _) {
         filterCalls++;
         return decision = PlayerSinglePointerGestureDecision(
           startPosition: startPosition,
@@ -122,7 +122,7 @@ void main() {
   ) async {
     var filterCalls = 0;
     final recognizer = _TestScaleGestureRecognizer()
-      ..singlePointerMoveFilter = (_, __, ___) {
+      ..singlePointerMoveFilter = (_, _, _) {
         filterCalls++;
         return const PlayerSinglePointerGestureDecision(
           startPosition: Offset.zero,
@@ -154,7 +154,7 @@ void main() {
     ) async {
       var filterCalls = 0;
       final recognizer = _TestScaleGestureRecognizer()
-        ..singlePointerMoveFilter = (_, __, ___) {
+        ..singlePointerMoveFilter = (_, _, _) {
           filterCalls++;
           return const PlayerSinglePointerGestureDecision(
             startPosition: Offset.zero,
@@ -205,7 +205,7 @@ void main() {
     tester,
   ) async {
     final recognizer = _TestScaleGestureRecognizer()
-      ..singlePointerMoveFilter = (_, __, ___) => null;
+      ..singlePointerMoveFilter = (_, _, _) => null;
     final down = _down(1);
 
     recognizer.addPointer(down);
@@ -220,7 +220,7 @@ void main() {
   ) async {
     var filterCalls = 0;
     final recognizer = _TestScaleGestureRecognizer()
-      ..singlePointerMoveFilter = (_, __, ___) {
+      ..singlePointerMoveFilter = (_, _, _) {
         filterCalls++;
         return null;
       };

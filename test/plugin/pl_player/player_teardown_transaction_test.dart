@@ -11,7 +11,7 @@ void main() {
       disposePlayer: (player) async => events.add('dispose-$player'),
       retainForRetry: ({required output, required outputReleased}) =>
           events.add('retain:$output:$outputReleased'),
-      onError: (_, __) {},
+      onError: (_, _) {},
       retryDelay: Duration.zero,
     );
     expect(result, PlayerTeardownResult.disposed);
@@ -31,7 +31,7 @@ void main() {
       disposePlayer: (player) async => events.add('dispose-$player'),
       retainForRetry: ({required output, required outputReleased}) =>
           events.add('retain:$output:$outputReleased'),
-      onError: (_, __) {},
+      onError: (_, _) {},
       retryDelay: Duration.zero,
     );
     expect(result, PlayerTeardownResult.retainedForOutputRetry);
@@ -47,7 +47,7 @@ void main() {
       disposePlayer: (player) async => throw StateError('dispose failed'),
       retainForRetry: ({required output, required outputReleased}) =>
           events.add('retain:$output:$outputReleased'),
-      onError: (_, __) {},
+      onError: (_, _) {},
       retryDelay: Duration.zero,
     );
     expect(result, PlayerTeardownResult.retainedForPlayerRetry);
@@ -61,7 +61,7 @@ void main() {
       disposePlayer: (player) async => events.add('dispose-$player'),
       retainForRetry: ({required output, required outputReleased}) =>
           events.add('retain-again:$output:$outputReleased'),
-      onError: (_, __) {},
+      onError: (_, _) {},
       retryDelay: Duration.zero,
     );
     expect(retry, PlayerTeardownResult.disposed);
@@ -79,7 +79,7 @@ void main() {
         disposePlayer: (player) async => events.add('dispose-$player'),
         retainForRetry: ({required output, required outputReleased}) =>
             events.add('retain:$output:$outputReleased'),
-        onError: (_, __) {},
+        onError: (_, _) {},
       ),
       throwsArgumentError,
     );

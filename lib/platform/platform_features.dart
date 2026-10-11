@@ -1,4 +1,4 @@
-import 'platform_features_io.dart'
+import 'package:PiliPlus/platform/platform_features_io.dart'
     if (dart.library.html) 'platform_features_web.dart'
     as impl;
 
