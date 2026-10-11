@@ -2,11 +2,31 @@
 
 ## Current State
 
-当前远端集成分支均为 routing/MK-ROUTING-20261011：库b5c5067089dd19a3271feff3e38aefc43b9f075f、Appb7d3a8efa313c670ed0d41dc86e85646d3531585（已审CONFIG源码切片已提交/push/readback）、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112665813。
+唯一集成分支 routing/MK-ROUTING-20261011。已推送库HEAD d91639401862d84c68406aae3b2029400a4cfbd6（仅文档证据提交，已验源码751d0cdd69c26374d452fbf672c5600ce59f2387）；App 6c4c1b4787fe2ce5459ee1d775279192fe432416；FFmpeg 9aba43cfbee182ade060cdccbe15340a0fbe3e83。DEVICE DV001 1095a43、PR5 5b279611 最近回读未见新修复；中央登记6112985520/构建PR6112842188。主PR未合并、关闭、发布，原checkout未知dirty保留，root唯一公共集成者，DEVICE继续唯一native producer/实机责任。
+
+已实现并集成：query/DASH/unknown DV门、F01源事实、FFmpeg e8df200c、R01输出资源契约/实际decoder复核/有界独立copy软件路线、有效auto/prefer/require从App到Session报告及配置代次/清理债务。CONFIG后续LG专用claim回归已修并V2通过。experimental产品默认false；true主验证、false回归；LG FULL/range1/YUV8、精确设备门和owner/ACK/lease保持，不重开10bit/lease融合。
+
+最新准确联合源码向量为上述751d+6c4。库source38168100713 SUCCESS：video772、3项原macOS专用Linux跳过、lab298、两包strict0；query38168100554和Darwin38168100584成功。App source38168113931 SUCCESS：四平台各268 Flutter、strict0、bundle/源码绑定/finalize；Python本轮实际444，真实Dart/YAML/kernel 7项与前后identity通过，不借旧362。Build38168114089已completed/failure；其独立Python本轮实际444。34info已清零并由当前严格分析验证。Build内四平台各268/strict0/bundle/finalize均真实成功；完整证据720文件索引已收尾，精简摘要docs/plans/core-native-ci-checkpoint-20261012.json，不以源码通过代替native/设备。
+
+Android/Pink已集成来源/真实YAML/生成物及插件精确清单、双artifact/accepted-ledger、实际localJAR/ABI/sign/parity/finalize门。当前接受账本空；最新两Release实际bootstrap成功后在空selector门失败（artifact11712449501/11712224176，commands=[]，preAPI/preGradle），不能宣称native候选通过。当前独立clean最新源码完整prepare验证进行中：原共享SDK36个tracked修改已正确拒绝且保护；新独立clean SDK d3b14与2524 cache成员hash核对，废弃symlink缓存保存p-rejected，空私有cache真实pubget通过。正式bootstrap及最终finalize exit0/fresh-source-only（receipt SHA256 6b261eff9516a60d1933e617770c3eaae017e2cef9babb4753c5bbba2fc05117）；Android/Pink真实prepare、offline lockedpubget、prebuild与routing lock均通过，分别inputs1888/pubGenerated31/buildGenerated3/pubLinks86，错误参数验证driver旧exit2仍保留。此证据只属于6c4+751，不是native/JAR/APK/device通过。旧receipt不得换vector重标。
+
+DV001与PR5必须完整归并。PR5三历史MD与16行增量已入e162cb3c/aeafc6c3；两个脚本未导入。DV001原审查要求符号读取失败拒绝、两个Vulkan目标分别检查、构建失败传播、干净staging、精确最终成员/补丁及链接来源记录，仍由DEVICE在原PR修；CORE消费者验证不等于producer修复。最新源码P5/P8.4、true/false、普通Session/实际carrier/owner/HDR呈现/持续性能尚缺同向量native与实机验收，旧AVC EOS/模型SDR不重标。
+
+当前工作：linux_windows_source_wiring唯一写App四个workflow/contract文件，接通同一vector/真实bootstrap源码前置，native缺当前输入时准确失败并归档，绝不以此称Release完成；platform_release_design只读设计Linux本地SO/headers/dependency完整消费者及DEVICE原recipe回交接口，随后接续真实producer→consumer→bundle；native_input_worker已完成当前clean Android/Pink完整prepare及finalize，归档收尾；ci_verify已完成当前CI证据核验（19 artifacts及准确ZIP hash）。root拥有TASKS/context/台账/Git。Windows/iOS及其他Release门、DV001/PR5和实机证据仍待，不因单项源码绿灯结项。
+
+Linux/Windows A作者41contracts/actionlint通过，但独立V2已发现直接routing分支dispatch会落回旧production以及job名提前声称prepared；保持REQUEST_CHANGES，未提交，等待原writer修正及复审。Linux B消费者独立writer实现中，未审不入已验切片。
+
+完整源码prepare检查点docs/plans/core-source-prepare-checkpoint-20261012.json逐字归档（SHA256 a5d5abf30dd92ce230899a904079b0a6eef511ae09427ce075021116572e8041），仍只证明旧准确6c4+751；没有native或variant postbuild验收。
+
+## History
+
+### 2026-10-12 最新CI收尾前状态快照（历史）
+
+当前远端集成分支均为 routing/MK-ROUTING-20261011：库751d0cdd69c26374d452fbf672c5600ce59f2387、App6c4c1b4787fe2ce5459ee1d775279192fe432416（已审CONFIG源码切片已提交/push/readback）、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112841982。
 
 已完成F01/query/DASH/未知DV门/FFmpeg e8df200c，不按旧planned重做。34条分析info已在CI03清零；最新已提交联合源码CI06仅证明Appabc149+库87eb：四平台233Flutter/strict0/bundle/源码freshness，Python实际两次359；Build六Release失败，不能称native验收。库a312窄CI源码685+3既有skip/lab298/strict0、query实际Java31tasks+host34、Darwin9通过；OHOS为实际PR merge unsigned，不是实机。证据原各handoff/summary保留。
 
-CONFIG实际闭环库v3与AppR1原冻结宿主V2 PASS并已集成push/readback，但后续完整lab CI证实LG单次实验配置禁改门回归，该LG窄修四文件已Critical PASS（独立lab298/video775/额外4边界、两strict0/hash同），正在保存新源码检查点；最新CI/native/实机仍未验。库20文件freeze af984d：作者762/strict0，Critical 762包内+12独立共774/strict0，前两轮三个P1真实修后绿、20hash前后同。App16vector47d60f9...绑定同库v3：作者268Flutter/strict0/bundle/channel11、独立90+1/20kwargs及hash一致，first文件设置竞态已关闭。能力查询/设置/refresh服从最新完整request与源代次，实际require履行复核及cleanup重试保留。requested/effective同配置已接DASH/planner/Session/report；未知legacy诊断、默认experimental=false及unknownDV/F01/owner/budget门保留。最新HEAD-only CI、native/实机仍未验，不把dirty宿主结果重标新SHA。各原失败日志与逐轮freeze/review完整归档见core-config-implementation-review/implementation-handoff JSON。
+CONFIG实际闭环库v3与AppR1原冻结宿主V2 PASS并已集成push/readback，但后续完整lab CI证实LG单次实验配置禁改门回归，该LG窄修四文件已Critical PASS（独立lab298/video775/额外4边界、两strict0/hash同），新源码检查点已push/readback且提交树逐hash与复审同；最新库CI video772+3skip/lab298/strict0已通过，Apphosted矩阵与真实toolsCI收尾，native/实机仍未验。库20文件freeze af984d：作者762/strict0，Critical 762包内+12独立共774/strict0，前两轮三个P1真实修后绿、20hash前后同。App16vector47d60f9...绑定同库v3：作者268Flutter/strict0/bundle/channel11、独立90+1/20kwargs及hash一致，first文件设置竞态已关闭。能力查询/设置/refresh服从最新完整request与源代次，实际require履行复核及cleanup重试保留。requested/effective同配置已接DASH/planner/Session/report；未知legacy诊断、默认experimental=false及unknownDV/F01/owner/budget门保留。最新HEAD-only CI、native/实机仍未验，不把dirty宿主结果重标新SHA。各原失败日志与逐轮freeze/review完整归档见core-config-implementation-review/implementation-handoff JSON。
 
 Android/Pink实际Release候选第二修复轮：第一来源漏项8注入已拒绝，但V2另证真实offline pubget正常ephemeral/plugin误拒与转义YAML build资源绕过且真实bundle包含，仍REQUEST_CHANGES。原native_input_worker单写variant/输入/workflows，新增持久Dart真实YAML工具及直接测试、精确pubgen/link契约；待实际Android/Pink prepare→pubget→prebuild正例与真实资源负例及新freeze复审。reviewer私有SDK/cache授权独占、packageconfig遗留共享roots只在私有metadata按逐包字节hash重绑，原证据保留，共享SDK不改。接受账本空，无approved A/B/新native/APK声明。
 
@@ -39,7 +59,12 @@ App第一修复最新10个真实variants通过，覆盖firstfile/真实FileSourc
 
 最新待集成切片已通过独立审核：库LGguard四文件+记录（readonlytoken专用setter pre-mutation、失败claim在解析前消费、fakeoverride同步；无token普通Session不封锁）V2 PASS；App native16来源scopePASS+3CI窄修V2 PASS_WITH_PENDING_HOSTED，444Python/36contract/7Dart与identity/actionlint通过，接受账本空、不批准native。源码切片逐hash核对后唯一root提交/push/readback，最新hosted/完整prepare仍待。
 
-## History
+
+最新实际组合CI capture source38168113931/Build38168114089 attempt1均App6c4c+lib751d。库source38168100713已SUCCESS（video772+3skip/lab298/两strict0）。Android/Pink真实Releasebootstrap成功后在accepted acquire阶段拒空manifest：artifact11712449501/11712224176、reason missing-accepted-native-input、commands=[]，preAPI/preGradle，不是旧cache/pin，不代表native成功。MAC Python job实际bootstrap中，不能提前叫444通过。
+
+已复读DEVICE DV0011095/PR5 5b279 HEAD+最新评论，无新修复回交；中央6112841982及构建PR6112842188同步当前实际源码检查点/消费者合同，请DEVICE继续原recipe回交当前stage/精确阻塞，不新增DEVICE任务或配方。最新完整clean Android/Pink sourcevariant prepare验证另进行，真实bootstrap新receipt必须由最新源码与干净sourceSDK在独立环境生成；r3旧patchedSDK/receipt不得改vector冒充，private工具pubget允许按正式现流程执行，共享.runtime只读。
+
+
 
 ### 2026-10-12 CONFIG独立反例前状态快照（历史，已由Current State替换）
 
