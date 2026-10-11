@@ -1,205 +1,97 @@
 {
-  "schema": 1,
+  "schema": 2,
   "taskId": "MK-ROUTING-20261011",
+  "updatedOn": "2026-10-11",
   "centralPlan": "Goodwu/media-kit:docs/plans/media-kit-routing-implementation-20261011.md",
+  "centralPlanVersion": 3,
   "centralLedger": "Goodwu/media-kit:routing/MK-ROUTING-20261011:docs/plans/media-kit-routing-handoff-20261011.json",
-  "centralPR": 4,
+  "centralLedgerCheckpoint": "da9fc29ea25ca9a77bcdfbda59194b3531c0512a",
   "repository": "Goodwu/PiliPlusX",
   "branch": "routing/MK-ROUTING-20261011",
+  "pullRequest": 1,
+  "draft": true,
   "baseBranch": "fix/darwin-video-output-rebuild-barrier",
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
-  "supersededObservedBase": "73afb9b66ce44bf142fa17165c46c54be8c89731",
   "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
-  "pullRequest": 1,
-  "mediaKitBranch": "routing/MK-ROUTING-20261011",
-  "latestObservedMediaKit": "2811f624c30bcaad312a73bacba550105ccb61a0",
-  "mediaKitSourceCheck": {
-    "runId": 38073735220,
-    "conclusion": "success",
-    "darwinViewportRunId": 38073735128,
-    "darwinViewportConclusion": "success",
-    "ohosRunId": 38073735121,
-    "ohosConclusion": "success",
-    "generalRunId": 38073735135,
-    "generalLastObserved": "in_progress",
-    "notFullNativeAcceptance": true
+  "status": "source_query_filter_and_compatibility_integrated_host_validated_CI_partially_blocked",
+  "history": {
+    "previousFullLedgerRef": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+    "previousFullLedgerPath": "docs/plans/media-kit-routing-app-handoff-20261011.json",
+    "previousFullLedgerBlob": "45ef70e1bd4039ef8b8cee4907d8c63a9a7fa33f",
+    "B2bResultComments": {"mediaKitPR4": 6107283427, "appPR1": 6107287306},
+    "rule": "Previous detailed failure history remains in Git. Earlier pending_B2b, startup_failure and native_not_fixed descriptions are superseded only to the extent explicitly recorded below. Do not redevelop existing commits."
   },
-  "status": "source_spec_query_and_DASH_filter_implemented_pending_validation",
   "completed": [
-    {
-      "id": "APP-portable-overrides",
-      "status": "implemented",
-      "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-source-resolution-verifier",
-      "status": "implemented_and_executed",
-      "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579",
-      "tests": {
-        "localPythonPassed": 8
-      },
-      "note": "All ten actual package roots verified before/after e80a52f0 App build; not native-binary provenance.",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-source-CI",
-      "status": "implemented",
-      "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579",
-      "workflow": ".github/workflows/routing-source-integration.yml",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-ci-environment",
-      "status": "implemented_and_validated",
-      "commit": "2c4001fbddf410d9d1dbb829fc1137f34c143748",
-      "note": "macOS Python host, current App's declared Flutter3.47.2 compiler; no App/native source rollback.",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-pointer-patch-composition",
-      "status": "implemented_and_build_validated",
-      "commit": "e80a52f0273a762061069fb9f18ad7965af9cebe",
-      "tests": {
-        "newPythonCases": 6,
-        "redGreen": true
-      },
-      "evidence": "docs/plans/media-kit-routing-app-ci-20261011.md",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-lifecycle-platform-fixture",
-      "status": "implemented_pending_rerun",
-      "commit": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3",
-      "note": "Assert the same Platform.isMacOS VO contract as production; additionally require native-surface intent and retain every rebuild/owner/pair assertion. Source-writing helper workflow is retired.",
-      "doNotRepeat": true
-    },
-    {
-      "id": "APP-B2b-source-spec-integration",
-      "status": "implemented_pending_CI",
-      "commitAnchor": "feat(app): filter DASH sources with target-aware decoder capabilities [MK-ROUTING-20261011 B2b]",
-      "changes": [
-        "remove Player query and stale cache",
-        "per-rendition codec/size/rate/bitrate query and filter before codec preference",
-        "bind owning FlutterView independently from Player",
-        "carry immutable selected source specification/target to Session open/reopen"
-      ],
-      "tests": {
-        "newFlutterCases": 12,
-        "localExistingPythonPassed": 14,
-        "fullCombinedCI": "pending"
-      },
-      "doNotRepeat": true
-    }
+    {"id": "APP-portable-overrides-and-source-verifier", "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579", "status": "implemented_host_validated", "doNotRepeat": true},
+    {"id": "APP-host-and-current-compiler-contract", "commit": "2c4001fbddf410d9d1dbb829fc1137f34c143748", "status": "implemented_host_validated", "compiler": "Flutter3.47.2 per current App declaration; not a product/native source rollback", "doNotRepeat": true},
+    {"id": "APP-SDK-pointer-gesture-patch-composition", "commit": "e80a52f0273a762061069fb9f18ad7965af9cebe", "status": "implemented_host_and_bundle_validated", "newTests": 6, "doNotRepeat": true},
+    {"id": "APP-lifecycle-platform-fixture", "commit": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3", "status": "implemented_host_validated", "doNotRepeat": true},
+    {"id": "APP-B2b-source-spec-integration", "commit": "384b10ae2fb02fe5909fec89597499ea314f3f4a", "status": "implemented_host_and_bundle_validated", "newTests": 12, "doNotRepeat": true, "note": "Per-rendition target/spec matching feeds actual source filter, menus, codec preferences and immutable NetworkSource/Session. No Player-based capability query or global stale cache."},
+    {"id": "APP-migration-analysis-cleanup", "commit": "4f7fcd66d2162434bb4cbb821dcdaaba15352c7a", "status": "implemented_host_validated", "doNotRepeat": true},
+    {"id": "APP-existing-Android7-integration", "commit": "d0926b315af63b43bf5452119b4e4a067f58f88c", "integrated": "30434b3eb6d77a787b0f8f5db6891d4090032696", "status": "normal_merge_committed_host_validated", "doNotRepeat": true, "note": "Existing startup compatibility retained with both histories. Integration-only PR2 is merged; primary PR1 remains draft."},
+    {"id": "APP-Build-required-Apple-ref", "commit": "c6c72369c79d9cbd1310302fe23dc8d03b3bd8b2", "newTests": 4, "status": "implemented_jobs_now_start", "doNotRepeat": true, "note": "The old workflow no longer fails at startup. Its current-source dependency/patch/preflight jobs still fail; this is not all-green Build acceptance."},
+    {"id": "APP-reviewed-safe-lints", "commit": "a6593b3f0e986779848828b770ed5b29ce4ae412", "status": "implemented_host_and_bundle_validated", "doNotRepeat": true, "note": "Accepted five Dart source/test file changes only. Rejected Get.reset teardown tear-off and ancillary pubspec change. No rule suppression or async-cleanup timing change. Original85 infos reduced to62, not zero."}
   ],
-  "ci": {
-    "runs": [
-      {
-        "id": 38074205303,
-        "headSha": "223031bb30b8f4cea5ad1f740eabe425fd659579",
-        "python": {
-          "ran": 225,
-          "failures": 1,
-          "errors": 4,
-          "skipped": 3
-        },
-        "reason": "macOS-only tests were on Linux"
-      },
-      {
-        "id": 38074264046,
-        "headSha": "223031bb30b8f4cea5ad1f740eabe425fd659579",
-        "resolve": "failed_exact_Flutter_version_requirement",
-        "flutterTests": "not_run",
-        "bundle": "not_run"
-      },
-      {
-        "id": 38074535394,
-        "headSha": "2c4001fbddf410d9d1dbb829fc1137f34c143748",
-        "pythonPassed": 225,
-        "resolveAndSourceBinding": "success",
-        "sdkPrepare": "pointer_filter_constructor_drift",
-        "flutterTests": "not_run",
-        "bundle": "not_run"
-      },
-      {
-        "id": 38075212190,
-        "headSha": "e80a52f0273a762061069fb9f18ad7965af9cebe",
-        "mediaKitSha": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
-        "pythonPassed": 231,
-        "sdkPrepare": "success",
-        "analyze": {
-          "errors": 0,
-          "warnings": 0,
-          "infos": 85,
-          "step": "failure"
-        },
-        "flutterTests": {
-          "passed": 155,
-          "failed": 1,
-          "reason": "macOS-only VO assertion on Linux",
-          "fixCommit": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3"
-        },
-        "dartAssetsBundle": "success",
-        "kernelSha256": "7ce7aaec1c1923e22c692e613270c6a614e9a92ab5d63bb333146f5efe3584c8",
-        "packageRootsAndFreshnessBeforeAfter": "success",
-        "artifactId": 11678458377,
-        "installableApk": false,
-        "nativeBinaryProvenanceVerified": false,
-        "deviceTest": false
-      },
-      {
-        "id": 38075212452,
-        "workflow": "existing Build",
-        "conclusion": "startup_failure",
-        "note": "Not disabled or counted as green. Legacy reusable workflow/ref and pinned release contracts still require reconciliation."
-      },
-      {
-        "id": 38075867243,
-        "headSha": "8fc8f2c618b96b60b29d576e4242d0e153fd00bd",
-        "mediaKitSha": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
-        "pythonPassed": 231,
-        "flutterPassed": 156,
-        "bundle": "success",
-        "analyze": "failure_85_infos",
-        "scope": "historical checkpoint only, not B2b acceptance"
-      }
+  "latestValidation": {
+    "run": 38130584907,
+    "conclusion": "failure_only_strict_analyze",
+    "appSha": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+    "mediaKitSha": "b48d94ce4254857872d16c234566c69beac782c6",
+    "appTree": "085cedc45199e4be45d1e03188bfa6153e42f023",
+    "mediaKitTree": "902339e46fb220572fb1d6444b6329bf0edcbf32",
+    "pythonPassed": 235,
+    "flutterPassed": 168,
+    "SDKAndPackagePreparation": "success",
+    "bundle": "success",
+    "actualTenPackageRootsAndBeforeAfterFreshness": "success",
+    "analyze": {"infos": 62, "errors": 0, "warnings": 0, "conclusion": "failure"},
+    "kernelSha256": "94888eda49771d3c8029ad217eb553f609312c53d01b5abfff2da260b81c7832",
+    "artifactsDownloadedAndHashChecked": [
+      {"id": 11698138576, "sha256": "de4bbabbb3d08bb3536ec175dc57e54cabdd06bbb2a4115add71b5d0e01bd5bc"},
+      {"id": 11699083599, "sha256": "321cedd9ec343a2c999eb4c996ce89098126b8f6fd4ed84eba97a67951f83eb7"}
     ],
-    "acceptance": "App Dart/assets compilation succeeded on actual current sources at the recorded vector. Full Flutter suite requires post-fixture revalidation. Strict analyzer remains red on85 info findings; no lints suppressed. Full native App build and overall CI are not accepted."
+    "installableAPK": false,
+    "repairedFFmpegLinked": false,
+    "fullNativeAcceptance": false,
+    "deviceTests": false
   },
-  "requiredWork": [
-    "Validate latest App and current media-kit task heads together; source migration is already implemented, do not reimplement.",
-    "Address85 pre-existing analyzer infos without hiding errors or broad unrelated UI rewrites.",
-    "Full latest-source native APK/App build and device tests remain required; bundle is not APK.",
-    "Continue remaining B1, B3, LG managed output and advanced/cross-platform config work from central v3 plan.",
-    "Resolve legacy Build startup failure without replacing current candidates with historical native inputs.",
-    "Read both existing PRs and central/App ledgers before resuming."
-  ],
-  "resumptionRule": "Continue this App branch and PR1. Existing223031bb,2c4001fb,e80a52f0,9fe16772 are real remote commits. Read latest PR results plus this ledger; do not rebuild an alternate branch or rerun source-writing helpers.",
-  "checkpointPolicy": "Commit/push recoverable stages promptly, read back, distinguish implemented/tested/blocked. PR result comments can persist terminal checks without cancelling CI with repeated docs commits.",
-  "nextAction": "Retire this scoped repair workflow, then independently run168 App Flutter tests, Python suite, strict analyze and bundle against latest media-kit. Do not modify library HEAD during combined acceptance. Record actual source vectors and results in PR1/PR4.",
-  "latestImplementation": {
-    "commit": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
-    "status": "implemented",
-    "doNotRepeat": true,
-    "changes": [
-      "Target-aware query without Player/global stale cache",
-      "Per-DASH-rendition source-spec filtering before codec/quality selection",
-      "Selected immutable specification and target passed to Session",
-      "12 new channel and source selection tests"
+  "currentLibraryAndNative": {
+    "mediaKitPR": 4,
+    "mediaKitBranch": "routing/MK-ROUTING-20261011",
+    "mediaKitVerifiedSource": "b48d94ce4254857872d16c234566c69beac782c6",
+    "mediaKitFallbackFix": "98a349f74b2066b476700becdde8b56e96645119",
+    "mediaKitSourceRun": 38130280175,
+    "videoPassed": 512,
+    "videoLinuxSkipped": 3,
+    "labPassed": 298,
+    "sourceQueryDarwinOHOS": "success",
+    "ffmpegRepository": "Goodwu/FFmpeg",
+    "ffmpegBranch": "routing/MK-ROUTING-20261011",
+    "ffmpegPR": 1,
+    "ffmpegImplementation": "e8df200cdaba99cc98ba1def82034396d945597b",
+    "ffmpegVerifiedSource": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+    "ffmpegRun": 38130404541,
+    "ffmpegResult": "success:17 actual-selector host cases under clang/GCC sanitizers;6 extractor tests; actualMediaCodec-enabled libavcodec/libavutil compiled for arm64 AndroidAPI24/35",
+    "limit": "Limited native static compilation is not a full mpv/helper/JAR/APK. Do not recreate the production repair or label current App bundle as already linking it."
+  },
+  "legacyBuild": {
+    "run": 38130585018,
+    "startupContract": "fixed_actual_jobs_execute",
+    "overallAcceptance": false,
+    "diagnosed": [
+      "HDR test job114443891817 fails because portable ../media-kit path has no sibling checkout in legacy Build layout",
+      "Android/Windows/Linux stop at patch step; Pink at post-rename HDR contract; macOS at approved shared-release preflight; each needs its own exact diagnostic",
+      "Legacy fixed lock/reference checks and release contracts must migrate to actual current sources; do not delete checks or restore older source inputs"
     ]
   },
-  "latestValidation": {
-    "run": 38124750626,
-    "appSha": "1a3dc7045e519689eb66d7560e0b64a63448671d",
-    "mediaKitSha": "4d8407b9158fa420316581d4f24f5a01591cfa5d",
-    "flutterPassed": 168,
-    "pythonJob": "success",
-    "bundle": "success",
-    "analyze": "failure_85_existing_infos_plus_4_new_infos_and_1_unused_import",
-    "freshness": "failed_library_advanced_during_run",
-    "kernelSha256": "3fc87b00926b8e033f7c7c33312383638c4dab3a7026d691019b5736e15f8d77",
-    "newLintRepair": "this_commit_pending_independent_run",
-    "fullNativeAcceptance": false,
-    "deviceTest": false
-  }
+  "requiredWork": [
+    "Finish62 analyzer infos without ignoring rules, broad unverified control rewrites or async cleanup behavior changes.",
+    "Migrate legacy Build layout/lock/patch/native input verification and preserve ABI/channel/parity/release safety checks.",
+    "Integrate the already repaired current FFmpeg with all applicable latest mpv/helper/dependency sources into a full test APK, verifying actual linked inputs.",
+    "Continue remaining B1 unknown/original source and importer/output facts, LG managed wiring, advanced auto/prefer/require and platform adapters from central v3.",
+    "Keep actual device HDR/performance/lifecycle acceptance separate from host tests and bundle/static builds."
+  ],
+  "resumptionRule": "Read live refs, both primary PRs and the registered FFmpegPR1 plus central ledger first. All completed items above are real remote commits; never recreate a competing branch or rerun retired source writers. Previous local working copies and old pending fields are not authoritative.",
+  "checkpointPolicy": "Push recoverable stages promptly; save exact code/test/runtime provenance. This is a documentation-only result consolidation. Fresh reruns after it are separate records, and future builds resolve current task refs rather than pinning the historical validation SHAs.",
+  "nextAction": "Continue remaining CI current-source layout and62-info cleanup, not B2b reimplementation. Preserve Android7 integration and use the existing B1c/B3 implementations. Full product native APK remains open."
 }
