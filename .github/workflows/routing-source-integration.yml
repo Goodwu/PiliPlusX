@@ -6,12 +6,13 @@ on:
   pull_request:
     branches: [fix/darwin-video-output-rebuild-barrier]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: routing-app-${{ github.head_ref || github.ref_name }}
+  group: routing-source-checks-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -35,6 +36,7 @@ jobs:
           mkdir -p ci-routing-tools
           git rev-parse HEAD > ci-routing-tools/source.txt
           python3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee ci-routing-tools/tests.log
+          python3 scripts/verify_hdr_channel.py
           git diff --exit-code
       - uses: actions/upload-artifact@v4
         if: always()

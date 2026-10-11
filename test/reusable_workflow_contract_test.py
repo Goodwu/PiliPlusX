@@ -40,6 +40,22 @@ class ReusableSourceContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'mac'):
             validate_apple_calls(prefix + '    mac:\n' + suffix)
 
+    def test_build_uses_the_current_source_validation_pipeline(self):
+        text = (ROOT / '.github/workflows/build.yml').read_text()
+        block = text.split('    hdr_unit_tests:\n', 1)[1].split('    android:\n', 1)[0]
+        self.assertIn('uses: ./.github/workflows/routing-source-integration.yml', block)
+        self.assertNotIn('73536ef', block)
+        source = (ROOT / '.github/workflows/routing-source-integration.yml').read_text()
+        self.assertIn('  workflow_call:', source)
+        self.assertIn('path: app', source)
+        self.assertIn('path: media-kit', source)
+        self.assertIn('verify_routing_sources.py', source)
+        self.assertIn('verify_hdr_channel.py', source)
+        self.assertIn('flutter test --no-pub', source)
+        self.assertIn('flutter analyze --no-pub', source)
+        self.assertIn('source-resolution-after.json', source)
+        self.assertIn('group: routing-source-checks-${{ github.workflow }}-', source)
+
     def test_callees_keep_required_ref_and_release_guards(self):
         for name in ('ios', 'mac'):
             text = (ROOT / f'.github/workflows/{name}.yml').read_text()

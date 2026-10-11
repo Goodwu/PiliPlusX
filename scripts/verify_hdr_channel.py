@@ -1,65 +1,83 @@
 #!/usr/bin/env python3
-"""Keep the HDR capability channel independent of application package names."""
+"""Verify App HDR channels and the Android hand-off to media-kit.
 
+Android device probing belongs to media-kit. Other platforms still implement
+HdrPlatform's probe/configure/reset contract. Pink renaming must alter neither
+channel identity nor this division of responsibilities.
+"""
 from pathlib import Path
-
+import re
 
 CHANNEL = "piliplusx/hdr_capabilities"
 OLD_CHANNEL = "com.example.piliplusx/hdr_capabilities"
+DART = "lib/plugin/pl_player/hdr_platform.dart"
+ANDROID = "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt"
 FILES = (
-    "lib/plugin/pl_player/hdr_platform.dart",
-    "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+    DART, ANDROID,
     "ios/Runner/AppDelegate.swift",
     "macos/Runner/MainFlutterWindow.swift",
     "windows/runner/flutter_window.cpp",
     "linux/runner/my_application.cc",
     "ohos/entry/src/main/ets/plugins/HarmonyChannel.ets",
 )
+OUTPUT_FIELDS = (
+    "active", "failureReason", "sourceProcessing", "outputEncoding",
+    "dynamicMetadataApplied", "supportedInputFormats", "supportedOutputFormats",
+)
+
+
+def verify(root: Path) -> list[str]:
+    failures: list[str] = []
+
+    def read(name: str) -> str:
+        path = root / name
+        if not path.is_file():
+            failures.append(f"{name}: missing contract file")
+            return ""
+        return path.read_text(encoding="utf-8")
+
+    for name in FILES:
+        text = read(name)
+        if text.count(CHANNEL) != 1:
+            failures.append(f"{name}: expected one {CHANNEL!r}")
+        if OLD_CHANNEL in text:
+            failures.append(f"{name}: package-coupled HDR channel")
+        methods = ("configureOutput", "resetOutput")
+        if name != ANDROID:
+            methods += ("probe",)
+        else:
+            methods += ("setWindowHdrMode",)
+        for method in methods:
+            # Quoted operation names, not comments describing retired methods.
+            if not re.search(r"['\"]" + re.escape(method) + r"['\"]", text):
+                failures.append(f"{name}: missing {method} operation")
+        if name != DART:
+            fields = OUTPUT_FIELDS
+            if name != ANDROID:
+                fields += ("nativeOutputCapable", "nativeOutputActive")
+            for field in fields:
+                if field not in text:
+                    failures.append(f"{name}: missing {field} field")
+        if name == ANDROID and re.search(r'call\.method\s*==\s*[\'"]probe[\'"]', text):
+            failures.append("Android must delegate device capability probing to media-kit")
+
+    selector = read("lib/plugin/pl_player/hdr_output.dart")
+    for token in ("VideoRouteCapabilities.query(", "target: target", "sources: sources"):
+        if token not in selector:
+            failures.append(f"Android route query: missing {token}")
+    if re.search(r"\bHdrCapabilities\.query\s*\(", selector):
+        failures.append("Android route query restored obsolete Player API")
+    controller = read("lib/plugin/pl_player/controller.dart")
+    if "HdrVideoSession(" not in controller:
+        failures.append("Android playback must use the media-kit Session")
+    return failures
 
 
 def main() -> None:
-    failures: list[str] = []
-    for name in FILES:
-        path = Path(name)
-        text = path.read_text(encoding="utf-8")
-        count = text.count(CHANNEL)
-        if count != 1:
-            failures.append(f"{name}: expected one {CHANNEL!r}, found {count}")
-        if OLD_CHANNEL in text:
-            failures.append(f"{name}: contains package-coupled HDR channel")
-        for method in ("probe", "configureOutput", "resetOutput"):
-            if method not in text:
-                failures.append(f"{name}: missing {method} operation")
-        if name != "lib/plugin/pl_player/hdr_platform.dart":
-            for field in ("nativeOutputCapable", "nativeOutputActive"):
-                if field not in text:
-                    failures.append(f"{name}: missing capability field {field}")
-            for field in ("active", "failureReason"):
-                if field not in text:
-                    failures.append(f"{name}: missing output result field {field}")
-            for field in (
-                "sourceProcessing",
-                "outputEncoding",
-                "dynamicMetadataApplied",
-                "supportedInputFormats",
-                "supportedOutputFormats",
-            ):
-                if field not in text:
-                    failures.append(f"{name}: missing structured output field {field}")
-    android_helper = Path("lib/plugin/pl_player/hdr_android.dart").read_text(
-        encoding="utf-8"
-    )
-    for method in ("setWindowHdrMode", "setColorSpace"):
-        if method not in android_helper:
-            failures.append(f"Android HDR helper: missing {method} operation")
-    for method in ("probe", "configureOutput", "resetOutput"):
-        if method in android_helper:
-            failures.append(
-                f"Android HDR helper: cross-platform operation {method} must use HdrPlatform"
-            )
+    failures = verify(Path.cwd())
     if failures:
         raise SystemExit("HDR channel verification failed:\n" + "\n".join(failures))
-    print(f"HDR channel verified: {CHANNEL} ({len(FILES)} endpoints)")
+    print(f"HDR channel verified: {len(FILES)} endpoints; Android query/Session delegation")
 
 
 if __name__ == "__main__":

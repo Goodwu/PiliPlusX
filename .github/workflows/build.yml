@@ -72,42 +72,10 @@ concurrency:
 jobs:
     hdr_unit_tests:
         if: ${{ github.event_name == 'pull_request' || inputs.run_hdr_unit_tests == true }}
-        name: HDR decision tests
-        runs-on: ubuntu-latest
+        name: Current-source App validation
+        uses: ./.github/workflows/routing-source-integration.yml
         permissions:
             contents: read
-
-        steps:
-            - name: 代码迁出
-              uses: actions/checkout@v7
-
-            - name: 安装Flutter
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: stable
-                  flutter-version-file: pubspec.yaml
-                  cache: true
-
-            - name: Resolve locked dependencies
-              run: flutter pub get --enforce-lockfile
-
-            - name: Patch extended nested scroll view pointer boundary
-              run: python3 scripts/prepare_ohos_package_patches.py --workspace "$GITHUB_WORKSPACE"
-
-            - name: Verify media-kit lock
-              run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
-
-            - name: Verify workflow media-kit references
-              run: python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96
-
-            - name: Verify HDR channel contract
-              run: python3 scripts/verify_hdr_channel.py
-
-            - name: Run release verifier tests
-              run: python3 -m unittest discover -s test -p '*_test.py'
-
-            - name: Run HDR decision tests
-              run: flutter test test/plugin/pl_player/hdr_test.dart
 
     android:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_android == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
