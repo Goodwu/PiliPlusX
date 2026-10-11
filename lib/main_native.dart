@@ -26,6 +26,7 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/font_utils.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
+import 'package:PiliPlus/utils/media_kit_compat.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_shortcuts.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -117,7 +118,14 @@ void main() async {
   final localDiagnosticOnly =
       localVideoDiagnosticBuildEnabled && Platform.isMacOS;
   ScaledWidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  try {
+    MediaKit.ensureInitialized();
+  } catch (e) {
+    // 播放内核缺失（如 Android API<28 缺 Vulkan 1.1 符号）不能阻断整个
+    // 应用启动；浏览等功能照常，播放路径按 mediaKitLoadFailed 降级。
+    mediaKitLoadFailed = true;
+    debugPrint('MediaKit.ensureInitialized failed: $e');
+  }
   await initializeDarwinMpvOwnerBroker();
   await _initAppPath();
   try {
