@@ -56,6 +56,7 @@ import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
+import 'package:PiliPlus/utils/media_kit_compat.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -990,6 +991,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // would turn the replacement page into DataStatus.error.
       if (sourceGeneration == _hdrSourceGeneration) {
         dataStatus.value = DataStatus.error;
+        if (mediaKitLoadFailed) {
+          SmartDialog.showToast(
+            '播放内核（libmpv）加载失败，当前设备暂不支持视频播放',
+          );
+        }
         if (kDebugMode) {
           debugPrint(stackTrace.toString());
           debugPrint('plPlayer err:  $err');
