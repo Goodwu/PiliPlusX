@@ -7,7 +7,8 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 
 def package_root(workspace: Path, package_name: str) -> Path:
@@ -17,10 +18,14 @@ def package_root(workspace: Path, package_name: str) -> Path:
     for package in config["packages"]:
         if package["name"] != package_name:
             continue
-        uri = urlparse(package["rootUri"])
-        if uri.scheme != "file":
+        root_uri = package["rootUri"]
+        uri = urlparse(root_uri)
+        if uri.scheme != "file" or uri.netloc not in ("", "localhost"):
             raise SystemExit(f"unsupported package root URI: {package['rootUri']}")
-        return Path(unquote(uri.path)).resolve()
+        if "?" in root_uri or "#" in root_uri or not uri.path.startswith("/"):
+            raise SystemExit(f"invalid package root URI: {package['rootUri']}")
+        # Decode once and apply the current platform's native file URL rules.
+        return Path(url2pathname(uri.path)).resolve()
     raise SystemExit(f"package not found in package_config: {package_name}")
 
 
