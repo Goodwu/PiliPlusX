@@ -1,0 +1,65 @@
+name: Routing integrate Android 7 once
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+    paths: ['.github/workflows/routing-integrate-android7-once.yml']
+permissions:
+  contents: write
+concurrency:
+  group: routing-android7-integration
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.repository == 'Goodwu/PiliPlusX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: routing/MK-ROUTING-20261011
+          path: app
+      - name: Merge existing reviewed compatibility work, never force
+        working-directory: app
+        shell: bash
+        env:
+          EXPECTED_TASK: ${{ github.sha }}
+          EXPECTED_COMPAT: 30434b3eb6d77a787b0f8f5db6891d4090032696
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_TASK"
+          git fetch origin fix/android7-lg-launch-libmpv-vulkan
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED_COMPAT"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git merge-base --is-ancestor "$EXPECTED_COMPAT" HEAD; then
+            git merge --no-ff -m 'merge: integrate existing Android 7 startup compatibility [MK-ROUTING-20261011]' "$EXPECTED_COMPAT"
+            git merge-base --is-ancestor "$EXPECTED_TASK" HEAD
+            git merge-base --is-ancestor "$EXPECTED_COMPAT" HEAD
+            git diff --exit-code "$EXPECTED_TASK" HEAD -- .github/workflows
+            test "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)" = "$EXPECTED_TASK"
+            git push origin HEAD:refs/heads/routing/MK-ROUTING-20261011
+          fi
+          test "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)" = "$(git rev-parse HEAD)"
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: routing/MK-ROUTING-20261011
+          path: media-kit
+          persist-credentials: false
+      - name: Archive current tracked source and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir sources
+          git -C app archive --format=tar.gz -o "$PWD/sources/piliplusx.tar.gz" HEAD
+          git -C media-kit archive --format=tar.gz -o "$PWD/sources/media-kit.tar.gz" HEAD
+          printf 'app=%s\nmediaKit=%s\n' "$(git -C app rev-parse HEAD)" "$(git -C media-kit rev-parse HEAD)" > sources/heads.txt
+          git -C app show --no-patch --format=fuller HEAD > sources/app-merge.txt
+          sha256sum sources/*.tar.gz > sources/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: routing-integrated-sources-${{ github.sha }}
+          path: sources
+          if-no-files-found: error
+          retention-days: 14
