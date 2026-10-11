@@ -1,0 +1,410 @@
+{
+  "scope": "PREPARE_INPUT_ONLY_NO_FLUTTER_EXECUTION",
+  "source_sdk": "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+  "private_root": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam",
+  "sdk": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+  "app_input_empty": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/p",
+  "script": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/prepare.py",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "--version"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "sw_vers"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "-C",
+        "/Users/wuweiwei1/src/PiliPlusX",
+        "status",
+        "--short"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "status",
+        "--porcelain=v1",
+        "-z"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "init",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "update-ref",
+        "refs/heads/prepared-ios-input",
+        "d3b14c876900e553bc736ca19295fc09e3853e8e"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "symbolic-ref",
+        "HEAD",
+        "refs/heads/prepared-ios-input"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "reset",
+        "--hard",
+        "d3b14c876900e553bc736ca19295fc09e3853e8e"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "write-tree"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "status",
+        "--porcelain=v1"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "rev-parse",
+        "--absolute-git-dir"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "fsck",
+        "--connectivity-only",
+        "--no-reflogs"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "status",
+        "--porcelain=v1",
+        "-z"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/Users/wuweiwei1/src/mk-core-routing-20261011/.runtime/flutter",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "git",
+        "--no-optional-locks",
+        "-C",
+        "/Users/wuweiwei1/src/PiliPlusX",
+        "status",
+        "--short"
+      ],
+      "exit": 0
+    }
+  ],
+  "started_utc": "2026-10-11T20:24:10Z",
+  "status": "PASS_PREPARED_INPUT_ONLY",
+  "environment": {
+    "platform": "darwin",
+    "python": "3.15.0 (main, Oct  9 2026, 11:16:41) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "git": "git version 2.56.0",
+    "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+    "disk_before": {
+      "available_bytes": 1438191616,
+      "block_size": 4096
+    },
+    "workspace_status_before": "?? .zcodeignore"
+  },
+  "source_before": {
+    "head": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+    "status": " M packages/flutter/lib/src/gestures/tap_and_drag.dart\u0000 M packages/flutter/lib/src/material/bottom_sheet.dart\u0000 M packages/flutter/lib/src/material/floating_action_button.dart\u0000 M packages/flutter/lib/src/material/navigation_drawer.dart\u0000 M packages/flutter/lib/src/material/popup_menu.dart\u0000 M packages/flutter/lib/src/material/progress_indicator.dart\u0000 M packages/flutter/lib/src/material/scaffold.dart\u0000 M packages/flutter/lib/src/material/tabs.dart\u0000 M packages/flutter/lib/src/material/text_field.dart\u0000 M packages/flutter/lib/src/painting/inline_span.dart\u0000 M packages/flutter/lib/src/painting/placeholder_span.dart\u0000 M packages/flutter/lib/src/painting/text_painter.dart\u0000 M packages/flutter/lib/src/painting/text_span.dart\u0000 M packages/flutter/lib/src/rendering/editable.dart\u0000 M packages/flutter/lib/src/rendering/paragraph.dart\u0000 M packages/flutter/lib/src/rendering/selection.dart\u0000 M packages/flutter/lib/src/widgets/draggable_scrollable_sheet.dart\u0000 M packages/flutter/lib/src/widgets/editable_text.dart\u0000 M packages/flutter/lib/src/widgets/gesture_detector.dart\u0000 M packages/flutter/lib/src/widgets/image.dart\u0000 M packages/flutter/lib/src/widgets/layout_builder.dart\u0000 M packages/flutter/lib/src/widgets/modal_barrier.dart\u0000 M packages/flutter/lib/src/widgets/navigator.dart\u0000 M packages/flutter/lib/src/widgets/page_view.dart\u0000 M packages/flutter/lib/src/widgets/routes.dart\u0000 M packages/flutter/lib/src/widgets/scroll_position_with_single_context.dart\u0000 M packages/flutter/lib/src/widgets/scroll_view.dart\u0000 M packages/flutter/lib/src/widgets/scrollable.dart\u0000 M packages/flutter/lib/src/widgets/selectable_region.dart\u0000 M packages/flutter/lib/src/widgets/selection_container.dart\u0000 M packages/flutter/lib/src/widgets/sliver.dart\u0000 M packages/flutter/lib/src/widgets/text.dart\u0000 M packages/flutter/lib/src/widgets/text_selection.dart\u0000 M packages/flutter/lib/src/widgets/widget_span.dart\u0000 M packages/flutter/lib/src/widgets/widget_state.dart\u0000 M packages/flutter/test/widgets/selectable_region_test.dart\u0000",
+    "dirty_paths": {
+      "packages/flutter/lib/src/gestures/tap_and_drag.dart": "8db3a1faf0533230f2e485a097872e2960baf3bed4329a56527ebc68d5500a74",
+      "packages/flutter/lib/src/material/bottom_sheet.dart": "e91ccf1d139ae5af5dcb089772b66a7f8c9343b89dd562e54cfe59f7f3ffaca4",
+      "packages/flutter/lib/src/material/floating_action_button.dart": "935fca25716c6cb734dbb015c3a83d55bfdeb5583254d200b60fc29db5f07a43",
+      "packages/flutter/lib/src/material/navigation_drawer.dart": "52873a9d58aacd13628d55a0c50b4ab932205e765555e794e3181e41dcac52fd",
+      "packages/flutter/lib/src/material/popup_menu.dart": "688154c595ab3b252c5c8e0d3823b5a91e064a06fbbafb271c9e68416cc7660b",
+      "packages/flutter/lib/src/material/progress_indicator.dart": "47e78371419e22af678e1236f80fd8e639d2399d9e2556670d45061f8522eb52",
+      "packages/flutter/lib/src/material/scaffold.dart": "c287cc6f0b11ab4fd13fe602f42981af136c5bebfd2cb1f09e45f9d96c72cdea",
+      "packages/flutter/lib/src/material/tabs.dart": "5e53d0a9895f519a0115ac8bfe4facb0e916f4b65af3b235ef789ee698256f13",
+      "packages/flutter/lib/src/material/text_field.dart": "b4487194107a085fde8872b36799df0babcdea9a3130597ff0a0f845209f896f",
+      "packages/flutter/lib/src/painting/inline_span.dart": "342e6be0f79a7d42cc06a445ed375b80a8b9885771f4f3ca43283b1aac107625",
+      "packages/flutter/lib/src/painting/placeholder_span.dart": "3a430edb254cf70d94027a4332fcf611de57cbd6e3bcf989751ba7dd93d855f8",
+      "packages/flutter/lib/src/painting/text_painter.dart": "6995a479a468e3a0a655c5ab25f9ef94e8c34a7d74bbee31dfe7a0221cd040b8",
+      "packages/flutter/lib/src/painting/text_span.dart": "c5ddab8dcd79d57ae8ae3bdfec4c2a01d5f3810fa2fcac79a2acd1cda6d72db6",
+      "packages/flutter/lib/src/rendering/editable.dart": "0d7de5ecc907ab83880e94c7978abc276abf4dfeb38b02ee439e31ae661ac7c9",
+      "packages/flutter/lib/src/rendering/paragraph.dart": "8850fa1541a5c1210741fed2c887ab395a6edb8f1b4a159ed76ccf152b327482",
+      "packages/flutter/lib/src/rendering/selection.dart": "19d408ad68218f72039382e108484e5061ee422db3d6c7d1717fefbe0d78ab4f",
+      "packages/flutter/lib/src/widgets/draggable_scrollable_sheet.dart": "fad377dd279a7da4c753e58bef749a6dab3ac056bd4ee0467b204f45687e62e7",
+      "packages/flutter/lib/src/widgets/editable_text.dart": "86d24b5f217a1a519c6e65e3b4d87b8f0a4b2b22cd4651d570f196cfa362769e",
+      "packages/flutter/lib/src/widgets/gesture_detector.dart": "4378d488dd578de02594ef22a98d6b24691d3b0350748a120af6f68079ccf7b9",
+      "packages/flutter/lib/src/widgets/image.dart": "4066404d079cf03616373c35bda15a7dfe16e8f2234e8f8ebd365e4a26fa99ef",
+      "packages/flutter/lib/src/widgets/layout_builder.dart": "14d7a7195c379dfd37c566398ae8682d5590f694a99e4de0bda968cb72ffe405",
+      "packages/flutter/lib/src/widgets/modal_barrier.dart": "dc4d0eb3d292ecf5b35bc5f9cf339b9c55d4a2015eb563d7ed448145eabfef6a",
+      "packages/flutter/lib/src/widgets/navigator.dart": "490cb0396c22d4b25491b79a6853d4b406e2e7a1e58c37b9d822d5388037c10f",
+      "packages/flutter/lib/src/widgets/page_view.dart": "9279a2ac3d6ab4ec3315c6cd43257afbdc3b56e22191e80c635f324d15e28b35",
+      "packages/flutter/lib/src/widgets/routes.dart": "a867bfd5138a6172698346e1b47e62d485207e96cbc8d9807d9c23b0dc45ca9f",
+      "packages/flutter/lib/src/widgets/scroll_position_with_single_context.dart": "e91cebf84c008040dc594dee1015fb0f34140fefbd0c7b87fea6d9f0c886be67",
+      "packages/flutter/lib/src/widgets/scroll_view.dart": "2dc07b6e6dfe23717431fb26486cee09b76555065f6506b6239dcf3329f63457",
+      "packages/flutter/lib/src/widgets/scrollable.dart": "73d458b08ff77fea54e16fe6ce189e12206097d0a2dd537d08b35ca6abb44ded",
+      "packages/flutter/lib/src/widgets/selectable_region.dart": "295336f2b1a824024e3901a1fb7c52c7a71abfc30cff17a4bf062392686e87ab",
+      "packages/flutter/lib/src/widgets/selection_container.dart": "8e0806585dabad243ce6fc96ca4a8afd0a07305cb82f9b66e655f5a34e145ae1",
+      "packages/flutter/lib/src/widgets/sliver.dart": "8366da0f838af5b95b09b2ed11c99c50a8395a6270ed0ee69874bfe3bd8a155d",
+      "packages/flutter/lib/src/widgets/text.dart": "da308e8574c5ccb4d42d4950cd4463b7baf62bbf065581d5071b9d66f20d7e13",
+      "packages/flutter/lib/src/widgets/text_selection.dart": "b00969eb93147a2e48e26a4d44be7171083512f98707013114e369d89e85e71a",
+      "packages/flutter/lib/src/widgets/widget_span.dart": "2aef00f4d33e49d50e1fe1276ec202573022c4b71a8b4def368bf2f5927aad7b",
+      "packages/flutter/lib/src/widgets/widget_state.dart": "ed17edefc24bc3025a7ed32b494679c7f5992a7e15fb94351f51f750e39dcbba",
+      "packages/flutter/test/widgets/selectable_region_test.dart": "0b0461c4845d370b48ed3a596efc60ba4fde2607203d3a0a566c53a26cb66ed0"
+    },
+    "dirty_count": 36
+  },
+  "destination": {
+    "head": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+    "index_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+    "status": "",
+    "git_dir": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f/.git",
+    "empty_p": true,
+    "tools_dot_dart_tool_absent": true,
+    "old_snapshot_absent": true,
+    "old_tools_stamp_absent": true,
+    "alternates_absent": true,
+    "linked_worktree_metadata_absent": true,
+    "symlinks_checked": [
+      "bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Resources",
+      "bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Headers",
+      "bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Modules",
+      "bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/FlutterMacOS",
+      "bin/cache/artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/Current",
+      "bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Resources",
+      "bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Headers",
+      "bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Modules",
+      "bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/FlutterMacOS",
+      "bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/Current",
+      "bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Resources",
+      "bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Headers",
+      "bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Modules",
+      "bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/FlutterMacOS",
+      "bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/Current",
+      ".claude/skills",
+      "engine/src/flutter/lib/web_ui/test/ui/paragraph_performance_test.dart"
+    ]
+  },
+  "source_after": {
+    "head": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+    "status": " M packages/flutter/lib/src/gestures/tap_and_drag.dart\u0000 M packages/flutter/lib/src/material/bottom_sheet.dart\u0000 M packages/flutter/lib/src/material/floating_action_button.dart\u0000 M packages/flutter/lib/src/material/navigation_drawer.dart\u0000 M packages/flutter/lib/src/material/popup_menu.dart\u0000 M packages/flutter/lib/src/material/progress_indicator.dart\u0000 M packages/flutter/lib/src/material/scaffold.dart\u0000 M packages/flutter/lib/src/material/tabs.dart\u0000 M packages/flutter/lib/src/material/text_field.dart\u0000 M packages/flutter/lib/src/painting/inline_span.dart\u0000 M packages/flutter/lib/src/painting/placeholder_span.dart\u0000 M packages/flutter/lib/src/painting/text_painter.dart\u0000 M packages/flutter/lib/src/painting/text_span.dart\u0000 M packages/flutter/lib/src/rendering/editable.dart\u0000 M packages/flutter/lib/src/rendering/paragraph.dart\u0000 M packages/flutter/lib/src/rendering/selection.dart\u0000 M packages/flutter/lib/src/widgets/draggable_scrollable_sheet.dart\u0000 M packages/flutter/lib/src/widgets/editable_text.dart\u0000 M packages/flutter/lib/src/widgets/gesture_detector.dart\u0000 M packages/flutter/lib/src/widgets/image.dart\u0000 M packages/flutter/lib/src/widgets/layout_builder.dart\u0000 M packages/flutter/lib/src/widgets/modal_barrier.dart\u0000 M packages/flutter/lib/src/widgets/navigator.dart\u0000 M packages/flutter/lib/src/widgets/page_view.dart\u0000 M packages/flutter/lib/src/widgets/routes.dart\u0000 M packages/flutter/lib/src/widgets/scroll_position_with_single_context.dart\u0000 M packages/flutter/lib/src/widgets/scroll_view.dart\u0000 M packages/flutter/lib/src/widgets/scrollable.dart\u0000 M packages/flutter/lib/src/widgets/selectable_region.dart\u0000 M packages/flutter/lib/src/widgets/selection_container.dart\u0000 M packages/flutter/lib/src/widgets/sliver.dart\u0000 M packages/flutter/lib/src/widgets/text.dart\u0000 M packages/flutter/lib/src/widgets/text_selection.dart\u0000 M packages/flutter/lib/src/widgets/widget_span.dart\u0000 M packages/flutter/lib/src/widgets/widget_state.dart\u0000 M packages/flutter/test/widgets/selectable_region_test.dart\u0000",
+    "dirty_paths": {
+      "packages/flutter/lib/src/gestures/tap_and_drag.dart": "8db3a1faf0533230f2e485a097872e2960baf3bed4329a56527ebc68d5500a74",
+      "packages/flutter/lib/src/material/bottom_sheet.dart": "e91ccf1d139ae5af5dcb089772b66a7f8c9343b89dd562e54cfe59f7f3ffaca4",
+      "packages/flutter/lib/src/material/floating_action_button.dart": "935fca25716c6cb734dbb015c3a83d55bfdeb5583254d200b60fc29db5f07a43",
+      "packages/flutter/lib/src/material/navigation_drawer.dart": "52873a9d58aacd13628d55a0c50b4ab932205e765555e794e3181e41dcac52fd",
+      "packages/flutter/lib/src/material/popup_menu.dart": "688154c595ab3b252c5c8e0d3823b5a91e064a06fbbafb271c9e68416cc7660b",
+      "packages/flutter/lib/src/material/progress_indicator.dart": "47e78371419e22af678e1236f80fd8e639d2399d9e2556670d45061f8522eb52",
+      "packages/flutter/lib/src/material/scaffold.dart": "c287cc6f0b11ab4fd13fe602f42981af136c5bebfd2cb1f09e45f9d96c72cdea",
+      "packages/flutter/lib/src/material/tabs.dart": "5e53d0a9895f519a0115ac8bfe4facb0e916f4b65af3b235ef789ee698256f13",
+      "packages/flutter/lib/src/material/text_field.dart": "b4487194107a085fde8872b36799df0babcdea9a3130597ff0a0f845209f896f",
+      "packages/flutter/lib/src/painting/inline_span.dart": "342e6be0f79a7d42cc06a445ed375b80a8b9885771f4f3ca43283b1aac107625",
+      "packages/flutter/lib/src/painting/placeholder_span.dart": "3a430edb254cf70d94027a4332fcf611de57cbd6e3bcf989751ba7dd93d855f8",
+      "packages/flutter/lib/src/painting/text_painter.dart": "6995a479a468e3a0a655c5ab25f9ef94e8c34a7d74bbee31dfe7a0221cd040b8",
+      "packages/flutter/lib/src/painting/text_span.dart": "c5ddab8dcd79d57ae8ae3bdfec4c2a01d5f3810fa2fcac79a2acd1cda6d72db6",
+      "packages/flutter/lib/src/rendering/editable.dart": "0d7de5ecc907ab83880e94c7978abc276abf4dfeb38b02ee439e31ae661ac7c9",
+      "packages/flutter/lib/src/rendering/paragraph.dart": "8850fa1541a5c1210741fed2c887ab395a6edb8f1b4a159ed76ccf152b327482",
+      "packages/flutter/lib/src/rendering/selection.dart": "19d408ad68218f72039382e108484e5061ee422db3d6c7d1717fefbe0d78ab4f",
+      "packages/flutter/lib/src/widgets/draggable_scrollable_sheet.dart": "fad377dd279a7da4c753e58bef749a6dab3ac056bd4ee0467b204f45687e62e7",
+      "packages/flutter/lib/src/widgets/editable_text.dart": "86d24b5f217a1a519c6e65e3b4d87b8f0a4b2b22cd4651d570f196cfa362769e",
+      "packages/flutter/lib/src/widgets/gesture_detector.dart": "4378d488dd578de02594ef22a98d6b24691d3b0350748a120af6f68079ccf7b9",
+      "packages/flutter/lib/src/widgets/image.dart": "4066404d079cf03616373c35bda15a7dfe16e8f2234e8f8ebd365e4a26fa99ef",
+      "packages/flutter/lib/src/widgets/layout_builder.dart": "14d7a7195c379dfd37c566398ae8682d5590f694a99e4de0bda968cb72ffe405",
+      "packages/flutter/lib/src/widgets/modal_barrier.dart": "dc4d0eb3d292ecf5b35bc5f9cf339b9c55d4a2015eb563d7ed448145eabfef6a",
+      "packages/flutter/lib/src/widgets/navigator.dart": "490cb0396c22d4b25491b79a6853d4b406e2e7a1e58c37b9d822d5388037c10f",
+      "packages/flutter/lib/src/widgets/page_view.dart": "9279a2ac3d6ab4ec3315c6cd43257afbdc3b56e22191e80c635f324d15e28b35",
+      "packages/flutter/lib/src/widgets/routes.dart": "a867bfd5138a6172698346e1b47e62d485207e96cbc8d9807d9c23b0dc45ca9f",
+      "packages/flutter/lib/src/widgets/scroll_position_with_single_context.dart": "e91cebf84c008040dc594dee1015fb0f34140fefbd0c7b87fea6d9f0c886be67",
+      "packages/flutter/lib/src/widgets/scroll_view.dart": "2dc07b6e6dfe23717431fb26486cee09b76555065f6506b6239dcf3329f63457",
+      "packages/flutter/lib/src/widgets/scrollable.dart": "73d458b08ff77fea54e16fe6ce189e12206097d0a2dd537d08b35ca6abb44ded",
+      "packages/flutter/lib/src/widgets/selectable_region.dart": "295336f2b1a824024e3901a1fb7c52c7a71abfc30cff17a4bf062392686e87ab",
+      "packages/flutter/lib/src/widgets/selection_container.dart": "8e0806585dabad243ce6fc96ca4a8afd0a07305cb82f9b66e655f5a34e145ae1",
+      "packages/flutter/lib/src/widgets/sliver.dart": "8366da0f838af5b95b09b2ed11c99c50a8395a6270ed0ee69874bfe3bd8a155d",
+      "packages/flutter/lib/src/widgets/text.dart": "da308e8574c5ccb4d42d4950cd4463b7baf62bbf065581d5071b9d66f20d7e13",
+      "packages/flutter/lib/src/widgets/text_selection.dart": "b00969eb93147a2e48e26a4d44be7171083512f98707013114e369d89e85e71a",
+      "packages/flutter/lib/src/widgets/widget_span.dart": "2aef00f4d33e49d50e1fe1276ec202573022c4b71a8b4def368bf2f5927aad7b",
+      "packages/flutter/lib/src/widgets/widget_state.dart": "ed17edefc24bc3025a7ed32b494679c7f5992a7e15fb94351f51f750e39dcbba",
+      "packages/flutter/test/widgets/selectable_region_test.dart": "0b0461c4845d370b48ed3a596efc60ba4fde2607203d3a0a566c53a26cb66ed0"
+    },
+    "dirty_count": 36
+  },
+  "source_protection_pass": true,
+  "workspace_status_after": "?? .zcodeignore",
+  "workspace_unchanged": true,
+  "counts": {
+    "objects": 18,
+    "cache": 2507
+  },
+  "logical_cloned_bytes": {
+    "objects": 361963710,
+    "cache": 3615092965
+  },
+  "disk_after": {
+    "available_bytes": 1228517376,
+    "block_size": 4096
+  },
+  "evidence": {
+    "prepare.py": {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/prepare.py",
+      "sha256": "ff039e75334985d8412ff70e9568aa4264a42778cdd60cc7d51f4d3344123efe"
+    },
+    "commands.log": {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/commands.log",
+      "sha256": "98bde894d229b0755435c3fa861207de8d481add671d1fefa44f614f5fadc8f3"
+    },
+    "clone-manifest.jsonl": {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/clone-manifest.jsonl",
+      "sha256": "d10c7f77fe5949407b5184670e8c3380b9ff18b9dcb524a5fe93635e5131334d"
+    },
+    "excluded.jsonl": {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/excluded.jsonl",
+      "sha256": "bd36bda2e24deaec106360d40a675d588225b9b060431d1ef8b5cf959a5fa178"
+    }
+  },
+  "unverified": [
+    "iOS bootstrap",
+    "pub get",
+    "patch application",
+    "Flutter CLI execution",
+    "build",
+    "runtime",
+    "cache provenance beyond supplied source cache"
+  ],
+  "finished_utc": "2026-10-11T20:24:24Z",
+  "sdk_tracked_manifest": {
+    "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/sdk-tracked-sha256.jsonl",
+    "sha256": "1e7a1a62198cc933f28862cc2de23f82336d7b76c1044a7102e179bbcaa929cd",
+    "entries": 16071
+  },
+  "preparation_command": {
+    "argv": [
+      "/opt/homebrew/bin/python3",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/prepare.py"
+    ],
+    "stdout": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/preparation.stdout.log",
+    "exit": 0
+  },
+  "prior_verification_attempt": {
+    "root": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-6a58x6cn",
+    "outcome": "baseline parser strip error before any SDK/cache clone; raw evidence preserved; corrected rstrip newline only in new attempt"
+  },
+  "classification": {
+    "original_dirty_state": "36 tracked SDK changes and PiliPlusX untracked .zcodeignore preserved",
+    "test_products": "new private input SDK/cache, empty p, logs/manifests/output JSON",
+    "unexpected_implementation_modifications": "none observed",
+    "executed_unreviewed_ios_source": false
+  }
+}

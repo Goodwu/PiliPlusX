@@ -35,6 +35,10 @@ class BootstrapTest(unittest.TestCase):
         (self.app / 'pubspec.yaml').write_text('environment:\n  flutter: 3.47.2\n')
         (self.app / 'lib/main.dart').write_text('business source\n')
         (self.app / 'test/example.dart').write_text('test source\n')
+        (self.app / 'lib/scripts').mkdir(parents=True, exist_ok=True)
+        (self.app / 'lib/scripts/bottom_sheet_ios_piliplus.patch').write_bytes(b'ios patch input\n')
+        (self.app / 'lib/scripts/bottom_sheet_ios_flutter.patch').write_bytes(b'ios SDK patch input\n')
+        (self.app / 'lib/scripts/patch.ps1').write_text('# fixture patch driver\n', encoding='utf-8')
         (self.media / 'README.md').write_text('library source\n')
         for relative in module.verify.__globals__['PACKAGES'].values():
             (self.media / relative).mkdir(parents=True, exist_ok=True)
@@ -64,6 +68,34 @@ class BootstrapTest(unittest.TestCase):
         self.process = patch.object(module.subprocess, 'run', side_effect=self.command)
         self.process.start()
         self.addCleanup(self.process.stop)
+        self.sdk_identity = patch.object(module, 'sdk_patch_identity', side_effect=self.fake_sdk_identity)
+        self.sdk_identity.start()
+        self.addCleanup(self.sdk_identity.stop)
+        self.patch_execution = patch.object(module, 'sdk_patch_execution_identity',
+                                            side_effect=self.fake_patch_execution)
+        self.patch_execution.start()
+        self.addCleanup(self.patch_execution.stop)
+        self.ios_witness = patch.object(module, 'ios_sdk_semantic_witness',
+                                        return_value={'patchSha256': 'i' * 64, 'reverseCheck': {'exitCode': 0}})
+        self.ios_witness.start()
+        self.addCleanup(self.ios_witness.stop)
+
+    def fake_sdk_identity(self, sdk, cache, platform, toolchain):
+        return {'schema': 'routing-sdk-patch-identity-v1', 'platform': platform,
+                'sdkRoot': str(Path(sdk).resolve()), 'pubCache': str(Path(cache).resolve()),
+                'sdkCommit': 'b' * 40, 'sdkTree': 'c' * 40,
+                'trackedDiffSha256': 'd' * 64, 'trackedStatusSha256': 'e' * 64,
+                'toolsConfigSha256': 'f' * 64, 'toolsLockSha256': 'a' * 64,
+                'toolsPackageRoots': {'flutter_tools': str(Path(sdk) / 'packages/flutter_tools')},
+                'toolchain': toolchain}
+
+    def fake_patch_execution(self, app, platform, vector, identity, steps):
+        phases = [{'name': f'patch-{mode}', 'command': step['command'],
+                   'cwd': step['cwd'], 'exitCode': step['exitCode']}
+                  for mode in ('SdkOnly', 'PackagesOnly')
+                  for step in steps if step.get('name') == f'patch-{mode}']
+        return {'platform': platform, 'sourceVector': vector, 'sdkCommit': identity['sdkCommit'],
+                'phases': phases}
 
     def sdk_fixture(self, root):
         for relative in ('.git', 'packages/flutter_tools', 'packages/flutter', 'bin/cache/dart-sdk/bin'):
@@ -146,6 +178,25 @@ class BootstrapTest(unittest.TestCase):
         receipt = json.loads((self.args.output / 'bootstrap.json').read_text())
         self.assertEqual(receipt['status'], 'fresh-source-only')
         self.assertFalse(receipt['deviceTest'])
+
+    def test_ios_platform_is_passed_to_both_patch_phases_and_finalized(self):
+        self.args.platform = 'ios'
+        bootstrap = self.bootstrap()
+        bootstrap.prepare()
+        platform_calls = [call[0] for call in self.calls if call[0][0] == 'pwsh']
+        self.assertEqual([call[5] for call in platform_calls], ['ios', 'ios'])
+        self.assertEqual([call[6] for call in platform_calls], ['-SdkOnly', '-PackagesOnly'])
+        receipt = json.loads((self.args.output / 'bootstrap.json').read_text())
+        self.assertEqual(receipt['platform'], 'ios')
+        bootstrap.finalize()
+
+    def test_ios_app_patch_crlf_is_rejected_before_patch_commands(self):
+        self.args.platform = 'ios'
+        patch = self.app / 'lib/scripts/bottom_sheet_ios_piliplus.patch'
+        patch.write_bytes(b'ios\r\npatch\r\n')
+        with self.assertRaisesRegex(ValueError, 'iOS App patch requires an LF'):
+            self.bootstrap().prepare()
+        self.assertFalse(any(call[0][0] == 'pwsh' for call in self.calls))
 
     def test_patch_failure_retains_exit_code_and_stops_next_patch(self):
         self.failure = '-SdkOnly'

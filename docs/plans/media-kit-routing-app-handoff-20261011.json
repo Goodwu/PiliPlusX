@@ -1,7 +1,7 @@
 {
   "schema": 3,
   "taskId": "MK-ROUTING-20261011",
-  "updatedOn": "2026-10-11",
+  "updatedOn": "2026-10-12",
   "centralPlan": "Goodwu/media-kit:docs/plans/media-kit-routing-implementation-20261011.md",
   "centralPlanVersion": 3,
   "centralLedger": "Goodwu/media-kit:routing/MK-ROUTING-20261011:docs/plans/media-kit-routing-handoff-20261011.json",
@@ -12,7 +12,7 @@
   "baseBranch": "fix/darwin-video-output-rebuild-barrier",
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
   "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
-  "status": "CORE_successor_F01_host_bundle_validated_remaining34infos_and_R01",
+  "status": "public_R01_config_and_analyzer_cleanup_source_validated_native_release_device_pending",
   "history": {
     "previousFullLedgerRef": "077378ce91335cc0e1c06562b9949dea00b8ecf0",
     "previousFullLedgerPath": "docs/plans/media-kit-routing-app-handoff-20261011.json",
@@ -60,7 +60,69 @@
       "mediaKitPR4": 6110447335,
       "appPR1": 6110417510
     },
-    "previousCentralLedgerCheckpoint": "1a8ac0f5f1d5f862ba91577fac7111974131ce75"
+    "previousCentralLedgerCheckpoint": "1a8ac0f5f1d5f862ba91577fac7111974131ce75",
+    "preR01ConfigFinalLatestValidation": {
+      "run": 38146940852,
+      "job": 114499858358,
+      "app": "569138fa8d55eb2686578fc834c19aba8093c411",
+      "mediaKit": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+      "flutterPassed": 192,
+      "pythonPassed": 244,
+      "pythonNote": "Retained earlier successful job at same App SHA; not rerun with second App job.",
+      "bundle": "success",
+      "analyze": {
+        "conclusion": "failure",
+        "infos": 34,
+        "warnings": 0,
+        "errors": 0
+      },
+      "actualTenPackageRoots": "success",
+      "remoteFreshness": "success",
+      "sourceArtifact": {
+        "id": 11705617556,
+        "sha256": "1af2bb6b49643cb6955c8596461c2fbc3cd1905bd7e99abefc3322ad37be854c"
+      },
+      "fullNativeAcceptance": false,
+      "deviceAcceptanceForF01": false,
+      "scope": "Prior recorded pair only; successor documentation checkpoint is not marked tested."
+    },
+    "nativeSourcePair751d6c4": {
+      "scope": "Exact previous completed source pair; current HEAD hosted checks separately pending",
+      "vector": {
+        "mediaKit": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "app": "6c4c1b4787fe2ce5459ee1d775279192fe432416"
+      },
+      "library": {
+        "run": 38168100713,
+        "conclusion": "success",
+        "videoPassed": 772,
+        "videoSkipped": 3,
+        "skipScope": "existing macOS-only tests on Linux",
+        "labPassed": 298,
+        "strictAnalysisIssues": 0
+      },
+      "app": {
+        "sourceRun": 38168113931,
+        "sourceConclusion": "success",
+        "buildRun": 38168114089,
+        "buildConclusion": "failure",
+        "sourcePlatforms": [
+          "android",
+          "linux",
+          "windows",
+          "macos"
+        ],
+        "flutterPassedPerPlatform": 268,
+        "strictAnalysisIssues": 0,
+        "pythonPassedEachOfTwoActualHostedJobs": 444,
+        "bootstrapBoundParserKernelIdentityTests": 7,
+        "bundleAndSourceFreshness": "passed_for_exact_vector",
+        "releaseFailures": 6
+      },
+      "evidence": "docs/plans/core-native-ci-checkpoint-20261012.json",
+      "fullNativeAPKAcceptance": false,
+      "currentDeviceAcceptance": false
+    }
   },
   "completed": [
     {
@@ -166,32 +228,70 @@
       "doNotRepeat": true,
       "newFlutterTests": 4,
       "terminalComment": 6110417510
+    },
+    {
+      "id": "CORE-CI03-34infos-and-effective-config",
+      "status": "implemented_source_CI_validated",
+      "analyzerIssues": 0,
+      "vector": "6c4c1b478+751d0cdd",
+      "evidence": [
+        "docs/plans/core-native-ci-checkpoint-20261012.json",
+        "docs/plans/core-config-implementation-handoff-20261012.json"
+      ],
+      "doNotRepeat": true
     }
   ],
   "latestValidation": {
-    "run": 38146940852,
-    "job": 114499858358,
-    "app": "569138fa8d55eb2686578fc834c19aba8093c411",
-    "mediaKit": "6e7570fcdaadeb66223a7327860000bb945daeb4",
-    "flutterPassed": 192,
-    "pythonPassed": 244,
-    "pythonNote": "Retained earlier successful job at same App SHA; not rerun with second App job.",
-    "bundle": "success",
-    "analyze": {
-      "conclusion": "failure",
-      "infos": 34,
-      "warnings": 0,
-      "errors": 0
+    "scope": "Exact completed e31a+d916 source pair; Release/native/device acceptance separate",
+    "vector": {
+      "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6"
     },
-    "actualTenPackageRoots": "success",
-    "remoteFreshness": "success",
-    "sourceArtifact": {
-      "id": 11705617556,
-      "sha256": "1af2bb6b49643cb6955c8596461c2fbc3cd1905bd7e99abefc3322ad37be854c"
+    "library": {
+      "run": 38169536268,
+      "videoPassed": 772,
+      "videoSkipped": 3,
+      "skipScope": "existing macOS-only Linux cases",
+      "labPassed": 298,
+      "strictIssues": 0
     },
-    "fullNativeAcceptance": false,
-    "deviceAcceptanceForF01": false,
-    "scope": "Prior recorded pair only; successor documentation checkpoint is not marked tested."
+    "app": {
+      "sourceRun": 38169989794,
+      "sourceConclusion": "success",
+      "buildRun": 38169989974,
+      "buildConclusion": "failure",
+      "flutterPassedEachPlatformEachMatrix": 268,
+      "strictIssues": 0,
+      "pythonActualIndependent": {
+        "passed": 451,
+        "seconds": 177.586,
+        "artifactId": 11713097959
+      },
+      "pythonActualEmbedded": {
+        "passed": 451,
+        "seconds": 182.022,
+        "artifactId": 11713209354
+      },
+      "parserTestsEach": 7,
+      "bundleAndSourceFinalize": "passed_for_exact_vector",
+      "releaseFailures": 6
+    },
+    "linuxWindowsReleasePrelude": {
+      "prepareVerifyFinalize": "success",
+      "actualBootstrapStepsEach": 57,
+      "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
+      "linuxArtifact": 11713952189,
+      "windowsArtifact": 11714201466,
+      "releaseBundleStep": false,
+      "nativeAccepted": false
+    },
+    "OHOS": {
+      "actualMerge": "eaee10dd9491592c5b13c1bcd2e544c8c7495154",
+      "scope": "unsigned source merge artifact, not pure library HEAD or device acceptance"
+    },
+    "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
+    "fullNativeAPKAcceptance": false,
+    "deviceAcceptance": false
   },
   "currentLibraryAndNative": {
     "mediaKitPR": 4,
@@ -229,21 +329,33 @@
     ]
   },
   "requiredWork": [
-    "Fix34 remaining infos without disabling rules or unverified broad copied-control/asynchronous cleanup rewrites.",
     "Continue the other Release Build jobs' current-source layout/lock/patch/native-input migration, preserving source/ABI/channel/parity/preflight checks.",
     "Build the already repaired FFmpeg with latest complete mpv/helper/dependencies into a real test APK and verify final linked input provenance.",
-    "LG managed ownership/output wiring, advanced auto/prefer/require, other platform adapters and App controls remain open under centralv3.",
+    "LG actual managed/native/device verification and existing other-platform executor adapters remain open; effective auto/prefer/require App/planner/Session/report implementation is complete in recorded host scope.",
     "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance.",
-    "CORE-F01 source evidence is complete in recorded scope; continue CORE-R01 importer/output/decoder review and independent executable alternatives. Raw-bitstream/live-track facts remain separate."
+    "CORE-R01 importer/output/decoder review and executable copy/software alternatives are implemented and host/source-CI validated; real native carrier/runtime validation remains. Raw-bitstream/live-track extensions remain separate."
   ],
   "resumptionRule": "Use this existing task branch/PR1 plus media-kitPR4 and FFmpegPR1. Read current refs, central ledger and latest PR comments. Completed query/source-filter/fallback/Android7/native and unknown-source fixes are real commits; never recreate another branch or replay retired writers. Failed validation does not erase implementation.",
   "checkpointPolicy": "Push recoverable stages promptly and read back. This is documentation only. Exact run/input/hash records are provenance, not obsolete build pins. Preserve source freshness gates and report intermediate failures accurately.",
-  "nextAction": "Continue CORE-R01a library dependency correction and current-pair regression,34 analyzer infos and remaining Release CI. Existing DEVICE retains native/real-device scope; DV001 review not closed.",
+  "nextAction": "Finish Linux/Windows hosted source prelude; independently review and integrate Linux native consumer, iOS isolated source variant and PR5 public matrix. DEVICE fixes original DV001 recipe and returns current-source accepted native/device evidence. Preserve separate implementation/host/native/device gates; do not reimplement completed R01/CONFIG/34-info cleanup.",
   "succession": {
     "centralRegistration": 6110756605,
     "centralDeviceReview": 6110762843,
     "role": "CORE-SUCCESSOR",
     "productionAppChanged": false
   },
-  "centralLedgerCurrent": "routing/MK-ROUTING-20261011:CORE-SUCCESSOR-CORE-R01a; registration6110756605"
+  "centralLedgerCurrent": "routing/MK-ROUTING-20261011: CORE-R01/CONFIG/CI03/source-prelude; registration6110756605 and scope6113083125; historical runs remain bound to their exact vectors",
+  "currentObservedHeads": {
+    "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6",
+    "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+    "DV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "PR5": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
+    "notTestedByHistoricalRuns": true
+  },
+  "pendingCurrentHeadValidation": {
+    "status": "source_validation_complete_release_native_pending",
+    "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
+    "nativeAcceptance": false
+  }
 }

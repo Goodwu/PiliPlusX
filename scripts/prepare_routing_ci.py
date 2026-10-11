@@ -10,12 +10,20 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 from urllib.parse import urljoin, urlparse
 from urllib.request import url2pathname
 
 from verify_routing_sources import verify
 
 BRANCH = 'refs/heads/routing/MK-ROUTING-20261011'
+IOS_SDK_PATCH = 'lib/scripts/bottom_sheet_ios_flutter.patch'
+IOS_SDK_PATCH_SHA256 = '4cee4e14393a5815112c535d424d60ade3f250f531ca6a5829d6cc153ae10a7e'
+IOS_SDK_FILES = (
+    'packages/flutter/lib/src/cupertino/route.dart',
+    'packages/flutter/lib/src/material/scaffold.dart',
+    'packages/flutter/lib/src/widgets/routes.dart',
+)
 
 
 def within(path: Path, root: Path) -> bool:
@@ -39,6 +47,135 @@ def package_roots(config: Path, allowed: list[Path]) -> dict[str, str]:
     if not roots:
         raise ValueError('Empty package config')
     return roots
+
+
+def sdk_patch_identity(sdk: Path, cache: Path, platform: str, toolchain: dict) -> dict:
+    """Return a reproducible identity for the platform-patched private Flutter SDK."""
+    sdk, cache = sdk.resolve(strict=True), cache.resolve(strict=True)
+    def git_bytes(*args: str) -> bytes:
+        result = subprocess.run(['git', *args], cwd=sdk, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        if result.returncode:
+            raise ValueError(f'Cannot identify private Flutter SDK: git {args[0]} failed')
+        return result.stdout
+    head = git_bytes('rev-parse', 'HEAD').decode('ascii').strip()
+    tree = git_bytes('rev-parse', 'HEAD^{tree}').decode('ascii').strip()
+    if not re.fullmatch(r'[0-9a-f]{40}', head) or not re.fullmatch(r'[0-9a-f]{40}', tree):
+        raise ValueError('Private Flutter SDK Git identity is malformed')
+    staged = git_bytes('diff', '--cached', '--binary', 'HEAD')
+    if staged:
+        raise ValueError('Private Flutter SDK contains staged changes')
+    unknown = git_bytes('ls-files', '--others', '--exclude-standard', '-z')
+    if unknown:
+        raise ValueError('Private Flutter SDK contains untracked, non-ignored inputs')
+    config = sdk / 'packages/flutter_tools/.dart_tool/package_config.json'
+    lock = sdk / 'packages/flutter_tools/pubspec.lock'
+    if not config.is_file() or config.is_symlink() or not lock.is_file() or lock.is_symlink():
+        raise ValueError('Private Flutter SDK tool package identity is incomplete')
+    roots = package_roots(config, [sdk, cache])
+    diff = git_bytes('diff', '--binary', 'HEAD')
+    status = git_bytes('status', '--porcelain=v1', '-z', '--untracked-files=no')
+    return {
+        'schema': 'routing-sdk-patch-identity-v1', 'platform': platform,
+        'sdkRoot': str(sdk), 'pubCache': str(cache), 'sdkCommit': head, 'sdkTree': tree,
+        'trackedDiffSha256': hashlib.sha256(diff).hexdigest(),
+        'trackedStatusSha256': hashlib.sha256(status).hexdigest(),
+        'toolsConfigSha256': hashlib.sha256(config.read_bytes()).hexdigest(),
+        'toolsLockSha256': hashlib.sha256(lock.read_bytes()).hexdigest(),
+        'toolsPackageRoots': roots, 'toolchain': toolchain,
+    }
+
+
+def ios_sdk_semantic_witness(app: Path, sdk: Path, expected_sdk_commit: str) -> dict:
+    """Prove the source-pinned iOS SDK patch is applied to its exact three targets."""
+    app, sdk = app.resolve(strict=True), sdk.resolve(strict=True)
+    def git_bytes(root: Path, *args: str) -> bytes:
+        result = subprocess.run(['git', *args], cwd=root, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        if result.returncode:
+            raise ValueError(f'Cannot verify iOS SDK patch semantics: git {args[0]} failed')
+        return result.stdout
+    app_commit = git_bytes(app, 'rev-parse', 'HEAD').decode('ascii').strip()
+    sdk_commit = git_bytes(sdk, 'rev-parse', 'HEAD').decode('ascii').strip()
+    if sdk_commit != expected_sdk_commit:
+        raise ValueError('iOS SDK semantic witness is bound to another SDK commit')
+    patch_path = app / IOS_SDK_PATCH
+    if not patch_path.is_file() or patch_path.is_symlink():
+        raise ValueError('Pinned iOS SDK patch must be a regular App source file')
+    patch = patch_path.read_bytes()
+    patch_blob = git_bytes(app, 'cat-file', 'blob', f'HEAD:{IOS_SDK_PATCH}')
+    patch_sha = hashlib.sha256(patch).hexdigest()
+    if patch_sha != IOS_SDK_PATCH_SHA256 or patch != patch_blob:
+        raise ValueError('Pinned iOS SDK patch differs from its exact source Git blob')
+    headers = re.findall(rb'^diff --git a/(.*?) b/(.*?)$', patch, re.MULTILINE)
+    expected_paths = {path.encode() for path in IOS_SDK_FILES}
+    if len(headers) != len(IOS_SDK_FILES) or {left for left, _ in headers} != expected_paths or any(
+            left != right for left, right in headers):
+        raise ValueError('Pinned iOS SDK patch target set is not the exact three-file contract')
+    sdk_files = {}
+    with tempfile.TemporaryDirectory(prefix='routing-ios-sdk-semantic-') as temporary:
+        isolated = Path(temporary)
+        for relative in IOS_SDK_FILES:
+            path = sdk / relative
+            parent = path.parent
+            ancestors = []
+            while parent != sdk and parent.is_relative_to(sdk):
+                ancestors.append(parent)
+                parent = parent.parent
+            if (not path.is_file() or path.is_symlink() or any(item.is_symlink() for item in ancestors)
+                    or not path.resolve().is_relative_to(sdk)):
+                raise ValueError(f'iOS SDK semantic target is not a regular in-root file: {relative}')
+            base_blob = git_bytes(sdk, 'cat-file', 'blob', f'HEAD:{relative}')
+            content = path.read_bytes()
+            sdk_files[relative] = {
+                'headBlobSha1': hashlib.sha1(b'blob ' + str(len(base_blob)).encode() + b'\0' + base_blob).hexdigest(),
+                'headBlobSha256': hashlib.sha256(base_blob).hexdigest(),
+                'worktreeSha256': hashlib.sha256(content).hexdigest(),
+            }
+            target = isolated / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        argv = ['git', 'apply', '--reverse', '--check', str(patch_path)]
+        result = subprocess.run(argv, cwd=isolated, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode:
+            detail = result.stderr.decode('utf-8', errors='replace').strip()
+            raise ValueError(f'iOS SDK reverse patch check failed ({result.returncode}): {detail}')
+    return {
+        'appCommit': app_commit, 'sdkCommit': sdk_commit,
+        'patchPath': IOS_SDK_PATCH, 'patchSha256': patch_sha,
+        'sdkFiles': sdk_files,
+        'reverseCheck': {'argv': ['git', 'apply', '--reverse', '--check', IOS_SDK_PATCH], 'exitCode': 0},
+    }
+
+
+def sdk_patch_execution_identity(app: Path, platform: str, vector: dict,
+                                 sdk_identity: dict, steps: list[dict]) -> dict:
+    app = app.resolve(strict=True)
+    script_relative = 'lib/scripts/patch.ps1'
+    script = app / script_relative
+    if not script.is_file() or script.is_symlink():
+        raise ValueError('Source-bound patch.ps1 must be a tracked regular file')
+    script_bytes = script.read_bytes()
+    source_blob = subprocess.run(['git', 'cat-file', 'blob', f'HEAD:{script_relative}'], cwd=app,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if source_blob.returncode or source_blob.stdout != script_bytes:
+        raise ValueError('patch.ps1 differs from its exact source Git blob')
+    phases = []
+    for mode in ('SdkOnly', 'PackagesOnly'):
+        name = f'patch-{mode}'
+        matches = [step for step in steps if step.get('name') == name]
+        expected = ['pwsh', '-NoLogo', '-NoProfile', '-File', str(script), platform, f'-{mode}']
+        if (len(matches) != 1 or matches[0].get('command') != expected
+                or matches[0].get('cwd') != str(app) or matches[0].get('exitCode') != 0):
+            raise ValueError(f'{name} lacks a successful source-bound command/cwd/exit identity')
+        phases.append({'name': name, 'command': expected, 'cwd': str(app), 'exitCode': 0})
+    return {
+        'platform': platform, 'sourceVector': vector, 'sdkCommit': sdk_identity['sdkCommit'],
+        'sdkRoot': sdk_identity['sdkRoot'], 'pubCache': sdk_identity['pubCache'],
+        'scriptPath': script_relative, 'scriptSha256': hashlib.sha256(script_bytes).hexdigest(),
+        'scriptGitBlobSha1': hashlib.sha1(b'blob ' + str(len(script_bytes)).encode() + b'\0' + script_bytes).hexdigest(),
+        'phases': phases,
+    }
 
 
 class Bootstrap:
@@ -134,6 +271,12 @@ class Bootstrap:
                 if b'\r\n' in path.read_bytes():
                     raise ValueError('Patch files require an LF checkout before bootstrap; '
                                      'set core.autocrlf=false/core.eol=lf before actions/checkout')
+        if self.args.platform == 'ios':
+            path = self.app / 'lib/scripts/bottom_sheet_ios_piliplus.patch'
+            if not path.is_file() or path.is_symlink():
+                raise ValueError('iOS App patch must be a tracked regular input')
+            if b'\r\n' in path.read_bytes():
+                raise ValueError('iOS App patch requires an LF checkout before bootstrap')
 
     def sdk_blob_hash(self, label: str, source: Path, revision: str, relative: str) -> dict:
         command = ['git', 'cat-file', 'blob', f'{revision}:{relative}']
@@ -276,6 +419,18 @@ class Bootstrap:
         for mode in ('SdkOnly', 'PackagesOnly'):
             self.run(f'patch-{mode}', ['pwsh', '-NoLogo', '-NoProfile', '-File', patch,
                                       self.args.platform, f'-{mode}'], self.app)
+            if mode == 'SdkOnly':
+                self.receipt['sdkPatchIdentity'] = sdk_patch_identity(
+                    sdk, cache, self.args.platform, self.receipt['toolchain'])
+                self.save()
+        if sdk_patch_identity(sdk, cache, self.args.platform, self.receipt['toolchain']) != self.receipt['sdkPatchIdentity']:
+            raise ValueError('PackagesOnly changed the private SDK identity')
+        self.receipt['sdkPatchExecution'] = sdk_patch_execution_identity(
+            self.app, self.args.platform, self.receipt['vector'], self.receipt['sdkPatchIdentity'],
+            self.receipt['steps'])
+        if self.args.platform == 'ios':
+            self.receipt['iosSdkSemanticWitness'] = ios_sdk_semantic_witness(
+                self.app, sdk, self.receipt['sdkPatchIdentity']['sdkCommit'])
         self.run('patched-sdk-status', ['git', 'status', '--porcelain', '--untracked-files=no'], sdk)
         self.run('patched-sdk-diff', ['git', 'diff', '--binary'], sdk)
         patched = self.resolution('source-resolution-patched', sdk, cache)
@@ -311,6 +466,17 @@ class Bootstrap:
         if self.receipt['finalVector'] != previous['vector']:
             raise ValueError('Final source vector differs from prepared vector')
         sdk, cache = Path(previous['flutterRoot']), Path(previous['pubCache'])
+        current_sdk_identity = sdk_patch_identity(sdk, cache, previous['platform'], previous['toolchain'])
+        if current_sdk_identity != previous.get('sdkPatchIdentity'):
+            raise ValueError('Private SDK/cache identity changed after bootstrap preparation')
+        current_patch_execution = sdk_patch_execution_identity(
+            self.app, previous['platform'], previous['vector'], current_sdk_identity, previous['steps'])
+        if current_patch_execution != previous.get('sdkPatchExecution'):
+            raise ValueError('Source-bound SDK/Packages patch execution identity changed')
+        if previous['platform'] == 'ios':
+            current_witness = ios_sdk_semantic_witness(self.app, sdk, current_sdk_identity['sdkCommit'])
+            if current_witness != previous.get('iosSdkSemanticWitness'):
+                raise ValueError('Source-bound iOS SDK patch application changed after bootstrap')
         self.check_sources()
         after = self.resolution('source-resolution-after', sdk, cache)
         before = json.loads((self.output / 'source-resolution-before.json').read_text(encoding='utf-8'))
@@ -329,7 +495,7 @@ def main() -> None:
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--expected-app-sha', required=True)
     parser.add_argument('--expected-media-kit-sha', required=True)
-    parser.add_argument('--platform', choices=['android', 'linux', 'macos', 'windows'], required=True)
+    parser.add_argument('--platform', choices=['android', 'ios', 'linux', 'macos', 'windows'], required=True)
     parser.add_argument('--finalize', action='store_true')
     args = parser.parse_args()
     bootstrap = Bootstrap(args)

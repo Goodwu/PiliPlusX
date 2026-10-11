@@ -14,6 +14,7 @@
 - CONFIG实际闭环宿主V2 PASS：库v3作者762/Critical774/strict0、AppR1作者268Flutter/strict0/bundle/channel11与独立90+1通过，20/16冻结hash一致；当前准确源码切片已提交push/readback，最新提交组合CI/native/实机仍待。各轮真实失败不删除，完整记录见Current State与handoff。
 - CORE接手中央PR4 comment6110756605；唯一routing/MK-ROUTING-20261011/PR1保持draft。context=`archives/conversations/media-kit-routing-20261011.md`。
 - CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。此为历史向量；当前CI03已清零，旧pending/62info/34info不再当前状态。
+- iOS私有source variant第二修正Critical PASS_WITH_SCOPE：26variant/31bootstrap+实际三SDK文件补丁语义/原Android重标签拒绝，六source hash一致；只接手已审源码检查点，真实最新iOS bootstrap/pubget/prebuild/hosted/native仍待。原两轮失败及SDK输入r1证据保留，Linux B/PR5未审切片不混入。
 - CORE-CI03 App1965ba0e+库bd9b9f85 source run38155973408 SUCCESS：严格分析No issues、211Flutter/1Chrome/263Python、Web/bundle/10包来源与freshness通过，中央6111284247。包名与6315处URI精确迁移，产品/native身份不变。最新App c51fd0973+库12966e7a source38156848733 SUCCESS：211Flutter/1Chrome/268Python、strict/Web/bundle/来源/freshness通过；库source38156773328 video591+3原mac跳过/lab298/strict通过。详见context。
 - 最新已核对Appf179+库915：Android/Linux/macOS真实bootstrap成功（各211Flutter/strictclean/bundle/来源），Python本轮各309；source38159246222/Build38159246432因Windows未知SDK修改失败，Build另6Release前置失败。Windows短路径/longpaths/完整拒绝前diff与hash窄修V1 29+19+13/Actionlint通过，待新runner验证；新库R01d8b98已推送独立255/strict通过，旧CI不重标。
 - native输入门四新文件critical复审43+2及真实LLVM反例通过：成功诊断/不可读dynsym拒绝、全ZIP CRC。接受账本空，未授权DEVICE/native候选；实际Android/Pink接线另审，设备验收未完成。

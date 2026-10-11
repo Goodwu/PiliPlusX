@@ -16,7 +16,7 @@ inputs:
     description: Exact media-kit HEAD captured for this job (checkout must use this SHA).
     required: true
   platform:
-    description: Existing patch.ps1 platform (android, linux, macos or windows).
+    description: Existing patch.ps1 platform (android, ios, linux, macos or windows).
     required: true
 outputs:
   app-root:

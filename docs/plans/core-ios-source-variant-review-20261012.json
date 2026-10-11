@@ -1,0 +1,551 @@
+{
+  "scope": "iOS private source variant SDK semantic and lifecycle gate; second correction",
+  "status": "PASS_WITH_SCOPE",
+  "freeze": {
+    "baseApp": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+    "scope": "iOS source variant/bootstrap only; no workflow/native/build acceptance",
+    "files": {
+      ".github/actions/routing-bootstrap/action.yml": "3bf053d808d12145f6addde45321c7b25e66a489d64840540d8c42af7b28149e",
+      "lib/scripts/patch.ps1": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+      "scripts/prepare_routing_ci.py": "e01db11e5b0c9e43a14f6dc3f642246e42feee70316d539eb93853b5cc7cd6a4",
+      "scripts/prepare_ios_variant.py": "9d7032fae400adb49a4b52db44f5b22cd6001f93b55ed7ea86b2a51430741f1a",
+      "test/prepare_routing_ci_test.py": "f00663bc71cdb44edbb57971ea4bc9a656e87bdaea774fd2970e75bceabb69f0",
+      "test/prepare_ios_variant_test.py": "c056c7718c8e50dd255c09193094e4d188d2970e53dce06c28b52a6780832090"
+    },
+    "authorTests": {
+      "iosVariant": 12,
+      "bootstrap": 31,
+      "actualIOSPubget": false,
+      "XcodeBuild": false
+    }
+  },
+  "review": {
+    "verdict": "REQUEST_CHANGES",
+    "scope": "six frozen iOS source variant/bootstrap files",
+    "hashes": {
+      ".github/actions/routing-bootstrap/action.yml": "3bf053d808d12145f6addde45321c7b25e66a489d64840540d8c42af7b28149e",
+      "lib/scripts/patch.ps1": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+      "scripts/prepare_routing_ci.py": "e01db11e5b0c9e43a14f6dc3f642246e42feee70316d539eb93853b5cc7cd6a4",
+      "scripts/prepare_ios_variant.py": "9d7032fae400adb49a4b52db44f5b22cd6001f93b55ed7ea86b2a51430741f1a",
+      "test/prepare_routing_ci_test.py": "f00663bc71cdb44edbb57971ea4bc9a656e87bdaea774fd2970e75bceabb69f0",
+      "test/prepare_ios_variant_test.py": "c056c7718c8e50dd255c09193094e4d188d2970e53dce06c28b52a6780832090"
+    },
+    "hashesBeforeAfterMatch": true,
+    "independentCases": [
+      {
+        "case": "android-bootstrap-authorizes-ios-full-lifecycle",
+        "outcome": "accepted",
+        "result": {
+          "bootstrapPlatform": "android",
+          "variantScope": "routing-ios-variant",
+          "variantStatus": "finalized",
+          "recordedBootstrapTools": [
+            "sdkCommit",
+            "flutterToolsPackages"
+          ]
+        }
+      },
+      {
+        "case": "missing-platform-bootstrap-authorizes-ios-full-lifecycle",
+        "outcome": "accepted",
+        "result": "finalized"
+      },
+      {
+        "case": "wrong-scope-bootstrap-authorizes-ios-prepare",
+        "outcome": "accepted",
+        "result": "prepared"
+      },
+      {
+        "case": "pub-generated-mutation",
+        "outcome": "rejected",
+        "error": "iOS variant generated/unknown source inputs changed",
+        "type": "GateError"
+      },
+      {
+        "case": "unknown-resource-injection",
+        "outcome": "rejected",
+        "error": "unknown source/build input: assets/new.json",
+        "type": "GateError"
+      },
+      {
+        "case": "forged-afterHashes-transform",
+        "outcome": "rejected",
+        "error": "iOS variant transformed bytes no longer match the pinned patch output",
+        "type": "GateError"
+      },
+      {
+        "case": "finalize-without-prebuild",
+        "outcome": "rejected",
+        "error": "iOS variant requires prebuild source verification before finalization",
+        "type": "GateError"
+      },
+      {
+        "case": "plugin-link-swap",
+        "outcome": "rejected",
+        "error": "unapproved input symlink: ios/Flutter/ephemeral/Packages/.packages/plugin-1.0.0",
+        "type": "GateError"
+      }
+    ],
+    "proofBoundary": "Real temporary Git remotes, exact tracked files and git apply; SDK manifest context and Flutter pubget simulated by existing fixture. No actual iOS SDK/pubget/Xcode success claimed.",
+    "blocker": "iOS prepare accepts Android or missing platform bootstrap receipts and finalizes them; no iOS SDK patch provenance binding",
+    "processesTerminal": true,
+    "tests": {
+      "iosVariant": 12,
+      "bootstrap": 31,
+      "additionalCases": 8,
+      "powerShellParseAndActualMainPlatformSwitch": {
+        "exitCode": 0,
+        "result": [
+          {
+            "platform": "android",
+            "mainSdkPatches": [
+              "bottom_sheet_android",
+              "scroll_view",
+              "navigator"
+            ]
+          },
+          {
+            "platform": "ios",
+            "mainSdkPatches": [
+              "scroll_view",
+              "bottom_sheet_ios_flutter",
+              "navigator"
+            ]
+          }
+        ],
+        "evidence": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/ios-patch-critical-u4ur44r6/result.log"
+      }
+    },
+    "nonBlocking": [],
+    "verified": [
+      "Exact two App transforms tied to pinned patch SHA-256 and source Git blobs",
+      "SDK-only and Packages-only phases exclude legacy App patch while private SDK/package chain remains unchanged",
+      "Private workspace/SDK/cache boundaries, exact App tracked bytes and package root equality",
+      "Unknown resources, generated-byte mutation, plugin links, forged transform digest, absent prebuild and ref drift fail closed"
+    ],
+    "unverified": [
+      "Actual iOS SDK patched bootstrap and offline pubget output inventory",
+      "Actual Xcode build, hosted run, native/framework provenance and runtime",
+      "No actual CocoaPods/SPM build input acceptance established"
+    ],
+    "reviewTriggers": [
+      "iOS bootstrap scope/platform provenance binding repair",
+      "Any six frozen bytes or imported manifest/source inventory boundary change",
+      "First real iOS pubget/bootstrap or native workflow integration"
+    ]
+  },
+  "reviewSha256": "dec30a9bd0d002a961b0f3c9da457d80f25b08e9ad6191c782c6a54647ba3277",
+  "realIOSBootstrap": false,
+  "XcodeNativeAcceptance": false,
+  "nextAction": "Integrate exact reviewed six-file source slice, then actual current clean iOS bootstrap/pubget/prebuild; no Xcode/native claim",
+  "firstRepairReview": {
+    "status": "REQUEST_CHANGES",
+    "review": {
+      "verdict": "REQUEST_CHANGES",
+      "files": {
+        ".github/actions/routing-bootstrap/action.yml": "3bf053d808d12145f6addde45321c7b25e66a489d64840540d8c42af7b28149e",
+        "lib/scripts/patch.ps1": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scripts/prepare_routing_ci.py": "6bad12fc4587fb4c0868da9445e6a0f51fc3aa8ba32b495681d7033f61887d9d",
+        "scripts/prepare_ios_variant.py": "b5a7a85fb944f461f594afabdbc8feeee9e17c74560a994fee2cc4c8a649839e",
+        "test/prepare_routing_ci_test.py": "d55bac1038e834a51d222cb9b1e6ecffb1f83a74e936e4cdc3155b7895b13fea",
+        "test/prepare_ios_variant_test.py": "e8b352a1b2673df87667d888d2f43291ee36d8bc60b3761b39064ce8383ae3aa"
+      },
+      "hashesBeforeAfterMatch": true,
+      "tests": {
+        "variant": 19,
+        "bootstrap": 31,
+        "additionalOriginalFailurePhaseCases": 9,
+        "legitimateSerializedLifecycle": 1,
+        "relatedPlatformOrchestrationCases": 5
+      },
+      "blocking": [
+        {
+          "priority": "P1",
+          "issue": "platform identity relabel authorizes actual Android SDK patch state as iOS",
+          "evidence": "/tmp/mk-ios-source-variant-r1-platform-relabel.json",
+          "cause": "platform is caller-supplied label; tracked diff hash captures current bytes without checking iOS patch semantics or required successful source-bound patch phases"
+        }
+      ],
+      "closedOriginalCases": [
+        {
+          "case": "android",
+          "phase": "prepare",
+          "outcome": "rejected",
+          "error": "iOS variant requires an iOS routing-source-bootstrap receipt for the exact source vector"
+        },
+        {
+          "case": "missing-platform",
+          "phase": "prepare",
+          "outcome": "rejected",
+          "error": "iOS variant requires an iOS routing-source-bootstrap receipt for the exact source vector"
+        },
+        {
+          "case": "wrong-scope",
+          "phase": "prepare",
+          "outcome": "rejected",
+          "error": "iOS variant requires an iOS routing-source-bootstrap receipt for the exact source vector"
+        },
+        {
+          "case": "android",
+          "phase": "prebuild",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "missing-platform",
+          "phase": "prebuild",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "wrong-scope",
+          "phase": "prebuild",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "android",
+          "phase": "finalize",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "missing-platform",
+          "phase": "finalize",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "wrong-scope",
+          "phase": "finalize",
+          "outcome": "rejected",
+          "error": "iOS variant receipt is not bound to an iOS source bootstrap"
+        },
+        {
+          "case": "prepared-to-fresh-with-append-only-steps-and-CLI-equivalent-JSON-boundary",
+          "outcome": "finalized"
+        }
+      ],
+      "relatedPlatformCases": [
+        {
+          "platform": "android",
+          "status": "fresh-source-only",
+          "patchPhasePlatforms": [
+            "android",
+            "android"
+          ],
+          "scope": "bootstrap orchestration fixture; process and sdk identity simulated"
+        },
+        {
+          "platform": "ios",
+          "status": "fresh-source-only",
+          "patchPhasePlatforms": [
+            "ios",
+            "ios"
+          ],
+          "scope": "bootstrap orchestration fixture; process and sdk identity simulated"
+        },
+        {
+          "platform": "linux",
+          "status": "fresh-source-only",
+          "patchPhasePlatforms": [
+            "linux",
+            "linux"
+          ],
+          "scope": "bootstrap orchestration fixture; process and sdk identity simulated"
+        },
+        {
+          "platform": "macos",
+          "status": "fresh-source-only",
+          "patchPhasePlatforms": [
+            "macos",
+            "macos"
+          ],
+          "scope": "bootstrap orchestration fixture; process and sdk identity simulated"
+        },
+        {
+          "platform": "windows",
+          "status": "fresh-source-only",
+          "patchPhasePlatforms": [
+            "windows",
+            "windows"
+          ],
+          "scope": "bootstrap orchestration fixture; process and sdk identity simulated"
+        }
+      ],
+      "nonBlocking": [
+        {
+          "issue": "Direct in-process API reuse aliases outerPreparedSteps; appending steps after prepare mutates bound identity and causes hash mismatch. CLI JSON save/load boundary avoids this.",
+          "priority": "P3",
+          "advice": "deep copy identity list/dict fields if in-process API is intended"
+        }
+      ],
+      "minimalSemanticGateEvidence": "/tmp/mk-ios-sdk-three-file-patch-review.json",
+      "unverified": [
+        "Actual full iOS SDK bootstrap and offline locked pubget",
+        "Actual generated plugin closure from iOS pubget",
+        "Xcode/native/hosted/runtime"
+      ],
+      "scope": "six source/bootstrap files only",
+      "sourceMutations": false,
+      "processesTerminal": true
+    },
+    "sha256": "963519c03f1b8211c9519aaa891e707fc36ad4893a6da4802c1ccf56a7c398f2"
+  },
+  "narrowActualSDKPatchEvidence": {
+    "review": {
+      "evidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/ios-sdk-three-file-patch-review-ovfjusjs",
+      "results": [
+        {
+          "patch": "modal_barrier.patch",
+          "exitCode": 0,
+          "stderr": ""
+        },
+        {
+          "patch": "scaffold.patch",
+          "exitCode": 0,
+          "stderr": ""
+        },
+        {
+          "patch": "bottom_sheet_ios_flutter.patch",
+          "exitCode": 0,
+          "stderr": ""
+        },
+        {
+          "iosReverseCheckExitCode": 0,
+          "stderr": ""
+        }
+      ],
+      "boundary": "Only target three files copied from shared SDK exact Git blobs. Relevant main SDK patch overlaps applied in current script order; no full SDK build."
+    },
+    "sha256": "fa9f6409ba87e4f4851ee0c84799fdcb4bc4048ea43742bfa7cccdf96c8c26c3",
+    "scope": "Only three actual SDK Git blobs and actual patch/reverse checks; not full iOS bootstrap"
+  },
+  "secondRepairReview": {
+    "sha256": "538c1bd1f2ce02a9153ea29af43bde8d8d7d3034075aafd05d0d181352ba4832",
+    "freeze": {
+      "scope": "CORE iOS private source variant correction 2 frozen candidate",
+      "status": "pending-V2",
+      "appHead": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "files": [
+        {
+          "path": ".github/actions/routing-bootstrap/action.yml",
+          "sha256": "3bf053d808d12145f6addde45321c7b25e66a489d64840540d8c42af7b28149e"
+        },
+        {
+          "path": "lib/scripts/patch.ps1",
+          "sha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089"
+        },
+        {
+          "path": "scripts/prepare_routing_ci.py",
+          "sha256": "67ea73a78b4071a28846f1c0f9b29501ab5d3ccc77f72440afea7c9449f73152"
+        },
+        {
+          "path": "scripts/prepare_ios_variant.py",
+          "sha256": "655484cd3da37c65db10f414367ff9c81a625425b1a339845527a53a1435a8a9"
+        },
+        {
+          "path": "test/prepare_routing_ci_test.py",
+          "sha256": "05617b1744744fca880c36bf791df4fe23ca64af8580a0eeef0acd9d67b851a6"
+        },
+        {
+          "path": "test/prepare_ios_variant_test.py",
+          "sha256": "f3a07e9be1b2a6fba42103e568084eb1df78a926893c99f498ae7a199efa6193"
+        }
+      ],
+      "authorTests": {
+        "variant": 26,
+        "bootstrap": 31
+      },
+      "actualSemanticEvidence": "/tmp/mk-ios-source-variant-r2-semantic-evidence.json",
+      "boundary": "Three-file iOS reverse-check real Git blob fixtures only; complete actual iOS bootstrap/pubget/hosted/Xcode/native still pending"
+    },
+    "review": {
+      "verdict": "PASS_WITH_SCOPE",
+      "scope": "six frozen iOS source variant/bootstrap files, semantic gate and lifecycle review only",
+      "hashes": {
+        ".github/actions/routing-bootstrap/action.yml": "3bf053d808d12145f6addde45321c7b25e66a489d64840540d8c42af7b28149e",
+        "lib/scripts/patch.ps1": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scripts/prepare_routing_ci.py": "67ea73a78b4071a28846f1c0f9b29501ab5d3ccc77f72440afea7c9449f73152",
+        "scripts/prepare_ios_variant.py": "655484cd3da37c65db10f414367ff9c81a625425b1a339845527a53a1435a8a9",
+        "test/prepare_routing_ci_test.py": "05617b1744744fca880c36bf791df4fe23ca64af8580a0eeef0acd9d67b851a6",
+        "test/prepare_ios_variant_test.py": "f3a07e9be1b2a6fba42103e568084eb1df78a926893c99f498ae7a199efa6193"
+      },
+      "all6HashesBeforeAfterMatch": true,
+      "realFlutterSourceGitSHA": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "independentCases": [
+        {
+          "case": "actual-iOS-three-file-chain-complete-serialized-lifecycle",
+          "outcome": "accepted",
+          "result": {
+            "status": "finalized",
+            "sdkSemanticReverseCheck": {
+              "argv": [
+                "git",
+                "apply",
+                "--reverse",
+                "--check",
+                "lib/scripts/bottom_sheet_ios_flutter.patch"
+              ],
+              "exitCode": 0
+            }
+          }
+        },
+        {
+          "case": "previous-Android-relabel-even-with-ios-shaped-step-claims",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: iOS SDK reverse patch check failed (1): error: patch failed: packages/flutter/lib/src/widgets/routes.dart:709\nerror: packages/flutter/lib/src/widgets/routes.dart: patch does not apply\nerror: patch failed: packages/flutter/lib/src/material/scaffold.dart:2519\nerror: packages/flutter/lib/src/material/scaffold.dart: patch does not apply\nerror: patch failed: packages/flutter/lib/src/cupertino/route.dart:201\nerror: packages/flutter/lib/src/cupertino/route.dart: patch does not apply"
+        },
+        {
+          "case": "actual-iOS-target-semantic-mutation",
+          "outcome": "rejected",
+          "error": "iOS SDK reverse patch check failed (1): error: patch failed: packages/flutter/lib/src/cupertino/route.dart:201\nerror: packages/flutter/lib/src/cupertino/route.dart: patch does not apply"
+        },
+        {
+          "case": "source-pinned-sdk-patch-mutation",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: Pinned iOS SDK patch differs from its exact source Git blob"
+        },
+        {
+          "case": "reverse-check-tool-exit37",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: iOS SDK reverse patch check failed (37): forced real tool launch result failure"
+        },
+        {
+          "case": "in-process-append-deepcopy",
+          "outcome": "accepted",
+          "result": "finalized"
+        },
+        {
+          "case": "source-bound-step-wrong-cwd",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: patch-SdkOnly lacks a successful source-bound command/cwd/exit identity"
+        },
+        {
+          "case": "source-bound-step-nonzero",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: patch-SdkOnly lacks a successful source-bound command/cwd/exit identity"
+        },
+        {
+          "case": "source-bound-step-wrong-argv",
+          "outcome": "rejected",
+          "error": "iOS source-bound SDK patch execution cannot be verified: patch-SdkOnly lacks a successful source-bound command/cwd/exit identity"
+        }
+      ],
+      "proofBoundary": "Actual four Flutter Git blobs, actual patch application, actual semantic witness and execution identity. Tiny SDK repository only; manifest parser/package input context and pubget are fixture simulations, not full bootstrap or native acceptance.",
+      "blocking": [],
+      "nonBlocking": [],
+      "processesTerminal": true,
+      "unverified": [
+        "Actual full iOS bootstrap and offline pubget output closure",
+        "Hosted/Xcode/native/build/visible playback"
+      ],
+      "tests": {
+        "variant": 26,
+        "bootstrap": 31,
+        "additionalRealSemanticAndLifecycleCases": 9,
+        "otherPlatformExecutionIdentityCases": 5
+      },
+      "platformExecutionIdentities": [
+        {
+          "platform": "android",
+          "sourceGitBlobChecked": true,
+          "actualHelperAcceptedProductionArgv": true,
+          "patchProcessesExecuted": false
+        },
+        {
+          "platform": "ios",
+          "sourceGitBlobChecked": true,
+          "actualHelperAcceptedProductionArgv": true,
+          "patchProcessesExecuted": false
+        },
+        {
+          "platform": "linux",
+          "sourceGitBlobChecked": true,
+          "actualHelperAcceptedProductionArgv": true,
+          "patchProcessesExecuted": false
+        },
+        {
+          "platform": "macos",
+          "sourceGitBlobChecked": true,
+          "actualHelperAcceptedProductionArgv": true,
+          "patchProcessesExecuted": false
+        },
+        {
+          "platform": "windows",
+          "sourceGitBlobChecked": true,
+          "actualHelperAcceptedProductionArgv": true,
+          "patchProcessesExecuted": false
+        }
+      ],
+      "commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "test",
+          "-p",
+          "prepare_ios_variant_test.py"
+        ],
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "test",
+          "-p",
+          "prepare_routing_ci_test.py"
+        ],
+        [
+          "git",
+          "cat-file",
+          "blob",
+          "d3b14c876900e553bc736ca19295fc09e3853e8e:<four reviewed SDK paths>"
+        ],
+        [
+          "git",
+          "apply",
+          "--include=<reviewed SDK paths>",
+          "modal_barrier.patch"
+        ],
+        [
+          "git",
+          "apply",
+          "--include=<reviewed SDK paths>",
+          "scaffold.patch"
+        ],
+        [
+          "git",
+          "apply",
+          "bottom_sheet_ios_flutter.patch OR bottom_sheet_android.patch"
+        ],
+        [
+          "git",
+          "apply",
+          "--reverse",
+          "--check",
+          "<source-bound bottom_sheet_ios_flutter.patch>"
+        ]
+      ],
+      "verified": [
+        "Prior Android-to-iOS relabel bypass closed even with syntactically iOS successful-step claims",
+        "iOS SDK semantic patch proof uses actual tracked source patch and three actual regular target files",
+        "Original sdk-only/package-only argv/cwd/zero exit and patch driver exact Git blob bound",
+        "Semantic witness and SDK identity recomputed in prepare/prebuild/finalize",
+        "Prepared to fresh source with append-only steps accepted across JSON save/load",
+        "Deep copy closes prior in-process step-list alias issue",
+        "Existing App source blob transform/resource/plugin/root/prebuild/freshness tests remain passing"
+      ],
+      "reviewTriggers": [
+        "Any six frozen source changes or imported source/manifest boundary changes",
+        "First full current-source iOS bootstrap/pubget requires actual generated closure validation",
+        "Workflow/Xcode/native integration requires separate review/acceptance"
+      ],
+      "repositoryMutations": false,
+      "cleanToolchainInputModified": false
+    }
+  }
+}
