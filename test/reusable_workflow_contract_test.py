@@ -22,6 +22,117 @@ def validate_apple_calls(text):
             raise ValueError('Missing exact current source ref in ' + job)
 
 
+def platform_job(text, name, indent=2):
+    spaces = ' ' * indent
+    block = re.search(r'^' + spaces + re.escape(name) + r':\n(.*?)(?=^' + spaces + r'[a-z][a-z_-]*:|\Z)',
+                      text, re.M | re.S)
+    if not block:
+        raise ValueError('Missing platform job ' + name)
+    return block.group(1)
+
+
+def validate_platform_routing_calls(text):
+    for name in ('linux_x64', 'win_x64'):
+        body = platform_job(text, name, indent=4)
+        for value, reason in (
+                ('needs: routing-vector', 'captured routing vector'),
+                ('uses: ./.github/workflows/' + name + '.yml', 'existing reusable workflow'),
+                ('routing-mode: ${{ needs.routing-vector.outputs.routing-mode == \'true\' }}', 'routing mode'),
+                ('app-sha: ${{ needs.routing-vector.outputs.app-sha }}', 'App SHA'),
+                ('media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}', 'media-kit SHA')):
+            if value not in body:
+                raise ValueError(name + ' misses ' + reason)
+
+
+def validate_platform_source_workflow(text, platform, consumer, old_urls):
+    inputs = text.split('  workflow_call:\n', 1)[1].split('  workflow_dispatch:', 1)[0]
+    for value, reason in (
+            ('routing-mode:\n', 'routing mode input'),
+            ('required: false\n        default: false\n        type: boolean', 'optional false routing mode'),
+            ('app-sha:\n', 'App SHA input'),
+            ('media-kit-sha:\n', 'media-kit SHA input')):
+        if value not in inputs:
+            raise ValueError('Reusable workflow misses ' + reason)
+    dispatch = text.split('  workflow_dispatch:\n', 1)[1].split('\njobs:', 1)[0]
+    if ('routing-mode:\n' not in dispatch or
+            'required: false\n        default: false\n        type: boolean' not in dispatch):
+        raise ValueError(platform + ' direct dispatch must declare an explicit default-false routing-mode input')
+    if 'app-sha:' in dispatch or 'media-kit-sha:' in dispatch:
+        raise ValueError(platform + ' direct dispatch cannot claim an uncaptured source vector')
+    job_name = 'build-linux-app' if platform == 'linux' else 'build-windows-app'
+    body = platform_job(text, job_name)
+    if 'name: %s x64 workflow' % ('Linux' if platform == 'linux' else 'Windows') not in body:
+        raise ValueError(platform + ' job name must not claim source preparation before it succeeds')
+    preflight = re.search(r'^      - name: Reject uncaptured routing dispatch before any production step\n(.*?)(?=^      - |\Z)',
+                          body, re.M | re.S)
+    if not preflight:
+        raise ValueError(platform + ' must reject uncaptured direct routing dispatch')
+    preflight_body = preflight.group(1)
+    for token in ('inputs.routing-mode', "inputs.app-sha == ''", "inputs.media-kit-sha == ''",
+                  "inputs.media-kit-sha != ''", "github.ref_name == 'routing/MK-ROUTING-20261011'", 'throw'):
+        if token not in preflight_body:
+            raise ValueError(platform + ' direct-dispatch refusal misses ' + token)
+    if 'github.event_name' in preflight_body:
+        raise ValueError(platform + ' must classify captured vectors independently of caller event name')
+    first_step = re.search(r'^      - name: (.+)$', body, re.M)
+    if not first_step or first_step.group(1) != 'Reject uncaptured routing dispatch before any production step':
+        raise ValueError(platform + ' must run dispatch refusal before source or production setup')
+    checkout = body.find('uses: actions/checkout@v4')
+    for setting in ('git config --global core.longpaths true',
+                    'git config --global core.autocrlf false',
+                    'git config --global core.eol lf'):
+        position = body.find(setting)
+        if position < 0 or position >= checkout:
+            raise ValueError(platform + ' must configure checkout before fetching sources')
+    for value, reason in (
+            ('repository: Goodwu/PiliPlusX', 'exact App repository'),
+            ('ref: ${{ inputs.app-sha }}', 'exact App SHA'),
+            ('path: app', 'App checkout path'),
+            ('repository: Goodwu/media-kit', 'exact media-kit repository'),
+            ('ref: ${{ inputs.media-kit-sha }}', 'exact media-kit SHA'),
+            ('path: media-kit', 'media-kit checkout path'),
+            ('persist-credentials: false', 'checkout credential removal'),
+            ('uses: ./app/.github/actions/routing-bootstrap', 'existing shared bootstrap'),
+            ('app-root: app', 'isolated App checkout root'),
+            ('media-kit-root: media-kit', 'isolated media-kit checkout root'),
+            ('app-sha: ${{ inputs.app-sha }}', 'exact bootstrap App SHA'),
+            ('media-kit-sha: ${{ inputs.media-kit-sha }}', 'exact bootstrap media-kit SHA'),
+            ('platform: ' + platform, 'real platform bootstrap'),
+            ('python scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit',
+             'real package source verification'),
+            ('flutter build bundle --debug --no-pub', 'current-source App bundle compilation'),
+            ('scripts/prepare_routing_ci.py', 'source finalization'),
+            ('--platform ' + platform + ' --finalize', 'platform source finalization'),
+            ('stage = \'SOURCE_PREPARED_NATIVE_BLOCKED\'', 'accurate blocked stage'),
+            ('status = \'%s-current-native-input-unavailable\'' % platform, 'platform-specific blocker'),
+            (consumer, 'current native consumer identity'),
+            ('currentProducerReceipt = $null', 'missing current producer receipt'),
+            ('nativeInputRoot = $env:NATIVE_ROOT', 'local native root evidence'),
+            ('appCommit = $env:APP_SHA', 'App SHA diagnostic'),
+            ('mediaKitCommit = $env:MEDIA_KIT_SHA', 'media-kit SHA diagnostic'),
+            ("bootstrapReceipt = (Join-Path $env:ROUTING_RESULTS 'bootstrap.json')", 'bootstrap receipt diagnostic'),
+            (old_urls, 'legacy native download URL evidence'),
+            ('if: ${{ always() && inputs.routing-mode }}', 'unconditional diagnostics upload'),
+            ('if-no-files-found: error', 'diagnostic artifact integrity')):
+        if value not in body:
+            raise ValueError(platform + ' misses ' + reason)
+    routing_start = body.find('      - name: Prepare routing receipts directory')
+    legacy_start = body.find('      - name: Checkout ' + ('repository' if platform == 'linux' else 'code'))
+    if routing_start < 0 or legacy_start <= routing_start:
+        raise ValueError(platform + ' must keep a separate source-only lane')
+    routing = body[routing_start:legacy_start]
+    if 'verify_media_kit_lock.py' in routing:
+        raise ValueError(platform + ' must not manufacture Android media-kit lock receipts')
+    if 'flutter build linux --release' in routing or 'fastforge package --platform windows' in routing:
+        raise ValueError(platform + ' routing mode must stop before native consumption')
+    for step in re.split(r'^      - ', body[legacy_start:], flags=re.M):
+        if step.strip():
+            if 'if: ${{ !inputs.routing-mode' not in step:
+                raise ValueError(platform + ' legacy production step is not disabled in routing mode')
+            if "inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011'" not in step:
+                raise ValueError(platform + ' legacy production step can bypass the direct-dispatch refusal')
+
+
 def routing_job(text, name):
     block = re.search(r'^  ' + re.escape(name) + r':\n(.*?)(?=^  [a-z][a-z-]*:|\Z)',
                       text, re.M | re.S)
@@ -403,6 +514,96 @@ class RoutingBootstrapWiringTests(unittest.TestCase):
         self.reject('flutter test --no-pub --platform chrome', '# chrome omitted', 'platform chrome')
         self.reject('flutter build web --target lib/main_web.dart --no-pub', '# web omitted', 'build web')
         self.reject('flutter build bundle --debug --no-pub', '# bundle omitted', 'build bundle')
+
+
+class LinuxWindowsRoutingSourceWiringTests(unittest.TestCase):
+    def setUp(self):
+        self.caller = (ROOT / '.github/workflows/build.yml').read_text()
+
+    def test_callers_forward_the_single_exact_source_vector(self):
+        validate_platform_routing_calls(self.caller)
+
+    def test_linux_current_source_path_stops_before_native_consumer(self):
+        text = (ROOT / '.github/workflows/linux_x64.yml').read_text()
+        validate_platform_source_workflow(
+            text, 'linux', 'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer',
+            'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip')
+
+    def test_windows_current_source_path_stops_before_native_consumer(self):
+        text = (ROOT / '.github/workflows/win_x64.yml').read_text()
+        validate_platform_source_workflow(
+            text, 'windows', 'media_kit_video/windows/CMakeLists.txt -> Flutter Windows CMake consumer',
+            'https://github.com/Predidit/libmpv-win32-video-cmake/releases/download/20260811/mpv-dev-x86_64-20260811-git-ad59ff1.7z')
+
+    def test_missing_source_sha_or_freshness_gate_is_rejected(self):
+        linux = (ROOT / '.github/workflows/linux_x64.yml').read_text()
+        with self.assertRaisesRegex(ValueError, 'exact media-kit SHA'):
+            validate_platform_source_workflow(
+                linux.replace('ref: ${{ inputs.media-kit-sha }}', 'ref: main'), 'linux',
+                'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer',
+                'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip')
+        with self.assertRaisesRegex(ValueError, 'source finalization'):
+            validate_platform_source_workflow(
+                linux.replace('scripts/prepare_routing_ci.py', 'scripts/other.py'), 'linux',
+                'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer',
+                'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip')
+
+    def test_current_native_producer_diagnostic_and_production_guard_are_mandatory(self):
+        windows = (ROOT / '.github/workflows/win_x64.yml').read_text()
+        with self.assertRaisesRegex(ValueError, 'missing current producer receipt'):
+            validate_platform_source_workflow(
+                windows.replace('currentProducerReceipt = $null', 'currentProducerReceipt = \'old.zip\''),
+                'windows', 'media_kit_video/windows/CMakeLists.txt -> Flutter Windows CMake consumer',
+                'https://github.com/Predidit/libmpv-win32-video-cmake/releases/download/20260811/mpv-dev-x86_64-20260811-git-ad59ff1.7z')
+        with self.assertRaisesRegex(ValueError, 'legacy production step'):
+            validate_platform_source_workflow(
+                windows.replace('        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == \'\' && github.ref_name != \'routing/MK-ROUTING-20261011\' }}\n        uses: subosito/flutter-action@v2',
+                                '        uses: subosito/flutter-action@v2'),
+                'windows', 'media_kit_video/windows/CMakeLists.txt -> Flutter Windows CMake consumer',
+                'https://github.com/Predidit/libmpv-win32-video-cmake/releases/download/20260811/mpv-dev-x86_64-20260811-git-ad59ff1.7z')
+
+    def test_dispatch_refusal_and_neutral_job_name_are_required(self):
+        linux = (ROOT / '.github/workflows/linux_x64.yml').read_text()
+        with self.assertRaisesRegex(ValueError, 'reject uncaptured direct routing dispatch'):
+            validate_platform_source_workflow(
+                linux.replace('Reject uncaptured routing dispatch before any production step',
+                              'Remove dispatch refusal'), 'linux',
+                'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer',
+                'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip')
+        with self.assertRaisesRegex(ValueError, 'job name must not claim'):
+            validate_platform_source_workflow(
+                linux.replace('name: Linux x64 workflow',
+                              "name: ${{ inputs.routing-mode && 'SOURCE_PREPARED_NATIVE_BLOCKED' || 'Release Linux x64' }}"),
+                'linux', 'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer',
+                'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip')
+
+    def test_routing_branch_direct_dispatch_counterexample_cannot_reach_legacy_lane(self):
+        branch = 'routing/MK-ROUTING-20261011'
+        app_sha = 'a' * 40
+        media_sha = 'b' * 40
+
+        def refused(event_name, ref_name, routing_mode, app, media):
+            return ((routing_mode and (not app or not media)) or
+                    (not routing_mode and bool(media)) or
+                    (ref_name == branch and not routing_mode))
+
+        def legacy_enabled(event_name, ref_name, routing_mode, media):
+            return not routing_mode and not media and ref_name != branch
+
+        # Direct dispatch exposes only routing-mode, so both SHAs are absent.
+        # A reusable-workflow call from the same dispatch carries the vector outputs.
+        self.assertTrue(refused('workflow_dispatch', branch, False, '', ''))
+        self.assertFalse(legacy_enabled('workflow_dispatch', branch, False, ''))
+        self.assertTrue(refused('workflow_dispatch', branch, True, '', ''))
+        self.assertFalse(legacy_enabled('workflow_dispatch', branch, True, ''))
+        self.assertTrue(refused('workflow_dispatch', 'main', True, '', ''))
+        self.assertFalse(legacy_enabled('workflow_dispatch', 'main', True, ''))
+        self.assertFalse(refused('workflow_dispatch', branch, True, app_sha, media_sha))  # captured routing dispatch
+        self.assertFalse(legacy_enabled('workflow_dispatch', branch, True, media_sha))
+        self.assertFalse(refused('pull_request', branch, True, app_sha, media_sha))  # captured routing PR
+        self.assertFalse(legacy_enabled('pull_request', branch, True, media_sha))
+        self.assertFalse(refused('workflow_dispatch', 'main', False, '', ''))  # ordinary direct dispatch
+        self.assertTrue(legacy_enabled('workflow_dispatch', 'main', False, ''))
 
 
 class RoutingNativeWorkflowTests(unittest.TestCase):

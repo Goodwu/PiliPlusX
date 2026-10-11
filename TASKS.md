@@ -7,6 +7,8 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
+- Linux/Windows源码前置四文件第二修正V2 PASS_WITH_PENDING_HOSTED：43contracts/actionlint/20实际caller表达式边界及真实pwsh失败传播通过；native缺受审输入阶段准确失败，不代表Release完成。证据docs/plans/core-linux-windows-source-prelude-20261012.json，旧两轮REQUEST_CHANGES保留。
+
 - 当前已核对源码向量：库751d0cdd + App6c4c1b478。库CI38168100713 video772+3原mac Linux跳过/lab298/两strict0；App38168113931 SUCCESS及Build38168114089内四平台各268/strict0/bundle/finalize，hosted Python实际两次444、parser/kernel7与身份前后稳定。Build整体六Release仍失败；Android/Pink空accepted selector实际preAPI/preGradle拒绝，非native通过。精简证据docs/plans/core-native-ci-checkpoint-20261012.json；原失败/旧向量保留。
 
 - CONFIG实际闭环宿主V2 PASS：库v3作者762/Critical774/strict0、AppR1作者268Flutter/strict0/bundle/channel11与独立90+1通过，20/16冻结hash一致；当前准确源码切片已提交push/readback，最新提交组合CI/native/实机仍待。各轮真实失败不删除，完整记录见Current State与handoff。

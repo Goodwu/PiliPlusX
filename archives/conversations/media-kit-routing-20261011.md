@@ -18,6 +18,10 @@ Linux/Windows A作者41contracts/actionlint通过，但独立V2已发现直接ro
 
 完整源码prepare检查点docs/plans/core-source-prepare-checkpoint-20261012.json逐字归档（SHA256 a5d5abf30dd92ce230899a904079b0a6eef511ae09427ce075021116572e8041），仍只证明旧准确6c4+751；没有native或variant postbuild验收。
 
+当前执行范围更新：A第二轮修正以routing-mode及完整两SHA判定已捕获输入，避免错误按caller event_name区分reusable；待Critical复审。ios_source_variant独占新增iOS variant/测试、patch.ps1仅SDKOnly隔离条件、bootstrap ios平台及对应测试，不动App原Dart或共享workflow；Linux B消费者独占CMake/独立Linux验证获取工具，接受账本空。PR5 matrix-device-build必要功能正只读定位现tool/matrix-build.sh归并接口，assembly重复打包仍由DEVICE修原DV001，不新增配方。
+
+Linux/Windows A第二轮独立V2 PASS_WITH_PENDING_HOSTED，43contracts/actionlint/20真实条件边界及pwsh拒绝通过，4hash与冻结一致；原两轮失败保留，native尚无受审输入，当前只保存源码前置检查点。iOS及Linux B未审修改不纳本切片。
+
 ## History
 
 ### 2026-10-12 最新CI收尾前状态快照（历史）
