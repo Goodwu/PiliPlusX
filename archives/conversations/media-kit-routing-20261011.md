@@ -6,6 +6,8 @@
 
 CORE-CI03在中央6110943824认领文本控件、Web、生命周期及包名迁移。当前改动尚未提交、尚未全量验收；隔离Flutter3.47.2/私有pub-cache依现有patch.ps1 android配置，前后10包绑定一致，原共享SDK/cache未改。控件与Web行为回归正在执行；包名规范化须同步OHOS准备脚本，不能以name判断跳过工具链转换。产品experimental默认false保持。
 
+OHOS包名兼容准备已修复：五项约束逐scope严格接受唯一old/new，小写包名不再跳过Dart/Flutter/flex/material转换；未知、缺失及重复字段/section拒绝。目标10项及关联19项通过，V1独立重跑目标10项通过、核对关联日志。仅脚本和新回归测试进入此检查点；真实OHOS pub/HAP/native及设备验收未执行。证据/tmp/mk-core-ohos-package-{before,after,related}.log。
+
 CORE-CI04a已定位Release Python随机失败：PBX模板插值后扫描双下划线误拒合法临时路径。两文件修复保留payload/ABI/来源/签名检查，本机目标38及关联177项通过；V1独立重跑目标38通过并核对关联177日志，无阻塞发现。此检查点仅提交这两文件和当前记录，其他CI03/OHOS改动仍待验证；不等同真实Xcode签名验收。证据/tmp/mk-core-ci04a-before.log、/tmp/mk-core-ci04a-inputs.log、/tmp/mk-core-ci04a-related.log。
 
 Release iOS兼容准备失败进一步定位为固定缩进匹配：当前view.dart仍有pointerDownFilter调用（10空格），prepare_standard_flutter_package_compat.py与macOS候选源码允许差异检查固定12空格。不能按“调用已删除”绕过断言；后续应统一严格匹配语义、覆盖实际源码缩进并保留未知变更拒绝。此项尚未修复。
