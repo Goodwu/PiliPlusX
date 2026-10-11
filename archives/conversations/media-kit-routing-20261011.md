@@ -2,6 +2,12 @@
 
 ## Current State
 
+CORE-CI03串行包名迁移完成：919文件、6315处精确package URI替换及1处root name，逐文件after==before.replace验证；Python旧输入夹具、产品/native标识未替换。私有pubget已成功，10包media-kit实际路径核验通过；结果JSON内HEAD仍66eedd680，当前dirty改动不是该提交的通过证据。全量严格分析、迁移后控件/Web联合复验及独立审查正在进行，不宣称34info已清零。迁移前文本15项通过、旧重复copy负对照macOS失败符合预期，恢复源码哈希一致；这些不改标为迁移后结果。原稿及逐文件manifest见/tmp/core-ci03-package-uri-migration/。
+
+本轮全量严格分析exit1：剩1条原list_tile cascade及5条新增控件测试hasFlag弃用，共6 info；正在修复，未关闭规则。迁移后文本控件V1独立15项和目录strict通过。Chrome真实DOM测试1项通过，实际main_web release构建进行中。
+
+Release pointer兼容修复独立V1通过：两个脚本各自只允许删除唯一完整批准行，缩进可变，其他字节及mac来源/节点/恢复门不变；未知/重复调用及额外App变更拒绝。作者35目标+33关联通过，V1独立35目标通过、关联日志核对。此检查点只提交两个脚本及两个Python测试、记录，不混入CI03大批URI改动。真实iOS/macOS打包尚未验收，证据/tmp/mk-core-pointer-*.log。
+
 2026-10-12：最新已完成联合源码验证为App b969fc289945ea0aa762de3a3ce026301bb17ec0 + media-kit bd9b9f852949af8980faaad337064a0830c405da。App run38153119252 attempt1实际执行192 Flutter、244 Python、bundle、10包源码绑定及远端新鲜度通过；严格分析34 info、0 warning、0 error，整体失败。终态中央6110898494、App6110898811；不是下述旧向量的重标。
 
 CORE-CI03在中央6110943824认领文本控件、Web、生命周期及包名迁移。当前改动尚未提交、尚未全量验收；隔离Flutter3.47.2/私有pub-cache依现有patch.ps1 android配置，前后10包绑定一致，原共享SDK/cache未改。控件与Web行为回归正在执行；包名规范化须同步OHOS准备脚本，不能以name判断跳过工具链转换。产品experimental默认false保持。

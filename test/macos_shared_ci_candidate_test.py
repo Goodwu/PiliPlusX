@@ -302,6 +302,33 @@ class SharedCandidateTests(unittest.TestCase):
             with self.assertRaisesRegex(candidate.CandidateError, "outside the reviewed file allowlist"):
                 candidate.compatibility_plan(root)
 
+    def test_pointer_filter_expected_transform_preserves_all_other_bytes(self):
+        argument = b"pointerDownFilter: _allowOuterVideoPointer,"
+        for indent, newline in ((b" " * 10, b"\n"), (b" " * 12, b"\n"),
+                                (b"\t", b"\n"), (b" " * 10, b"\r\n")):
+            with self.subTest(indent=indent, newline=newline):
+                line = indent + argument + newline
+                source = b"const before = 1;" + newline + line + b"const after = 2;" + newline
+                self.assertEqual(candidate.expected_pointer_filter_removal(source),
+                                 source.replace(line, b"", 1))
+        actual = (ROOT / "lib/pages/video/view.dart").read_bytes()
+        line = next(line for line in actual.splitlines(keepends=True) if argument in line)
+        self.assertEqual(line.strip(), argument)
+        self.assertEqual(actual.count(line), 1)
+        self.assertEqual(candidate.expected_pointer_filter_removal(actual), actual.replace(line, b"", 1))
+
+    def test_pointer_filter_expected_transform_rejects_unknown_or_partial_calls(self):
+        approved = b"          pointerDownFilter: _allowOuterVideoPointer,\n"
+        for source in (b"unrelated\n", approved * 2,
+                       b"          pointerDownFilter: other,\n",
+                       approved + b"          pointerDownFilter: other,\n",
+                       b"          pointerDownFilter:\n            _allowOuterVideoPointer,\n",
+                       approved.rstrip(b"\n") + b" // unapproved comment\n",
+                       approved.rstrip(b"\n") + b" anotherOperation();\n"):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(candidate.CandidateError, "approved full argument line"):
+                    candidate.expected_pointer_filter_removal(source)
+
     def _assert_compat_node_change_rejected(self, kind):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -339,7 +366,8 @@ class SharedCandidateTests(unittest.TestCase):
     def test_compat_approved_change_plus_special_node_is_rejected(self):
         self._assert_compat_node_change_rejected("special-node")
 
-    def _pipeline_case(self, fail_at=None, production_release=False):
+    def _pipeline_case(self, fail_at=None, production_release=False,
+                       pointer_line="          pointerDownFilter: _allowOuterVideoPointer,\n"):
         sha = "a" * 40
         names = ["media_kit", "media_kit_video"]
         with tempfile.TemporaryDirectory() as temporary:
@@ -350,7 +378,7 @@ class SharedCandidateTests(unittest.TestCase):
             pubspec.write_text("name: fixture\n")
             (workspace / "lib/pages/video").mkdir(parents=True)
             view = workspace / "lib/pages/video/view.dart"
-            view.write_text("class V {\n            pointerDownFilter: _allowOuterVideoPointer,\n}\n")
+            view.write_text("class V {\n" + pointer_line + "}\n")
             lock = workspace / "pubspec.lock"
             lock.write_bytes(b"original lock bytes\n")
             overrides = workspace / "pubspec_overrides.yaml"
@@ -448,8 +476,9 @@ class SharedCandidateTests(unittest.TestCase):
                         (root / rel).write_bytes(data)
                     if fail_at == "compatibility-out-of-scope":
                         (root / "lib/unapproved.dart").write_text("unapproved edit\n")
-                    view.write_text(view.read_text().replace(
-                        "            pointerDownFilter: _allowOuterVideoPointer,\n", "", 1))
+                    view.write_text(view.read_text().replace(pointer_line, "", 1))
+                    if fail_at == "compatibility-app-out-of-scope":
+                        view.write_text(view.read_text() + "// unapproved app edit\n")
                 if label == "acquire-fetch":
                     out = Path(argv[argv.index("--output") + 1]); out.mkdir(parents=True)
                     (out / "acquisition-manifest.json").write_text("{}\n")
@@ -591,10 +620,12 @@ class SharedCandidateTests(unittest.TestCase):
         self.assertEqual(failed["status"], "failed")
         self.assertNotIn("artifact", failed)
         self.assertNotIn("PiliPlusX-shared-candidate.zip", failed["_mock_artifact_files"])
-        expected_call = "compatibility-patch" if stage == "compatibility-out-of-scope" else stage
+        expected_call = "compatibility-patch" if stage in (
+            "compatibility-out-of-scope", "compatibility-app-out-of-scope") else stage
         self.assertIn(expected_call, failed_calls)
         if failed_before:
             self.assertNotIn(failed_before, failed_calls)
+        return failed
 
     def test_pipeline_pubget_failure_restores_workspace_and_stops(self):
         self._assert_pipeline_failure("pub-get", "acquire-fetch")
@@ -604,6 +635,22 @@ class SharedCandidateTests(unittest.TestCase):
 
     def test_pipeline_compatibility_out_of_scope_change_is_rejected(self):
         self._assert_pipeline_failure("compatibility-out-of-scope", "acquire-fetch")
+
+    def test_pipeline_compatibility_app_out_of_scope_change_is_rejected(self):
+        report = self._assert_pipeline_failure("compatibility-app-out-of-scope", "acquire-fetch")
+        self.assertIn("app source outside the approved pointer-filter removal", report['error'])
+
+    def test_pipeline_pointer_argument_drift_rejects_before_dependency_mutation(self):
+        approved = "          pointerDownFilter: _allowOuterVideoPointer,\n"
+        for pointer in ("", approved * 2, "          pointerDownFilter: other,\n",
+                        approved + "          pointerDownFilter: other,\n"):
+            with self.subTest(pointer=pointer):
+                report, calls, _ = self._pipeline_case(pointer_line=pointer)
+                self.assertEqual(report['status'], 'failed')
+                self.assertIn('pointer-filter', report['error'])
+                self.assertNotIn('pub-get', calls)
+                self.assertNotIn('compatibility-patch', calls)
+                self.assertNotIn('artifact', report)
 
     def test_pipeline_consumer_failure_restores_workspace_and_stops(self):
         self._assert_pipeline_failure("shared-consumer", "final-bundle-gate")

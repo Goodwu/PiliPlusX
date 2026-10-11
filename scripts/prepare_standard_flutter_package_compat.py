@@ -52,11 +52,30 @@ def remove_ohos_cases(text: str) -> tuple[str, int]:
     return text, removed + comparisons
 
 
+def remove_pointer_filter(source: bytes) -> bytes:
+    """Remove exactly one approved argument line, preserving every other byte."""
+    lines = list(re.finditer(
+        rb"^[ \t]*pointerDownFilter: _allowOuterVideoPointer,\r?\n", source, re.M
+    ))
+    if len(lines) != 1 or len(re.findall(rb"\bpointerDownFilter\b", source)) != 1:
+        raise SystemExit(
+            "standard Flutter pointer-filter source must occur exactly once "
+            "as the approved full argument line"
+        )
+    start, end = lines[0].span()
+    return source[:start] + source[end:]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", type=Path, required=True)
     args = parser.parse_args()
     root = package_root(args.workspace.resolve())
+    view = args.workspace.resolve() / "lib/pages/video/view.dart"
+    source = view.read_bytes()
+    source.decode("utf-8")
+    # Validate the app change before mutating either the package or the app.
+    patched_view = remove_pointer_filter(source)
     changed = 0
     for path in root.rglob("*.dart"):
         text = path.read_text(encoding="utf-8")
@@ -69,12 +88,7 @@ def main() -> None:
         changed += count
     if changed == 0:
         raise SystemExit(f"no TargetPlatform.ohos references found in {root}")
-    view = args.workspace.resolve() / "lib/pages/video/view.dart"
-    source = view.read_text(encoding="utf-8")
-    needle = "            pointerDownFilter: _allowOuterVideoPointer,\n"
-    if needle not in source:
-        raise SystemExit(f"standard Flutter pointer-filter call missing from {view}")
-    view.write_text(source.replace(needle, "", 1), encoding="utf-8")
+    view.write_bytes(patched_view)
     print(f"standard Flutter package compatibility: removed {changed} OHOS references")
 
 
