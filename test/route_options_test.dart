@@ -18,6 +18,45 @@ void main() {
     experimental: experimental,
   );
 
+  for (final request in [
+    'videotoolbox',
+    'd3d11va-copy',
+    'vulkan',
+    'vendor-private',
+  ]) {
+    test('Android rejects unavailable legacy mode $request', () {
+      final adapted = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.auto,
+        enableHA: true,
+        hardwareDecoding: request,
+        android: true,
+      );
+      expect(adapted.hasUnsupportedLegacyRequest, true);
+      expect(adapted.unsupportedReason, contains('Android'));
+    });
+  }
+
+  for (final entry in {
+    'mediacodec-copy,mediacodec': VideoImportPreference.preferCopy,
+    'mediacodec,mediacodec-copy': VideoImportPreference.preferDirect,
+    'auto-copy,auto-safe': VideoImportPreference.preferCopy,
+    'auto-safe': VideoImportPreference.auto,
+  }.entries) {
+    test('ordered Android legacy ${entry.key} applies import preference', () {
+      final options = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.auto,
+        enableHA: true,
+        hardwareDecoding: entry.key,
+        android: true,
+      ).resolve();
+      expect(options.importPreference, entry.value);
+      expect(
+        options.origins['importPreference'],
+        VideoRouteOptionOrigin.application,
+      );
+    });
+  }
+
   test('HDR auto and legacy automatic decode remain preferences', () {
     final request = adapt();
     expect(request.options.output?.preference, VideoRoutePreference.auto);

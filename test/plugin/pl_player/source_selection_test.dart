@@ -1,6 +1,8 @@
 import 'package:piliplus/models/common/video/video_quality.dart';
 import 'package:piliplus/models/video/play/url.dart';
 import 'package:piliplus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/route_options.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart' show HdrMode;
 import 'package:piliplus/plugin/pl_player/models/data_source.dart';
 import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:flutter/services.dart';
@@ -95,6 +97,79 @@ void main() {
 
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
+  test(
+    'HDR off keeps a safe HDR source when its actual route tone-maps SDR',
+    () async {
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async => result(call, hdr: []),
+      );
+      final options = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.off,
+        enableHA: true,
+        hardwareDecoding: 'mediacodec',
+        android: true,
+      ).resolve();
+      final hdr = track(quality: 125);
+      final selection = await DashRouteSelection.query(
+        tracks: [hdr],
+        target: target,
+        options: options,
+      );
+      expect(selection.options, same(options));
+      expect(selection.allows(hdr), true);
+      expect(
+        selection.prediction(hdr)!.selected.route!.outputTransfer,
+        HdrOutputTransfer.sdr,
+      );
+      final source = NetworkSource(
+        videoSource: 'https://example.invalid/hdr.mp4',
+        audioSource: null,
+        routeOptions: selection.options,
+      );
+      expect(source.routeOptions, same(options));
+      expect(source.withRouteOptions(options).routeOptions, same(options));
+    },
+  );
+
+  test(
+    'unknown query cannot claim explicit output or software requirement',
+    () {
+      final options = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.off,
+        enableHA: false,
+        hardwareDecoding: 'no',
+        android: true,
+      ).resolve();
+      expect(
+        DashRouteSelection.unknown(options: options).allows(track(quality: 80)),
+        false,
+      );
+    },
+  );
+
+  test(
+    'require HDR never authorizes an SDR source on an SDR display',
+    () async {
+      messenger.setMockMethodCallHandler(
+        channel,
+        (call) async => result(call, hdr: []),
+      );
+      final options = EffectiveVideoRouteOptions.resolve(
+        application: const VideoRouteOptions(
+          output: VideoRouteSelection.require(VideoOutputIntent.hdr),
+        ),
+      );
+      final sdr = track(quality: 80);
+      final selection = await DashRouteSelection.query(
+        tracks: [sdr],
+        target: target,
+        options: options,
+      );
+      expect(selection.allows(sdr), false);
+    },
+  );
+
   test('DASH specification carries encoded size, rate and bandwidth without media URL', () {
     final item = track(fps: '30000/1001');
     final spec = DashRouteSelection.specification(item)!;
@@ -134,8 +209,27 @@ void main() {
         tracks: [av1, hevc],
         target: target,
       );
-      expect(selection.filter([av1, hevc]), [hevc]);
-      expect(selection.prediction(av1)!.playable, isFalse);
+      // This exact MediaCodec negative does not authorize any hardware route.
+      // A separate FFmpeg software path remains unknown until real CPU review.
+      expect(selection.prediction(av1)!.selected.route!.hwdec, 'no');
+      expect(selection.decodeSupport(av1), VideoSupport.unknown);
+      expect(selection.prediction(hevc)!.selected.route!.hwdec, 'mediacodec');
+      final strict = await DashRouteSelection.query(
+        tracks: [av1, hevc],
+        target: target,
+        allowUnknown: false,
+      );
+      expect(strict.filter([av1, hevc]), [hevc]);
+      final requireHardware = await DashRouteSelection.query(
+        tracks: [av1, hevc],
+        target: target,
+        options: EffectiveVideoRouteOptions.resolve(
+          application: const VideoRouteOptions(
+            decode: VideoRouteSelection.require(VideoDecodeTarget.hardware),
+          ),
+        ),
+      );
+      expect(requireHardware.filter([av1, hevc]), [hevc]);
     },
   );
 
@@ -154,7 +248,15 @@ void main() {
       tracks: [high, low],
       target: target,
     );
-    expect(selection.filter([high, low]), [low]);
+    expect(selection.prediction(high)!.selected.route!.hwdec, 'no');
+    expect(selection.decodeSupport(high), VideoSupport.unknown);
+    expect(selection.prediction(low)!.selected.route!.hwdec, 'mediacodec');
+    final strict = await DashRouteSelection.query(
+      tracks: [high, low],
+      target: target,
+      allowUnknown: false,
+    );
+    expect(strict.filter([high, low]), [low]);
   });
 
   test('query carries explicit target and no Player', () async {

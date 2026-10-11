@@ -7,14 +7,16 @@ import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 /// cache. Unknown SDR inputs may be tried explicitly; unknown HDR output
 /// does not advertise that the display can present HDR.
 class DashRouteSelection {
-  const DashRouteSelection.unknown({this.allowUnknown = true})
+  const DashRouteSelection.unknown({this.allowUnknown = true, this.options})
     : _sources = const {};
   DashRouteSelection._(
     Map<String, VideoRouteCapabilities> sources, {
     this.allowUnknown = true,
+    this.options,
   }) : _sources = Map.unmodifiable(sources);
   final Map<String, VideoRouteCapabilities> _sources;
   final bool allowUnknown;
+  final EffectiveVideoRouteOptions? options;
 
   bool? get displayHdr {
     if (_sources.isEmpty) return null;
@@ -44,6 +46,7 @@ class DashRouteSelection {
     required Iterable<VideoItem> tracks,
     required VideoOutputTarget target,
     bool allowUnknown = true,
+    EffectiveVideoRouteOptions? options,
   }) async {
     final specs = <String, VideoSourceSpec>{};
     for (final item in tracks) {
@@ -64,19 +67,29 @@ class DashRouteSelection {
         sources: batch,
       );
       if (caps == null) {
-        return DashRouteSelection.unknown(allowUnknown: allowUnknown);
+        return DashRouteSelection.unknown(
+          allowUnknown: allowUnknown,
+          options: options,
+        );
       }
       final revision =
           '${caps.platform}/${caps.display.status}/${caps.display.revision}';
       if (displayRevision != null && displayRevision != revision) {
-        return DashRouteSelection.unknown(allowUnknown: allowUnknown);
+        return DashRouteSelection.unknown(
+          allowUnknown: allowUnknown,
+          options: options,
+        );
       }
       displayRevision = revision;
       for (final spec in batch) {
         sources[spec.key] = caps;
       }
     }
-    return DashRouteSelection._(sources, allowUnknown: allowUnknown);
+    return DashRouteSelection._(
+      sources,
+      allowUnknown: allowUnknown,
+      options: options,
+    );
   }
 
   HdrRoutePrediction? prediction(VideoItem item) {
@@ -91,6 +104,7 @@ class DashRouteSelection {
           const HdrSourceDescriptor(),
       specification: spec,
       capabilities: _sources[spec.key],
+      options: options,
     );
   }
 
@@ -114,9 +128,20 @@ class DashRouteSelection {
     if (descriptor?.hasUnresolvedDolbyVision == true) return false;
     final hdrTier = item.id == 125 || item.id == 126 || item.id == 129;
     final planned = prediction(item);
-    if (planned == null) return allowUnknown && !hdrTier;
+    if (planned == null) {
+      // Missing evidence cannot satisfy an explicit output/decode requirement.
+      final requiresEvidence =
+          options?.output.preference == VideoRoutePreference.require ||
+          options?.decode.preference == VideoRoutePreference.require;
+      return allowUnknown && !hdrTier && !requiresEvidence;
+    }
     if (!planned.playable) return false;
-    if (hdrTier && !HdrOutputSelector.isHdrPresentable(planned)) return false;
+    if (hdrTier &&
+        options?.output !=
+            const VideoRouteSelection.require(VideoOutputIntent.sdr) &&
+        !HdrOutputSelector.isHdrPresentable(planned)) {
+      return false;
+    }
     return allowUnknown || decodeSupport(item) == VideoSupport.supported;
   }
 

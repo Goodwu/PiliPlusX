@@ -77,6 +77,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' hide HdrCapabilities;
+import 'package:piliplus/plugin/pl_player/route_options.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path/path.dart' as path;
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -84,6 +85,20 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 typedef PlayCallback = Future<void>? Function();
+
+class _RouteSourceIntent {
+  const _RouteSourceIntent({
+    required this.source,
+    required this.generation,
+    required this.completed,
+    required this.reopen,
+  });
+
+  final DataSource source;
+  final int generation;
+  final Completer<void> completed;
+  final Future<void> Function(DataSource source) reopen;
+}
 
 class _InitializedVideoPlayer {
   const _InitializedVideoPlayer(
@@ -441,6 +456,136 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 从而在 open 完成前先挂载播放器 UI（PlatformView 拓扑的输出绑定
   /// 需要视频视图先挂载）。
   final hdrVideoSession = Rxn<HdrVideoSession>();
+  EffectiveVideoRouteOptions? _sourceRouteOptions;
+  _RouteSourceIntent? _routeSourceIntent;
+  int _routeOptionsRevision = 0;
+  void Function(EffectiveVideoRouteOptions options)? onRouteOptionsInvalidated;
+  Future<void> Function(EffectiveVideoRouteOptions options)?
+  onRouteOptionsChanged;
+
+  bool get usesAndroidRouting => _lifecyclePorts.usesAndroidSession;
+
+  AppVideoRouteRequest readRouteRequest() =>
+      AppVideoRouteRequest.fromPreferences(
+        hdrMode: Pref.hdrMode,
+        enableHA: Pref.enableHA,
+        hardwareDecoding: Pref.hardwareDecoding,
+        android: _lifecyclePorts.usesAndroidSession,
+      );
+
+  /// Called only after a preference has been persisted successfully.
+  Future<void> applyRoutePreferences() async {
+    if (!_lifecyclePorts.usesAndroidSession || _fsDisposed) return;
+    final revision = ++_routeOptionsRevision;
+    final request = readRouteRequest();
+    final options = request.resolve();
+    final intent = _routeSourceIntent;
+    final unpublished =
+        _videoPlayerController == null &&
+        intent != null &&
+        !intent.completed.isCompleted;
+    // Invalidate the private first-open owner before any settings await. It
+    // must finish releasing before the latest intent can create a replacement.
+    if (unpublished) ++_hdrSourceGeneration;
+    onRouteOptionsInvalidated?.call(options);
+    if (request.hasUnsupportedLegacyRequest) {
+      await stopForRouteOptions(request.unsupportedReason!);
+      if (unpublished) {
+        await intent.completed.future;
+        await teardownDrain;
+      }
+      return;
+    }
+    _sourceRouteOptions = options;
+    if (intent != null) {
+      dataSource = intent.source.withRouteOptions(options);
+    }
+    try {
+      if (unpublished) {
+        await intent.completed.future;
+        await teardownDrain;
+        if (revision != _routeOptionsRevision ||
+            _fsDisposed ||
+            !identical(intent, _routeSourceIntent) ||
+            !identical(options, _sourceRouteOptions)) {
+          return;
+        }
+        if (_blockedTeardowns.isNotEmpty) {
+          throw StateError('Previous output has not been released');
+        }
+      }
+      await hdrVideoSession.value?.setOptions(options);
+    } on Object catch (error) {
+      if (revision == _routeOptionsRevision &&
+          !_fsDisposed &&
+          identical(options, _sourceRouteOptions)) {
+        await stopForRouteOptions('路由配置无法满足：${error.runtimeType}');
+      }
+      return;
+    }
+    if (revision != _routeOptionsRevision ||
+        _fsDisposed ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    final changed = onRouteOptionsChanged;
+    if (changed != null) {
+      await changed(options);
+    } else {
+      await ensureRouteSourceOptions(options);
+    }
+  }
+
+  /// File sources have no rendition selection. Complete their current source
+  /// intent after the invalidated private first-open owner has released.
+  Future<void> ensureRouteSourceOptions(
+    EffectiveVideoRouteOptions options,
+  ) async {
+    final intent = _routeSourceIntent;
+    final revision = _routeOptionsRevision;
+    if (intent == null ||
+        _fsDisposed ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    await intent.completed.future;
+    await teardownDrain;
+    if (revision != _routeOptionsRevision ||
+        _fsDisposed ||
+        !identical(intent, _routeSourceIntent) ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    if (_blockedTeardowns.isNotEmpty) {
+      throw StateError('Previous output has not been released');
+    }
+    if (hdrVideoSession.value != null) return;
+    await intent.reopen(intent.source.withRouteOptions(options));
+  }
+
+  Future<void> stopForRouteOptions(String reason) async {
+    final sourceGeneration = ++_hdrSourceGeneration;
+    hdrOutputError.value = reason;
+    dataStatus.value = DataStatus.error;
+    _stopFramePacingDiagnostics();
+    _removeListeners();
+    _unbindNativeSurfaceState();
+    try {
+      await _videoPlayerController?.pause();
+    } on Object catch (error) {
+      debugPrint('Route stop pause failed: ${error.runtimeType}');
+    }
+    // Release the output through the existing session/Player ownership barrier.
+    _schedulePlayerTeardown();
+    final teardown = _playerTeardownFuture;
+    await teardownDrain;
+    if (_blockedTeardowns.isEmpty &&
+        identical(_playerTeardownFuture, teardown)) {
+      _playerTeardownFuture = null;
+    }
+    if (sourceGeneration == _hdrSourceGeneration) _processing = false;
+  }
+
   StreamSubscription<HdrOutputEvent>? _hdrVideoEventSub;
   final Map<Player, _PlayerHdrSessionOwnership> _hdrSessionsByPlayer = {};
   int? _hdrQualityHint;
@@ -889,9 +1034,49 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     String? initialVideoCodec,
   }) async {
     late final int sourceGeneration;
+    final completed = Completer<void>();
     try {
       _sourceLocalDiagnostic = isLocalDiagnosticSource(dataSource);
       sourceGeneration = ++_hdrSourceGeneration;
+      _routeSourceIntent = _RouteSourceIntent(
+        source: dataSource,
+        generation: sourceGeneration,
+        completed: completed,
+        reopen: (source) => setDataSource(
+          source,
+          isLive: isLive,
+          autoplay: autoplay,
+          seekTo: seekTo,
+          speed: speed,
+          width: width,
+          height: height,
+          duration: duration,
+          isVertical: isVertical,
+          aid: aid,
+          bvid: bvid,
+          cid: cid,
+          epid: epid,
+          seasonId: seasonId,
+          pgcType: pgcType,
+          videoType: videoType,
+          onInit: onInit,
+          volume: volume,
+          autoFullScreenFlag: autoFullScreenFlag,
+          initialVideoQuality: initialVideoQuality,
+          initialVideoCodec: initialVideoCodec,
+        ),
+      );
+      final teardown = _playerTeardownFuture;
+      if (teardown != null) {
+        await teardownDrain;
+        if (sourceGeneration != _hdrSourceGeneration) return;
+        if (_blockedTeardowns.isNotEmpty) {
+          throw StateError('Previous output has not been released');
+        }
+        if (identical(_playerTeardownFuture, teardown)) {
+          _playerTeardownFuture = null;
+        }
+      }
       _stopFramePacingDiagnostics();
       _processing = true;
       _hdrCodecHint = initialVideoCodec;
@@ -914,6 +1099,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       this.width = width;
       this.height = height;
       this.dataSource = dataSource;
+      if (_lifecyclePorts.usesAndroidSession) {
+        if (dataSource.routeOptions case final options?) {
+          _sourceRouteOptions = options;
+        } else {
+          final request = readRouteRequest();
+          if (request.hasUnsupportedLegacyRequest) {
+            await stopForRouteOptions(request.unsupportedReason!);
+            throw StateError(request.unsupportedReason!);
+          }
+          _sourceRouteOptions = request.resolve();
+          this.dataSource = dataSource = dataSource.withRouteOptions(
+            _sourceRouteOptions!,
+          );
+        }
+      }
       _autoPlay = autoplay;
       // 初始化视频倍速
       // _playbackSpeed.value = speed;
@@ -943,7 +1143,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // Android 会话的 PlatformView 输出绑定需要 HdrVideo 视图先挂载，
       // 因此只能在 Android open 前通知页面。其他平台要等普通
       // VideoController 发布后再通知，否则页面会因 controller 为空而不挂载。
-      if (Platform.isAndroid) onInit?.call();
+      if (_lifecyclePorts.usesAndroidSession) onInit?.call();
       // 配置Player 音轨、字幕等等
       await _createVideoController(
         dataSource,
@@ -966,7 +1166,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         _startFramePacingDiagnostics(currentPlayer, sourceGeneration);
       }
 
-      updateDuration(duration ?? _videoPlayerController!.state.duration);
+      if (currentPlayer == null) {
+        hdrOutputError.value =
+            'Source initialization produced no current Player';
+        throw StateError(hdrOutputError.value!);
+      }
+      updateDuration(duration ?? currentPlayer.state.duration);
       position.value = buffered.value = seekTo?.inSeconds ?? 0;
 
       dataStatus.value = .loaded;
@@ -984,7 +1189,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _fsDisposed) {
         return;
       }
-      if (!Platform.isAndroid) onInit?.call();
+      if (!_lifecyclePorts.usesAndroidSession) onInit?.call();
     } catch (err, stackTrace) {
       // An older queued native open may fail after a replacement source has
       // already entered loading. Its error is diagnostic only; publishing it
@@ -1002,6 +1207,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         }
       }
     } finally {
+      completed.complete();
       // An older open must not advertise the newer open as idle.
       if (sourceGeneration == _hdrSourceGeneration) {
         _processing = false;
@@ -1065,13 +1271,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   VideoOutputTarget videoOutputTarget =
       const VideoOutputTarget.applicationView();
 
+  bool _isCurrentRouteOptions(EffectiveVideoRouteOptions? options) =>
+      !_lifecyclePorts.usesAndroidSession ||
+      identical(options, _sourceRouteOptions);
+
   Future<_InitializedVideoPlayer?> _initPlayer({
     required int sourceGeneration,
+    EffectiveVideoRouteOptions? routeOptions,
   }) async {
     assert(_videoPlayerController == null);
     final opt = {
       'video-sync': Pref.videoSync,
-      if (Pref.hdrMode == HdrMode.off) ...{
+      if (!_lifecyclePorts.usesAndroidSession &&
+          Pref.hdrMode == HdrMode.off) ...{
         'target-prim': 'bt.709',
         'target-trc': 'bt.1886',
       },
@@ -1094,14 +1306,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     return resources.run<_InitializedVideoPlayer?>(() async {
       assert(_videoController == null);
 
-      if (Platform.isAndroid) {
+      if (_lifecyclePorts.usesAndroidSession) {
         // Android：HDR 输出编排整体交给 media-kit HdrVideoSession（R2）。
         // App 侧不探测设备、不选择输出拓扑；只保留能力快照（选档与
         // 展示用）和事件消费。
-        final session = HdrVideoSession(
+        final session = _lifecyclePorts.newHdrSession(
           player,
-          policy: HdrOutputSelector.policy,
-          target: videoOutputTarget,
+          videoOutputTarget,
         );
         _hdrSessionsByPlayer[player] = _PlayerHdrSessionOwnership(session);
         // A new source can start while the capability query awaits; the stale
@@ -1111,6 +1322,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
         final capabilities = routeCapabilities?.hdr;
         if (sourceGeneration != _hdrSourceGeneration ||
+            !_isCurrentRouteOptions(routeOptions) ||
             _playerCount == 0 ||
             _fsDisposed) {
           await resources.release(
@@ -1995,7 +2207,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     var player = _videoPlayerController;
 
     if (player == null) {
-      final initialized = await _initPlayer(sourceGeneration: sourceGeneration);
+      final initialized = await _initPlayer(
+        sourceGeneration: sourceGeneration,
+        routeOptions: dataSource.routeOptions,
+      );
       if (initialized == null) return;
       final initializedPlayer = initialized.player;
       player = initializedPlayer;
@@ -2010,6 +2225,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       final published = await initialized.lease.publishIfCurrent(
         isCurrent: () =>
             sourceGeneration == _hdrSourceGeneration &&
+            _isCurrentRouteOptions(dataSource.routeOptions) &&
             _playerCount > 0 &&
             !_fsDisposed &&
             _videoPlayerController == null,
@@ -2099,6 +2315,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // player/shader initialization. The shared Player may already belong to
     // the replacement source at this point.
     if (sourceGeneration != _hdrSourceGeneration ||
+        !_isCurrentRouteOptions(dataSource.routeOptions) ||
         !identical(player, _videoPlayerController)) {
       return;
     }
@@ -2168,6 +2385,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       player: currentPlayer,
       isCurrent: () =>
           sourceGeneration == _hdrSourceGeneration &&
+          _isCurrentRouteOptions(dataSource.routeOptions) &&
           _playerCount > 0 &&
           identical(currentPlayer, _videoPlayerController),
       open: (player) {
@@ -2182,6 +2400,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
               codec: _hdrCodecHint,
             ),
             sourceSpec: dataSource.videoSpec,
+            options: dataSource.routeOptions ?? _sourceRouteOptions,
             target: dataSource.outputTarget ?? videoOutputTarget,
             play: false,
           );
@@ -2223,6 +2442,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             codec: _hdrCodecHint,
           ),
           sourceSpec: dataSource.videoSpec,
+          options: dataSource.routeOptions ?? _sourceRouteOptions,
           target: dataSource.outputTarget ?? videoOutputTarget,
           play: true,
         );
@@ -3577,15 +3797,28 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (identical(hdrVideoSession.value, session)) {
         hdrVideoSession.value = null;
       }
-      final events = ownership!.events;
-      if (events != null) await events.cancel();
-      if (identical(_hdrVideoEventSub, events)) {
-        _hdrVideoEventSub = null;
-      }
       try {
+        final events = ownership!.events;
+        if (events != null) await events.cancel();
+        if (identical(_hdrVideoEventSub, events)) {
+          _hdrVideoEventSub = null;
+        }
         await session.dispose();
+        if (session.lastDisposeReport?.clean != true) {
+          throw StateError('HDR Session cleanup is incomplete');
+        }
       } catch (error) {
-        debugPrint('HDR session dispose failed: $error');
+        // Keep the exact Session/Player owner until every native output stage
+        // has released. A failed dispose must never become Player termination.
+        _hdrSessionsByPlayer[player] = ownership!;
+        _blockedTeardowns[player] = _BlockedPlayerTeardown(
+          video: video,
+          outputReleased: outputAlreadyReleased,
+        );
+        _lifecyclePorts.onHdrTeardownRetainedForTesting?.call(player);
+        _scheduleBlockedTeardownRetry();
+        debugPrint('HDR session dispose failed; Player retained: $error');
+        return;
       }
     }
     final result = await PlayerTeardownTransaction<Player, VideoController>()

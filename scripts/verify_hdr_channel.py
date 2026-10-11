@@ -68,8 +68,22 @@ def verify(root: Path) -> list[str]:
     if re.search(r"\bHdrCapabilities\.query\s*\(", selector):
         failures.append("Android route query restored obsolete Player API")
     controller = read("lib/plugin/pl_player/controller.dart")
-    if "HdrVideoSession(" not in controller:
-        failures.append("Android playback must use the media-kit Session")
+    ports = read("lib/plugin/pl_player/models/player_lifecycle_ports.dart")
+    for token in ("_lifecyclePorts.usesAndroidSession", "session: session"):
+        if token not in controller:
+            failures.append(f"Android Session factory hand-off: missing {token}")
+    if not re.search(r"_lifecyclePorts\.newHdrSession\(\s*player,\s*videoOutputTarget,?\s*\)", controller):
+        failures.append("Android Session factory hand-off is missing")
+    if not re.search(r"androidSessionOverride\s*\?\?\s*Platform\.isAndroid", ports):
+        failures.append("Android Session factory must default to the actual platform")
+    if not re.search(r"createHdrSession\?\.call\(player,\s*target\)\s*\?\?\s*HdrVideoSession\(player,\s*target:\s*target\)", ports):
+        failures.append("Android Session factory must default to the real media-kit Session")
+    opens = re.findall(r"hdrVideoSession\.value!\.open\((.*?)\n\s*\);", controller, re.S)
+    if len(opens) != 2 or any(
+        "options: dataSource.routeOptions ?? _sourceRouteOptions" not in call
+        for call in opens
+    ):
+        failures.append("Android initial and refresh opens must consume the source options snapshot")
     return failures
 
 

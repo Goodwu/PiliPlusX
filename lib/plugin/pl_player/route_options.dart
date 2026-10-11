@@ -13,7 +13,8 @@ enum LegacyHwdecPolicyStatus {
 }
 
 /// Pure translation of already-read preferences. No native facts are inferred.
-/// The original hwdec string remains available for diagnostics and later wiring.
+/// Android copy/direct order becomes executable route policy; the original
+/// hwdec string remains available to diagnose unsupported requests.
 class AppVideoRouteRequest {
   const AppVideoRouteRequest._({
     required this.options,
@@ -39,6 +40,7 @@ class AppVideoRouteRequest {
     required bool enableHA,
     required String? hardwareDecoding,
     bool experimental = false,
+    bool android = false,
     VideoRouteFailurePolicy failurePolicy =
         VideoRouteFailurePolicy.allowAlternatives,
   }) {
@@ -50,7 +52,24 @@ class AppVideoRouteRequest {
         ?.split(',')
         .map((token) => token.trim())
         .toList();
-    if (!enableHA) {
+    if (android &&
+        enableHA &&
+        tokens != null &&
+        tokens.any(
+          (token) => !const {
+            'no',
+            'auto',
+            'auto-safe',
+            'auto-copy',
+            'mediacodec',
+            'mediacodec-copy',
+          }.contains(token),
+        )) {
+      decode = const VideoRouteSelection.auto();
+      status = LegacyHwdecPolicyStatus.unsupported;
+      unsupportedReason =
+          'Legacy hwdec request is unavailable in the Android route catalog';
+    } else if (!enableHA) {
       decode = const VideoRouteSelection.require(VideoDecodeTarget.software);
       status = LegacyHwdecPolicyStatus.disabled;
     } else if (tokens != null && tokens.length == 1 && tokens.single == 'no') {
@@ -63,7 +82,7 @@ class AppVideoRouteRequest {
       status = LegacyHwdecPolicyStatus.automatic;
       if (tokens.contains('auto-copy')) {
         migrationNotes.add(
-          'Copy preference is retained in the legacy hwdec hint',
+          'Copy preference is applied to the executable route catalog',
         );
       }
     } else if (tokens != null &&
@@ -76,7 +95,9 @@ class AppVideoRouteRequest {
       decode = const VideoRouteSelection.prefer(VideoDecodeTarget.hardware);
       status = LegacyHwdecPolicyStatus.hardwarePreference;
       migrationNotes.add(
-        'Decoder names and copy/direct ordering are retained in the legacy hwdec hint',
+        android
+            ? 'Copy/direct preference is applied to the executable route catalog'
+            : 'Legacy decoder names remain the non-Android backend hint',
       );
     } else {
       decode = const VideoRouteSelection.auto();
@@ -89,6 +110,7 @@ class AppVideoRouteRequest {
         output: hdrMode == HdrMode.off
             ? const VideoRouteSelection.require(VideoOutputIntent.sdr)
             : const VideoRouteSelection.auto(),
+        importPreference: _importPreference(tokens),
         failurePolicy: failurePolicy,
         experimental: experimental,
       ),
@@ -97,6 +119,16 @@ class AppVideoRouteRequest {
       migrationNotes: List<String>.unmodifiable(migrationNotes),
       unsupportedReason: unsupportedReason,
     );
+  }
+
+  static VideoImportPreference _importPreference(List<String>? tokens) {
+    for (final token in tokens ?? const <String>[]) {
+      if (token == 'auto-copy' || token == 'mediacodec-copy') {
+        return VideoImportPreference.preferCopy;
+      }
+      if (token == 'mediacodec') return VideoImportPreference.preferDirect;
+    }
+    return VideoImportPreference.auto;
   }
 
   EffectiveVideoRouteOptions resolve({

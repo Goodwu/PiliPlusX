@@ -2,17 +2,29 @@
 
 ## Current State
 
-当前远端集成分支均为 routing/MK-ROUTING-20261011：库a31269badbf8ecc9ec286a1b0c4bf4f6639708ef、Appabc149dcf7e89cf0ea1f08ba133bf1047c36138d、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112465611。
+当前远端集成分支均为 routing/MK-ROUTING-20261011：库adde2b5b543c099843bee357f63559ce12488def、Appb9d6d623f79a44232e3aff535b88e41ba1634d28（仅文档检查点，源基线a312/abc149）、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112465611。
 
 已完成F01/query/DASH/未知DV门/FFmpeg e8df200c，不按旧planned重做。34条分析info已在CI03清零；最新已提交联合源码CI06仅证明Appabc149+库87eb：四平台233Flutter/strict0/bundle/源码freshness，Python实际两次359；Build六Release失败，不能称native验收。库a312窄CI源码685+3既有skip/lab298/strict0、query实际Java31tasks+host34、Darwin9通过；OHOS为实际PR merge unsigned，不是实机。证据原各handoff/summary保留。
 
-CONFIG实际闭环候选已实现但未终审/提交。旧库20文件freeze SHA9ebeafd0579815e3cad6b9a5d73a0f068d56491754ea2714a9acd9312b402a90作者743/strict0；独立69目标通过仍有两真实REQUEST_CHANGES：pending首open查询时setOptions提前返回导致旧auto发布；requiredHW actualdecoder移出fresh census后同route仍verified。原库writer第一修复轮，旧结果不重标。App16文件vector292c6034fb746a78b44603e1cf5872f6e59fcb498f38fda1fd87602e1e32b5ac，最新258Flutter/strict0/bundle/channel11且前后无drift；只证明旧库20freeze，App独立V2进行，修库后新组合必须联验。日志/receipt=/tmp/mk-app-config-final-worker-receipt.json。
+CONFIG实际闭环库v3与AppR1已独立V2 PASS（宿主范围），准备集成。库20文件freeze af984d：作者762/strict0，Critical 762包内+12独立共774/strict0，前两轮三个P1真实修后绿、20hash前后同。App16vector47d60f9...绑定同库v3：作者268Flutter/strict0/bundle/channel11、独立90+1/20kwargs及hash一致，first文件设置竞态已关闭。能力查询/设置/refresh服从最新完整request与源代次，实际require履行复核及cleanup重试保留。requested/effective同配置已接DASH/planner/Session/report；未知legacy诊断、默认experimental=false及unknownDV/F01/owner/budget门保留。最新HEAD-only CI、native/实机仍未验，不把dirty宿主结果重标新SHA。各原失败日志与逐轮freeze/review完整归档见core-config-implementation-review/implementation-handoff JSON。
 
 Android/Pink实际Release候选第二修复轮：第一来源漏项8注入已拒绝，但V2另证真实offline pubget正常ephemeral/plugin误拒与转义YAML build资源绕过且真实bundle包含，仍REQUEST_CHANGES。原native_input_worker单写variant/输入/workflows，新增持久Dart真实YAML工具及直接测试、精确pubgen/link契约；待实际Android/Pink prepare→pubget→prebuild正例与真实资源负例及新freeze复审。reviewer私有SDK/cache授权独占、packageconfig遗留共享roots只在私有metadata按逐包字节hash重绑，原证据保留，共享SDK不改。接受账本空，无approved A/B/新native/APK声明。
 
 DV001与PR5必须完整归并。三历史MD与16行增量已分别入e162/aeaf并核原文/hash/链接；两配方脚本未导入，整体未完成。原DV001符号读取失败/两个目标各自/失败传播/干净staging/精确成员链接补丁manifest等审查仍待DEVICE在原PR修；CORE不另写配方。最新适用源码P5/P8.4、experimental true/false、普通Session/实际carrier/owner/HDR呈现/持续性能仍需同向量构建与实机验证，旧模型/AVC EOS不重标。LG批准FULL/range1/YUV8、精确设备门、owner/ACK/lease保持；不重开10bit/lease融合，产品默认experimental=false。
 
 下一步按已有认领串行冻结、独立V2、准确stage/中文commit/push/readback及最新组合CI；余下Linux/Windows/iOS Release消费者与原DEVICE native协作随后接入，不用发布JAR/SO或旧pin代替当前构建。当前活跃子任务r01d_worker（库修复）、app_config_v2（App critical）、variant_boundary_fix（库独立反例/复核）、native_input_worker（第二来源修复），root唯一集成者。
+
+
+最新general只读快照：a312 run38164066846已cancelled；旧5c8 run38162912132 GitHub仍in_progress、三test jobs运行且日志不可取，无法证明挂死原因。新docs HEAD作业pending/运行快照不推定终态。证据/tmp/mk-routing-ci-current-snapshot-20261012.json。
+
+
+第二来源修复实际进展：真实App旧abc149只读解析/生成inventory 1879 tracked/31 pubGenerated/3 buildGenerated/86精确插件links通过；7 YAML语义与kernel编译通过，27 synthetic variant通过。仅工具/清单范围证据，不是新候选完整prepare/native通过。私有101包逐成员hash一致后metadata重绑receipt=/tmp/mk-routing-r2-private-sdk-rebinding.json；inventory=/tmp/mk-routing-r2-real-pubgen-inventory.json。资源真实bundle和错链/生成hash负例仍进行。
+
+
+App第一修复最新10个真实variants通过，覆盖firstfile/真实FileSource/no-page/latest设置/公开新sourceB优先/dispose/三个真实清理债务；observer仅testing生产factory不传。现对库v3冻结组合fresh全Flutter/strict/bundle，未终审/提交。来源第二修复35variants与30workflowcontract/actionlint通过，普通tracked资源真实bundle exit0且字节匹配、escapedbuild资源在构建前拒绝；全Python与真实Android/Pink诊断收尾，完整新candidate prepare仍待CONFIG真实提交。
+
+
+2026-10-12集成切片：仅各冻结CONFIG源码/tests（库20、App16）+TASKS/context/本阶段handoff；Android/Pink native16文件仍dirty等待第二来源修复Critical V2及最新clean完整prepare，不混入CONFIG提交。
 
 ## History
 

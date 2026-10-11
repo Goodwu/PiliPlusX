@@ -3,7 +3,8 @@ import 'dart:io' show Platform;
 import 'dart:math' show min;
 import 'dart:ui';
 
-import 'package:media_kit_video/media_kit_video.dart' show VideoOutputTarget;
+import 'package:media_kit_video/media_kit_video.dart'
+    show VideoOutputTarget, EffectiveVideoRouteOptions, VideoOutputIntent;
 import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:piliplus/common/style.dart';
 import 'package:piliplus/common/widgets/pair.dart';
@@ -76,7 +77,7 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show Options;
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show ExtendedNestedScrollViewState;
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, visibleForTesting;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
@@ -134,6 +135,75 @@ class VideoDetailController extends GetxController
   int? _routingDisplayId;
   int _routingQuerySerial = 0;
   DashRouteSelection? _routeSelection;
+  EffectiveVideoRouteOptions? _routeOptions;
+  int _routeOptionsRevision = 0;
+  late final void Function(EffectiveVideoRouteOptions)
+  _routeInvalidatedCallback = _invalidateRouteOptions;
+  late final Future<void> Function(EffectiveVideoRouteOptions)
+  _routeChangedCallback = _refreshRouteOptions;
+
+  void _invalidateRouteOptions(EffectiveVideoRouteOptions options) {
+    ++_routeOptionsRevision;
+    ++_routingQuerySerial;
+    _routeOptions = options;
+    _routeSelection = null;
+    videoQualityMenuRevision.value++;
+  }
+
+  Future<void> _refreshRouteOptions(EffectiveVideoRouteOptions options) async {
+    if (isClosed || !identical(_routeOptions, options)) return;
+    if (isFileSource) {
+      await plPlayerController.ensureRouteSourceOptions(options);
+      return;
+    }
+    final revision = _playbackDataRevision;
+    final configRevision = _routeOptionsRevision;
+    if (revision == 0 || !await _probeRoutingCapabilities(revision)) {
+      return;
+    }
+    if (isClosed ||
+        revision != _playbackDataRevision ||
+        configRevision != _routeOptionsRevision) {
+      return;
+    }
+    final current = currentVideoQa.value;
+    if (current != null && findVideoByQa(current.code) != null) {
+      await updatePlayer();
+      return;
+    }
+    final eligible =
+        data.dash?.video?.where(_routeAllows).toList() ?? const <VideoItem>[];
+    if (eligible.isEmpty) {
+      await plPlayerController.stopForRouteOptions('当前路由配置没有可播放资源');
+      return;
+    }
+    currentVideoQa.value = eligible.first.quality;
+    plPlayerController.cacheVideoQa = eligible.first.quality.code;
+    await updatePlayer();
+  }
+
+  @visibleForTesting
+  Future<bool> probeRoutingForTesting(PlayUrlModel data, int revision) {
+    this.data = data;
+    _playbackDataRevision = revision;
+    plPlayerController
+      ..onRouteOptionsInvalidated = _routeInvalidatedCallback
+      ..onRouteOptionsChanged = _routeChangedCallback;
+    return _probeRoutingCapabilities(revision);
+  }
+
+  @visibleForTesting
+  void invalidateRouteOptionsForTesting(EffectiveVideoRouteOptions options) =>
+      _invalidateRouteOptions(options);
+
+  @visibleForTesting
+  DashRouteSelection? get routingSelectionForTesting => _routeSelection;
+
+  @visibleForTesting
+  void releaseRoutingForTesting() {
+    _unbindRoutingCallbacks();
+    plPlayerController.dispose();
+  }
 
   /// Called by the owning page, not by a Player or a guessed OS display ID.
   void bindOutputView(FlutterView view) {
@@ -156,9 +226,15 @@ class VideoDetailController extends GetxController
 
   Future<void> _refreshRoutingTarget() async {
     final revision = _playbackDataRevision;
+    final configRevision = _routeOptionsRevision;
     if (!await _probeRoutingCapabilities(revision) || isClosed) return;
     await plPlayerController.refreshHdrDisplayCapabilities();
-    if (revision != _playbackDataRevision || isClosed || isQuerying) return;
+    if (revision != _playbackDataRevision ||
+        configRevision != _routeOptionsRevision ||
+        isClosed ||
+        isQuerying) {
+      return;
+    }
     // Re-open through the ordinary source transaction, which retains position.
     // An old target snapshot never authorizes the new output.
     final current = currentVideoQa.value;
@@ -166,19 +242,35 @@ class VideoDetailController extends GetxController
     if (findVideoByQa(current.code) == null) {
       final eligible =
           data.dash?.video?.where(_routeAllows).toList() ?? const <VideoItem>[];
-      if (eligible.isEmpty) return;
+      if (eligible.isEmpty) {
+        await plPlayerController.stopForRouteOptions('当前显示目标没有可播放路由');
+        return;
+      }
       currentVideoQa.value = eligible.first.quality;
       plPlayerController.cacheVideoQa = eligible.first.quality.code;
     }
-    updatePlayer();
+    await updatePlayer();
   }
 
+  bool get _allowsHdrSourceAsSdr =>
+      plPlayerController.usesAndroidRouting &&
+      _routeOptions?.output.isRequired == true &&
+      _routeOptions?.output.target == VideoOutputIntent.sdr;
+
   bool _routeAllows(VideoItem item) =>
-      !Platform.isAndroid ||
-      (_routeSelection ?? const DashRouteSelection.unknown()).allows(item);
+      !plPlayerController.usesAndroidRouting ||
+      (_routeSelection ?? DashRouteSelection.unknown(options: _routeOptions))
+          .allows(item);
 
   Future<bool> _probeRoutingCapabilities(int revision) async {
-    if (!Platform.isAndroid) return true;
+    if (!plPlayerController.usesAndroidRouting) return true;
+    final request = plPlayerController.readRouteRequest();
+    if (request.hasUnsupportedLegacyRequest) {
+      await plPlayerController.stopForRouteOptions(request.unsupportedReason!);
+      return false;
+    }
+    final options = _routeOptions ??= request.resolve();
+    final configRevision = _routeOptionsRevision;
     final serial = ++_routingQuerySerial;
     _routeSelection = null;
     // A first FlutterView can attach while the initial query is outstanding.
@@ -188,10 +280,13 @@ class VideoDetailController extends GetxController
       final selection = await DashRouteSelection.query(
         tracks: data.dash?.video ?? const [],
         target: target,
+        options: options,
       );
       if (isClosed ||
           revision != _playbackDataRevision ||
-          serial != _routingQuerySerial) {
+          serial != _routingQuerySerial ||
+          configRevision != _routeOptionsRevision ||
+          !identical(options, _routeOptions)) {
         return false;
       }
       if (!identical(target, _videoOutputTarget)) continue;
@@ -453,7 +548,10 @@ class VideoDetailController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    plPlayerController.onHdrDisplayChanged = _hdrDisplayChangedCallback;
+    plPlayerController
+      ..onHdrDisplayChanged = _hdrDisplayChangedCallback
+      ..onRouteOptionsInvalidated = _routeInvalidatedCallback
+      ..onRouteOptionsChanged = _routeChangedCallback;
     args = Get.arguments;
     isLocalVideoDiagnostic = isLocalVideoDiagnosticArgs(args);
     videoType = args['videoType'] ?? VideoType.ugc;
@@ -504,7 +602,12 @@ class VideoDetailController extends GetxController
   }
 
   void _onHdrDisplayChanged(bool displayHdr) {
-    if (displayHdr || isFileSource || data.dash == null) return;
+    if (displayHdr ||
+        _allowsHdrSourceAsSdr ||
+        isFileSource ||
+        data.dash == null) {
+      return;
+    }
     final current = currentVideoQa.value;
     if (current == null || !_isHdrQuality(current.code)) return;
 
@@ -552,7 +655,9 @@ class VideoDetailController extends GetxController
     return videoQualityEligibility(
       quality: quality,
       tracks: _tracksForQuality(quality),
-      displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+      displaySupportsHdr:
+          _allowsHdrSourceAsSdr ||
+          plPlayerController.hdrDisplaySupportsHdr.value,
       gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
       decodeCapabilities: _decodeCapabilities,
     );
@@ -915,7 +1020,7 @@ class VideoDetailController extends GetxController
   }
 
   /// 更新画质、音质
-  void updatePlayer() {
+  Future<void> updatePlayer() async {
     final currentVideoQa = this.currentVideoQa.value;
     if (currentVideoQa == null) return;
     _autoPlay.value = true;
@@ -945,7 +1050,7 @@ class VideoDetailController extends GetxController
       audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
     }
 
-    playerInit();
+    await playerInit();
   }
 
   Future<void>? _initPlayerIfNeeded(bool autoFullScreenFlag) {
@@ -968,21 +1073,36 @@ class VideoDetailController extends GetxController
     Duration? seek = defaultST ?? playedTime;
     if (seek == .zero) seek = null;
     seek ??= getFirstSegment();
+    final request = plPlayerController.readRouteRequest();
+    if (plPlayerController.usesAndroidRouting &&
+        request.hasUnsupportedLegacyRequest) {
+      await plPlayerController.stopForRouteOptions(request.unsupportedReason!);
+      return;
+    }
+    final options =
+        _routeSelection?.options ?? (_routeOptions ??= request.resolve());
+    final configRevision = _routeOptionsRevision;
+    final dataRevision = _playbackDataRevision;
     await plPlayerController.setDataSource(
       isLocalVideoDiagnostic
-          ? DirectFileSource(args['localVideoPath'] as String)
+          ? DirectFileSource(
+              args['localVideoPath'] as String,
+              routeOptions: options,
+            )
           : isFileSource
           ? FileSource(
               dir: args['dirPath'],
               typeTag: entry.typeTag!,
               isMp4: entry.mediaType == 1,
               hasDashAudio: entry.hasDashAudio,
+              routeOptions: options,
             )
           : NetworkSource(
               videoSource: videoUrl!,
               audioSource: audioUrl,
               videoSpec: DashRouteSelection.specification(firstVideo),
               outputTarget: _videoOutputTarget,
+              routeOptions: options,
             ),
       seekTo: seek,
       duration: data.timeLength == null
@@ -1011,7 +1131,12 @@ class VideoDetailController extends GetxController
       autoFullScreenFlag: autoFullScreenFlag,
     );
 
-    if (isClosed) return;
+    if (isClosed ||
+        configRevision != _routeOptionsRevision ||
+        dataRevision != _playbackDataRevision ||
+        !identical(options, _routeOptions)) {
+      return;
+    }
 
     if (!isFileSource) {
       if (plPlayerController.enableBlock) {
@@ -1196,6 +1321,7 @@ class VideoDetailController extends GetxController
           .where(_routeAllows)
           .toList();
       if (videoList.isEmpty) {
+        await plPlayerController.stopForRouteOptions('当前配置没有可用的解码及输出路径');
         SmartDialog.showToast('当前设备没有可用的解码及输出路径');
         isQuerying = false;
         return;
@@ -1208,7 +1334,8 @@ class VideoDetailController extends GetxController
       var cacheVideoQa = plPlayerController.cacheVideoQa!;
       // Display capability has been probed above, so this is a real negative
       // result rather than the controller's initial unknown=false state.
-      if (!plPlayerController.hdrDisplaySupportsHdr.value &&
+      if (!_allowsHdrSourceAsSdr &&
+          !plPlayerController.hdrDisplaySupportsHdr.value &&
           _isHdrQuality(cacheVideoQa)) {
         final sdrVideos = videoList
             .where((item) => !_isHdrQuality(item.id))
@@ -1249,7 +1376,8 @@ class VideoDetailController extends GetxController
               .code;
         }
       }
-      if (!plPlayerController.hdrDisplaySupportsHdr.value &&
+      if (!_allowsHdrSourceAsSdr &&
+          !plPlayerController.hdrDisplaySupportsHdr.value &&
           _isHdrQuality(targetVideoQa)) {
         final sdrVideos = videoList
             .where((item) => !_isHdrQuality(item.id))
@@ -1268,7 +1396,9 @@ class VideoDetailController extends GetxController
       if (!qualityEligibility(targetVideoQa).enabled) {
         final fallback = highestEligibleNonEightKTrack(
           tracks: videoList,
-          displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+          displaySupportsHdr:
+              _allowsHdrSourceAsSdr ||
+              plPlayerController.hdrDisplaySupportsHdr.value,
           gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
           decodeCapabilities: _decodeCapabilities,
         );
@@ -1607,14 +1737,31 @@ class VideoDetailController extends GetxController
     }
   }
 
-  @override
-  void onClose() {
+  void _unbindRoutingCallbacks() {
+    ++_routingQuerySerial;
+    if (identical(
+      plPlayerController.onRouteOptionsInvalidated,
+      _routeInvalidatedCallback,
+    )) {
+      plPlayerController.onRouteOptionsInvalidated = null;
+    }
+    if (identical(
+      plPlayerController.onRouteOptionsChanged,
+      _routeChangedCallback,
+    )) {
+      plPlayerController.onRouteOptionsChanged = null;
+    }
     if (identical(
       plPlayerController.onHdrDisplayChanged,
       _hdrDisplayChangedCallback,
     )) {
       plPlayerController.onHdrDisplayChanged = null;
     }
+  }
+
+  @override
+  void onClose() {
+    _unbindRoutingCallbacks();
     cid.close();
     if (isFileSource && !isLocalVideoDiagnostic) {
       cacheLocalProgress();

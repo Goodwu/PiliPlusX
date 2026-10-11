@@ -1,5 +1,7 @@
 import 'dart:io' show Platform;
 
+import 'package:piliplus/plugin/pl_player/controller.dart';
+
 import 'package:piliplus/common/widgets/custom_icon.dart';
 import 'package:piliplus/models/common/super_chat_type.dart';
 import 'package:piliplus/models/common/video/subtitle_pref_type.dart';
@@ -30,9 +32,11 @@ List<SettingsModel> get playSettings => [
     leading: const Icon(Icons.hdr_auto_outlined),
     value: () => Pref.hdrMode,
     items: HdrMode.values,
-    onSelected: (value, setState) => GStorage.setting
-        .put(SettingBoxKey.hdrMode, value.name)
-        .whenComplete(setState),
+    onSelected: (value, setState) async {
+      await GStorage.setting.put(SettingBoxKey.hdrMode, value.name);
+      await PlPlayerController.instance?.applyRoutePreferences();
+      setState();
+    },
   ),
   const SwitchModel(
     title: '弹幕开关',

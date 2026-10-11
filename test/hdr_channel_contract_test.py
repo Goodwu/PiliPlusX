@@ -15,7 +15,7 @@ class HdrChannelContractTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name)
-        for name in (*FILES, "lib/plugin/pl_player/hdr_output.dart", "lib/plugin/pl_player/controller.dart"):
+        for name in (*FILES, "lib/plugin/pl_player/hdr_output.dart", "lib/plugin/pl_player/controller.dart", "lib/plugin/pl_player/models/player_lifecycle_ports.dart"):
             target = self.root / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / name, target)
@@ -52,6 +52,27 @@ class HdrChannelContractTests(unittest.TestCase):
     def test_source_query_cannot_be_removed(self):
         self.replace("lib/plugin/pl_player/hdr_output.dart", "sources: sources", "sources: const []")
         self.assertTrue(any("sources: sources" in error for error in verify(self.root)))
+
+    def test_default_session_factory_cannot_be_replaced_by_null(self):
+        self.replace("lib/plugin/pl_player/models/player_lifecycle_ports.dart",
+                     "HdrVideoSession(player, target: target)", "null")
+        self.assertTrue(any("real media-kit Session" in e for e in verify(self.root)))
+
+    def test_android_factory_cannot_default_to_false(self):
+        self.replace("lib/plugin/pl_player/models/player_lifecycle_ports.dart",
+                     "androidSessionOverride ?? Platform.isAndroid", "androidSessionOverride ?? false")
+        self.assertTrue(any("actual platform" in e for e in verify(self.root)))
+
+    def test_initial_or_refresh_cannot_drop_snapshot(self):
+        name = "lib/plugin/pl_player/controller.dart"
+        text = (self.root / name).read_text()
+        old = "options: dataSource.routeOptions ?? _sourceRouteOptions"
+        self.assertEqual(text.count(old), 2)
+        for index in (0, 1):
+            parts = text.split(old)
+            (self.root / name).write_text(parts[0] + (old if index else "options: null") +
+                                          parts[1] + ("options: null" if index else old) + parts[2])
+            self.assertTrue(any("source options snapshot" in e for e in verify(self.root)))
 
     def test_missing_file_is_reported(self):
         (self.root / ANDROID).unlink()

@@ -105,10 +105,12 @@ abstract final class HdrOutputSelector {
     required HdrSourceDescriptor descriptor,
     required VideoSourceSpec specification,
     required VideoRouteCapabilities? capabilities,
+    EffectiveVideoRouteOptions? options,
   }) => capabilities?.predict(
     descriptor,
     specification: specification,
     policy: policy,
+    options: options,
   );
 
   /// 「片源与显示能力是否一致」的 App 决策：预测可呈现（能开播且呈现为

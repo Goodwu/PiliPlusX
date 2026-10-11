@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:async';
+
+import 'package:piliplus/plugin/pl_player/controller.dart';
 
 import 'package:piliplus/models/common/video/audio_quality.dart';
 import 'package:piliplus/models/common/video/cdn_type.dart';
@@ -23,12 +26,18 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get videoSettings => [
-  const SwitchModel(
+  SwitchModel(
     title: '开启硬解',
     subtitle: '以较低功耗播放视频，若异常卡死请关闭',
-    leading: Icon(Icons.flash_on_outlined),
+    leading: const Icon(Icons.flash_on_outlined),
     setKey: SettingBoxKey.enableHA,
     defaultVal: true,
+    onChanged: (_) {
+      unawaited(
+        PlPlayerController.instance?.applyRoutePreferences() ??
+            Future<void>.value(),
+      );
+    },
   ),
   const SwitchModel(
     title: '免登录1080P',
@@ -410,6 +419,7 @@ Future<void> _showAudioOutputDialog(
       SettingBoxKey.audioOutput,
       res.join(','),
     );
+    await PlPlayerController.instance?.applyRoutePreferences();
     setState();
   }
 }
@@ -461,6 +471,7 @@ Future<void> _showHwDecDialog(
       SettingBoxKey.hardwareDecoding,
       res.join(','),
     );
+    await PlPlayerController.instance?.applyRoutePreferences();
     setState();
   }
 }

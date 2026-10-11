@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:piliplus/plugin/pl_player/hdr_platform.dart';
 import 'package:piliplus/plugin/pl_player/models/hdr.dart';
 import 'package:media_kit/media_kit.dart';
@@ -17,7 +19,21 @@ class PlayerLifecyclePorts {
     required this.displayChanges,
     required this.disposeOutput,
     required this.disposePlayer,
+    this.createHdrSession,
+    this.androidSessionOverride,
+    this.onHdrTeardownRetainedForTesting,
   });
+
+  /// Only the native boundary is substituted by lifecycle tests.
+  final HdrVideoSession Function(Player player, VideoOutputTarget target)?
+  createHdrSession;
+  final bool? androidSessionOverride;
+  final void Function(Player player)? onHdrTeardownRetainedForTesting;
+  bool get usesAndroidSession => androidSessionOverride ?? Platform.isAndroid;
+
+  HdrVideoSession newHdrSession(Player player, VideoOutputTarget target) =>
+      createHdrSession?.call(player, target) ??
+      HdrVideoSession(player, target: target);
 
   final Future<Player> Function(PlayerConfiguration configuration) createPlayer;
   final Future<HdrCapabilities> Function() probeHdr;
