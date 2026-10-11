@@ -1,4 +1,4 @@
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
 
 const bool localVideoDiagnosticBuildEnabled = bool.fromEnvironment(
   'PILIPLUS_LOCAL_VIDEO_DIAGNOSTICS',

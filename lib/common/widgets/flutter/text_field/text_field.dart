@@ -13,14 +13,14 @@ library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/text_field.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/controller.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/cupertino/text_field.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/editable_text.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/spell_check.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/system_context_menu.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/text_selection.dart';
 import 'package:cupertino_ui/cupertino_ui.dart'
     hide
         EditableText,
@@ -259,11 +259,6 @@ class RichTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    @Deprecated(
-      'Use `contextMenuBuilder` instead. '
-      'This feature was deprecated after v3.3.0-0.5.pre.',
-    )
-    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.statesController,
@@ -531,17 +526,6 @@ class RichTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
-
-  /// Configuration of toolbar options.
-  ///
-  /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -1818,7 +1802,6 @@ class RichTextFieldState extends State<RichTextField>
         child: EditableText(
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
-          toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,

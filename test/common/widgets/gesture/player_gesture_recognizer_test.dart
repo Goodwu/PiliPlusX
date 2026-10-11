@@ -1,5 +1,5 @@
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_recognizer.dart';
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_recognizer.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_constants.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 

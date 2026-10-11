@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
-import 'package:PiliPlus/models/common/enum_with_label.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:piliplus/models/common/enum_with_label.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
 
 enum SearchType implements EnumWithLabel {
   // all('综合'),

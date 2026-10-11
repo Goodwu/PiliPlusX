@@ -1,4 +1,4 @@
-import 'package:PiliPlus/plugin/pl_player/models/player_reference_release.dart';
+import 'package:piliplus/plugin/pl_player/models/player_reference_release.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

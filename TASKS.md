@@ -9,7 +9,8 @@
 
 - CORE接手中央PR4 comment6110756605；唯一routing/MK-ROUTING-20261011/PR1保持draft。context=`archives/conversations/media-kit-routing-20261011.md`。
 - CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。旧pending/62info不再当前状态。
-- 继续CORE-R01、真实选项闭环、34info和Release CI；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
+- CORE-CI03已完成本地分析债务收口：全量严格分析No issues，211 Flutter、bundle、Chrome DOM和实际Web入口构建通过；文本/基础控件及Web生命周期独立复核通过。包名与6315处URI精确迁移，产品/native身份不变。待提交后的GitHub CI验证，不改标旧向量为新源码通过；详见context。
+- Release Python随机路径、OHOS工具链约束及iOS/mac pointer兼容修复已分别审查并提交；真实Release作业验收仍开放。继续CORE-R01、真实选项闭环；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
 
 ## Now（当前推进，最多 3 条）
 

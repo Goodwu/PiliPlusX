@@ -1,4 +1,4 @@
-import 'package:PiliPlus/models/common/enum_with_label.dart';
+import 'package:piliplus/models/common/enum_with_label.dart';
 
 /// HDR policy and capability primitives shared by every platform backend.
 ///

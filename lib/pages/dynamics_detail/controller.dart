@@ -1,10 +1,10 @@
-import 'package:PiliPlus/common/widgets/scroll_physics.dart' show ReloadMixin;
-import 'package:PiliPlus/http/dynamics.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/reply.dart';
-import 'package:PiliPlus/models/dynamics/result.dart';
-import 'package:PiliPlus/pages/common/dyn/common_dyn_controller.dart';
-import 'package:PiliPlus/utils/id_utils.dart';
+import 'package:piliplus/common/widgets/scroll_physics.dart' show ReloadMixin;
+import 'package:piliplus/http/dynamics.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/reply.dart';
+import 'package:piliplus/models/dynamics/result.dart';
+import 'package:piliplus/pages/common/dyn/common_dyn_controller.dart';
+import 'package:piliplus/utils/id_utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 

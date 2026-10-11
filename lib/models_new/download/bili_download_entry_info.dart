@@ -1,11 +1,11 @@
 import 'dart:io' show Platform, Process;
 
-import 'package:PiliPlus/models/common/video/video_type.dart';
-import 'package:PiliPlus/pages/common/multi_select/base.dart'
+import 'package:piliplus/models/common/video/video_type.dart';
+import 'package:piliplus/pages/common/multi_select/base.dart'
     show MultiSelectData;
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/route_manager.dart';
 import 'package:material_ui/material_ui.dart';

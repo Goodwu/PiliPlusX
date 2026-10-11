@@ -4,7 +4,7 @@
 
 CORE-CI03串行包名迁移完成：919文件、6315处精确package URI替换及1处root name，逐文件after==before.replace验证；Python旧输入夹具、产品/native标识未替换。私有pubget已成功，10包media-kit实际路径核验通过；结果JSON内HEAD仍66eedd680，当前dirty改动不是该提交的通过证据。全量严格分析、迁移后控件/Web联合复验及独立审查正在进行，不宣称34info已清零。迁移前文本15项通过、旧重复copy负对照macOS失败符合预期，恢复源码哈希一致；这些不改标为迁移后结果。原稿及逐文件manifest见/tmp/core-ci03-package-uri-migration/。
 
-本轮全量严格分析exit1：剩1条原list_tile cascade及5条新增控件测试hasFlag弃用，共6 info；正在修复，未关闭规则。迁移后文本控件V1独立15项和目录strict通过。Chrome真实DOM测试1项通过，实际main_web release构建进行中。
+本轮全量严格分析首次exit1：剩1条原list_tile cascade及5条新增控件测试hasFlag弃用，共6 info，失败保留；修复后最终全量flutter analyze --no-pub exit0 No issues found。迁移后全VM回归211项通过，debug bundle exit0，kernel SHA256 a466231cf59af8f529174ab11a72aad5704f1050bc288cc8170c5c107a1bd7fd。文本控件V1独立15项、基础控件V1独立2项及其目录strict通过。Chrome真实DOM1项、新URI生命周期2项、实际main_web release构建和workflow契约5项通过；Web/lifecycle独立复核再跑2+1项通过、workflow失败传播与来源门核验无阻塞。新增GitHub Chrome/Web入口构建步骤待远端运行。不改标本地dirty测试为570c提交通过。测试日志/tmp/core-ci03-full-{analyze-final,flutter-tests}.log、/tmp/core-ci03-bundle-final.log；Web89文件哈希与运行证据见.runtime/ci03b-results/summary.json。无APK/新native/设备验收声明。
 
 Release pointer兼容修复独立V1通过：两个脚本各自只允许删除唯一完整批准行，缩进可变，其他字节及mac来源/节点/恢复门不变；未知/重复调用及额外App变更拒绝。作者35目标+33关联通过，V1独立35目标通过、关联日志核对。此检查点只提交两个脚本及两个Python测试、记录，不混入CI03大批URI改动。真实iOS/macOS打包尚未验收，证据/tmp/mk-core-pointer-*.log。
 

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/models/video/play/url.dart';
+import 'package:piliplus/models/video/play/url.dart';
 import 'package:flutter/services.dart';
 
 /// The macOS 8K gate is deliberately independent from HDR output capability.

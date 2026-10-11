@@ -1,6 +1,6 @@
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/models/video/play/url.dart';
-import 'package:PiliPlus/pages/video/video_quality_eligibility.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/models/video/play/url.dart';
+import 'package:piliplus/pages/video/video_quality_eligibility.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 

@@ -1,16 +1,16 @@
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/custom_tooltip.dart';
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart'
+import 'package:piliplus/common/widgets/button/icon_button.dart';
+import 'package:piliplus/common/widgets/custom_tooltip.dart';
+import 'package:piliplus/common/widgets/image/network_img_layer.dart';
+import 'package:piliplus/common/widgets/loading_widget/loading_widget.dart';
+import 'package:piliplus/common/widgets/scroll_physics.dart'
     show tabBarView, platformClampingPhysics;
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/common/image_type.dart';
-import 'package:PiliPlus/models_new/emote/emote.dart';
-import 'package:PiliPlus/models_new/emote/package.dart';
-import 'package:PiliPlus/pages/emote/controller.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/theme_utils.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/models/common/image_type.dart';
+import 'package:piliplus/models_new/emote/emote.dart';
+import 'package:piliplus/models_new/emote/package.dart';
+import 'package:piliplus/pages/emote/controller.dart';
+import 'package:piliplus/utils/extension/theme_ext.dart';
+import 'package:piliplus/utils/theme_utils.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 

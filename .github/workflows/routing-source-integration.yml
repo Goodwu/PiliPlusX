@@ -112,6 +112,18 @@ jobs:
         run: |
           set -euo pipefail
           flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee ci-routing-results/flutter-tests.log
+      - name: Run Web player DOM tests in Chrome
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --platform chrome --reporter expanded test/web/player_dom_test.dart 2>&1 | tee ci-routing-results/web-dom-tests.log
+      - name: Compile the Web player entry point
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter build web --target lib/main_web.dart --no-pub 2>&1 | tee ci-routing-results/web-build.log
+          test -s build/web/main.dart.js
+          find build/web -type f -print0 | sort -z | xargs -0 sha256sum | tee ci-routing-results/web-sha256.txt
       - name: Compile the App Dart and assets bundle without historical native binaries
         if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
         run: |

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
-import 'package:PiliPlus/plugin/pl_player/models/native_hdr_transaction.dart';
+import 'package:piliplus/plugin/pl_player/models/native_hdr_transaction.dart';
 
 void main() {
   test('reads capability and activation from typed reports', () {

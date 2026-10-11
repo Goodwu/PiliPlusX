@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_lifecycle_ports.dart';
-import 'package:PiliPlus/utils/path_utils.dart' as app_paths;
-import 'package:PiliPlus/utils/storage.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/models/player_lifecycle_ports.dart';
+import 'package:piliplus/utils/path_utils.dart' as app_paths;
+import 'package:piliplus/utils/storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

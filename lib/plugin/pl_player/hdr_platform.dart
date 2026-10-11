@@ -1,5 +1,5 @@
-import 'package:PiliPlus/platform/platform_features.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/platform/platform_features.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
 import 'package:flutter/services.dart';
 
 /// Cross-platform HDR capability and output lifecycle channel.

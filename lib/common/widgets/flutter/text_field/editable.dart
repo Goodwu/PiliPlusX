@@ -17,7 +17,7 @@ import 'dart:ui'
         SemanticsInputType,
         TextBox;
 
-import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/controller.dart';
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1387,7 +1387,6 @@ class RenderEditable extends RenderBox
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
-      ..isFocusable = true
       ..isTextField = true
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.

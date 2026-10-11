@@ -1,7 +1,7 @@
-import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
+import 'package:piliplus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show MainListReply, VoteCard, ReplyInfo;
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/pages/common/common_list_controller.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/pages/common/common_list_controller.dart';
 
 mixin ReplyVoteMixin on CommonListController<MainListReply, ReplyInfo> {
   VoteCard? voteCard;

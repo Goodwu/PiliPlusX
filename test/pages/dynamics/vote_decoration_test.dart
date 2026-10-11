@@ -1,4 +1,4 @@
-import 'package:PiliPlus/pages/dynamics/widgets/vote_decoration.dart';
+import 'package:piliplus/pages/dynamics/widgets/vote_decoration.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

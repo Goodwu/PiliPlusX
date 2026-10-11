@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
 
 void main() {
   const hdr10 = HdrSourceMetadata(

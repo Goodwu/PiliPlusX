@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/search.dart';
-import 'package:PiliPlus/models/search/suggest.dart';
-import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
-import 'package:PiliPlus/models_new/search/search_trending/data.dart';
-import 'package:PiliPlus/utils/extension/get_ext.dart';
-import 'package:PiliPlus/utils/extension/string_ext.dart';
-import 'package:PiliPlus/utils/id_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/common/widgets/dialog/dialog.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/search.dart';
+import 'package:piliplus/models/search/suggest.dart';
+import 'package:piliplus/models_new/search/search_rcmd/data.dart';
+import 'package:piliplus/models_new/search/search_trending/data.dart';
+import 'package:piliplus/utils/extension/get_ext.dart';
+import 'package:piliplus/utils/extension/string_ext.dart';
+import 'package:piliplus/utils/id_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:stream_transform/stream_transform.dart';

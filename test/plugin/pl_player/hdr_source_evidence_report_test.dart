@@ -1,4 +1,4 @@
-import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart' show VideoParams;
 import 'package:media_kit_video/media_kit_video.dart';

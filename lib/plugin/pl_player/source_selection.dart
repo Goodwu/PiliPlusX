@@ -1,7 +1,7 @@
-import 'package:PiliPlus/models/video/play/url.dart';
+import 'package:piliplus/models/video/play/url.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 
 /// A single target/revision's source declarations. Never a process-global
 /// cache. Unknown SDR inputs may be tried explicitly; unknown HDR output

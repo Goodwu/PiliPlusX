@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:ui' show Locale;
 
-import 'package:PiliPlus/pages/video/local_diagnostic/local_video_diagnostic.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/utils/path_utils.dart' as app_paths;
-import 'package:PiliPlus/utils/storage.dart';
+import 'package:piliplus/pages/video/local_diagnostic/local_video_diagnostic.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/utils/path_utils.dart' as app_paths;
+import 'package:piliplus/utils/storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';

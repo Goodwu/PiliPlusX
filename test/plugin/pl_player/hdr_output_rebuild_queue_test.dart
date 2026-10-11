@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr_output_rebuild_queue.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr_output_rebuild_queue.dart';
 
 void main() {
   test('one completed request does not schedule a second rebuild', () {

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/flutter/chat_list_view.dart';
+import 'package:piliplus/common/widgets/flutter/chat_list_view.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

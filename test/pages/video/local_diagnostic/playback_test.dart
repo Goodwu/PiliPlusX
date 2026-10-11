@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:PiliPlus/pages/video/local_diagnostic/playback.dart';
+import 'package:piliplus/pages/video/local_diagnostic/playback.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

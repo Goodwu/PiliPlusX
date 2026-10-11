@@ -3,9 +3,9 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:PiliPlus/http/browser_ua.dart';
-import 'package:PiliPlus/http/constants.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/http/browser_ua.dart';
+import 'package:piliplus/http/constants.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:ffi/ffi.dart';
 import 'package:get/get_rx/get_rx.dart';
@@ -61,8 +61,9 @@ class MpvConvertWebp {
       name.cast(),
       headers.cast(),
     );
-    calloc.free(name);
-    calloc.free(headers);
+    calloc
+      ..free(name)
+      ..free(headers);
     if (progress != null) {
       _observeProperty('time-pos');
     }

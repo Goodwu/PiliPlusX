@@ -1,7 +1,7 @@
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/models/video/play/url.dart';
-import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
-import 'package:PiliPlus/plugin/pl_player/source_selection.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/models/video/play/url.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/media_kit_video.dart';

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
+import 'package:piliplus/plugin/pl_player/utils/player_touch_trace.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';

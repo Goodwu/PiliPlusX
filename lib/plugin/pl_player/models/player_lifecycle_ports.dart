@@ -1,5 +1,5 @@
-import 'package:PiliPlus/plugin/pl_player/hdr_platform.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/hdr_platform.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' hide HdrCapabilities;
 

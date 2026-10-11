@@ -1,4 +1,4 @@
-name: PiliPlus
+name: piliplus
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -170,6 +170,7 @@ dependencies:
   url_launcher: ^6.3.1
   uuid: ^4.5.1
   vector_math: ^2.2.0
+  web: ^1.1.1
   wakelock_plus: ^1.2.8
   waterfall_flow: ^3.1.0
   web_socket_channel: ^3.0.3

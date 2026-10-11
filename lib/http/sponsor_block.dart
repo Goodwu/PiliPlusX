@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-import 'package:PiliPlus/build_config.dart';
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/sponsor_block_api.dart';
-import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
-import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
-import 'package:PiliPlus/models_new/sponsor_block/segment_item.dart';
-import 'package:PiliPlus/models_new/sponsor_block/user_info.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/build_config.dart';
+import 'package:piliplus/common/constants.dart';
+import 'package:piliplus/http/init.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/sponsor_block_api.dart';
+import 'package:piliplus/models/common/sponsor_block/post_segment_model.dart';
+import 'package:piliplus/models/common/sponsor_block/segment_type.dart';
+import 'package:piliplus/models_new/sponsor_block/segment_item.dart';
+import 'package:piliplus/models_new/sponsor_block/user_info.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
