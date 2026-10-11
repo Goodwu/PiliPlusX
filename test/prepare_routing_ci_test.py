@@ -5,6 +5,7 @@ import argparse
 import contextlib
 import importlib.util
 import io
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -54,6 +55,8 @@ class BootstrapTest(unittest.TestCase):
         self.toolchain_version = '3.47.2'
         self.real_run = subprocess.run
         self.real_untracked_git = False
+        self.real_sdk_git = False
+        self.sdk_diff_failure = False
         self.calls = []
         self.environ = patch.dict(os.environ, {'RUNNER_TEMP': str(self.temp)}, clear=False)
         self.environ.start()
@@ -75,6 +78,10 @@ class BootstrapTest(unittest.TestCase):
     def command(self, command, *, cwd, env, **kwargs):
         self.calls.append((command, Path(cwd), dict(env)))
         stdout, code = '', 0
+        if command[0] == 'git' and self.real_sdk_git and Path(cwd) == self.sdk:
+            if self.sdk_diff_failure and command[1:] == ['diff', '--binary']:
+                return subprocess.CompletedProcess(command, 7, 'diff reader failure', '')
+            return self.real_run(command, cwd=cwd, env=env, **kwargs)
         if command[0] == 'git':
             args = command[1:]
             if args == ['rev-parse', '--show-toplevel']:
@@ -117,6 +124,8 @@ class BootstrapTest(unittest.TestCase):
                 code, stdout = 23, 'patch failed\n'
             if self.rewrite_source:
                 (self.app / 'lib/main.dart').write_text('unauthorized rewrite\n')
+        if not kwargs.get('text'):
+            return subprocess.CompletedProcess(command, code, stdout.encode(), b'')
         return subprocess.CompletedProcess(command, code, stdout)
 
     def bootstrap(self):
@@ -264,6 +273,67 @@ class BootstrapTest(unittest.TestCase):
             self.bootstrap().prepare()
         self.assertFalse(any(call[0][0] == 'pwsh' for call in self.calls))
 
+    def real_sdk_repository(self):
+        self.real_sdk_git = True
+        self.real_run(['git', 'init', str(self.sdk)], check=True, capture_output=True)
+        # This real tracked binary has a path longer than 260 on this test host.
+        relative = ('engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/ScenariosUITests/'
+                    'golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_'
+                    'iPhone SE (3rd generation)_26.2_simulator.png')
+        path = self.sdk / relative
+        path.parent.mkdir(parents=True)
+        original = b'\x89PNG\r\n\x1a\noriginal binary\x00\xff'
+        path.write_bytes(original)
+        self.real_run(['git', '-C', str(self.sdk), 'add', '.'], check=True, capture_output=True)
+        self.real_run(['git', '-C', str(self.sdk), '-c', 'user.name=Fixture',
+                       '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'binary fixture'],
+                      check=True, capture_output=True)
+        return relative, path, original
+
+    def test_real_dirty_binary_saves_all_diffs_and_exact_hashes_before_refusal(self):
+        relative, path, original = self.real_sdk_repository()
+        changed = b'\x89PNG\r\n\x1a\nchanged binary\x00\xfe'
+        path.write_bytes(changed)
+        self.real_run(['git', '-C', str(self.sdk), 'add', str(path)], check=True, capture_output=True)
+        with self.assertRaisesRegex(ValueError, 'unknown modifications'):
+            self.bootstrap().prepare_sdk()
+        evidence = json.loads((self.args.output / 'original-sdk-state.json').read_text())
+        item = next(item for item in evidence['files'] if item['path'] == relative)
+        self.assertGreater(item['pathCharacters'], 260)
+        self.assertEqual(item['expectedHead']['sha256'], hashlib.sha256(original).hexdigest())
+        self.assertEqual(item['index']['sha256'], hashlib.sha256(changed).hexdigest())
+        self.assertEqual(item['worktree']['sha256'], hashlib.sha256(changed).hexdigest())
+        for name in ('status', 'working-diff', 'index-diff'):
+            self.assertTrue((self.args.output / f'original-sdk-{name}.log').is_file())
+        self.assertIn('GIT binary patch', (self.args.output / 'original-sdk-index-diff.log').read_text())
+        self.assertEqual(path.read_bytes(), changed)
+        self.assertFalse(any(call[0][0] == 'pwsh' for call in self.calls))
+
+    def test_sdk_diff_failure_does_not_prevent_index_or_file_evidence(self):
+        relative, path, original = self.real_sdk_repository()
+        path.write_bytes(original + b'changed')
+        self.sdk_diff_failure = True
+        with self.assertRaisesRegex(ValueError, 'unreadable state'):
+            self.bootstrap().prepare_sdk()
+        evidence = json.loads((self.args.output / 'original-sdk-state.json').read_text())
+        self.assertIn('working-diff', evidence['collectionErrors'])
+        self.assertTrue((self.args.output / 'original-sdk-index-diff.log').exists())
+        self.assertEqual(evidence['files'][0]['expectedHead']['sha256'], hashlib.sha256(original).hexdigest())
+        receipt = json.loads((self.args.output / 'bootstrap.json').read_text())
+        failed = next(step for step in receipt['steps'] if step['name'] == 'original-sdk-working-diff')
+        self.assertEqual(failed['exitCode'], 7)
+
+    def test_missing_sdk_binary_saves_head_and_explicit_worktree_read_error(self):
+        relative, path, original = self.real_sdk_repository()
+        path.unlink()
+        with self.assertRaisesRegex(ValueError, 'unknown modifications'):
+            self.bootstrap().prepare_sdk()
+        evidence = json.loads((self.args.output / 'original-sdk-state.json').read_text())
+        item = next(item for item in evidence['files'] if item['path'] == relative)
+        self.assertEqual(item['expectedHead']['sha256'], hashlib.sha256(original).hexdigest())
+        self.assertIn('readError', item['worktree'])
+        self.assertFalse(path.exists())
+
     def test_unknown_sdk_modification_preserved_and_refused(self):
         self.sdk_dirty = True
         (self.sdk / 'unknown.dart').write_text('preserve me')
@@ -284,14 +354,14 @@ class BootstrapTest(unittest.TestCase):
         self.bootstrap().prepare()
         self.assertEqual(original_config.read_bytes(), original_bytes)
         sdk_calls = [call for call in self.calls if call[0][0].endswith(('dart', 'dart.exe'))]
-        self.assertEqual(sdk_calls[0][1], self.private / 'flutter/packages/flutter_tools')
+        self.assertEqual(sdk_calls[0][1], self.private / 'f/packages/flutter_tools')
         self.assertFalse(any(call[0][0] == 'pwsh' and call[2]['FLUTTER_ROOT'] == str(shared) for call in self.calls))
 
     def test_private_cache_symlink_escape_stops_before_dependency_write(self):
         shared = self.root / 'shared-cache'
         shared.mkdir()
         try:
-            (self.private / 'pub-cache').symlink_to(shared, target_is_directory=True)
+            (self.private / 'p').symlink_to(shared, target_is_directory=True)
         except OSError:
             self.skipTest('symlinks unavailable on this host')
         with self.assertRaisesRegex(ValueError, 'Pub cache escaped'):

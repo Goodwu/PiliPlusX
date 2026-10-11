@@ -39,6 +39,8 @@ runs:
     - name: Keep SDK patch inputs in LF form
       shell: pwsh
       run: |
+        git config --global core.longpaths true
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to configure SDK long-path support' }
         git config --global core.autocrlf false
         if ($LASTEXITCODE -ne 0) { throw 'Unable to configure SDK checkout line endings' }
         git config --global core.eol lf
@@ -49,8 +51,8 @@ runs:
         flutter-version-file: ${{ inputs.app-root }}/pubspec.yaml
         cache: false
         pub-cache: false
-        cache-path: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}/sdk-install
-        pub-cache-path: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}/pub-cache
+        cache-path: ${{ runner.temp }}/rb/s
+        pub-cache-path: ${{ runner.temp }}/rb/p
     - name: Prepare and verify the source vector in a private toolchain
       id: prepare
       shell: pwsh
@@ -60,12 +62,12 @@ runs:
         INPUT_APP_SHA: ${{ inputs.app-sha }}
         INPUT_MEDIA_SHA: ${{ inputs.media-kit-sha }}
         INPUT_PLATFORM: ${{ inputs.platform }}
-        PRIVATE_ROOT: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}
+        PRIVATE_ROOT: ${{ runner.temp }}/rb
       run: |
         $ErrorActionPreference = 'Stop'
         $app = Join-Path $env:GITHUB_WORKSPACE $env:INPUT_APP
         $media = Join-Path $env:GITHUB_WORKSPACE $env:INPUT_MEDIA
-        $output = Join-Path $env:PRIVATE_ROOT 'results'
+        $output = Join-Path $env:PRIVATE_ROOT 'r'
         python (Join-Path $app 'scripts/prepare_routing_ci.py') --app-root $app --media-kit-root $media --flutter-root $env:FLUTTER_ROOT --private-root $env:PRIVATE_ROOT --output $output --expected-app-sha $env:INPUT_APP_SHA --expected-media-kit-sha $env:INPUT_MEDIA_SHA --platform $env:INPUT_PLATFORM
         if ($LASTEXITCODE -ne 0) { throw "Routing source bootstrap failed: $LASTEXITCODE" }
         "app-root=$app" >> $env:GITHUB_OUTPUT

@@ -135,6 +135,76 @@ class Bootstrap:
                     raise ValueError('Patch files require an LF checkout before bootstrap; '
                                      'set core.autocrlf=false/core.eol=lf before actions/checkout')
 
+    def sdk_blob_hash(self, label: str, source: Path, revision: str, relative: str) -> dict:
+        command = ['git', 'cat-file', 'blob', f'{revision}:{relative}']
+        step = {'name': label, 'command': command, 'cwd': str(source)}
+        self.receipt['steps'].append(step)
+        self.save()
+        try:
+            result = subprocess.run(command, cwd=source, env=self.env,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            step['exitCode'] = result.returncode
+            (self.output / f'{label}.log').write_bytes(result.stderr)
+            if result.returncode:
+                return {'readError': f'git exited {result.returncode}; see {label}.log'}
+            return {'sha256': hashlib.sha256(result.stdout).hexdigest(), 'bytes': len(result.stdout)}
+        except OSError as error:
+            step['launchError'] = str(error)
+            return {'readError': str(error)}
+        finally:
+            self.save()
+
+    def collect_sdk_state(self, source: Path) -> bool:
+        """Preserve all diffs and exact blob/worktree evidence before refusing changes."""
+        states, errors = {}, {}
+        for label, flags in [('status', ['status', '--porcelain=v1', '-z', '--untracked-files=no']),
+                             ('working-diff', ['diff', '--binary']), ('index-diff', ['diff', '--cached', '--binary'])]:
+            try:
+                states[label] = self.run(f'original-sdk-{label}', ['git', *flags], source)
+            except (OSError, RuntimeError) as error:
+                errors[label] = str(error)
+        evidence = {'source': str(source), 'collectionErrors': errors, 'files': []}
+        if 'status' in states:
+            # Use the saved raw NUL-delimited status, not run()'s whitespace-stripped return.
+            records = (self.output / 'original-sdk-status.log').read_text(encoding='utf-8').split('\0')
+            position = 0
+            while position < len(records):
+                record = records[position]
+                position += 1
+                if not record:
+                    continue
+                status, relative = record[:2], record[3:]
+                if len(record) < 4 or record[2] != ' ':
+                    errors['statusParsing'] = f'Invalid porcelain status record: {record!r}'
+                    continue
+                paths = [relative]
+                if any(flag in status for flag in 'RC'):
+                    if position >= len(records) or not records[position]:
+                        errors['statusParsing'] = 'Missing rename/copy source path'
+                    else:
+                        paths.append(records[position])
+                        position += 1
+                for relative in paths:
+                    item = {'path': relative, 'status': status,
+                            'absolutePath': str(source / relative), 'pathCharacters': len(str(source / relative))}
+                    index = len(evidence['files'])
+                    item['expectedHead'] = self.sdk_blob_hash(f'original-sdk-file-{index}-head', source,
+                                                             self.receipt['sdkCommit'], relative)
+                    item['index'] = self.sdk_blob_hash(f'original-sdk-file-{index}-index', source, '', relative)
+                    try:
+                        path = source / relative
+                        if not within(path, source):
+                            raise ValueError('Modified SDK path escaped source root')
+                        content = path.read_bytes()
+                        item['worktree'] = {'sha256': hashlib.sha256(content).hexdigest(), 'bytes': len(content)}
+                    except (OSError, ValueError) as error:
+                        item['worktree'] = {'readError': str(error)}
+                    evidence['files'].append(item)
+        self.receipt['originalSdkState'] = evidence
+        (self.output / 'original-sdk-state.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
+        self.save()
+        return bool(errors or any(states.values()))
+
     def prepare_sdk(self) -> tuple[Path, Path]:
         temporary = Path(self.env['RUNNER_TEMP']).resolve(strict=True)
         if not within(self.private, temporary) or self.private == temporary:
@@ -150,12 +220,9 @@ class Bootstrap:
             raise ValueError('Flutter git worktree escaped SDK root')
         self.receipt['sdkCommit'] = self.run('original-sdk-head', ['git', 'rev-parse', 'HEAD'], source)
         self.receipt['sdkTree'] = self.run('original-sdk-tree', ['git', 'rev-parse', 'HEAD^{tree}'], source)
-        for label, flags in [('status', ['status', '--porcelain', '--untracked-files=no']),
-                             ('working-diff', ['diff', '--binary']), ('index-diff', ['diff', '--cached', '--binary'])]:
-            state = self.run(f'original-sdk-{label}', ['git', *flags], source)
-            if state:
-                raise ValueError('Flutter SDK has unknown modifications; preserved and refused before patching')
-        sdk = source if within(source, self.private) else self.private / 'flutter'
+        if self.collect_sdk_state(source):
+            raise ValueError('Flutter SDK has unknown modifications or unreadable state; preserved and refused before patching')
+        sdk = source if within(source, self.private) else self.private / 'f'
         if sdk != source:
             if sdk.exists():
                 raise ValueError('Private SDK copy target already exists; refusing to overwrite')
@@ -164,7 +231,7 @@ class Bootstrap:
             shutil.rmtree(sdk / 'packages/flutter_tools/.dart_tool', ignore_errors=True)
             for name in ('flutter_tools.snapshot', 'flutter_tools.stamp'):
                 (sdk / 'bin/cache' / name).unlink(missing_ok=True)
-        cache = self.private / 'pub-cache'
+        cache = self.private / 'p'
         cache.mkdir(exist_ok=True)
         if not within(cache, self.private):
             raise ValueError('Pub cache escaped private root')

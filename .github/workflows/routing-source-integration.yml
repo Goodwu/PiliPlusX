@@ -91,9 +91,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
+          git config --global core.longpaths true
           git config --global core.autocrlf false
           git config --global core.eol lf
-          printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/routing-bootstrap-app-source/results" >> "$GITHUB_ENV"
+          printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/rb/r" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -198,11 +199,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           $ErrorActionPreference = 'Stop'
+          git config --global core.longpaths true
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App long-path support' }
           git config --global core.autocrlf false
           if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App checkout line endings' }
           git config --global core.eol lf
           if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App checkout line endings' }
-          "ROUTING_RESULTS=$env:RUNNER_TEMP/routing-bootstrap-platform-source/results" >> $env:GITHUB_ENV
+          "ROUTING_RESULTS=$env:RUNNER_TEMP/rb/r" >> $env:GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}

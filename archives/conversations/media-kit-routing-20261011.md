@@ -2,6 +2,20 @@
 
 ## Current State
 
+当前已推送App f179e21a7c20f9f167232c060f90f32d702c19bd；库8b98c67a293876bd4af3f36ff245968ca848b41e（R01d新检查点）。最新已核对CI只证明旧f179+915：source38159246222/Build38159246432均失败，Android/Linux/macOS实际bootstrap通过（各strict零问题/211Flutter/bundle/真实SDK及package补丁/10routing与全部261roots/前后final新鲜度），Android另Chrome/Web通过，本轮Python两run各309。Windows original SDK tracked PNG修改被拒绝，路径261字符是嫌疑，实际原文件工作hash/diff缺口保留；Build另6Release前置失败。证据/tmp/mk-routing-ci04-20261012/summary.json，未改标最新库。
+
+CI04 Windows窄修已完成V1独立29 bootstrap+19workflow+13来源/Actionlint通过，待本检查点提交后真实runner验证：runner.temp/rb短根（sdk s/flutter/cache p/results r/fallback f）统一；App首次checkout/SDK前longpaths及LF；未知SDK先收齐status/working/indexdiff与HEAD/index/worktree hash或readError再拒绝。不得ignore/reset原SDK，220字符静态路径计算不证明原因或实际修复成功。来源、真实补丁、roots/hash/freshness/失败归档门保留。
+
+34info已于CI03清零，DEVICE旧8bed+a3向量34info不覆盖当前严格分析。库R01a/R01b/R01c已实现，R01d刚推送8b98c67a普通scalar decoder复核/原子entry-epoch/单review预算/代次与MIME/frame/报告绑定；两critical问题修复后独立255与strict通过，两门删除负例红灯保留。预算不包括open admission，不能抢占同步native FFI。真实carrier、copy/software catalog及auto/prefer/require有效配置闭环仍开放；experimental默认false，true主测/false回归。
+
+native输入门四新文件仍dirty未提交，critical发现nm exit0/no-symbols误当absence及APK额外成员CRC漏验，原worker修复中。接受账本空，不授权DV001；实际Release workflow/native候选/ABI/签名/设备未验。正式mac tag、各平台来源/ABI门不删除。
+
+DV001仍1095a43原PR修复未回交；PR5最新5b279611文档16行已归主线aeafc6c3，原与导入6hash及V1原文/5链接核验，两个脚本未导入。新188/34info/244为DEVICE旧向量声称，原manifest日志未入PR；AVC EOS不等于dvh1/HDR，UX归因未证，dvh1菜单后e2e仍缺。DV001与PR5最终归并、完整manifest、最新P5/P8.4/truefalse/普通Session/owner/YUV arm实机复测必需。保留LG FULL/range1及owner/ACK/lease，主PR不merge/publish。
+
+## History
+
+### CI04 Windows检查点前快照（历史）
+
 当前已推送App f7505821fb1c8191f2c899555c4c5e9129d5421a + media-kit9152154473901b750553be96dbc2137c927b2f5d；下述已成功源码运行仅证明此前c51fd0973 + media-kit12966e7a。最新已完成专用source38158306410 attempt1 SUCCESS：实际Appf750+库915（treea8b1cdc6/9ad3d930），strict零问题、211Flutter/1Chrome/299Python、Web/bundle、10包before/patched/after一致与两仓freshness通过。source artifact11709368250 ZIP938b8443eecd0e1b03e21525450340671f2326f7a1704aea8a446f47816b9c6d；Build内source独立11708758246也成功，不跨run改标。库915 source38158342447 video604+3原mac Linux跳过/lab298/strict通过；query34+Java、Darwin9、OHOSunsigned成功，general仍live，旧general四tests终态cancelled。证据/tmp/mk-routing-ci-20261012-next/summary.json。上述运行不证明后续接线提交。
 
 34 info已在CI03 1965ba0e清零并由新向量继续验证，不再是待修项。R01b12966请求契约统一、输出复用/重建与失败清理已实现，本地64目标、独立critical78及strict通过。真实decoder/presenter/copy/software catalog、auto/prefer/require有效配置贯穿闭环仍未完成，experimental产品默认false保持。
@@ -16,7 +30,6 @@ DEVICE最新6111344927登记LG原候选实体屏幕人眼颜色亮度基本正�
 
 新CI Appsource38158306410/Build38158306591、库915source38158342447及query/Darwin/OHOS/general正在核对。Build内源码job114525735394已SUCCESS，artifact11708758246实际f750+915（treea8b1cdc6/9ad3d930），211Flutter/1Chrome/Web/bundle/10roots前后相等及freshness成功；kernel a9c7d7eab0ce9ed196e8a32da6b3b709ad3f5b829ace20353b60ad27b95d437a。Python Build299实跑成功，dedicated源码job仍待其独立终态，不跨run借archive。库915源码604video+3旧mac跳过/298lab/strict已成功。Build整体6Release前置失败，native未验。不删除新鲜度门。
 
-## History
 
 - 2026-10-11：CORE继任从当前远端569138fa建立同分支独立worktree，保留默认checkout .zcodeignore；归并已完成F01/CI02与旧分析债务状态。
 

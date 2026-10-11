@@ -54,6 +54,9 @@ def validate_routing_bootstrap(text):
             position = body.find(setting)
             if position < 0 or position >= checkout:
                 raise ValueError(name + ' requires LF configuration before checkout')
+        longpaths = body.find('git config --global core.longpaths true')
+        if longpaths < 0 or longpaths >= checkout:
+            raise ValueError(name + ' requires long-path support before checkout')
         if 'ref: ${{ github.event.pull_request.head.sha || github.sha }}' not in body:
             raise ValueError(name + ' requires exact App event HEAD')
         library = body.split('repository: Goodwu/media-kit', 1)[-1].split('persist-credentials: false', 1)[0]
@@ -115,6 +118,29 @@ def validate_routing_bootstrap(text):
                     'Final source freshness/package binding verification failed'):
         if f"if ($LASTEXITCODE -ne 0) {{ throw '{failure}' }}" not in matrix:
             raise ValueError('Matrix must propagate native command failure: ' + failure)
+
+
+def validate_short_bootstrap_paths(action, workflow):
+    required = {
+        'cache-path': '${{ runner.temp }}/rb/s',
+        'pub-cache-path': '${{ runner.temp }}/rb/p',
+        'PRIVATE_ROOT': '${{ runner.temp }}/rb',
+    }
+    for name, expected in required.items():
+        match = re.search(r'^\s+' + re.escape(name) + r': (.+)$', action, re.M)
+        if not match or match.group(1) != expected:
+            raise ValueError('Bootstrap requires one short private installation root: ' + name)
+    if "Join-Path $env:PRIVATE_ROOT 'r'" not in action:
+        raise ValueError('Action results must use the short private root')
+    sdk_setup = action.find('uses: subosito/flutter-action@v2')
+    for setting in ('core.longpaths true', 'core.autocrlf false', 'core.eol lf'):
+        position = action.find('git config --global ' + setting)
+        if position < 0 or position >= sdk_setup:
+            raise ValueError('SDK requires Git configuration before setup: ' + setting)
+    for name, prefix in [('app-source', '$RUNNER_TEMP'), ('platform-source', '$env:RUNNER_TEMP')]:
+        body = routing_job(workflow, name)
+        if prefix + '/rb/r' not in body or 'routing-bootstrap-' in body:
+            raise ValueError('Workflow results disagree with action private root: ' + name)
 
 
 class ReusableSourceContractTests(unittest.TestCase):
@@ -188,6 +214,45 @@ class RoutingBootstrapWiringTests(unittest.TestCase):
         broken = body.replace('          git config --global core.autocrlf false\n', '')
         with self.assertRaisesRegex(ValueError, 'LF configuration before checkout'):
             validate_routing_bootstrap(self.text.replace(body, broken))
+
+    def test_windows_long_paths_must_be_enabled_before_checkout(self):
+        body = routing_job(self.text, 'platform-source')
+        setting = '          git config --global core.longpaths true\n'
+        self.assertIn(setting, body)
+        broken = body.replace(setting, '')
+        with self.assertRaisesRegex(ValueError, 'long-path support before checkout'):
+            validate_routing_bootstrap(self.text.replace(body, broken))
+        moved = body.replace(setting, '').replace('      - uses: actions/checkout@v4\n',
+                                                     '      - uses: actions/checkout@v4\n' + setting, 1)
+        with self.assertRaisesRegex(ValueError, 'long-path support before checkout'):
+            validate_routing_bootstrap(self.text.replace(body, moved))
+
+    def test_short_action_paths_and_artifacts_are_consistent(self):
+        action = (ROOT / '.github/actions/routing-bootstrap/action.yml').read_text()
+        validate_short_bootstrap_paths(action, self.text)
+        # Reproduce the observed 196-character golden relative path using a
+        # Windows runner root. This is a boundary calculation, not causal proof.
+        relative = ('engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/ScenariosUITests/'
+                    'golden_platform_view_large_cliprrect_with_transform_multiple_clips_impeller_'
+                    'iPhone SE (3rd generation)_26.2_simulator.png')
+        old = 'D:\\a\\_temp\\routing-bootstrap-platform-source\\sdk-install\\flutter\\' + relative.replace('/', '\\')
+        new = 'D:\\a\\_temp\\rb\\s\\flutter\\' + relative.replace('/', '\\')
+        self.assertGreater(len(old), 260)
+        self.assertLess(len(new), 260)
+
+    def test_inconsistent_or_lengthened_results_paths_are_rejected(self):
+        action = (ROOT / '.github/actions/routing-bootstrap/action.yml').read_text()
+        for key in ('rb/s', 'rb/p'):
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, 'short private installation root'):
+                validate_short_bootstrap_paths(action.replace(key, 'routing-bootstrap-platform-source/' + key), self.text)
+        with self.assertRaisesRegex(ValueError, 'results disagree'):
+            validate_short_bootstrap_paths(action, self.text.replace('$env:RUNNER_TEMP/rb/r', '$env:RUNNER_TEMP/old/results'))
+
+    def test_sdk_long_paths_must_precede_setup_and_keep_lf(self):
+        action = (ROOT / '.github/actions/routing-bootstrap/action.yml').read_text()
+        for setting in ('core.longpaths true', 'core.autocrlf false', 'core.eol lf'):
+            with self.subTest(setting=setting), self.assertRaisesRegex(ValueError, 'before setup'):
+                validate_short_bootstrap_paths(action.replace('git config --global ' + setting, '# removed'), self.text)
 
     def test_missing_actual_platform_or_finish_step_is_rejected(self):
         self.reject('platform: windows', 'platform: linux', 'windows')
