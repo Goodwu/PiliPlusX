@@ -29,8 +29,10 @@ void main() {
     await supportDirectory.delete(recursive: true);
   });
 
-  tearDown(() {
-    Get.reset();
+  // The test framework must observe completion/errors of asynchronous reset.
+  // Do not drop the returned Future or merely silence the closure lint.
+  tearDown(() async {
+    await Get.reset();
   });
 
   test('Get.put initializes a network-free intro without Bilibili ids', () {
@@ -54,6 +56,17 @@ void main() {
     expect(intro.timer, isNull);
     expect(intro.prevPlay(), isFalse);
     expect(intro.nextPlay(), isFalse);
+  });
+
+  test('awaited reset removes the diagnostic registration before reuse', () async {
+    const tag = 'local-diagnostic-reset';
+    Get.put(
+      LocalDiagnosticIntroController(diagnosticHeroTag: tag),
+      tag: tag,
+    );
+    expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isTrue);
+    await Get.reset();
+    expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isFalse);
   });
 
   testWidgets('player page stays inert when the compile flag is off', (

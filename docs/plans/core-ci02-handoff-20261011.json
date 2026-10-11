@@ -1,0 +1,22 @@
+{
+  "taskId": "MK-ROUTING-20261011",
+  "workItem": "CORE-CI02",
+  "role": "CORE",
+  "branch": "routing/MK-ROUTING-20261011",
+  "pullRequest": 1,
+  "centralClaimComment": 6109236283,
+  "deviceRegistrationComment": 6109258398,
+  "deviceScopeReply": 6109294215,
+  "status": "implemented_pending_final_current_source_validation",
+  "checkpoints": [
+    {"commit": "5370a1879b504bcb291f85feeb67ffdaba2c7c78", "scope": "Gesture/event fixture cascades; Future.sync for throw-only asynchronous errors; controlled cleanup-before-rethrow regression", "doNotRepeat": true},
+    {"commit": "746ef93ea585e57a95e4a98ed4db125d01ef2ed8", "scope": "Chat layout receiver cleanup and two widget regressions; preserve 8-bit opacity rounding in VoteDecoration", "doNotRepeat": true},
+    {"commitAnchor": "test: verify border quantization and await diagnostic teardown [CORE CORE-CI02 MK-ROUTING-20261011]", "scope": "Six drawing-command opacity/border cases, explicitly awaited Get.reset with registration regression, initialization fixture cascade", "doNotRepeat": true}
+  ],
+  "baseline": {"app": "b8303a9c2ce0c07b19bc85528dd1b1d93f72f61a", "analyzerInfos": 62, "flutterTestsPassed": 178, "pythonTestsPassed": 244},
+  "expectedNewFlutterTests": 10,
+  "validation": "Pending independent final App CI. Do not use the expected diagnostic reduction or test count as a passed result. Keep current-source dependency roots/freshness checks and all strict analyzer rules.",
+  "scopeLimit": "No source-query/planner/Session/App playback-controller or native production changes. No SDK/native-build scripts, package rename, lint suppression or copied text-control rewrite. Existing Get.reset automatic tearoff was not applied: cleanup now deliberately awaits its Future and is tested.",
+  "parallel": "DEVICE owns environment/native build/device scope. CORE has asked it to audit and include current applicable mpv changes instead of automatically excluding them because the build recipe pins an older ref. No device acceptance inferred. Shared files still need explicit claims.",
+  "resume": "Read current PR1 and media-kit PR4 terminal comments plus canonical ledgers. This delta supplements older 62-info summaries after validation; do not recreate these commits. Future builds resolve current task heads, not these historical evidence SHAs. Remaining copied-widget deprecated APIs, web API/package naming, asynchronous BuildContext and release Build migration are separate open items. Full current-native APK and devices remain separate."
+}

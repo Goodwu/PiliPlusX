@@ -59,8 +59,9 @@ void main() {
           return 'output-a';
         },
         disposePair: (output) async {
-          events.add('dispose-output:$output');
-          events.add('dispose-player-a');
+          events
+            ..add('dispose-output:$output')
+            ..add('dispose-player-a');
         },
       );
 
