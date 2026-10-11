@@ -44,6 +44,7 @@ class VideoDecodeCapability {
 enum VideoQualityIneligibility {
   none,
   displayHdrUnsupported,
+  routeUnsupported,
   eightKProbePending,
   eightKProbeFailed,
   eightKHardwareUnsupported,
@@ -57,6 +58,7 @@ class VideoQualityEligibility {
 
   String get message => switch (reason) {
     VideoQualityIneligibility.displayHdrUnsupported => '当前显示器不支持 HDR 输出',
+    VideoQualityIneligibility.routeUnsupported => '当前解码或 HDR 输出路径不支持该档位',
     VideoQualityIneligibility.eightKProbePending => '正在检测当前设备的 8K 解码能力',
     VideoQualityIneligibility.eightKProbeFailed => '无法确认当前设备的 8K 解码能力',
     VideoQualityIneligibility.eightKHardwareUnsupported => '当前设备不支持对应编码的 8K 硬解',
@@ -161,9 +163,7 @@ VideoItem? highestEligibleNonEightKTrack({
   });
   final items = eligible.toList();
   if (items.isEmpty) return null;
-  return items.reduce(
-    (a, b) => a.quality.code > b.quality.code ? a : b,
-  );
+  return items.reduce((a, b) => a.quality.code > b.quality.code ? a : b);
 }
 
 /// A separate channel method keeps decode support from being accidentally

@@ -1,4 +1,4 @@
-import 'package:media_kit/media_kit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 /// Android HDR 选档与展示接入层（S12，验收 A7/A8）。
@@ -15,21 +15,20 @@ abstract final class HdrOutputSelector {
   /// `allowExperimental`，在此构造 `HdrRoutingPolicy`，不新增设备判断。
   static const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
 
-  /// 最近一次能力快照（选档用）。由 [queryCapabilities] 统一经
-  /// media-kit 公开 API `HdrCapabilities.query(player:)` 刷新。P5 管线
-  /// 由引擎 attach 时的原生探针一次性探测并缓存快照，`player` 参数仅
-  /// 保留兼容、不再参与读取；无 Player 时快照缺省，P5 档预测保守回落
-  /// SDR（P8.4/HDR10/HLG/SDR 预测不受影响）。
-  static HdrCapabilities? lastCapabilities;
-
-  /// 开播前能力查询（R1.1）。[player] 可空直传 media-kit 公开 API，
-  /// 不再手工读插件通道兜底。
-  static Future<HdrCapabilities?> queryCapabilities({Player? player}) async {
+  /// Query one explicit output target before creating a Player. A failure is
+  /// unknown for THIS request; never reuse a previous display/source snapshot.
+  static Future<VideoRouteCapabilities?> queryCapabilities({
+    required VideoOutputTarget target,
+    Iterable<VideoSourceSpec> sources = const [],
+  }) async {
     try {
-      lastCapabilities = await HdrCapabilities.query(player: player);
-      return lastCapabilities;
-    } on Object {
-      return lastCapabilities;
+      return await VideoRouteCapabilities.query(
+        target: target,
+        sources: sources,
+      );
+    } on Object catch (error) {
+      debugPrint('Video route capability query failed: ${error.runtimeType}');
+      return null;
     }
   }
 
@@ -101,12 +100,13 @@ abstract final class HdrOutputSelector {
   /// 选档预测（R1.2）：同一 planner 同时用于执行，预测与执行同源。
   static HdrRoutePrediction? predict({
     required HdrSourceDescriptor descriptor,
-    HdrCapabilities? capabilities,
-  }) {
-    final caps = capabilities ?? lastCapabilities;
-    if (caps == null) return null;
-    return caps.predict(descriptor, policy: policy);
-  }
+    required VideoSourceSpec specification,
+    required VideoRouteCapabilities? capabilities,
+  }) => capabilities?.predict(
+    descriptor,
+    specification: specification,
+    policy: policy,
+  );
 
   /// 「片源与显示能力是否一致」的 App 决策：预测可呈现（能开播且呈现为
   /// HDR 或原生杜比视界）才请求 HDR 档，否则回落 SDR 档。

@@ -1,3 +1,5 @@
+import 'package:media_kit_video/media_kit_video.dart'
+    show VideoSourceSpec, VideoOutputTarget;
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -5,9 +7,16 @@ sealed class DataSource {
   final String videoSource;
   final String? audioSource;
 
+  /// Encoded source dimensions/rate, never viewport geometry. The immutable
+  /// choice travels with the URL across asynchronous Player initialization.
+  final VideoSourceSpec? videoSpec;
+  final VideoOutputTarget? outputTarget;
+
   DataSource({
     required this.videoSource,
     required this.audioSource,
+    this.videoSpec,
+    this.outputTarget,
   });
 }
 
@@ -15,6 +24,8 @@ class NetworkSource extends DataSource {
   NetworkSource({
     required super.videoSource,
     required super.audioSource,
+    super.videoSpec,
+    super.outputTarget,
   });
 }
 

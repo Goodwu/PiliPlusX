@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'dart:math' show min;
 import 'dart:ui';
 
+import 'package:media_kit_video/media_kit_video.dart' show VideoOutputTarget;
+import 'package:PiliPlus/plugin/pl_player/source_selection.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
@@ -127,6 +129,79 @@ class VideoDetailController extends GetxController
   /// them closed over the previous response.
   final RxInt videoQualityMenuRevision = 0.obs;
   int _playbackDataRevision = 0;
+  VideoOutputTarget _videoOutputTarget =
+      const VideoOutputTarget.applicationView();
+  FlutterView? _routingView;
+  int? _routingDisplayId;
+  int _routingQuerySerial = 0;
+  DashRouteSelection? _routeSelection;
+
+  /// Called by the owning page, not by a Player or a guessed OS display ID.
+  void bindOutputView(FlutterView view) {
+    if (identical(view, _routingView) && _routingDisplayId == view.display.id)
+      return;
+    _routingView = view;
+    _routingDisplayId = view.display.id;
+    _videoOutputTarget = VideoOutputTarget.flutterView(view);
+    plPlayerController.videoOutputTarget = _videoOutputTarget;
+    _routeSelection = null;
+    if (!Platform.isAndroid ||
+        _playbackDataRevision == 0 ||
+        isQuerying ||
+        isFileSource)
+      return;
+    unawaited(_refreshRoutingTarget());
+  }
+
+  Future<void> _refreshRoutingTarget() async {
+    final revision = _playbackDataRevision;
+    if (!await _probeRoutingCapabilities(revision) || isClosed) return;
+    await plPlayerController.refreshHdrDisplayCapabilities();
+    if (revision != _playbackDataRevision || isClosed || isQuerying) return;
+    // Re-open through the ordinary source transaction, which retains position.
+    // An old target snapshot never authorizes the new output.
+    final current = currentVideoQa.value;
+    if (current == null) return;
+    if (findVideoByQa(current.code) == null) {
+      final eligible =
+          data.dash?.video?.where(_routeAllows).toList() ?? const <VideoItem>[];
+      if (eligible.isEmpty) return;
+      currentVideoQa.value = eligible.first.quality;
+      plPlayerController.cacheVideoQa = eligible.first.quality.code;
+    }
+    updatePlayer();
+  }
+
+  bool _routeAllows(VideoItem item) =>
+      !Platform.isAndroid ||
+      (_routeSelection ?? const DashRouteSelection.unknown()).allows(item);
+
+  Future<bool> _probeRoutingCapabilities(int revision) async {
+    if (!Platform.isAndroid) return true;
+    final serial = ++_routingQuerySerial;
+    _routeSelection = null;
+    // A first FlutterView can attach while the initial query is outstanding.
+    // Re-read that target once; do not publish a result for the previous one.
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final target = _videoOutputTarget;
+      final selection = await DashRouteSelection.query(
+        tracks: data.dash?.video ?? const [],
+        target: target,
+      );
+      if (isClosed ||
+          revision != _playbackDataRevision ||
+          serial != _routingQuerySerial)
+        return false;
+      if (!identical(target, _videoOutputTarget)) continue;
+      _routeSelection = selection;
+      plPlayerController.hdrDisplaySupportsHdr.value =
+          selection.displayHdr ?? false;
+      videoQualityMenuRevision.value++;
+      return true;
+    }
+    return false;
+  }
+
   final Map<String, VideoDecodeCapability> _decodeCapabilities = {};
   AudioQuality? currentAudioQa;
   // `findVideoByQa` is also the initial source selector. Give that first
@@ -432,7 +507,7 @@ class VideoDetailController extends GetxController
     if (current == null || !_isHdrQuality(current.code)) return;
 
     final fallback = data.dash!.video!.firstWhereOrNull(
-      (item) => !_isHdrQuality(item.id),
+      (item) => !_isHdrQuality(item.id) && _routeAllows(item),
     );
     if (fallback == null || fallback.quality.code == current.code) return;
 
@@ -448,36 +523,10 @@ class VideoDetailController extends GetxController
       code == VideoQuality.hdr.code ||
       code == VideoQuality.hdrVivid.code;
 
-  /// 开播前预测（需求 R1.2/A7）：按 DASH codec 与清晰度档构造
-  /// HdrSourceDescriptor，调 `HdrCapabilities.query` + `predict`
-  /// （与执行同一 planner）。可呈现（playable 且呈现为 HDR）才请求 HDR 档，
-  /// 否则由调用方回落 SDR 档。非 Android 平台维持既有选择逻辑。
-  Future<bool> _hdrTierPresentable(int quality) async {
-    if (!Platform.isAndroid) return true;
-    final track = _tracksForQuality(quality).firstOrNull;
-    final descriptor = HdrOutputSelector.descriptorFromDash(
-      quality: quality,
-      codec: track?.codecs,
-    );
-    if (descriptor == null) return true;
-    final capabilities = await HdrOutputSelector.queryCapabilities(
-      player: plPlayerController.videoPlayerController,
-    );
-    final prediction = HdrOutputSelector.predict(
-      descriptor: descriptor,
-      capabilities: capabilities,
-    );
-    final presentable = HdrOutputSelector.isHdrPresentable(prediction);
-    // 选档预测日志必须无条件输出（release 同样可见，A7 实机验收依据）。
-    debugPrint(
-      'HDR predict: quality=$quality, codec=${track?.codecs}, '
-      'playable=${prediction?.playable}, '
-      'presentation=${prediction?.presentation.name}, '
-      'selected=${prediction?.selected.strategy.name}, '
-      'presentable=$presentable',
-    );
-    return presentable;
-  }
+  /// HDR eligibility and the eventual codec choice use the SAME per-track
+  /// source result; a supported rendition cannot authorize another codec.
+  bool _hdrTierPresentable(int quality) =>
+      !Platform.isAndroid || _tracksForQuality(quality).any(_routeAllows);
 
   List<VideoItem> _tracksForQuality(int quality) =>
       data.dash?.video
@@ -492,14 +541,20 @@ class VideoDetailController extends GetxController
     );
   }
 
-  VideoQualityEligibility qualityEligibility(int quality) =>
-      videoQualityEligibility(
-        quality: quality,
-        tracks: _tracksForQuality(quality),
-        displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
-        gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
-        decodeCapabilities: _decodeCapabilities,
+  VideoQualityEligibility qualityEligibility(int quality) {
+    if (Platform.isAndroid && !_tracksForQuality(quality).any(_routeAllows)) {
+      return const VideoQualityEligibility(
+        VideoQualityIneligibility.routeUnsupported,
       );
+    }
+    return videoQualityEligibility(
+      quality: quality,
+      tracks: _tracksForQuality(quality),
+      displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+      gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+      decodeCapabilities: _decodeCapabilities,
+    );
+  }
 
   Future<void> _probeEightKDecodeCapabilities(int revision) async {
     if (!PlatformFeatureSupport.isMacOS) return;
@@ -529,6 +584,7 @@ class VideoDetailController extends GetxController
 
   Future<bool> changeVideoQuality(int quality) async {
     final revision = _playbackDataRevision;
+    if (!await _probeRoutingCapabilities(revision)) return false;
     final eligibility = qualityEligibility(quality);
     if (_tracksForQuality(quality).isEmpty) {
       SmartDialog.showToast('当前分 P 不提供该画质');
@@ -539,7 +595,7 @@ class VideoDetailController extends GetxController
       return false;
     }
     // 开播前预测（A7）：本机无法呈现为 HDR 的档位不请求，回落 SDR 档。
-    if (!await _hdrTierPresentable(quality)) {
+    if (!_hdrTierPresentable(quality)) {
       SmartDialog.showToast('当前设备无法以 HDR 呈现该档位，请选择 SDR 画质');
       return false;
     }
@@ -601,9 +657,8 @@ class VideoDetailController extends GetxController
           for (final item in mediaList) {
             if (item.cid != null) {
               try {
-                Get.find<UgcIntroController>(
-                  tag: heroTag,
-                ).onChangeEpisode(item);
+                Get.find<UgcIntroController>(tag: heroTag)
+                    .onChangeEpisode(item);
               } catch (_) {}
               break;
             }
@@ -720,10 +775,7 @@ class VideoDetailController extends GetxController
       alignment: Alignment.centerLeft,
       child: SlideTransition(
         position: animation.drive(
-          Tween<Offset>(
-            begin: const Offset(-1.0, 0.0),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero),
         ),
         child: Padding(
           padding: const EdgeInsets.only(top: 5),
@@ -817,7 +869,10 @@ class VideoDetailController extends GetxController
     bool requireConfirmedEightKHardware = false,
   }) {
     /// 根据currentVideoQa和currentDecodeFormats 重新设置videoUrl
-    var videoList = data.dash!.video!.where((i) => i.id == qa).toList();
+    var videoList = data.dash!.video!
+        .where((i) => i.id == qa)
+        .where(_routeAllows)
+        .toList();
     if (requireConfirmedEightKHardware) {
       videoList = tracksEligibleForPlayback(
         tracks: videoList,
@@ -831,7 +886,7 @@ class VideoDetailController extends GetxController
     VideoItem? bestVideo;
     int bestIndex = preferCodecs.length;
     for (final video in videoList) {
-      final c = video.codecs!;
+      final c = video.codecs ?? '';
       if (currentCodes.any(c.startsWith)) {
         return video;
       }
@@ -924,6 +979,8 @@ class VideoDetailController extends GetxController
           : NetworkSource(
               videoSource: videoUrl!,
               audioSource: audioUrl,
+              videoSpec: DashRouteSelection.specification(firstVideo),
+              outputTarget: _videoOutputTarget,
             ),
       seekTo: seek,
       duration: data.timeLength == null
@@ -1056,6 +1113,10 @@ class VideoDetailController extends GetxController
       // and makes the initial source selection observe the same revision that
       // the menu shows; 4K and lower remain eligible regardless of the probe.
       final playbackRevision = _playbackDataRevision;
+      if (!await _probeRoutingCapabilities(playbackRevision)) {
+        isQuerying = false;
+        return;
+      }
       await _probeEightKDecodeCapabilities(playbackRevision);
       if (isClosed || playbackRevision != _playbackDataRevision) return;
 
@@ -1129,7 +1190,14 @@ class VideoDetailController extends GetxController
         }
       }
 
-      final List<VideoItem> videoList = data.dash!.video!;
+      final List<VideoItem> videoList = data.dash!.video!
+          .where(_routeAllows)
+          .toList();
+      if (videoList.isEmpty) {
+        SmartDialog.showToast('当前设备没有可用的解码及输出路径');
+        isQuerying = false;
+        return;
+      }
       // if (kDebugMode) debugPrint("allVideosList:${allVideosList}");
       // 当前可播放的最高质量视频
       final curHighestVideoQa = videoList.first.quality.code;
@@ -1151,13 +1219,16 @@ class VideoDetailController extends GetxController
           plPlayerController.cacheVideoQa = cacheVideoQa;
         }
       }
-      if (data.acceptQuality?.isNotEmpty == true &&
-          cacheVideoQa <= curHighestVideoQa) {
+      if (cacheVideoQa <= curHighestVideoQa) {
         // 如果预设的画质低于当前最高
-        targetVideoQa = data.acceptQuality!.findClosestTarget(
-          (e) => e <= cacheVideoQa,
-          (a, b) => a > b ? a : b,
-        );
+        targetVideoQa = videoList
+            .map((item) => item.quality.code)
+            .toSet()
+            .toList()
+            .findClosestTarget(
+              (e) => e <= cacheVideoQa,
+              (a, b) => a > b ? a : b,
+            );
       }
       // Bilibili may report ordinary 4K (80) as the first/maximum entry in
       // accept_quality even when the DASH list also contains HDR tiers.  On
@@ -1206,8 +1277,7 @@ class VideoDetailController extends GetxController
       }
       // 开播前预测（R1.2/A7）：「片源与显示能力是否一致」由 predict 决定。
       // 预测不可呈现（不可播或仅 tone-map）的 HDR 档回落到最高 SDR 档。
-      if (_isHdrQuality(targetVideoQa) &&
-          !await _hdrTierPresentable(targetVideoQa)) {
+      if (_isHdrQuality(targetVideoQa) && !_hdrTierPresentable(targetVideoQa)) {
         final sdrVideos = videoList
             .where((item) => !_isHdrQuality(item.id))
             .toList();
@@ -1651,9 +1721,10 @@ class VideoDetailController extends GetxController
   void showNoteList(BuildContext context) {
     String? title;
     try {
-      title = Get.find<UgcIntroController>(
-        tag: heroTag,
-      ).videoDetail.value.title;
+      title = Get.find<UgcIntroController>(tag: heroTag)
+          .videoDetail
+          .value
+          .title;
     } catch (_) {}
     if (plPlayerController.isFullScreen.value || showVideoSheet) {
       final child = NoteListPage(
@@ -1888,25 +1959,21 @@ class VideoDetailController extends GetxController
       String? title;
       try {
         if (isUgc) {
-          title = Get.find<UgcIntroController>(
-            tag: heroTag,
-          ).videoDetail.value.title;
+          title = Get.find<UgcIntroController>(tag: heroTag)
+              .videoDetail
+              .value
+              .title;
         } else {
-          title = Get.find<PgcIntroController>(
-            tag: heroTag,
-          ).videoDetail.value.title;
+          title = Get.find<PgcIntroController>(tag: heroTag)
+              .videoDetail
+              .value
+              .title;
         }
       } catch (_) {}
       if (kDebugMode) {
         debugPrint(title);
       }
-      Get.toNamed(
-        '/dlna',
-        parameters: {
-          'url': url,
-          'title': ?title,
-        },
-      );
+      Get.toNamed('/dlna', parameters: {'url': url, 'title': ?title});
     } else {
       res.toast();
     }

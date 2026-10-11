@@ -1055,6 +1055,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
+  /// The intended Flutter/native output, independent from Player identity.
+  VideoOutputTarget videoOutputTarget =
+      const VideoOutputTarget.applicationView();
+
   Future<_InitializedVideoPlayer?> _initPlayer({
     required int sourceGeneration,
   }) async {
@@ -1077,10 +1081,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     final player = await _lifecyclePorts.createPlayer(
-      PlayerConfiguration(
-        logLevel: kDebugMode ? .warn : .error,
-        options: opt,
-      ),
+      PlayerConfiguration(logLevel: kDebugMode ? .warn : .error, options: opt),
     );
 
     final resources = PlayerResourceLease<VideoController>();
@@ -1094,13 +1095,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         final session = HdrVideoSession(
           player,
           policy: HdrOutputSelector.policy,
+          target: videoOutputTarget,
         );
         _hdrSessionsByPlayer[player] = _PlayerHdrSessionOwnership(session);
         // A new source can start while the capability query awaits; the stale
         // path disposes the session and the local Player together.
-        final capabilities = await HdrOutputSelector.queryCapabilities(
-          player: player,
+        final routeCapabilities = await HdrOutputSelector.queryCapabilities(
+          target: videoOutputTarget,
         );
+        final capabilities = routeCapabilities?.hdr;
         if (sourceGeneration != _hdrSourceGeneration ||
             _playerCount == 0 ||
             _fsDisposed) {
@@ -1160,9 +1163,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           try {
             return await _lifecyclePorts.createOutput(
               player,
-              _videoConfiguration(
-                nativeSurface: useNativeSurface,
-              ),
+              _videoConfiguration(nativeSurface: useNativeSurface),
             );
           } on Object catch (error) {
             if (sourceGeneration != _hdrSourceGeneration ||
@@ -1255,9 +1256,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 非 Android 平台的输出重建（macOS 原生 surface / OHOS XComponent）。
   /// Android 不再走此路径：会话 API 在内部完成复核重建与降级（R2.3/R3.1）。
-  Future<void> _rebuildVideoOutput({
-    bool nativeSurface = false,
-  }) async {
+  Future<void> _rebuildVideoOutput({bool nativeSurface = false}) async {
     final player = _videoPlayerController;
     final old = _videoController;
     final sourceGeneration = _hdrSourceGeneration;
@@ -1379,10 +1378,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
         _refreshHdrDecision();
         unawaited(
-          _applyHdrOutputParameters(
-            player,
-            sourceGeneration: sourceGeneration,
-          ),
+          _applyHdrOutputParameters(player, sourceGeneration: sourceGeneration),
         );
         debugPrint('HDR dataspace applied after output rebuild');
       }
@@ -1435,10 +1431,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     required Player player,
   }) {
     late final Future<void> rebuildFuture;
-    rebuildFuture =
-        _rebuildVideoOutput(
-          nativeSurface: nativeSurface,
-        ).whenComplete(() {
+    rebuildFuture = _rebuildVideoOutput(nativeSurface: nativeSurface)
+        .whenComplete(() {
           final queuedNativeSurface = _hdrOutputRebuildQueue.complete(
             mayReplay: () =>
                 !_fsDisposed &&
@@ -1457,9 +1451,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           }
         });
     _videoOutputRebuildFuture = rebuildFuture;
-    unawaited(
-      rebuildFuture,
-    );
+    unawaited(rebuildFuture);
   }
 
   String _hdrOutputSignature(HdrPlaybackDecision decision) =>
@@ -1503,12 +1495,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> refreshHdrDisplayCapabilities() async {
     final refreshGeneration = ++_hdrDisplayRefreshGeneration;
     if (Platform.isAndroid) {
-      // Android：能力查询走 media-kit R1 快照（无 Player 时 P5 管线保守
-      // 按缺失处理，拿到 Player 后重新查询）；显示 HDR 能力变化由会话
-      // CapabilityChanged 事件驱动。
-      final capabilities = await HdrOutputSelector.queryCapabilities(
-        player: _videoPlayerController,
+      // Query the current output target, including before Player creation.
+      // Session capability notifications use the same target-aware service.
+      final routeCapabilities = await HdrOutputSelector.queryCapabilities(
+        target: videoOutputTarget,
       );
+      final capabilities = routeCapabilities?.hdr;
       if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
       final displayHdr = capabilities?.displayHdrTypes?.isNotEmpty ?? false;
       if (displayHdr != hdrDisplaySupportsHdr.value) {
@@ -1629,10 +1621,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
-  Future<bool> _setHdrColorSpace(
-    Player player, {
-    int? sourceGeneration,
-  }) {
+  Future<bool> _setHdrColorSpace(Player player, {int? sourceGeneration}) {
     final generation = sourceGeneration ?? _hdrSourceGeneration;
     final surfaceGeneration = hdrSurfaceGeneration.value;
     final transaction = _hdrOutputTransactionGate.run<bool>(
@@ -1833,10 +1822,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           generation == _hdrSourceGeneration &&
           identical(player, _videoPlayerController) &&
           surfaceGeneration == hdrSurfaceGeneration.value,
-      action: () => _applyHdrOutputParametersSerial(
-        player,
-        sourceGeneration: generation,
-      ),
+      action: () =>
+          _applyHdrOutputParametersSerial(player, sourceGeneration: generation),
     );
     return run.then<void>((_) {});
   }
@@ -2002,9 +1989,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     var player = _videoPlayerController;
 
     if (player == null) {
-      final initialized = await _initPlayer(
-        sourceGeneration: sourceGeneration,
-      );
+      final initialized = await _initPlayer(sourceGeneration: sourceGeneration);
       if (initialized == null) return;
       final initializedPlayer = initialized.player;
       player = initializedPlayer;
@@ -2150,10 +2135,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final media = Media(
       video,
       start: seekTo,
-      httpHeaders: {
-        'User-Agent': BrowserUa.pc,
-        'Referer': HttpString.baseUrl,
-      },
+      httpHeaders: {'User-Agent': BrowserUa.pc, 'Referer': HttpString.baseUrl},
       extras: extras.isEmpty ? null : extras,
     );
     if (hdrVideoSession.value != null && !onlyPlayAudio.value) {
@@ -2193,6 +2175,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
               quality: _hdrQualityHint,
               codec: _hdrCodecHint,
             ),
+            sourceSpec: dataSource.videoSpec,
+            target: dataSource.outputTarget ?? videoOutputTarget,
             play: false,
           );
         }
@@ -2232,6 +2216,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             quality: _hdrQualityHint,
             codec: _hdrCodecHint,
           ),
+          sourceSpec: dataSource.videoSpec,
+          target: dataSource.outputTarget ?? videoOutputTarget,
           play: true,
         );
       }
@@ -2365,10 +2351,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       },
       isCurrent: isCurrent,
       readProperties: () => FramePacingPropertyReadback.read(
-        getProperty: (property) => player.getProperty(
-          property,
-          waitForInitialization: false,
-        ),
+        getProperty: (property) =>
+            player.getProperty(property, waitForInitialization: false),
         isCurrent: isCurrent,
         playerHandle: playerHandle,
         sourceGeneration: sourceGeneration,
@@ -2390,10 +2374,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   /// 播放事件监听
-  void _startListeners(
-    NativePlayer player, {
-    required int sourceGeneration,
-  }) {
+  void _startListeners(NativePlayer player, {required int sourceGeneration}) {
     assert(_subscriptions == null);
     final stream = player.stream;
     final subscriptionOwner = PlayerSubscriptionOwner();
@@ -3305,22 +3286,20 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   void _scheduleFullScreenDisposalCleanup() {
     if (_fsCleanupInFlight) return;
     _fsCleanupInFlight = true;
-    unawaited(
-      () async {
-        try {
-          await _restoreFullScreenPlatformState(
-            _fullScreenRequestQueue.cancel(),
-            _fullScreenOwner,
-          );
-        } catch (error, stackTrace) {
-          debugPrint('Fullscreen disposal cleanup aborted: $error');
-          if (kDebugMode) debugPrint(stackTrace.toString());
-        } finally {
-          // A failed cleanup must not permanently disable a later retry.
-          _fsCleanupInFlight = false;
-        }
-      }(),
-    );
+    unawaited(() async {
+      try {
+        await _restoreFullScreenPlatformState(
+          _fullScreenRequestQueue.cancel(),
+          _fullScreenOwner,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Fullscreen disposal cleanup aborted: $error');
+        if (kDebugMode) debugPrint(stackTrace.toString());
+      } finally {
+        // A failed cleanup must not permanently disable a later retry.
+        _fsCleanupInFlight = false;
+      }
+    }());
   }
 
   Future<void> triggerFullScreen({
@@ -3681,9 +3660,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> takeScreenshot() async {
     SmartDialog.showToast('截图中');
-    final time = DurationUtils.formatDuration(
-      positionInMilliseconds / 1000,
-    ).replaceAll(':', '-');
+    final time = DurationUtils.formatDuration(positionInMilliseconds / 1000)
+        .replaceAll(':', '-');
     final imageBytes = await videoPlayerController?.screenshot();
     if (imageBytes != null) {
       final codec = await ui.instantiateImageCodec(imageBytes);
