@@ -54,7 +54,6 @@ import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/pages/video/video_quality_eligibility.dart';
 import 'package:PiliPlus/platform/platform_features.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
@@ -138,8 +137,9 @@ class VideoDetailController extends GetxController
 
   /// Called by the owning page, not by a Player or a guessed OS display ID.
   void bindOutputView(FlutterView view) {
-    if (identical(view, _routingView) && _routingDisplayId == view.display.id)
+    if (identical(view, _routingView) && _routingDisplayId == view.display.id) {
       return;
+    }
     _routingView = view;
     _routingDisplayId = view.display.id;
     _videoOutputTarget = VideoOutputTarget.flutterView(view);
@@ -148,8 +148,9 @@ class VideoDetailController extends GetxController
     if (!Platform.isAndroid ||
         _playbackDataRevision == 0 ||
         isQuerying ||
-        isFileSource)
+        isFileSource) {
       return;
+    }
     unawaited(_refreshRoutingTarget());
   }
 
@@ -190,8 +191,9 @@ class VideoDetailController extends GetxController
       );
       if (isClosed ||
           revision != _playbackDataRevision ||
-          serial != _routingQuerySerial)
+          serial != _routingQuerySerial) {
         return false;
+      }
       if (!identical(target, _videoOutputTarget)) continue;
       _routeSelection = selection;
       plPlayerController.hdrDisplaySupportsHdr.value =

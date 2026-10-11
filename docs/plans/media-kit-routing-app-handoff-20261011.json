@@ -167,14 +167,39 @@
     "acceptance": "App Dart/assets compilation succeeded on actual current sources at the recorded vector. Full Flutter suite requires post-fixture revalidation. Strict analyzer remains red on85 info findings; no lints suppressed. Full native App build and overall CI are not accepted."
   },
   "requiredWork": [
-    "Read fresh workflow outcome after9fe16772 and this checkpoint, do not repeat its fixture edit.",
-    "Address85 analyzer info findings deliberately; avoid unrelated broad UI/API rewrites or hiding debt to report green.",
-    "Full latest-source native APK/App build remains required; bundle does not satisfy it.",
-    "Finish B2 query/predict/report integration; query interface has not changed yet.",
-    "Resolve the legacy Build startup failure without substituting pinned historical App/native sources.",
-    "Keep main PR4 informed of App PR1 identity/results before resuming; older central branch=null observation has been superseded."
+    "Validate latest App and current media-kit task heads together; source migration is already implemented, do not reimplement.",
+    "Address85 pre-existing analyzer infos without hiding errors or broad unrelated UI rewrites.",
+    "Full latest-source native APK/App build and device tests remain required; bundle is not APK.",
+    "Continue remaining B1, B3, LG managed output and advanced/cross-platform config work from central v3 plan.",
+    "Resolve legacy Build startup failure without replacing current candidates with historical native inputs.",
+    "Read both existing PRs and central/App ledgers before resuming."
   ],
   "resumptionRule": "Continue this App branch and PR1. Existing223031bb,2c4001fb,e80a52f0,9fe16772 are real remote commits. Read latest PR results plus this ledger; do not rebuild an alternate branch or rerun source-writing helpers.",
   "checkpointPolicy": "Commit/push recoverable stages promptly, read back, distinguish implemented/tested/blocked. PR result comments can persist terminal checks without cancelling CI with repeated docs commits.",
-  "nextAction": "Read the persisted B2b implementation on existing PR1; retire its scoped transport; run current App plus latest media-kit source tests/analyze/bundle. Fix actual failures, not stale prior implementation. Full latest native APK and remaining B1/B3/LG/config work remain open."
+  "nextAction": "Retire this scoped repair workflow, then independently run168 App Flutter tests, Python suite, strict analyze and bundle against latest media-kit. Do not modify library HEAD during combined acceptance. Record actual source vectors and results in PR1/PR4.",
+  "latestImplementation": {
+    "commit": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
+    "status": "implemented",
+    "doNotRepeat": true,
+    "changes": [
+      "Target-aware query without Player/global stale cache",
+      "Per-DASH-rendition source-spec filtering before codec/quality selection",
+      "Selected immutable specification and target passed to Session",
+      "12 new channel and source selection tests"
+    ]
+  },
+  "latestValidation": {
+    "run": 38124750626,
+    "appSha": "1a3dc7045e519689eb66d7560e0b64a63448671d",
+    "mediaKitSha": "4d8407b9158fa420316581d4f24f5a01591cfa5d",
+    "flutterPassed": 168,
+    "pythonJob": "success",
+    "bundle": "success",
+    "analyze": "failure_85_existing_infos_plus_4_new_infos_and_1_unused_import",
+    "freshness": "failed_library_advanced_during_run",
+    "kernelSha256": "3fc87b00926b8e033f7c7c33312383638c4dab3a7026d691019b5736e15f8d77",
+    "newLintRepair": "this_commit_pending_independent_run",
+    "fullNativeAcceptance": false,
+    "deviceTest": false
+  }
 }

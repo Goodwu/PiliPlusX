@@ -63,8 +63,9 @@ class DashRouteSelection {
         target: target,
         sources: batch,
       );
-      if (caps == null)
+      if (caps == null) {
         return DashRouteSelection.unknown(allowUnknown: allowUnknown);
+      }
       final revision =
           '${caps.platform}/${caps.display.status}/${caps.display.revision}';
       if (displayRevision != null && displayRevision != revision) {
