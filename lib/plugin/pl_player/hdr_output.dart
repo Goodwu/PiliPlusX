@@ -136,6 +136,7 @@ abstract final class HdrOutputSelector {
       HdrSourceClass.hdrVivid => 'HDR Vivid',
       HdrSourceClass.hdr10Plus => 'HDR10+',
       HdrSourceClass.dvP10 => '杜比视界 P10',
+      HdrSourceClass.dvUnknown => '杜比视界（源信息未确定）',
       HdrSourceClass.sdr => 'SDR',
     };
     final transferName = switch (actual.outputTransfer) {
