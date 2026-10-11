@@ -2,6 +2,11 @@
 
 ## Current State
 
+本CONFIG模型检查点以库8b98+App08acc为代码基线，新增不可变requested/override/effective配置与来源/序列化、纯App设置适配及库一行public export。V1独立35库+22App+4额外反例/两target strict通过，5文件与实际HdrMode/HwDecType哈希一致；隔离纯模型测试最初assets失败保留，最终no-test-assets通过，不是App全量。experimental默认false，explicit auto/reset及按库→App→open完整覆盖；require不被实验/失败策略暗弱化。默认MC组合prefer hardware，disableHA require software；旧原串、copy/direct未完整迁移及未知mode诊断保留。事实模型尚未接DASH/NetworkSource/planner/Session/report，不能标配置闭环完成，后续caller必须处理未知mode诊断。handoff见库docs/plans/core-config-model-handoff-20261012.json。R01e与Release接线其他dirty改动不进入本模型切片。
+
+最新完整已验源码向量只为App08accb63df8c4cab62d00946fb2159dd3781e0ee+库8b98c67a293876bd4af3f36ff245968ca848b41e：source38160661703 attempt1 SUCCESS，四平台真实bootstrap各211/strict零问题/bundle/finalize、Python359/Chrome1/Web；8份source/Build内实际bootstrapreceipt前后向量/10routing+261roots/102toolsroots及2662hash一致，无SKIP。Build38160661882整体FAIL但源码矩阵全成功，6Release既有前置失败，不native验收。库628video+3原mac Linux跳过/lab298与strict/query/Darwin9/OHOSunsigned成功；general四平台test仍live/运行中log API404，未重跑取消跳过。Windows已真实成功，但旧PNG因果未单独证明。证据/tmp/mk-routing-ci05-20261012/summary.json；这些结果不重标本模型提交。
+
+
 当前已推送App b1978a9602b74ca2821d1d36ea27560381c7c03a；库8b98c67a293876bd4af3f36ff245968ca848b41e（R01d新检查点）。新库8b98 source38160404717独立核对video628+3原mac Linux跳过、lab298及strict通过；Darwin9成功，新App两source仍真实执行中，Python本轮各316（非旧309）。下面完整旧运行只证明f179+915：source38159246222/Build38159246432均失败，Android/Linux/macOS实际bootstrap通过（各strict零问题/211Flutter/bundle/真实SDK及package补丁/10routing与全部261roots/前后final新鲜度），Android另Chrome/Web通过，本轮Python两run各309。Windows original SDK tracked PNG修改被拒绝，路径261字符是嫌疑，实际原文件工作hash/diff缺口保留；Build另6Release前置失败。证据/tmp/mk-routing-ci04-20261012/summary.json，未改标最新库。
 
 CI04 Windows窄修已完成V1独立29 bootstrap+19workflow+13来源/Actionlint通过，待本检查点提交后真实runner验证：runner.temp/rb短根（sdk s/flutter/cache p/results r/fallback f）统一；App首次checkout/SDK前longpaths及LF；未知SDK先收齐status/working/indexdiff与HEAD/index/worktree hash或readError再拒绝。不得ignore/reset原SDK，220字符静态路径计算不证明原因或实际修复成功。来源、真实补丁、roots/hash/freshness/失败归档门保留。

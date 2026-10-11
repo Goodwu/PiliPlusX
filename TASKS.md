@@ -7,6 +7,7 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
+- CONFIG事实模型检查点：独立35库/22App/4额外反例与targetstrict通过；requested/effective/override与纯设置适配不等于闭环，实际DASH/planner/Session/report接线仍待R01e后串行。仅模型切片，其他dirty不归入。最新完整已验08acc+8b98 source38160661703四平台SUCCESS，359Python/各211Flutter；Build6Release仍FAIL，native/DEVICE仍未验。
 - CORE接手中央PR4 comment6110756605；唯一routing/MK-ROUTING-20261011/PR1保持draft。context=`archives/conversations/media-kit-routing-20261011.md`。
 - CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。此为历史向量；当前CI03已清零，旧pending/62info/34info不再当前状态。
 - CORE-CI03 App1965ba0e+库bd9b9f85 source run38155973408 SUCCESS：严格分析No issues、211Flutter/1Chrome/263Python、Web/bundle/10包来源与freshness通过，中央6111284247。包名与6315处URI精确迁移，产品/native身份不变。最新App c51fd0973+库12966e7a source38156848733 SUCCESS：211Flutter/1Chrome/268Python、strict/Web/bundle/来源/freshness通过；库source38156773328 video591+3原mac跳过/lab298/strict通过。详见context。
