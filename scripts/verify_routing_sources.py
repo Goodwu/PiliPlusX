@@ -6,7 +6,8 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
-from urllib.parse import unquote, urljoin, urlparse
+from urllib.parse import urljoin, urlparse
+from urllib.request import url2pathname
 
 PACKAGES = {
     'media_kit': 'media_kit',
@@ -34,10 +35,17 @@ def verify(config: Path, media_root: Path) -> dict[str, str]:
             raise ValueError(f'Unaccounted media-kit package: {name}')
         if name in found:
             raise ValueError(f'Duplicate package: {name}')
-        uri = urlparse(urljoin(config.as_uri(), entry['rootUri']))
+        root_uri = urljoin(config.as_uri(), entry['rootUri'])
+        if '?' in root_uri or '#' in root_uri:
+            raise ValueError(f'Invalid local package root: {name}')
+        uri = urlparse(root_uri)
         if uri.scheme != 'file' or uri.netloc not in ('', 'localhost'):
             raise ValueError(f'Non-local package root: {name}')
-        actual = Path(unquote(uri.path)).resolve(strict=True)
+        if not uri.path.startswith('/'):
+            raise ValueError(f'Invalid local package root: {name}')
+        # url2pathname performs the single URL decode and applies native path
+        # rules (including /C:/... handling on Windows).
+        actual = Path(url2pathname(uri.path)).resolve(strict=True)
         expected = (media_root / PACKAGES[name]).resolve(strict=True)
         expected.relative_to(media_root)  # Reject an escaped checkout symlink.
         if actual != expected or not actual.is_dir():

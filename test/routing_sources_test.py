@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from nturl2path import url2pathname as windows_url2pathname
 import unittest
 
 SPEC = importlib.util.spec_from_file_location(
@@ -17,7 +18,7 @@ class RoutingSourcesTest(unittest.TestCase):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.media = self.root / 'media-kit'
+        self.media = self.root / 'media % sources'
         self.config = self.root / 'app/.dart_tool/package_config.json'
         self.config.parent.mkdir(parents=True)
         self.entries = []
@@ -32,6 +33,14 @@ class RoutingSourcesTest(unittest.TestCase):
 
     def test_all_packages_use_one_checkout(self):
         self.assertEqual(self.check(self.entries), MODULE.PACKAGES)
+
+    def test_encoded_space_and_percent_uri_resolves_once(self):
+        uri = (self.media / MODULE.PACKAGES['media_kit']).as_uri()
+        self.assertIn('%20', uri)
+        self.assertIn('%25', uri)
+        entries = copy.deepcopy(self.entries)
+        entries[0]['rootUri'] = uri
+        self.assertEqual(self.check(entries), MODULE.PACKAGES)
 
     def test_relative_package_uri_is_resolved_against_config(self):
         entries = copy.deepcopy(self.entries)
@@ -60,6 +69,38 @@ class RoutingSourcesTest(unittest.TestCase):
         entries[0]['rootUri'] = 'https://example.invalid/media_kit'
         with self.assertRaisesRegex(ValueError, 'Non-local'):
             self.check(entries)
+
+    def test_nonlocal_file_authority_is_rejected(self):
+        entries = copy.deepcopy(self.entries)
+        entries[0]['rootUri'] = 'file://remote.invalid/tmp/media_kit'
+        with self.assertRaisesRegex(ValueError, 'Non-local'):
+            self.check(entries)
+
+    def test_uppercase_localhost_authority_remains_rejected(self):
+        entries = copy.deepcopy(self.entries)
+        uri = (self.media / MODULE.PACKAGES['media_kit']).as_uri()
+        entries[0]['rootUri'] = uri.replace('file:///', 'file://LOCALHOST/', 1)
+        with self.assertRaisesRegex(ValueError, 'Non-local'):
+            self.check(entries)
+
+    def test_file_uri_query_and_fragment_are_rejected(self):
+        uri = (self.media / MODULE.PACKAGES['media_kit']).as_uri()
+        for suffix in ('?query=1', '#fragment'):
+            with self.subTest(suffix=suffix):
+                entries = copy.deepcopy(self.entries)
+                entries[0]['rootUri'] = uri + suffix
+                with self.assertRaisesRegex(ValueError, 'Invalid local'):
+                    self.check(entries)
+
+    def test_windows_file_url_path_conversion(self):
+        self.assertEqual(
+            windows_url2pathname('/C:/Users/A%20B/100%25'),
+            r'C:\Users\A B\100%',
+        )
+        self.assertEqual(
+            windows_url2pathname('/C:/Users/A%2520B'),
+            r'C:\Users\A%20B',
+        )
 
     def test_unaccounted_media_kit_package_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'Unaccounted'):
