@@ -7,14 +7,36 @@
   "centralClaimComment": 6109236283,
   "deviceRegistrationComment": 6109258398,
   "deviceScopeReply": 6109294215,
-  "status": "implemented_fixture_correction_pending_final_validation",
+  "status": "implemented_host_and_App_bundle_validated",
   "checkpoints": [
-    {"commit": "5370a1879b504bcb291f85feeb67ffdaba2c7c78", "scope": "Gesture/event fixture cascades; Future.sync for throw-only asynchronous errors; controlled cleanup-before-rethrow regression", "doNotRepeat": true},
-    {"commit": "746ef93ea585e57a95e4a98ed4db125d01ef2ed8", "scope": "Chat layout receiver cleanup and two widget regressions; preserve 8-bit opacity rounding in VoteDecoration", "doNotRepeat": true},
-    {"commit": "504a3e983e48478921ded5685ac033ac155e2e5e", "scope": "Six drawing-command opacity/border cases, reset-registration regression, initialization fixture cascade", "doNotRepeat": true, "correction": "The attempted await Get.reset was wrong: actual App GetResetExt.reset returns void. Independent CI caught two compile errors. The correction below restores synchronous reset and preserves the added test."},
-    {"commitAnchor": "test: respect the actual synchronous Get reset contract [CORE CORE-CI02 MK-ROUTING-20261011]", "scope": "Use verified synchronous Get.reset callback and test; finish missed gesture cascade; preserve all new regression coverage", "doNotRepeat": true}
+    {
+      "commit": "5370a1879b504bcb291f85feeb67ffdaba2c7c78",
+      "scope": "Gesture/event fixture cascades; Future.sync for throw-only asynchronous errors; controlled cleanup-before-rethrow regression",
+      "doNotRepeat": true
+    },
+    {
+      "commit": "746ef93ea585e57a95e4a98ed4db125d01ef2ed8",
+      "scope": "Chat layout receiver cleanup and two widget regressions; preserve 8-bit opacity rounding in VoteDecoration",
+      "doNotRepeat": true
+    },
+    {
+      "commit": "504a3e983e48478921ded5685ac033ac155e2e5e",
+      "scope": "Six drawing-command opacity/border cases, reset-registration regression, initialization fixture cascade",
+      "doNotRepeat": true,
+      "correction": "The attempted await Get.reset was wrong: actual App GetResetExt.reset returns void. Independent CI caught two compile errors. The correction below restores synchronous reset and preserves the added test."
+    },
+    {
+      "commitAnchor": "test: respect the actual synchronous Get reset contract [CORE CORE-CI02 MK-ROUTING-20261011]",
+      "scope": "Use verified synchronous Get.reset callback and test; finish missed gesture cascade; preserve all new regression coverage",
+      "doNotRepeat": true
+    }
   ],
-  "baseline": {"app": "b8303a9c2ce0c07b19bc85528dd1b1d93f72f61a", "analyzerInfos": 62, "flutterTestsPassed": 178, "pythonTestsPassed": 244},
+  "baseline": {
+    "app": "b8303a9c2ce0c07b19bc85528dd1b1d93f72f61a",
+    "analyzerInfos": 62,
+    "flutterTestsPassed": 178,
+    "pythonTestsPassed": 244
+  },
   "expectedNewFlutterTests": 10,
   "intermediateValidation": {
     "run": 38142083077,
@@ -24,7 +46,10 @@
     "flutterPassed": 185,
     "flutterFailedModules": 1,
     "failure": "Get.reset has void return; await uses caused local_diagnostic_intro_test compilation failure. This is CORE's fixture mistake, not a native/device regression.",
-    "analyzer": {"infos": 37, "errors": 2},
+    "analyzer": {
+      "infos": 37,
+      "errors": 2
+    },
     "sourceArtifact": 11703352622,
     "sourceArtifactSha256": "10f42f0b2b9cde13523a05d582d80fa32018f2a046101f7af86a46e6b5d41628",
     "pythonArtifact": 11702739499,
@@ -32,8 +57,11 @@
     "actualResetSource": "bggRGjQaUbCoE/getx@12c9d4d1517186390e92f86063369f4a26d01fdb:lib/get_common/get_reset.dart",
     "finalCurrentPairAcceptance": false
   },
-  "validation": "Await independent final App CI after the correction. Expected diagnostic reduction/test count is not a result. Keep current-source roots/freshness checks and all strict analyzer rules. Record terminal results in PR1 and central PR4 without unnecessary docs-only CI cancellation.",
+  "validation": "Final source run38142585709: App8bed4a4f+libraryd68871f7,244Python/188Flutter,bundle/roots/freshness success;34infos,0errors,0warnings. Terminal6109486294 supersedes pending; intermediate failure retained.",
   "scopeLimit": "No source-query/planner/Session/App playback-controller or native production changes. No SDK/native-build scripts, package rename, lint suppression or copied text-control rewrite. The earlier assumption that Get.reset returned a Future was corrected against actual dependency source and compile evidence.",
   "parallel": "DEVICE owns environment/native build/device scope. CORE requested audit/inclusion of current applicable mpv changes, not automatic exclusion due to old build pins. No device acceptance inferred. Shared files need explicit claims.",
-  "resume": "Read current PR1 and media-kit PR4 comments plus canonical ledgers. This delta supersedes older62-info summaries only after actual validation; do not recreate commits. Copied-widget deprecated APIs, web API/package naming, asynchronous BuildContext and release Build migration remain separate open items. Full current-native APK/device acceptance stays separate."
+  "resume": "Read current PR1 and media-kit PR4 comments plus canonical ledgers. This delta supersedes older62-info summaries only after actual validation; do not recreate commits. Copied-widget deprecated APIs, web API/package naming, asynchronous BuildContext and release Build migration remain separate open items. Full current-native APK/device acceptance stays separate.",
+  "terminalComment": 6109486294,
+  "validationNote": "Terminal comment supersedes pending state; preserve failed intermediate evidence and exact source vectors.",
+  "next": "CORE-R01 and remaining34infos/Release CI; no repeat of delivered phase."
 }

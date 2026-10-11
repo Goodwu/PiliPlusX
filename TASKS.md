@@ -5,6 +5,12 @@
 
 <!-- 2026-10-04 最终新诊断Release构建59318 exit1：Intel smoke Bad CPU type；主机arch -x86_64 /usr/bin/true亦失败且Rosetta receipt缺失，环境前置不足。保持universal门禁。双架构静态closure与独立arm64 NOW/initialize0 PASS，不能替代Intel动态/最终签名/build。等待用户自行完成官方Rosetta许可确认安装后完整重建。demo本地4K59.94已获用户“播放流畅”反馈，Pili产品流畅性/HDR仍开放。 -->
 
+## MK-ROUTING-20261011（CORE继任）
+
+- CORE接手中央PR4 comment6110756605；唯一routing/MK-ROUTING-20261011/PR1保持draft。context=`archives/conversations/media-kit-routing-20261011.md`。
+- CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。旧pending/62info不再当前状态。
+- 继续CORE-R01、真实选项闭环、34info和Release CI；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
+
 ## Now（当前推进，最多 3 条）
 
 - [ ] 修复 macOS `BV1vY4y1N7TY` Dolby Vision 亮度不足

@@ -5,7 +5,6 @@
   "centralPlan": "Goodwu/media-kit:docs/plans/media-kit-routing-implementation-20261011.md",
   "centralPlanVersion": 3,
   "centralLedger": "Goodwu/media-kit:routing/MK-ROUTING-20261011:docs/plans/media-kit-routing-handoff-20261011.json",
-  "centralLedgerCheckpoint": "1a8ac0f5f1d5f862ba91577fac7111974131ce75",
   "repository": "Goodwu/PiliPlusX",
   "branch": "routing/MK-ROUTING-20261011",
   "pullRequest": 1,
@@ -13,59 +12,197 @@
   "baseBranch": "fix/darwin-video-output-rebuild-barrier",
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
   "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
-  "status": "B1b_App_unknown_source_and_CI_layout_implemented_final_pair_revalidation_pending",
+  "status": "CORE_successor_F01_host_bundle_validated_remaining34infos_and_R01",
   "history": {
     "previousFullLedgerRef": "077378ce91335cc0e1c06562b9949dea00b8ecf0",
     "previousFullLedgerPath": "docs/plans/media-kit-routing-app-handoff-20261011.json",
     "previousFullLedgerBlob": "ec5b38432ae908aedbf774a332fc1cbbbbee3679",
-    "B2bResultComments": {"mediaKitPR4": 6107283427, "appPR1": 6107287306},
+    "B2bResultComments": {
+      "mediaKitPR4": 6107283427,
+      "appPR1": 6107287306
+    },
     "currentPhaseProgressCommentMediaKitPR4": 6108671374,
-    "rule": "Complete older evidence remains at immutable Git refs. Read current branch, ledger and latest PR result comments. Already implemented code is never planned again because a test/freshness gate failed."
+    "rule": "Complete older evidence remains at immutable Git refs. Read current branch, ledger and latest PR result comments. Already implemented code is never planned again because a test/freshness gate failed.",
+    "previousLatestValidation": {
+      "run": 38136372299,
+      "app": "b6f63ec55552284e878bbc7d9a1a1dd0fe2f884c",
+      "mediaKit": "cb14f8536f8f0cc274dd17cc9e0ebaaa55e45eb8",
+      "pythonPassed": 244,
+      "flutterPassed": 178,
+      "newUnknownSourceTestsPassed": 10,
+      "bundle": "success",
+      "analyze": {
+        "conclusion": "failure",
+        "infos": 62,
+        "warnings": 0,
+        "errors": 0
+      },
+      "actualTenPackageRoots": "success",
+      "sourceResolutionBeforeAfter": "identical",
+      "remoteFreshness": "failure_library_advanced_to8de0_during_run",
+      "latestPairAcceptance": false,
+      "kernelSha256": "eb81e2112e91214096204f3b8eb8ffa9d3b4fbf61fe9f5b1dbcb8c5f1d5baaa9",
+      "sourceArtifact": {
+        "id": 11700834517,
+        "sha256": "0867732a573b192b4eaf76cf07200c4f6b6c164ba4007ee88b559e52f3e776f3",
+        "downloadedAndRead": true
+      },
+      "pythonArtifact": {
+        "id": 11700849308,
+        "sha256": "252c683b7f7babe916edb0b4385755cc758d1ddcfa30e23fe7c663f1de5662f9",
+        "downloadedAndRead": true
+      },
+      "fullNativeAcceptance": false,
+      "deviceTest": false,
+      "nextValidation": "This documentation commit triggers an independent run against current media-kit after central ledger1a8ac0f5. Do not advance either source branch during that acceptance; record final result in PR comments. No old source pin or binary substitute."
+    },
+    "CORE_F01_terminalComments": {
+      "mediaKitPR4": 6110447335,
+      "appPR1": 6110417510
+    },
+    "previousCentralLedgerCheckpoint": "1a8ac0f5f1d5f862ba91577fac7111974131ce75"
   },
   "completed": [
-    {"id": "APP-portable-overrides-and-source-verifier", "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579", "status": "implemented_host_validated", "doNotRepeat": true},
-    {"id": "APP-host-and-current-compiler-contract", "commit": "2c4001fbddf410d9d1dbb829fc1137f34c143748", "status": "implemented_host_validated", "compiler": "Flutter3.47.2 per current App declaration, not a product/native source rollback", "doNotRepeat": true},
-    {"id": "APP-SDK-pointer-gesture-patch-composition", "commit": "e80a52f0273a762061069fb9f18ad7965af9cebe", "status": "implemented_host_and_bundle_validated", "newTests": 6, "doNotRepeat": true},
-    {"id": "APP-lifecycle-platform-fixture", "commit": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3", "status": "implemented_host_validated", "doNotRepeat": true},
-    {"id": "APP-B2b-source-spec-integration", "commit": "384b10ae2fb02fe5909fec89597499ea314f3f4a", "status": "implemented_host_and_bundle_validated", "newTests": 12, "doNotRepeat": true, "note": "Actual per-rendition target/spec filtering, menus, codec preferences and immutable NetworkSource/Session input. No Player query/global stale cache."},
-    {"id": "APP-migration-analysis-cleanup", "commit": "4f7fcd66d2162434bb4cbb821dcdaaba15352c7a", "status": "implemented_host_validated", "doNotRepeat": true},
-    {"id": "APP-existing-Android7-integration", "commit": "d0926b315af63b43bf5452119b4e4a067f58f88c", "integrated": "30434b3eb6d77a787b0f8f5db6891d4090032696", "status": "normal_merge_committed_host_validated", "doNotRepeat": true, "note": "Preserve both histories; integration-onlyPR2 merged, primaryPR1 still draft."},
-    {"id": "APP-Build-required-Apple-ref", "commit": "c6c72369c79d9cbd1310302fe23dc8d03b3bd8b2", "status": "implemented_actual_jobs_start", "newTests": 4, "doNotRepeat": true},
-    {"id": "APP-reviewed-safe-lints", "commit": "a6593b3f0e986779848828b770ed5b29ce4ae412", "status": "implemented_host_and_bundle_validated", "doNotRepeat": true, "note": "85 original infos became62. Get.reset timing change and ancillary pubspec change were rejected. This phase did not reduce the remaining62 or suppress rules."},
-    {"id": "APP-Build-current-source-validation-and-HDR-channel", "commit": "ea07f5303a0ff1afe7e643e708a39928a7ad0caf", "status": "implemented_host_tested", "newPythonTests": 9, "doNotRepeat": true, "note": "Old HDR-only Build job now calls the existing complete readonly source pipeline: checkout App and latest media-kit, resolve before SDK/package patches, strict analyze, all tests, bundle,10 actual package roots and freshness. Reusable workflow concurrency is isolated. Android delegates query/Session to media-kit; all other platform probe/output and Pink channel identities remain checked."},
-    {"id": "APP-unknown-DV-report", "commit": "8f82d294b69aece59ea6e5798cf3482e02e5e24d", "status": "implemented_compile_validated", "doNotRepeat": true},
-    {"id": "APP-unknown-DV-hints-and-selection", "commit": "b6f63ec55552284e878bbc7d9a1a1dd0fe2f884c", "status": "implemented_tests_and_bundle_passed_intermediate_vector", "newFlutterTests": 10, "doNotRepeat": true, "note": "Missing/malformed/other DV profiles do not invent P5/P8.4 or EL=false; quality126 alone is unknown DV intent. allowUnknown decoder support cannot bypass unresolved DV colors even without a snapshot or in an ordinary quality tier. Declared P5 and existing declared-P8 Bilibili provider hint are preserved; the latter is not a universal compatibility fact."}
+    {
+      "id": "APP-portable-overrides-and-source-verifier",
+      "commit": "223031bb30b8f4cea5ad1f740eabe425fd659579",
+      "status": "implemented_host_validated",
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-host-and-current-compiler-contract",
+      "commit": "2c4001fbddf410d9d1dbb829fc1137f34c143748",
+      "status": "implemented_host_validated",
+      "compiler": "Flutter3.47.2 per current App declaration, not a product/native source rollback",
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-SDK-pointer-gesture-patch-composition",
+      "commit": "e80a52f0273a762061069fb9f18ad7965af9cebe",
+      "status": "implemented_host_and_bundle_validated",
+      "newTests": 6,
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-lifecycle-platform-fixture",
+      "commit": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3",
+      "status": "implemented_host_validated",
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-B2b-source-spec-integration",
+      "commit": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
+      "status": "implemented_host_and_bundle_validated",
+      "newTests": 12,
+      "doNotRepeat": true,
+      "note": "Actual per-rendition target/spec filtering, menus, codec preferences and immutable NetworkSource/Session input. No Player query/global stale cache."
+    },
+    {
+      "id": "APP-migration-analysis-cleanup",
+      "commit": "4f7fcd66d2162434bb4cbb821dcdaaba15352c7a",
+      "status": "implemented_host_validated",
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-existing-Android7-integration",
+      "commit": "d0926b315af63b43bf5452119b4e4a067f58f88c",
+      "integrated": "30434b3eb6d77a787b0f8f5db6891d4090032696",
+      "status": "normal_merge_committed_host_validated",
+      "doNotRepeat": true,
+      "note": "Preserve both histories; integration-onlyPR2 merged, primaryPR1 still draft."
+    },
+    {
+      "id": "APP-Build-required-Apple-ref",
+      "commit": "c6c72369c79d9cbd1310302fe23dc8d03b3bd8b2",
+      "status": "implemented_actual_jobs_start",
+      "newTests": 4,
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-reviewed-safe-lints",
+      "commit": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+      "status": "implemented_host_and_bundle_validated",
+      "doNotRepeat": true,
+      "note": "85 original infos became62. Get.reset timing change and ancillary pubspec change were rejected. This phase did not reduce the remaining62 or suppress rules."
+    },
+    {
+      "id": "APP-Build-current-source-validation-and-HDR-channel",
+      "commit": "ea07f5303a0ff1afe7e643e708a39928a7ad0caf",
+      "status": "implemented_host_tested",
+      "newPythonTests": 9,
+      "doNotRepeat": true,
+      "note": "Old HDR-only Build job now calls the existing complete readonly source pipeline: checkout App and latest media-kit, resolve before SDK/package patches, strict analyze, all tests, bundle,10 actual package roots and freshness. Reusable workflow concurrency is isolated. Android delegates query/Session to media-kit; all other platform probe/output and Pink channel identities remain checked."
+    },
+    {
+      "id": "APP-unknown-DV-report",
+      "commit": "8f82d294b69aece59ea6e5798cf3482e02e5e24d",
+      "status": "implemented_compile_validated",
+      "doNotRepeat": true
+    },
+    {
+      "id": "APP-unknown-DV-hints-and-selection",
+      "commit": "b6f63ec55552284e878bbc7d9a1a1dd0fe2f884c",
+      "status": "implemented_tests_and_bundle_passed_intermediate_vector",
+      "newFlutterTests": 10,
+      "doNotRepeat": true,
+      "note": "Missing/malformed/other DV profiles do not invent P5/P8.4 or EL=false; quality126 alone is unknown DV intent. allowUnknown decoder support cannot bypass unresolved DV colors even without a snapshot or in an ordinary quality tier. Declared P5 and existing declared-P8 Bilibili provider hint are preserved; the latter is not a universal compatibility fact."
+    },
+    {
+      "id": "CORE-CI02",
+      "commits": [
+        "5370a187",
+        "746ef93e",
+        "504a3e98",
+        "8bed4a4f"
+      ],
+      "status": "implemented_host_and_bundle_validated",
+      "doNotRepeat": true,
+      "terminalComment": 6109486294
+    },
+    {
+      "id": "CORE-F01-App-report",
+      "commit": "569138fa8d55eb2686578fc834c19aba8093c411",
+      "status": "implemented_host_and_bundle_validated",
+      "doNotRepeat": true,
+      "newFlutterTests": 4,
+      "terminalComment": 6110417510
+    }
   ],
   "latestValidation": {
-    "run": 38136372299,
-    "app": "b6f63ec55552284e878bbc7d9a1a1dd0fe2f884c",
-    "mediaKit": "cb14f8536f8f0cc274dd17cc9e0ebaaa55e45eb8",
+    "run": 38146940852,
+    "job": 114499858358,
+    "app": "569138fa8d55eb2686578fc834c19aba8093c411",
+    "mediaKit": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+    "flutterPassed": 192,
     "pythonPassed": 244,
-    "flutterPassed": 178,
-    "newUnknownSourceTestsPassed": 10,
+    "pythonNote": "Retained earlier successful job at same App SHA; not rerun with second App job.",
     "bundle": "success",
-    "analyze": {"conclusion": "failure", "infos": 62, "warnings": 0, "errors": 0},
+    "analyze": {
+      "conclusion": "failure",
+      "infos": 34,
+      "warnings": 0,
+      "errors": 0
+    },
     "actualTenPackageRoots": "success",
-    "sourceResolutionBeforeAfter": "identical",
-    "remoteFreshness": "failure_library_advanced_to8de0_during_run",
-    "latestPairAcceptance": false,
-    "kernelSha256": "eb81e2112e91214096204f3b8eb8ffa9d3b4fbf61fe9f5b1dbcb8c5f1d5baaa9",
-    "sourceArtifact": {"id": 11700834517, "sha256": "0867732a573b192b4eaf76cf07200c4f6b6c164ba4007ee88b559e52f3e776f3", "downloadedAndRead": true},
-    "pythonArtifact": {"id": 11700849308, "sha256": "252c683b7f7babe916edb0b4385755cc758d1ddcfa30e23fe7c663f1de5662f9", "downloadedAndRead": true},
+    "remoteFreshness": "success",
+    "sourceArtifact": {
+      "id": 11705617556,
+      "sha256": "1af2bb6b49643cb6955c8596461c2fbc3cd1905bd7e99abefc3322ad37be854c"
+    },
     "fullNativeAcceptance": false,
-    "deviceTest": false,
-    "nextValidation": "This documentation commit triggers an independent run against current media-kit after central ledger1a8ac0f5. Do not advance either source branch during that acceptance; record final result in PR comments. No old source pin or binary substitute."
+    "deviceAcceptanceForF01": false,
+    "scope": "Prior recorded pair only; successor documentation checkpoint is not marked tested."
   },
   "currentLibraryAndNative": {
     "mediaKitPR": 4,
     "mediaKitBranch": "routing/MK-ROUTING-20261011",
-    "mediaKitVerifiedSource": "8de0de0068eec1ea64cbb3a9cc98ee4c5c53ae68",
+    "mediaKitVerifiedSource": "6e7570fcdaadeb66223a7327860000bb945daeb4",
     "mediaKitUnknownSourceImplementation": "2a5d87f058f1fdb9a45d2874ebb0de4be4010441",
     "mediaKitUnknownMatrix": "cb14f8536f8f0cc274dd17cc9e0ebaaa55e45eb8",
     "mediaKitFallbackFix": "98a349f74b2066b476700becdde8b56e96645119",
-    "mediaKitSourceRun": 38136527516,
+    "mediaKitSourceRun": 38149366499,
     "sourceConclusion": "success",
-    "videoPassed": 541,
+    "videoPassed": 571,
     "videoLinuxSkipped": 3,
     "labPassed": 298,
     "videoAndLabAnalyze": "clean",
@@ -84,18 +221,29 @@
     "hdrValidationLayout": "migrated_in_ea07f530_to_full_current_source_pipeline",
     "androidAndPinkChannel": "actual_delegation_contract_verified_with_negative_tests",
     "overallAcceptance": false,
-    "remaining": ["Android/Pink/Windows/Linux source layout and patch/lock migration", "Apple approved release input/preflight contract", "Release manifest/source identity must reflect real linked current inputs", "ABI and Android/Pink native parity checks must stay enabled"]
+    "remaining": [
+      "Android/Pink/Windows/Linux source layout and patch/lock migration",
+      "Apple approved release input/preflight contract",
+      "Release manifest/source identity must reflect real linked current inputs",
+      "ABI and Android/Pink native parity checks must stay enabled"
+    ]
   },
   "requiredWork": [
-    "Independently validate final current App/library pair after these two ledger commits; record terminal result without creating another source revision.",
-    "Fix62 remaining infos without disabling rules or unverified broad copied-control/asynchronous cleanup rewrites.",
+    "Fix34 remaining infos without disabling rules or unverified broad copied-control/asynchronous cleanup rewrites.",
     "Continue the other Release Build jobs' current-source layout/lock/patch/native-input migration, preserving source/ABI/channel/parity/preflight checks.",
     "Build the already repaired FFmpeg with latest complete mpv/helper/dependencies into a real test APK and verify final linked input provenance.",
-    "Continue original-vs-decoded source fact lifetimes and actual importer/output/review/software alternatives. The unknown-source classification part is already done.",
     "LG managed ownership/output wiring, advanced auto/prefer/require, other platform adapters and App controls remain open under centralv3.",
-    "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance."
+    "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance.",
+    "CORE-F01 source evidence is complete in recorded scope; continue CORE-R01 importer/output/decoder review and independent executable alternatives. Raw-bitstream/live-track facts remain separate."
   ],
   "resumptionRule": "Use this existing task branch/PR1 plus media-kitPR4 and FFmpegPR1. Read current refs, central ledger and latest PR comments. Completed query/source-filter/fallback/Android7/native and unknown-source fixes are real commits; never recreate another branch or replay retired writers. Failed validation does not erase implementation.",
   "checkpointPolicy": "Push recoverable stages promptly and read back. This is documentation only. Exact run/input/hash records are provenance, not obsolete build pins. Preserve source freshness gates and report intermediate failures accurately.",
-  "nextAction": "Finish independent latest-pair source/bundle verification; terminal comments update validation only. Then continue actual remaining CI and B1 original/import/output work and full native build. Do not repeat ea07f530,2a5d87f0,b6f63ec5,98a349f7 or e8df200c. Keep primary PRs draft/unmerged."
+  "nextAction": "Continue CORE-R01a library dependency correction and current-pair regression,34 analyzer infos and remaining Release CI. Existing DEVICE retains native/real-device scope; DV001 review not closed.",
+  "succession": {
+    "centralRegistration": 6110756605,
+    "centralDeviceReview": 6110762843,
+    "role": "CORE-SUCCESSOR",
+    "productionAppChanged": false
+  },
+  "centralLedgerCurrent": "routing/MK-ROUTING-20261011:CORE-SUCCESSOR-CORE-R01a; registration6110756605"
 }
