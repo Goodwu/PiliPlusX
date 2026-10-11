@@ -104,6 +104,14 @@ class DashRouteSelection {
   }
 
   bool allows(VideoItem item) {
+    // Unknown decoder support may permit a controlled SDR attempt. It cannot
+    // authorize an unknown DV color interpretation, even without a snapshot
+    // or when the server puts that codec in an ordinary quality tier.
+    final descriptor = HdrOutputSelector.descriptorFromDash(
+      quality: item.id,
+      codec: item.codecs,
+    );
+    if (descriptor?.hasUnresolvedDolbyVision == true) return false;
     final hdrTier = item.id == 125 || item.id == 126 || item.id == 129;
     final planned = prediction(item);
     if (planned == null) return allowUnknown && !hdrTier;

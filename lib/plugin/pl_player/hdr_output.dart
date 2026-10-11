@@ -39,12 +39,12 @@ abstract final class HdrOutputSelector {
     int? quality,
     String? codec,
   }) {
-    final normalized = codec?.toLowerCase() ?? '';
+    final normalized = codec?.trim().toLowerCase() ?? '';
     if (normalized.startsWith('dvh1') || normalized.startsWith('dvhe')) {
       final parts = normalized.split('.');
       final profile = parts.length > 1 ? int.tryParse(parts[1]) : null;
       if (profile == 5) {
-        // DV P5：基础层 IPT 色彩，所有路由依赖 dovi rescale 管线。
+        // P5 hint: native DV or a correct RPU-preserving processing path.
         return const HdrSourceDescriptor(
           codec: 'hevc',
           dynamicMetadata: HdrDynamicMetadata.dolbyVision,
@@ -53,30 +53,33 @@ abstract final class HdrOutputSelector {
           enhancementLayer: false,
         );
       }
-      // 其余 DV（含 P8）：Bilibili DV 档当前为 P8.4（HLG 基础层）。
-      // mpv 不暴露兼容 ID，按基础层传输函数推断 8.4（库内同规则）；
-      // hint 不符时由会话解码器复核纠正（最多一次原位重建）。
-      return const HdrSourceDescriptor(
+      if (profile == 8) {
+        // Retain the existing Bilibili P8.4 provider hint for a declared P8
+        // codec only. This is not a general DV profile/compatibility rule;
+        // actual container facts must still be reviewed by the Session.
+        return const HdrSourceDescriptor(
+          codec: 'hevc',
+          transfer: 'hlg',
+          primaries: 'bt.2020',
+          dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+          dvProfile: 8,
+          dvCompatibilityId: 4,
+          enhancementLayer: false,
+        );
+      }
+      // Preserve the parsed profile, if any; never manufacture P5/P8.4 or
+      // a single-layer flag for missing, malformed or another DV profile.
+      return HdrSourceDescriptor(
         codec: 'hevc',
-        transfer: 'hlg',
-        primaries: 'bt.2020',
         dynamicMetadata: HdrDynamicMetadata.dolbyVision,
-        dvProfile: 8,
-        dvCompatibilityId: 4,
-        enhancementLayer: false,
+        dvProfile: profile,
       );
     }
-    if (quality == 126 &&
-        (normalized.contains('dolby') || normalized.contains('dv'))) {
-      // DV 档但 codec 串缺 profile：保守按 P5（hint 只影响开播路由的
-      // 预配置；hint 错误由会话解码器复核的单次重建纠正，保守取 P5
-      // 避免任何忽略 RPU 的路由被错误 hint 选中）。
+    if (quality == 126) {
+      // The DV tier identifies metadata intent, not its profile, base-layer
+      // encoding or layer structure. Unknown must remain unknown at selection.
       return const HdrSourceDescriptor(
-        codec: 'hevc',
         dynamicMetadata: HdrDynamicMetadata.dolbyVision,
-        dvProfile: 5,
-        dvCompatibilityId: 0,
-        enhancementLayer: false,
       );
     }
     if (quality == 129 || normalized.contains('vivid')) {
