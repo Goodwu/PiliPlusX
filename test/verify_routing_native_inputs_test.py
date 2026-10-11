@@ -66,7 +66,7 @@ class NativeInputTest(unittest.TestCase):
 
     def accept(self):
         self.manifest_file.write_text(json.dumps(self.manifest))
-        self.accepted = {"schemaVersion": 1, "task": gate.TASK, "entries": [{"manifestSha256": gate.digest(self.manifest_file.read_bytes()), "sourceClosureSha256": gate.closure_hash(self.manifest), "artifactIdentity": copy.deepcopy(self.manifest["artifact"]["identity"]), "jarSha256": self.manifest["artifact"]["sha256"], "approval": {"reviewUrl": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-1", "coreCommit": "5" * 40}, "allowedWeakVulkanImports": {}, "weakImportEvidence": None}]}
+        self.accepted = {"schemaVersion": 1, "task": gate.TASK, "selectedManifestSha256": gate.digest(self.manifest_file.read_bytes()), "entries": [{"manifestSha256": gate.digest(self.manifest_file.read_bytes()), "sourceClosureSha256": gate.closure_hash(self.manifest), "artifactIdentity": copy.deepcopy(self.manifest["artifact"]["identity"]), "jarSha256": self.manifest["artifact"]["sha256"], "approval": {"reviewUrl": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-1", "coreCommit": "5" * 40}, "allowedWeakVulkanImports": {}, "weakImportEvidence": None, "acquisition": {kind: {"repository": "Goodwu/native-build", "runId": 1, "artifactId": 2 if kind == "jar" else 3, "attempt": 1, "name": f"synthetic-{kind}", "zipSha256": "6" * 64, "producerHeadSha": "1" * 40, "uploadJobId": 4} for kind in ("jar", "evidence")}}]}
 
     def symbols(self, imports):
         rows = ["0: 0000000000000000 0 NOTYPE LOCAL DEFAULT UND"]
@@ -114,7 +114,7 @@ class NativeInputTest(unittest.TestCase):
     def test_checked_in_ledger_does_not_authorize_synthetic_fixture(self):
         actual, _ = gate.read_json(gate.ACCEPTED)
         self.accepted = actual
-        self.reject("no unique CORE-reviewed")
+        self.reject("missing-accepted-native-input")
         self.assertEqual(self.receipt["commands"], [])
 
     def test_manifest_cannot_authorize_itself(self):
@@ -276,7 +276,7 @@ class NativeInputTest(unittest.TestCase):
             with self.subTest(field=field):
                 self.accept()
                 self.accepted["entries"][0][field] = value
-                self.reject("accepted source closure")
+                self.reject("accepted source closure|artifact identity differs")
 
     def test_manifest_duplicate_fields_rejected(self):
         self.manifest_file.write_text('{"task":"a","task":"b"}')

@@ -30,6 +30,71 @@ def routing_job(text, name):
     return block.group(1)
 
 
+def validate_python_bootstrap(text):
+    """Keep macOS API tests and real parser provenance in the full test job."""
+    body = routing_job(text, 'python-tests')
+    for value, reason in (
+            ('needs: source-vector', 'captured vector'),
+            ('runs-on: macos-latest', 'real macOS signing APIs'),
+            ('timeout-minutes: 45', 'bootstrap and full test timeout'),
+            ('working-directory: app', 'App working directory'),
+            ("ROUTING_RESULTS=%s\\n' \"$RUNNER_TEMP/rb/r\"", 'private results'),
+            ("ROUTING_BOOTSTRAP_RECEIPT=%s\\n' \"$RUNNER_TEMP/rb/r/bootstrap.json\"", 'exact bootstrap receipt'),
+            ('path: app\n', 'App checkout path'),
+            ('path: media-kit\n', 'library checkout path'),
+            ('EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}', 'exact App vector'),
+            ('EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}', 'exact library vector'),
+            ('ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}', 'exact App event HEAD'),
+            ('ref: ${{ needs.source-vector.outputs.media-kit-sha }}', 'exact library checkout'),
+            ('repository: Goodwu/media-kit', 'library repository'),
+            ('uses: ./app/.github/actions/routing-bootstrap', 'real shared bootstrap'),
+            ('app-root: app\n', 'bootstrap App root'),
+            ('media-kit-root: media-kit\n', 'bootstrap library root'),
+            ('app-sha: ${{ env.EXPECTED_APP_SHA }}', 'bootstrap App vector'),
+            ('media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}', 'bootstrap library vector'),
+            ('platform: android', 'existing Android patch preparation'),
+            ('git merge-base --is-ancestor FETCH_HEAD HEAD', 'App base gate'),
+            ('scripts/prepare_routing_ci.py', 'post-test source finalization'),
+            ('--platform android --finalize', 'post-test source finalization'),
+            ('path: ${{ env.ROUTING_RESULTS }}', 'private receipt upload'),
+            ('if-no-files-found: error', 'failure evidence')):
+        if value not in body:
+            raise ValueError('python-tests misses ' + reason)
+    checkout = body.find('- uses: actions/checkout@v4')
+    for setting in ('core.longpaths true', 'core.autocrlf false', 'core.eol lf'):
+        position = body.find('git config --global ' + setting)
+        if position < 0 or position >= checkout:
+            raise ValueError('python-tests requires Git configuration before checkout')
+    test_command = "python3 -m unittest discover -s test -p '*_test.py' -v"
+    if test_command not in body:
+        raise ValueError('python-tests must retain all Python modules')
+    prepare = body.find('uses: ./app/.github/actions/routing-bootstrap')
+    if body.find(test_command) < prepare:
+        raise ValueError('python-tests must bootstrap before discovering tests')
+    guard = "if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}"
+    steps = re.split(r'^      - ', body, flags=re.M)
+    for step in steps:
+        if test_command in step:
+            for value in (guard, 'set -euo pipefail', 'test -f "$ROUTING_BOOTSTRAP_RECEIPT"',
+                          'test -n "$FLUTTER_ROOT"', 'test -n "$PUB_CACHE"',
+                          'python3 scripts/verify_hdr_channel.py', 'git diff --exit-code'):
+                if value not in step:
+                    raise ValueError('python-tests misses prepared test environment/failure propagation')
+        if 'scripts/prepare_routing_ci.py' in step:
+            for value in (guard, '--app-root .', '--media-kit-root ../media-kit', '--flutter-root "$FLUTTER_ROOT"',
+                          '--private-root "${{ steps.prepare.outputs.private-root }}"', '--output "$ROUTING_RESULTS"',
+                          '--expected-app-sha "$EXPECTED_APP_SHA"', '--expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA"'):
+                if value not in step:
+                    raise ValueError('python-tests must finalize prepared sources even after test failure')
+            if body.find('scripts/prepare_routing_ci.py') < body.find(test_command):
+                raise ValueError('python-tests must finalize after tests')
+    if 'continue-on-error:' in body:
+        raise ValueError('python-tests must retain failed job status')
+    artifacts = body.split('- uses: actions/upload-artifact@v4', 1)
+    if len(artifacts) != 2 or 'if: always()' not in artifacts[1]:
+        raise ValueError('python-tests must archive evidence unconditionally')
+
+
 def validate_routing_bootstrap(text):
     """Require exact sources and real platform preparation through finalization."""
     vector = routing_job(text, 'source-vector')
@@ -57,7 +122,7 @@ def validate_routing_bootstrap(text):
         longpaths = body.find('git config --global core.longpaths true')
         if longpaths < 0 or longpaths >= checkout:
             raise ValueError(name + ' requires long-path support before checkout')
-        if 'ref: ${{ github.event.pull_request.head.sha || github.sha }}' not in body:
+        if 'ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}' not in body:
             raise ValueError(name + ' requires exact App event HEAD')
         library = body.split('repository: Goodwu/media-kit', 1)[-1].split('persist-credentials: false', 1)[0]
         if 'ref: ${{ needs.source-vector.outputs.media-kit-sha }}' not in library:
@@ -118,6 +183,7 @@ def validate_routing_bootstrap(text):
                     'Final source freshness/package binding verification failed'):
         if f"if ($LASTEXITCODE -ne 0) {{ throw '{failure}' }}" not in matrix:
             raise ValueError('Matrix must propagate native command failure: ' + failure)
+    validate_python_bootstrap(text)
 
 
 def validate_short_bootstrap_paths(action, workflow):
@@ -186,6 +252,51 @@ class ReusableSourceContractTests(unittest.TestCase):
         self.assertIn('run_macos_shared_release.py --preflight', mac)
 
 
+class PythonBootstrapWiringTests(unittest.TestCase):
+    def setUp(self):
+        self.text = (ROOT / '.github/workflows/routing-source-integration.yml').read_text()
+        self.body = routing_job(self.text, 'python-tests')
+
+    def reject(self, before, after, reason):
+        self.assertIn(before, self.body)
+        with self.assertRaisesRegex(ValueError, reason):
+            validate_python_bootstrap(self.text.replace(self.body, self.body.replace(before, after, 1)))
+
+    def test_macOS_full_suite_uses_exact_bootstrap_and_failure_finalization(self):
+        validate_python_bootstrap(self.text)
+
+    def test_removing_bootstrap_or_private_receipt_is_rejected(self):
+        self.reject('uses: ./app/.github/actions/routing-bootstrap', '# bootstrap omitted', 'shared bootstrap')
+        self.reject('ROUTING_BOOTSTRAP_RECEIPT=%s', 'OTHER_RECEIPT=%s', 'bootstrap receipt')
+
+    def test_checkout_root_vector_and_working_directory_are_enforced(self):
+        for before, after in (('path: app\n', 'path: .\n'), ('path: media-kit\n', 'path: library\n'),
+                              ('app-root: app\n', 'app-root: .\n'), ('media-kit-root: media-kit\n', 'media-kit-root: other\n'),
+                              ('working-directory: app', 'working-directory: .'),
+                              ('needs: source-vector', '# detached vector')):
+            with self.subTest(before=before):
+                self.reject(before, after, 'python-tests')
+
+    def test_parser_only_discovery_cannot_replace_full_python_suite(self):
+        self.reject("-p '*_test.py'", "-p 'parse_routing_manifest_test.py'", 'all Python modules')
+        self.reject('runs-on: macos-latest', 'runs-on: ubuntu-latest', 'macOS signing APIs')
+
+    def test_finalization_is_required_and_runs_after_failed_tests(self):
+        self.reject('--platform android --finalize', '--platform android', 'post-test source finalization')
+        self.reject("if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}", "if: ${{ success() }}", 'prepared test environment')
+        prefix, final = self.body.split('      - name: Finalize Python test source freshness and package roots', 1)
+        broken = final.replace("if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}", "if: ${{ success() }}", 1)
+        with self.assertRaisesRegex(ValueError, 'even after test failure'):
+            validate_python_bootstrap(self.text.replace(self.body, prefix + '      - name: Finalize Python test source freshness and package roots' + broken))
+        with self.assertRaisesRegex(ValueError, 'failed job status'):
+            validate_python_bootstrap(self.text.replace(self.body, self.body + '    continue-on-error: true\n'))
+
+    def test_failure_receipts_and_real_environment_checks_are_required(self):
+        self.reject('if: always()', 'if: ${{ success() }}', 'unconditionally')
+        self.reject('test -n "$PUB_CACHE"', '# no cache check', 'prepared test environment')
+        self.reject('test -n "$FLUTTER_ROOT"', '# no SDK check', 'prepared test environment')
+
+
 class RoutingBootstrapWiringTests(unittest.TestCase):
     def setUp(self):
         self.text = (ROOT / '.github/workflows/routing-source-integration.yml').read_text()
@@ -204,7 +315,7 @@ class RoutingBootstrapWiringTests(unittest.TestCase):
 
     def test_app_pr_merge_commit_cannot_replace_actual_event_head(self):
         body = routing_job(self.text, 'app-source')
-        broken = body.replace('ref: ${{ github.event.pull_request.head.sha || github.sha }}',
+        broken = body.replace('ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}',
                               'ref: ${{ github.sha }}')
         with self.assertRaisesRegex(ValueError, 'exact App event HEAD'):
             validate_routing_bootstrap(self.text.replace(body, broken))
@@ -292,6 +403,110 @@ class RoutingBootstrapWiringTests(unittest.TestCase):
         self.reject('flutter test --no-pub --platform chrome', '# chrome omitted', 'platform chrome')
         self.reject('flutter build web --target lib/main_web.dart --no-pub', '# web omitted', 'build web')
         self.reject('flutter build bundle --debug --no-pub', '# bundle omitted', 'build bundle')
+
+
+class RoutingNativeWorkflowTests(unittest.TestCase):
+    def setUp(self):
+        import sys
+        sys.path.insert(0,str(ROOT/'scripts'))
+        import verify_workflow_media_kit_refs as refs
+        self.refs=refs
+        self.texts={name:(ROOT/'.github/workflows'/name).read_text() for name in ('build.yml','pink.yml','routing-source-integration.yml')}
+
+    def validate(self,texts=None):
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            for name,text in (texts or self.texts).items():
+                (Path(directory)/name).write_text(text)
+            self.refs.verify_routing_workflows(Path(directory))
+
+    def test_real_workflows_preserve_routing_build_and_consumer_gates(self):
+        self.validate()
+
+    def test_each_required_gate_removal_is_rejected(self):
+        for workflow in ('build.yml','pink.yml'):
+            block=self.refs.routing_block(self.texts[workflow])
+            labels=re.findall(r'^            - name: (.+)$',block,re.M)
+            for label in labels:
+                if label.startswith(('Initialize','Checkout','Verify routing App','Set up')):
+                    continue
+                with self.subTest(workflow=workflow,gate=label):
+                    body=self.refs.routing_step(block,label)
+                    broken=dict(self.texts);broken[workflow]=broken[workflow].replace('            - name: '+label+'\n'+body,'',1)
+                    with self.assertRaises(ValueError):self.validate(broken)
+
+    def test_native_args_ABI_signature_finalize_and_selector_flow_cannot_be_omitted(self):
+        checks={
+          'Acquire explicitly accepted native input before Gradle':('--output','--receipt','--app-commit','--media-kit-commit','--readelf','--nm'),
+          'Build routing Release APK with verified local arm64 input':('--check-prebuild','--manifest-parser','--android-project-arg=mediaKitLocalArm64Jar="$VERIFIED_JAR"','--android-project-arg=mediaKitArm64Only=true','--target-platform android-arm64','--no-pub'),
+          'Verify routing APK native members ABI and signature':('--apk "$apk"','--manifest "$VERIFIED_MANIFEST"','--evidence-root "$VERIFIED_EVIDENCE"','--jar "$VERIFIED_JAR"','--receipt "$ROUTING_RESULTS/native-after.json"','scripts/verify_artifact.py','"$apksigner" verify --verbose'),
+          'Finalize routing variant after build':('--finalize','--manifest-parser'),
+          'Finalize original routing sources and freshness':('--finalize','--expected-app-sha','--expected-media-kit-sha'),
+        }
+        for workflow in ('build.yml','pink.yml'):
+            block=self.refs.routing_block(self.texts[workflow])
+            for label,tokens in checks.items():
+                body=self.refs.routing_step(block,label)
+                for token in tokens:
+                    with self.subTest(workflow=workflow,gate=label,token=token):
+                        broken=dict(self.texts);broken[workflow]=broken[workflow].replace(body,body.replace(token,'REMOVED',1),1)
+                        with self.assertRaises(ValueError):self.validate(broken)
+
+    def test_success_upload_cannot_be_replaced_by_failure_upload(self):
+        for flavor in ('Android','Pink'):
+            body=self.refs.routing_step(self.texts['build.yml'],f'Upload routing {flavor} candidate after parity')
+            broken=dict(self.texts);broken['build.yml']=broken['build.yml'].replace(body,body.replace('success()','always()'))
+            with self.subTest(flavor=flavor),self.assertRaisesRegex(ValueError,'candidate upload'):
+                self.validate(broken)
+
+    def test_failure_diagnostics_must_upload_even_if_native_rejected(self):
+        for name in ('build.yml','pink.yml'):
+            body=self.refs.routing_step(self.refs.routing_block(self.texts[name]),'Upload routing native failure diagnostics')
+            broken=dict(self.texts);broken[name]=broken[name].replace(body,body.replace('always()','success()'))
+            with self.subTest(workflow=name),self.assertRaises(ValueError):self.validate(broken)
+
+    def test_staging_ID_and_final_native_sign_parity_cannot_be_omitted(self):
+        for token in ('needs.android.outputs.staging-id','needs.pink.outputs.staging-id','scripts/verify_android_native_parity.py','--staging','--flavor'):
+            broken=dict(self.texts);broken['build.yml']=broken['build.yml'].replace(token,'REMOVED')
+            with self.subTest(token=token),self.assertRaises(ValueError):self.validate(broken)
+
+    def test_source_callee_must_use_the_single_caller_capture(self):
+        for token in ('SUPPLIED_MEDIA_SHA: ${{ inputs.media-kit-sha }}','library_head="$SUPPLIED_MEDIA_SHA"','inputs.app-sha || github.event.pull_request.head.sha || github.sha'):
+            broken=dict(self.texts);broken['routing-source-integration.yml']=broken['routing-source-integration.yml'].replace(token,'REMOVED')
+            with self.subTest(token=token),self.assertRaises(ValueError):self.validate(broken)
+
+    def test_parity_failure_logs_and_dispatch_guard_cannot_be_omitted(self):
+        for name,token in (('build.yml','Initialize parity failure diagnostics'),('build.yml','parity-diagnostics/source.txt'),('build.yml','tee "$RUNNER_TEMP/parity-diagnostics/parity.log"'),('build.yml','parity-diagnostics/freshness.txt'),('pink.yml','Reject uncaptured routing dispatch'),('pink.yml','exit 1'),('pink.yml','contents: write')):
+            broken=dict(self.texts);broken[name]=broken[name].replace(token,'REMOVED',1)
+            with self.subTest(workflow=name,token=token),self.assertRaises(ValueError):self.validate(broken)
+        body=self.refs.routing_step(self.texts['build.yml'],'Upload routing parity diagnostics')
+        broken=dict(self.texts);broken['build.yml']=broken['build.yml'].replace(body,body.replace('always()','success()'))
+        with self.assertRaises(ValueError):self.validate(broken)
+
+    def test_routing_candidate_never_uses_default_production_artifact(self):
+        broken=dict(self.texts);broken['build.yml']=broken['build.yml'].replace('name: routing-android-candidate-','name: Android_arm64-v8a-')
+        with self.assertRaises(ValueError):self.validate(broken)
+
+    def test_production_lock_default_remains_fail_closed(self):
+        import subprocess,tempfile,sys
+        with tempfile.TemporaryDirectory() as directory:
+            lock=Path(directory)/'pubspec.lock'
+            commit='a'*40
+            lock.write_text('packages:\n  media_kit:\n    description:\n      resolved-ref: '+commit+'\n      url: "https://github.com/Goodwu/media-kit.git"\n    source: git\n')
+            argv=[sys.executable,str(ROOT/'scripts/verify_media_kit_lock.py'),str(lock),'--commit',commit]
+            self.assertEqual(subprocess.run(argv,capture_output=True).returncode,0)
+            lock.write_text(lock.read_text().replace('source: git','source: path'))
+            self.assertNotEqual(subprocess.run(argv,capture_output=True).returncode,0)
+
+    def test_production_ref_default_rejects_changed_immutable_pin(self):
+        import subprocess,tempfile,sys
+        with tempfile.TemporaryDirectory() as directory:
+            workflow=Path(directory)/'release.yml';commit='a'*40
+            workflow.write_text('flutter build apk\npython scripts/verify_media_kit_lock.py pubspec.lock --commit '+commit+'\n--media-kit-commit '+commit+'\n')
+            argv=[sys.executable,str(ROOT/'scripts/verify_workflow_media_kit_refs.py'),'--workflow-dir',directory,'--commit',commit]
+            self.assertEqual(subprocess.run(argv,capture_output=True).returncode,0)
+            workflow.write_text(workflow.read_text().replace(commit,'b'*40))
+            self.assertNotEqual(subprocess.run(argv,capture_output=True).returncode,0)
 
 
 if __name__ == '__main__':

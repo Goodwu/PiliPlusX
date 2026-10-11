@@ -200,14 +200,28 @@ def closure_hash(manifest: dict) -> str:
     return digest(canonical({k: manifest[k] for k in ("components", "toolchain", "staging", "linkInputs", "evidence", "members")}))
 
 
-def accepted_entry(accepted: object, manifest: dict, manifest_sha: str) -> dict:
-    accepted = keys(accepted, {"schemaVersion", "task", "entries"}, "trusted acceptance ledger")
+def validate_download(value: object) -> dict:
+    value = keys(value, {"repository", "runId", "artifactId", "attempt", "name", "zipSha256", "producerHeadSha", "uploadJobId"}, "approved artifact download")
+    identity({key: value[key] for key in ("repository", "runId", "artifactId", "attempt")})
+    name = text(value["name"], "artifact name")
+    if len(name) > 128 or "/" in name or "\\" in name:
+        raise GateError("artifact name must be a bounded basename")
+    sha(value["zipSha256"], "artifact ZIP hash")
+    sha(value["producerHeadSha"], "producer HEAD", 40)
+    if type(value["uploadJobId"]) is not int or value["uploadJobId"] < 1:
+        raise GateError("positive approved uploadJobId required")
+    return value
+
+
+def selected_entry(accepted: object) -> dict:
+    if isinstance(accepted, dict) and set(accepted) == {"schemaVersion", "task", "entries"} and type(accepted["schemaVersion"]) is int and accepted["schemaVersion"] == 1 and accepted["task"] == TASK and accepted["entries"] == []:
+        raise GateError("missing-accepted-native-input: legacy empty ledger has no selector")
+    accepted = keys(accepted, {"schemaVersion", "task", "entries", "selectedManifestSha256"}, "trusted acceptance ledger")
     if type(accepted["schemaVersion"]) is not int or accepted["schemaVersion"] != 1 or accepted["task"] != TASK or not isinstance(accepted["entries"], list):
         raise GateError("unsupported acceptance ledger")
-    matches = []
     seen = set()
     for entry in accepted["entries"]:
-        keys(entry, {"manifestSha256", "sourceClosureSha256", "artifactIdentity", "jarSha256", "approval", "allowedWeakVulkanImports", "weakImportEvidence"}, "acceptance record")
+        keys(entry, {"manifestSha256", "sourceClosureSha256", "artifactIdentity", "jarSha256", "approval", "allowedWeakVulkanImports", "weakImportEvidence", "acquisition"}, "acceptance record")
         for field in ("manifestSha256", "sourceClosureSha256", "jarSha256"):
             sha(entry[field], field)
         if entry["manifestSha256"] in seen:
@@ -231,13 +245,33 @@ def accepted_entry(accepted: object, manifest: dict, manifest_sha: str) -> dict:
                 raise GateError("weak imports require approved contract evidence")
         elif weak_evidence is not None:
             raise GateError("unused weak contract evidence must be null")
-        if entry["manifestSha256"] == manifest_sha:
-            matches.append(entry)
+        acquisition = keys(entry["acquisition"], {"jar", "evidence"}, "acquisition")
+        for download in acquisition.values():
+            validate_download(download)
+        first, second = acquisition["jar"], acquisition["evidence"]
+        if any(first[field] != second[field] for field in ("repository", "runId", "attempt", "producerHeadSha")) or first["artifactId"] == second["artifactId"]:
+            raise GateError("A/B must identify distinct artifacts in one exact producer attempt")
+        if {field: first[field] for field in ("repository", "runId", "artifactId", "attempt")} != entry["artifactIdentity"]:
+            raise GateError("JAR artifact identity differs from acquisition A")
+    selector = accepted["selectedManifestSha256"]
+    if selector is not None:
+        sha(selector, "selected manifest")
+    if selector is None:
+        raise GateError("missing-accepted-native-input: explicit selected manifest is empty")
+    matches = [e for e in accepted["entries"] if e["manifestSha256"] == selector]
     if len(matches) != 1:
-        raise GateError("native manifest has no unique CORE-reviewed acceptance record")
-    result = matches[0]
+        raise GateError("selected native manifest has no unique CORE-reviewed acceptance record")
+    return matches[0]
+
+
+def accepted_entry(accepted: object, manifest: dict, manifest_sha: str) -> dict:
+    result = selected_entry(accepted)
+    if result["manifestSha256"] != manifest_sha:
+        raise GateError("native manifest has no unique CORE-reviewed acceptance record for selector")
     if result["sourceClosureSha256"] != closure_hash(manifest) or result["artifactIdentity"] != manifest["artifact"]["identity"] or result["jarSha256"] != manifest["artifact"]["sha256"]:
         raise GateError("accepted source closure/artifact identity/JAR hash mismatch")
+    if result["acquisition"]["jar"]["producerHeadSha"] != manifest["components"]["recipe"]["commit"]:
+        raise GateError("producer HEAD differs from accepted recipe source")
     if any(result["allowedWeakVulkanImports"].values()):
         attached = {e["id"]: e for e in manifest["evidence"]}
         label = result["weakImportEvidence"]

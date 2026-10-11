@@ -2,11 +2,11 @@
 
 ## Current State
 
-当前远端集成分支均为 routing/MK-ROUTING-20261011：库adde2b5b543c099843bee357f63559ce12488def、Appb9d6d623f79a44232e3aff535b88e41ba1634d28（仅文档检查点，源基线a312/abc149）、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112465611。
+当前远端集成分支均为 routing/MK-ROUTING-20261011：库b5c5067089dd19a3271feff3e38aefc43b9f075f、Appb7d3a8efa313c670ed0d41dc86e85646d3531585（已审CONFIG源码切片已提交/push/readback）、FFmpeg9aba43cf；DEVICE DV0011095a43、PR5 5b279611刚重新回读，无新修复回交。主PR仍未合并/关闭/发布。原checkout未知dirty保留。中央最新登记6112665813。
 
 已完成F01/query/DASH/未知DV门/FFmpeg e8df200c，不按旧planned重做。34条分析info已在CI03清零；最新已提交联合源码CI06仅证明Appabc149+库87eb：四平台233Flutter/strict0/bundle/源码freshness，Python实际两次359；Build六Release失败，不能称native验收。库a312窄CI源码685+3既有skip/lab298/strict0、query实际Java31tasks+host34、Darwin9通过；OHOS为实际PR merge unsigned，不是实机。证据原各handoff/summary保留。
 
-CONFIG实际闭环库v3与AppR1已独立V2 PASS（宿主范围），准备集成。库20文件freeze af984d：作者762/strict0，Critical 762包内+12独立共774/strict0，前两轮三个P1真实修后绿、20hash前后同。App16vector47d60f9...绑定同库v3：作者268Flutter/strict0/bundle/channel11、独立90+1/20kwargs及hash一致，first文件设置竞态已关闭。能力查询/设置/refresh服从最新完整request与源代次，实际require履行复核及cleanup重试保留。requested/effective同配置已接DASH/planner/Session/report；未知legacy诊断、默认experimental=false及unknownDV/F01/owner/budget门保留。最新HEAD-only CI、native/实机仍未验，不把dirty宿主结果重标新SHA。各原失败日志与逐轮freeze/review完整归档见core-config-implementation-review/implementation-handoff JSON。
+CONFIG实际闭环库v3与AppR1原冻结宿主V2 PASS并已集成push/readback，但后续完整lab CI证实LG单次实验配置禁改门回归，该LG窄修四文件已Critical PASS（独立lab298/video775/额外4边界、两strict0/hash同），正在保存新源码检查点；最新CI/native/实机仍未验。库20文件freeze af984d：作者762/strict0，Critical 762包内+12独立共774/strict0，前两轮三个P1真实修后绿、20hash前后同。App16vector47d60f9...绑定同库v3：作者268Flutter/strict0/bundle/channel11、独立90+1/20kwargs及hash一致，first文件设置竞态已关闭。能力查询/设置/refresh服从最新完整request与源代次，实际require履行复核及cleanup重试保留。requested/effective同配置已接DASH/planner/Session/report；未知legacy诊断、默认experimental=false及unknownDV/F01/owner/budget门保留。最新HEAD-only CI、native/实机仍未验，不把dirty宿主结果重标新SHA。各原失败日志与逐轮freeze/review完整归档见core-config-implementation-review/implementation-handoff JSON。
 
 Android/Pink实际Release候选第二修复轮：第一来源漏项8注入已拒绝，但V2另证真实offline pubget正常ephemeral/plugin误拒与转义YAML build资源绕过且真实bundle包含，仍REQUEST_CHANGES。原native_input_worker单写variant/输入/workflows，新增持久Dart真实YAML工具及直接测试、精确pubgen/link契约；待实际Android/Pink prepare→pubget→prebuild正例与真实资源负例及新freeze复审。reviewer私有SDK/cache授权独占、packageconfig遗留共享roots只在私有metadata按逐包字节hash重绑，原证据保留，共享SDK不改。接受账本空，无approved A/B/新native/APK声明。
 
@@ -25,6 +25,19 @@ App第一修复最新10个真实variants通过，覆盖firstfile/真实FileSourc
 
 
 2026-10-12集成切片：仅各冻结CONFIG源码/tests（库20、App16）+TASKS/context/本阶段handoff；Android/Pink native16文件仍dirty等待第二来源修复Critical V2及最新clean完整prepare，不混入CONFIG提交。
+
+
+实际新CI capture已确认source38166934942与Build38166935298 attempt1均Appb7d3a8efa+libb5c50670；本轮Python实际两次362通过（31.293/34.451s），其余矩阵仍live/queued不推定通过。Darwin38166919514九项成功；source/query/OHOS仍live、generalpendingnojobs。
+
+独立来源复审在最新b7d3gitarchive实际offlinepubget/清单正向通过（1881tracked/31pubGenerated/86插件）；仅清单，不完整prepare。hostedPythonjob缺真实SDK是确定新增CI阻断，交Lead/只读Specialist做窄provision方案，native16冻结未commit。
+
+
+最新CONFIG源码CI真实阻断：库source38166919509 video759通过+3既有skip/strict0，但lab267通过2失败：fake Session.open缺options override编译失败；LGsingle-open wrapper失败后setPreference应拒却返回（专用token pre-mutation guard被CONFIG遗漏）。独立b5c隔离17pass2fail已复现，lab_config_regression唯一writer获窄增Session三个setter禁改门与claim先消费后解析（扩展需红例）及直接tests，普通无tokenCONFIG事务不封锁；需新Critical复审/新提交CI。App已实际Linux两job268/strict0/bundle/finalize、BuildAndroid268+Web成功，其余Windows/macOS仍live不推定通过。OHOS新HAP为PRmerge9e5577d5非纯b5c。
+
+第二来源修复Critical 140及最新b7d3清单/所有YAML资源/插件反例PASS_WITH_SCOPE，整体REQUEST_CHANGES仅CIprovisioning；新native_ci_sdk_wiring唯一三文件（workflow/parser test/contract）按Specialist方案保留macOS fullsuite、双exactcheckout+现bootstrap、真实receipt前后identity/finalize/失败归档，不skip或新SDK配方。native其他13冻结文件不动，当前未提交。
+
+
+最新待集成切片已通过独立审核：库LGguard四文件+记录（readonlytoken专用setter pre-mutation、失败claim在解析前消费、fakeoverride同步；无token普通Session不封锁）V2 PASS；App native16来源scopePASS+3CI窄修V2 PASS_WITH_PENDING_HOSTED，444Python/36contract/7Dart与identity/actionlint通过，接受账本空、不批准native。源码切片逐hash核对后唯一root提交/push/readback，最新hosted/完整prepare仍待。
 
 ## History
 

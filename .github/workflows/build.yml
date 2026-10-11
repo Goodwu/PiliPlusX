@@ -70,27 +70,205 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+    routing-vector:
+        name: Capture one current App/library input vector
+        runs-on: ubuntu-latest
+        outputs:
+            routing-mode: ${{ steps.vector.outputs.routing-mode }}
+            app-sha: ${{ steps.vector.outputs.app-sha }}
+            media-kit-sha: ${{ steps.vector.outputs.media-kit-sha }}
+        steps:
+            - id: vector
+              shell: bash
+              env:
+                  APP_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+                  HEAD_NAME: ${{ github.head_ref || github.ref_name }}
+              run: |
+                  set -euo pipefail
+                  printf 'app-sha=%s\n' "$APP_SHA" >> "$GITHUB_OUTPUT"
+                  if [ "$HEAD_NAME" = 'routing/MK-ROUTING-20261011' ]; then
+                    app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+                    test "$app_head" = "$APP_SHA"
+                    library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+                    [[ "$library_head" =~ ^[0-9a-f]{40}$ ]]
+                    printf 'routing-mode=true\nmedia-kit-sha=%s\n' "$library_head" >> "$GITHUB_OUTPUT"
+                  else
+                    printf 'routing-mode=false\nmedia-kit-sha=\n' >> "$GITHUB_OUTPUT"
+                  fi
+
     hdr_unit_tests:
+        needs: routing-vector
         if: ${{ github.event_name == 'pull_request' || inputs.run_hdr_unit_tests == true }}
         name: Current-source App validation
         uses: ./.github/workflows/routing-source-integration.yml
+        with:
+            app-sha: ${{ needs.routing-vector.outputs.app-sha }}
+            media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}
         permissions:
             contents: read
 
     android:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_android == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         name: Release Android
+        needs: routing-vector
+        outputs:
+            staging-id: ${{ steps.routing_staging.outputs.artifact-id }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
+            actions: read
 
         steps:
+            # BEGIN ROUTING ANDROID
+            - name: Initialize routing native diagnostics
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              shell: bash
+              run: |
+                set -euo pipefail
+                git config --global core.autocrlf false
+                git config --global core.eol lf
+                git config --global core.longpaths true
+                printf 'ROUTING_RESULTS=%s\nEXPECTED_APP_SHA=%s\nEXPECTED_MEDIA_KIT_SHA=%s\nROUTING_STAGE=%s\n' "$RUNNER_TEMP/rb/r" '${{ needs.routing-vector.outputs.app-sha }}' '${{ needs.routing-vector.outputs.media-kit-sha }}' "$RUNNER_TEMP/routing-android-staging" >> "$GITHUB_ENV"
+                mkdir -p "$RUNNER_TEMP/rb/r"
+            - name: Checkout exact routing App
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/checkout@v7
+              with:
+                ref: ${{ needs.routing-vector.outputs.app-sha }}
+                path: app
+                fetch-depth: 0
+                persist-credentials: false
+            - name: Checkout exact routing library
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/checkout@v7
+              with:
+                repository: Goodwu/media-kit
+                ref: ${{ needs.routing-vector.outputs.media-kit-sha }}
+                path: media-kit
+                persist-credentials: false
+            - name: Verify routing App base
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              working-directory: app
+              shell: bash
+              run: |
+                set -euo pipefail
+                git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+                git merge-base --is-ancestor FETCH_HEAD HEAD
+            - name: Bootstrap actual routing Android patches
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              id: routing_prepare
+              uses: ./app/.github/actions/routing-bootstrap
+              with:
+                app-root: app
+                media-kit-root: media-kit
+                app-sha: ${{ env.EXPECTED_APP_SHA }}
+                media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}
+                platform: android
+            - name: Acquire explicitly accepted native input before Gradle
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              id: routing_native
+              working-directory: app
+              shell: bash
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                set -euo pipefail
+                python3 scripts/acquire_routing_native_inputs.py --output "$RUNNER_TEMP/native-input-android" --receipt "$ROUTING_RESULTS/native-acquire.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --readelf "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --nm "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm"
+            - name: Prepare immutable routing android variant
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              id: routing_variant
+              working-directory: app
+              shell: bash
+              run: |
+                set -euo pipefail
+                python3 scripts/prepare_android_variant.py --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$RUNNER_TEMP/av/android/app" --receipt "$ROUTING_RESULTS/variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --flavor android --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart"
+                python3 scripts/verify_media_kit_lock.py "$RUNNER_TEMP/av/android/app/pubspec.lock" --mode routing --commit "$EXPECTED_MEDIA_KIT_SHA" --app-commit "$EXPECTED_APP_SHA" --source-app-root "$GITHUB_WORKSPACE/app" --variant-root "$RUNNER_TEMP/av/android/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant-receipt "$ROUTING_RESULTS/variant.json"
+                python3 scripts/verify_workflow_media_kit_refs.py --mode routing --commit "$EXPECTED_MEDIA_KIT_SHA" --workflow-dir .github/workflows
+            - name: Set up routing Java
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/setup-java@v5
+              with:
+                distribution: zulu
+                java-version: '17'
+            - name: Build routing Release APK with verified local arm64 input
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              id: routing_build
+              working-directory: ${{ steps.routing_variant.outputs.variant }}
+              shell: bash
+              env:
+                VERIFIED_JAR: ${{ steps.routing_native.outputs.jar }}
+              run: |
+                set -euo pipefail
+                python3 "$GITHUB_WORKSPACE/app/scripts/prepare_android_variant.py" --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$RUNNER_TEMP/av/android/app" --receipt "$ROUTING_RESULTS/variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --flavor android --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart" --check-prebuild
+                flutter build apk --release --split-per-abi --target-platform android-arm64 --android-project-arg=dev=1 --android-project-arg=mediaKitLocalArm64Jar="$VERIFIED_JAR" --android-project-arg=mediaKitArm64Only=true --no-pub 2>&1 | tee "$ROUTING_RESULTS/apk-build.log"
+            - name: Verify routing APK native members ABI and signature
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              id: routing_packaged
+              working-directory: app
+              shell: bash
+              env:
+                VERIFIED_JAR: ${{ steps.routing_native.outputs.jar }}
+                VERIFIED_MANIFEST: ${{ steps.routing_native.outputs.manifest }}
+                VERIFIED_EVIDENCE: ${{ steps.routing_native.outputs.evidenceRoot }}
+                ROUTING_VARIANT: ${{ steps.routing_variant.outputs.variant }}
+              run: |
+                set -euo pipefail
+                apk="$ROUTING_VARIANT/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+                test -s "$apk"
+                python3 scripts/verify_routing_native_inputs.py --jar "$VERIFIED_JAR" --manifest "$VERIFIED_MANIFEST" --evidence-root "$VERIFIED_EVIDENCE" --apk "$apk" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --readelf "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --nm "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm" --receipt "$ROUTING_RESULTS/native-after.json"
+                python3 scripts/verify_artifact.py "$apk" --platform android --abi arm64-v8a
+                apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+                test -x "$apksigner"
+                "$apksigner" verify --verbose "$apk" | tee "$ROUTING_RESULTS/apk-signature.log"
+            - name: Finalize routing variant after build
+              if: ${{ !cancelled() && needs.routing-vector.outputs.routing-mode == 'true' && steps.routing_variant.outcome == 'success' }}
+              working-directory: app
+              shell: bash
+              run: |
+                set -euo pipefail
+                python3 scripts/prepare_android_variant.py --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$RUNNER_TEMP/av/android/app" --receipt "$ROUTING_RESULTS/variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --flavor android --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart" --finalize
+            - name: Finalize original routing sources and freshness
+              if: ${{ !cancelled() && needs.routing-vector.outputs.routing-mode == 'true' && steps.routing_prepare.outcome == 'success' }}
+              working-directory: app
+              shell: bash
+              run: |
+                set -euo pipefail
+                python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "${{ steps.routing_prepare.outputs.private-root }}" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform android --finalize
+            - name: Stage verified routing APK pending cross-variant parity
+              if: ${{ success() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              shell: bash
+              env:
+                ROUTING_VARIANT: ${{ steps.routing_variant.outputs.variant }}
+              run: |
+                set -euo pipefail
+                mkdir "$ROUTING_STAGE"
+                cp "$ROUTING_VARIANT/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" "$ROUTING_STAGE/PiliPlusX_routing_android_arm64-v8a.apk"
+                cp "$ROUTING_RESULTS/native-after.json" "$ROUTING_RESULTS/variant.json" "$ROUTING_RESULTS/bootstrap.json" "$ROUTING_RESULTS/apk-signature.log" "$ROUTING_STAGE/"
+                printf 'pending-parity=true\napp=%s\nmedia-kit=%s\ndeviceVerified=false\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" > "$ROUTING_STAGE/source.txt"
+            - name: Upload routing staging evidence only
+              id: routing_staging
+              if: ${{ success() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/upload-artifact@v7
+              with:
+                name: routing-android-staging
+                path: ${{ env.ROUTING_STAGE }}
+                if-no-files-found: error
+            - name: Upload routing native failure diagnostics
+              if: ${{ always() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/upload-artifact@v7
+              with:
+                name: routing-android-diagnostics-${{ env.EXPECTED_APP_SHA }}
+                path: ${{ env.ROUTING_RESULTS }}
+                if-no-files-found: error
+            # END ROUTING ANDROID
             - name: 代码迁出
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               uses: actions/checkout@v7
               with:
                   fetch-depth: 0
 
             - name: 构建Java环境
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               uses: actions/setup-java@v5
               with:
                   distribution: "zulu"
@@ -101,6 +279,7 @@ jobs:
                       android/**/gradle-wrapper.properties
 
             - name: 安装Flutter
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               uses: subosito/flutter-action@v2
               id: flutter-action
               with:
@@ -109,58 +288,68 @@ jobs:
                   cache: true
 
             - name: Apply Patch
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               shell: pwsh
               run: lib/scripts/patch.ps1 android
 
             - name: Resolve locked dependencies
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: flutter pub get --enforce-lockfile
 
             - name: Patch extended nested scroll view pointer boundary
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: python3 scripts/prepare_ohos_package_patches.py --workspace "$GITHUB_WORKSPACE"
 
             - name: Verify media-kit lock
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
             - name: Verify workflow media-kit references
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
             - name: Write key
-              if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))) }}
               run: |
                   if [ ! -z "${{ secrets.KEYSTORE_FILE }}" ]; then
                     echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
-                    echo storeFile='key.jks' >> android/key.properties
-                    echo storePassword='${{ secrets.KEYSTORE_PASSWORD }}' >> android/key.properties
-                    echo keyAlias='${{ secrets.KEY_ALIAS }}' >> android/key.properties
-                    echo keyPassword='${{ secrets.KEY_PASSWORD }}' >> android/key.properties
+                    {
+                      echo storeFile='key.jks'
+                      echo storePassword='${{ secrets.KEYSTORE_PASSWORD }}'
+                      echo keyAlias='${{ secrets.KEY_ALIAS }}'
+                      echo keyPassword='${{ secrets.KEY_PASSWORD }}'
+                    } >> android/key.properties
                   fi
 
             - name: Set and Extract version
-              if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))) }}
               shell: pwsh
               run: lib/scripts/build.ps1 android
 
             - name: Flutter Build Release Apk
-              if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) }}
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))) }}
               run: flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define-from-file=pili_release.json --no-pub
 
             - name: Flutter Build Dev Apk
-              if: ${{ github.event_name == 'pull_request' }}
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') && (github.event_name == 'pull_request') }}
               run: |
                 flutter build apk --release --split-per-abi --target-platform android-arm64 --android-project-arg dev=1 --no-pub
 
             - name: Rename
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: |
                   tag_name=${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
                   mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "PiliPlusX_android_${tag_name}_arm64-v8a.apk"
               shell: bash
 
             - name: Verify Android ABI
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: |
                   apk=$(find . -maxdepth 1 -name 'PiliPlusX_android_*_arm64-v8a.apk' -print -quit)
                   python3 scripts/verify_artifact.py "$apk" --platform android --abi arm64-v8a
 
             - name: Generate Android release manifest
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               run: |
                   apk=$(find . -maxdepth 1 -name 'PiliPlusX_android_*_arm64-v8a.apk' -print -quit)
                   mkdir -p release-metadata/android
@@ -175,6 +364,7 @@ jobs:
                   mv release-metadata/android/SHA256SUMS "${apk%.apk}.SHA256SUMS"
 
             - name: 上传
+              if: ${{ !(needs.routing-vector.outputs.routing-mode == 'true') }}
               uses: actions/upload-artifact@v7
               with:
                   archive: false
@@ -185,38 +375,116 @@ jobs:
                       PiliPlusX_android_*_arm64-v8a.SHA256SUMS
 
     pink:
+        needs: routing-vector
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_pink == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         uses: ./.github/workflows/pink.yml
         permissions: write-all
         with:
+            routing-mode: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+            app-sha: ${{ needs.routing-vector.outputs.app-sha }}
+            media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
 
     verify_android_native_parity:
         if: ${{ needs.android.result == 'success' && needs.pink.result == 'success' }}
-        needs: [android, pink]
+        needs: [android, pink, routing-vector]
         name: Verify Android/Pink native parity
+        permissions:
+            contents: read
+            actions: read
         runs-on: ubuntu-latest
         steps:
             - name: Checkout verification scripts
               uses: actions/checkout@v7
+              with:
+                  ref: ${{ needs.routing-vector.outputs.app-sha }}
+                  persist-credentials: false
+
+            - name: Initialize parity failure diagnostics
+              shell: bash
+              env:
+                  APP_SHA: ${{ needs.routing-vector.outputs.app-sha }}
+                  MEDIA_SHA: ${{ needs.routing-vector.outputs.media-kit-sha }}
+              run: |
+                  set -euo pipefail
+                  mkdir -p "$RUNNER_TEMP/parity-diagnostics"
+                  printf 'app=%s\nmedia-kit=%s\ndeviceVerified=false\n' "$APP_SHA" "$MEDIA_SHA" > "$RUNNER_TEMP/parity-diagnostics/source.txt"
 
             - name: Download Android artifact
               uses: actions/download-artifact@v7
               with:
-                  name: Android_arm64-v8a
+                  name: ${{ needs.routing-vector.outputs.routing-mode != 'true' && 'Android_arm64-v8a' || '' }}
+                  artifact-ids: ${{ needs.routing-vector.outputs.routing-mode == 'true' && needs.android.outputs.staging-id || '' }}
                   path: android-artifact
 
             - name: Download Pink artifact
               uses: actions/download-artifact@v7
               with:
-                  name: Android_Pink
+                  name: ${{ needs.routing-vector.outputs.routing-mode != 'true' && 'Android_Pink' || '' }}
+                  artifact-ids: ${{ needs.routing-vector.outputs.routing-mode == 'true' && needs.pink.outputs.staging-id || '' }}
                   path: pink-artifact
 
             - name: Verify identical arm64 native libraries
+              shell: bash
               run: |
+                  set -euo pipefail
                   android_apk=$(find android-artifact -name '*.apk' -print -quit)
                   pink_apk=$(find pink-artifact -name '*.apk' -print -quit)
-                  python3 scripts/verify_android_native_parity.py "$android_apk" "$pink_apk"
+                  python3 scripts/verify_android_native_parity.py "$android_apk" "$pink_apk" 2>&1 | tee "$RUNNER_TEMP/parity-diagnostics/parity.log"
+
+            - name: Reverify selected native input and both staged APKs
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  APP_SHA: ${{ needs.routing-vector.outputs.app-sha }}
+                  MEDIA_SHA: ${{ needs.routing-vector.outputs.media-kit-sha }}
+              run: |
+                  set -euo pipefail
+                  mkdir -p "$RUNNER_TEMP/parity-diagnostics"
+                  for flavor in android pink; do
+                    python3 scripts/acquire_routing_native_inputs.py --output "$RUNNER_TEMP/parity-native-$flavor" --receipt "$RUNNER_TEMP/parity-diagnostics/native-$flavor.json" --app-commit "$APP_SHA" --media-kit-commit "$MEDIA_SHA" --staging "$GITHUB_WORKSPACE/$flavor-artifact" --flavor "$flavor" --readelf "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --nm "${ANDROID_NDK_HOME:-/missing-ndk}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm"
+                    apk="$flavor-artifact/PiliPlusX_routing_${flavor}_arm64-v8a.apk"
+                    python3 scripts/verify_artifact.py "$apk" --platform android --abi arm64-v8a
+                    apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
+                    test -x "$apksigner"
+                    "$apksigner" verify --verbose "$apk" > "$RUNNER_TEMP/parity-diagnostics/signature-$flavor.log"
+                  done
+            - name: Verify routing freshness before candidate upload
+              if: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+              shell: bash
+              env:
+                  APP_SHA: ${{ needs.routing-vector.outputs.app-sha }}
+                  MEDIA_SHA: ${{ needs.routing-vector.outputs.media-kit-sha }}
+              run: |
+                  set -euo pipefail
+                  app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+                  library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+                  printf 'expected-app=%s\nobserved-app=%s\nexpected-media-kit=%s\nobserved-media-kit=%s\n' "$APP_SHA" "$app_head" "$MEDIA_SHA" "$library_head" > "$RUNNER_TEMP/parity-diagnostics/freshness.txt"
+                  test "$app_head" = "$APP_SHA"
+                  test "$library_head" = "$MEDIA_SHA"
+            - name: Upload routing Android candidate after parity
+              if: ${{ success() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/upload-artifact@v7
+              with:
+                  name: routing-android-candidate-${{ needs.routing-vector.outputs.app-sha }}
+                  path: android-artifact
+                  if-no-files-found: error
+            - name: Upload routing Pink candidate after parity
+              if: ${{ success() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/upload-artifact@v7
+              with:
+                  name: routing-pink-candidate-${{ needs.routing-vector.outputs.app-sha }}
+                  path: pink-artifact
+                  if-no-files-found: error
+            - name: Upload routing parity diagnostics
+              if: ${{ always() && needs.routing-vector.outputs.routing-mode == 'true' }}
+              uses: actions/upload-artifact@v7
+              with:
+                  name: routing-parity-diagnostics-${{ needs.routing-vector.outputs.app-sha }}
+                  path: ${{ runner.temp }}/parity-diagnostics
+                  if-no-files-found: error
+
 
     ios:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_ios == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}

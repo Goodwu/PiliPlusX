@@ -7,6 +7,13 @@ on:
     branches: [fix/darwin-video-output-rebuild-barrier]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      app-sha:
+        type: string
+        default: ''
+      media-kit-sha:
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -27,12 +34,17 @@ jobs:
         id: vector
         shell: bash
         env:
-          EXPECTED_APP_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          SUPPLIED_MEDIA_SHA: ${{ inputs.media-kit-sha }}
+          EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
           test "$app_head" = "$EXPECTED_APP_SHA"
-          library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          if [ -n "$SUPPLIED_MEDIA_SHA" ]; then
+            library_head="$SUPPLIED_MEDIA_SHA"
+          else
+            library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          fi
           [[ "$library_head" =~ ^[0-9a-f]{40}$ ]]
           printf 'media-kit-sha=%s\n' "$library_head" >> "$GITHUB_OUTPUT"
           printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$library_head"
@@ -40,37 +52,77 @@ jobs:
   python-tests:
     name: App Python regression tests (macOS)
     # Existing signing/publication tests deliberately require real macOS APIs.
+    needs: source-vector
     runs-on: macos-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
+    env:
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
     steps:
       - name: Keep App checkout inputs in LF form
-        shell: bash
+        working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
+          git config --global core.longpaths true
           git config --global core.autocrlf false
           git config --global core.eol lf
-          printf 'ROUTING_TOOLS=%s\n' "$RUNNER_TEMP/routing-app-python-results" >> "$GITHUB_ENV"
+          printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/rb/r" >> "$GITHUB_ENV"
+          printf 'ROUTING_BOOTSTRAP_RECEIPT=%s\n' "$RUNNER_TEMP/rb/r/bootstrap.json" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+          path: app
+          fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
         with:
-          python-version: '3.13'
-      - name: Run all App Python test modules
-        shell: bash
+          repository: Goodwu/media-kit
+          ref: ${{ needs.source-vector.outputs.media-kit-sha }}
+          path: media-kit
+          persist-credentials: false
+      - name: Verify exact Python test source vector and App base
         run: |
           set -euo pipefail
-          mkdir -p "$ROUTING_TOOLS"
-          git rev-parse HEAD > "$ROUTING_TOOLS/source.txt"
-          python3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee "$ROUTING_TOOLS/tests.log"
+          mkdir -p "$ROUTING_RESULTS"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$EXPECTED_MEDIA_KIT_SHA"
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" | tee "$ROUTING_RESULTS/source.txt"
+      - name: Bootstrap private parser SDK and current sources
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ env.EXPECTED_APP_SHA }}
+          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}
+          platform: android
+      - name: Run all App Python test modules
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          test -f "$ROUTING_BOOTSTRAP_RECEIPT"
+          test -n "$FLUTTER_ROOT"
+          test -n "$PUB_CACHE"
+          python3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee "$ROUTING_RESULTS/tests.log"
           python3 scripts/verify_hdr_channel.py
           git diff --exit-code
+      - name: Finalize Python test source freshness and package roots
+        # A failed test remains a failed job, but prepared sources are still checked.
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "${{ steps.prepare.outputs.private-root }}" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform android --finalize
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: routing-app-python-${{ github.event.pull_request.head.sha || github.sha }}
-          path: ${{ env.ROUTING_TOOLS }}
+          name: routing-app-python-${{ env.EXPECTED_APP_SHA }}
+          path: ${{ env.ROUTING_RESULTS }}
           if-no-files-found: error
 
   app-source:
@@ -79,7 +131,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      EXPECTED_APP_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
       EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
     defaults:
       run:
@@ -97,7 +149,7 @@ jobs:
           printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/rb/r" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
           path: app
           fetch-depth: 0
           persist-credentials: false
@@ -188,7 +240,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     env:
-      EXPECTED_APP_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
       EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
     defaults:
       run:
@@ -208,7 +260,7 @@ jobs:
           "ROUTING_RESULTS=$env:RUNNER_TEMP/rb/r" >> $env:GITHUB_ENV
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
           path: app
           fetch-depth: 0
           persist-credentials: false
