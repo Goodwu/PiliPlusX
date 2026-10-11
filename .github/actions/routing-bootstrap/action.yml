@@ -1,0 +1,73 @@
+name: Routing source bootstrap
+description: Prepare private Flutter and package patches against one exact current source vector.
+inputs:
+  app-root:
+    description: App checkout path relative to the job workspace (normally app).
+    required: true
+    default: app
+  media-kit-root:
+    description: media-kit checkout path relative to the job workspace (normally media-kit).
+    required: true
+    default: media-kit
+  app-sha:
+    description: Exact App HEAD captured for this job.
+    required: true
+  media-kit-sha:
+    description: Exact media-kit HEAD captured for this job (checkout must use this SHA).
+    required: true
+  platform:
+    description: Existing patch.ps1 platform (android, linux, macos or windows).
+    required: true
+outputs:
+  app-root:
+    description: Absolute App source root (also exposed as ROUTING_APP_ROOT).
+    value: ${{ steps.prepare.outputs.app-root }}
+  receipt-directory:
+    description: Absolute path to bootstrap evidence and command logs.
+    value: ${{ steps.prepare.outputs.receipt-directory }}
+  private-root:
+    description: Absolute path to this job's private SDK and pub cache.
+    value: ${{ steps.prepare.outputs.private-root }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    # The caller must also configure these before its initial App checkout.
+    # This controls any SDK checkout performed by flutter-action on Windows.
+    - name: Keep SDK patch inputs in LF form
+      shell: pwsh
+      run: |
+        git config --global core.autocrlf false
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to configure SDK checkout line endings' }
+        git config --global core.eol lf
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to configure SDK checkout line endings' }
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        flutter-version-file: ${{ inputs.app-root }}/pubspec.yaml
+        cache: false
+        pub-cache: false
+        cache-path: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}/sdk-install
+        pub-cache-path: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}/pub-cache
+    - name: Prepare and verify the source vector in a private toolchain
+      id: prepare
+      shell: pwsh
+      env:
+        INPUT_APP: ${{ inputs.app-root }}
+        INPUT_MEDIA: ${{ inputs.media-kit-root }}
+        INPUT_APP_SHA: ${{ inputs.app-sha }}
+        INPUT_MEDIA_SHA: ${{ inputs.media-kit-sha }}
+        INPUT_PLATFORM: ${{ inputs.platform }}
+        PRIVATE_ROOT: ${{ runner.temp }}/routing-bootstrap-${{ github.job }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $app = Join-Path $env:GITHUB_WORKSPACE $env:INPUT_APP
+        $media = Join-Path $env:GITHUB_WORKSPACE $env:INPUT_MEDIA
+        $output = Join-Path $env:PRIVATE_ROOT 'results'
+        python (Join-Path $app 'scripts/prepare_routing_ci.py') --app-root $app --media-kit-root $media --flutter-root $env:FLUTTER_ROOT --private-root $env:PRIVATE_ROOT --output $output --expected-app-sha $env:INPUT_APP_SHA --expected-media-kit-sha $env:INPUT_MEDIA_SHA --platform $env:INPUT_PLATFORM
+        if ($LASTEXITCODE -ne 0) { throw "Routing source bootstrap failed: $LASTEXITCODE" }
+        "app-root=$app" >> $env:GITHUB_OUTPUT
+        "receipt-directory=$output" >> $env:GITHUB_OUTPUT
+        "private-root=$env:PRIVATE_ROOT" >> $env:GITHUB_OUTPUT

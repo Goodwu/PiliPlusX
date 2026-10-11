@@ -2,15 +2,17 @@
 
 ## Current State
 
-当前已推送App c51fd0973ed9138354b0abbc5da0e5b3d1c20cc2 + media-kit 12966e7ac78983807199e0a179e84ad763a547a7。最新source CI38156848733 attempt1 SUCCESS：严格分析No issues、211 Flutter、1 Chrome、268 Python、Web/bundle、10包实际来源与freshness通过；库source38156773328 SUCCESS：video591通过/3项原macOS跳过、lab298通过、两包严格分析通过。Darwin/query/OHOS三检查成功；general库作业仍在核对，不推定全部green。精确artifact/哈希由CI复核继续回读，证据/tmp/mk-routing-new-ci-20261012/。
+当前已推送App da28171292931d32a1f4954f495ab5b7c29852a6；下述已成功源码运行仅证明此前c51fd0973 + media-kit 12966e7ac78983807199e0a179e84ad763a547a7。最新source CI38156848733 attempt1 SUCCESS：严格分析No issues、211 Flutter、1 Chrome、268 Python、Web/bundle、10包实际来源与freshness通过；库source38156773328 SUCCESS：video591通过/3项原macOS跳过、lab298通过、两包严格分析通过。Darwin/query/OHOS三检查成功；general库作业仍在核对，不推定全部green。精确artifact/哈希由CI复核继续回读，证据/tmp/mk-routing-new-ci-20261012/。
 
 34 info已在CI03 1965ba0e清零并由新向量继续验证，不再是待修项。R01b12966请求契约统一、输出复用/重建与失败清理已实现，本地64目标、独立critical78及strict通过。真实decoder/presenter/copy/software catalog、auto/prefer/require有效配置贯穿闭环仍未完成，experimental产品默认false保持。
 
-Release38156848910仍有失败：Android/Pink/Linux私有PUB_CACHE缺目录；Windows缺兄弟media-kit源码，pubget exit66；mac PR空tag被正式release gate拒绝；iOS已失败于旧锁SHA校验，标准Flutter兼容先成功，未到编译。源码job通过不能代表native/ABI/签名/设备通过。公共bootstrap三个新文件已实施并18目标/13来源测试通过，尚待独立V1及真实平台接线，不宣称mock就是真实bootstrap。Windows包补丁helper URI窄修5目标/13关联及V1独立5+13通过，仅标准库单次解码和本机路径转换/URI组件门，原patch校验未改；真实Windows尚待。Bootstrap V1发现未跟踪源码未纳来源、GITHUB_ENV保护变量及Windows字节差异需修，暂不提交bootstrap。
+Release38156848910仍有失败：Android/Pink/Linux私有PUB_CACHE缺目录；Windows缺兄弟media-kit源码，pubget exit66；mac PR空tag被正式release gate拒绝；iOS已失败于旧锁SHA校验，标准Flutter兼容先成功，未到编译。源码job通过不能代表native/ABI/签名/设备通过。公共bootstrap三个新文件已实施并26目标/13来源测试及V1独立26+13通过：exact两仓HEAD、私有SDK/cache、resolve→真实补丁、全roots/10包来源与前后hash、freshness及失败receipt；尚待真实平台接线，不宣称mock就是真实bootstrap。Windows包补丁helper URI窄修5目标/13关联及V1独立5+13通过，仅标准库单次解码和本机路径转换/URI组件门，原patch校验未改；真实Windows尚待。Bootstrap V1原两缺陷已修：拒绝unknown untracked/ignored源码、不写protected GITHUB_ENV；CRLF和继承SKIP=1明确拒绝，调用方必须checkout前LF配置，不能normalize hash伪通过。准备三文件检查点，真实pubget/3OS尚待。
 
 CORE-R01c中央6111412893认领首小阶段：持续实际hwdec/route不一致不能accept/verified；普通review/open超时不得误标outputBindTimeout排除platformView。正在有界失败及typed等待边界实现/测试，未提交。原nativeDV、F01、owner与cleanup门保留。曾尝试复用旧r01_implement角色收到agent thread limit reached，未假装执行；新原生team_worker_escalated r01c_worker派发成功，责任仅Session/coordinator/直接测试。
 
 DEVICE最新6111344927登记LG原候选实体屏幕人眼颜色亮度基本正常，DV002呈现项passed_for_vector；不改标最新整合验收。DV0011095a43构建审查及native owner/YUV arm、普通Session无define接线、最新native输入manifest仍开放。CORE不接管配方，不以SurfaceTexture+PQ猜YUV，不改已批准LG FULL/range1。主PR未合并、未发布。
+
+用户再次明确要求归并DV001与PR#5，列为最终必需交付：media-kit PR5 latest86c186f0/base routing主线、构建PR1 DV001 latest1095a43已回读。库文档e162cb3c已部分归并三md/README/原导入hash，独立critical原文/6hash/5relative链接通过，两个sh未归入；DV001仍REQUEST_CHANGES。独立critical角色dv_integration_audit审查可归并文件与旧向量/配方问题；CORE唯一归并者，DEVICE原PR修构建，最新完整输入组合关键P5/P8.4复测不得省略，不自动merge主PR或发布。
 
 ## History
 
