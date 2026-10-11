@@ -12,14 +12,16 @@ void main() {
 
       await expectLater(
         lease.run(
-          () async {
-            events.add('player-created');
-            events.add('probe-started');
+          () => Future<void>.sync(() {
+            events
+              ..add('player-created')
+              ..add('probe-started');
             throw StateError('probe failed');
-          },
+          }),
           disposePair: (output) async {
-            events.add('dispose-output:${output ?? 'none'}');
-            events.add('dispose-player');
+            events
+              ..add('dispose-output:${output ?? 'none'}')
+              ..add('dispose-player');
           },
         ),
         throwsA(isA<StateError>()),
@@ -43,14 +45,16 @@ void main() {
 
       await expectLater(
         lease.run(
-          () async {
-            events.add('probe-complete');
-            events.add('output-create-started');
+          () => Future<void>.sync(() {
+            events
+              ..add('probe-complete')
+              ..add('output-create-started');
             throw StateError('output create failed');
-          },
+          }),
           disposePair: (output) async {
-            events.add('dispose-output:${output ?? 'none'}');
-            events.add('dispose-player');
+            events
+              ..add('dispose-output:${output ?? 'none'}')
+              ..add('dispose-player');
           },
         ),
         throwsA(isA<StateError>()),
@@ -72,15 +76,17 @@ void main() {
       final events = <String>[];
       lease.attachOutput('output-a');
       await lease.release((output) async {
-        events.add('dispose-output:$output');
-        events.add('dispose-player');
+        events
+          ..add('dispose-output:$output')
+          ..add('dispose-player');
       });
       // A racing catch/stale path must not double dispose the same pair.
       await lease.release((output) async => events.add('duplicate:$output'));
       expect(events, ['dispose-output:output-a', 'dispose-player']);
 
-      final published = PlayerResourceLease<String>()..attachOutput('output-b');
-      published.transfer();
+      final published = PlayerResourceLease<String>()
+        ..attachOutput('output-b')
+        ..transfer();
       await published.release(
         (output) async => events.add('wrongly-disposed:$output'),
       );
@@ -93,11 +99,13 @@ void main() {
     final lease = PlayerResourceLease<String>()..attachOutput('output');
     var attempts = 0;
     await expectLater(
-      lease.release((output) async {
-        attempts++;
-        expect(output, 'output');
-        throw StateError('barrier failed');
-      }),
+      lease.release(
+        (output) => Future<void>.sync(() {
+          attempts++;
+          expect(output, 'output');
+          throw StateError('barrier failed');
+        }),
+      ),
       throwsA(isA<StateError>()),
     );
     expect(lease.released, isFalse);
@@ -128,5 +136,46 @@ void main() {
     await Future.wait([first, second]);
     expect(attempts, 1);
     expect(lease.released, isTrue);
+  });
+
+  test('deferred failure is rethrown only after owned cleanup completes', () async {
+    final lease = PlayerResourceLease<String>()..attachOutput('output');
+    final operation = Completer<void>();
+    final cleanupStarted = Completer<void>();
+    final allowCleanup = Completer<void>();
+    final failure = StateError('deferred probe failure');
+    final events = <String>[];
+    var errorDelivered = false;
+
+    final pending = lease.run(
+      () => operation.future,
+      disposePair: (output) async {
+        expect(output, 'output');
+        events.add('cleanup-started');
+        cleanupStarted.complete();
+        await allowCleanup.future;
+        events.add('cleanup-finished');
+      },
+    );
+    final observed = pending.then<void>(
+      (_) => fail('The failed operation must not succeed'),
+      onError: (Object error, StackTrace stackTrace) {
+        expect(error, same(failure));
+        expect(lease.released, isTrue);
+        errorDelivered = true;
+      },
+    );
+    operation.completeError(failure);
+    await cleanupStarted.future;
+    expect(errorDelivered, isFalse);
+    expect(lease.released, isFalse);
+    expect(lease.output, 'output');
+    expect(events, ['cleanup-started']);
+
+    allowCleanup.complete();
+    await observed;
+    expect(errorDelivered, isTrue);
+    expect(lease.output, isNull);
+    expect(events, ['cleanup-started', 'cleanup-finished']);
   });
 }

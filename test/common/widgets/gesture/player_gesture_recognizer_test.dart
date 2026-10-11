@@ -105,10 +105,11 @@ void main() {
       };
     final down = _down(1);
 
-    recognizer.addPointer(down);
-    recognizer.handleEvent(down);
-    recognizer.handleEvent(_move(1, const Offset(20, 0)));
-    recognizer.handleEvent(_move(1, const Offset(40, 0)));
+    recognizer
+      ..addPointer(down)
+      ..handleEvent(down)
+      ..handleEvent(_move(1, const Offset(20, 0)))
+      ..handleEvent(_move(1, const Offset(40, 0)));
     expect(decision?.startPosition, Offset.zero);
     expect(recognizer.singlePointerDecision, same(decision));
     recognizer.handleEvent(_up(1, const Offset(40, 0)));
@@ -131,20 +132,22 @@ void main() {
       };
     final down = _down(1, Offset.zero, PointerDeviceKind.mouse);
 
-    recognizer.addPointer(down);
-    recognizer.handleEvent(down);
-    recognizer.handleEvent(
-      _move(1, const Offset(3, 0), PointerDeviceKind.mouse),
-    );
+    recognizer
+      ..addPointer(down)
+      ..handleEvent(down)
+      ..handleEvent(
+        _move(1, const Offset(3, 0), PointerDeviceKind.mouse),
+      );
     expect(filterCalls, 0);
     recognizer.handleEvent(
       _move(1, const Offset(19, 0), PointerDeviceKind.mouse),
     );
     expect(filterCalls, 1);
-    recognizer.handleEvent(
-      _up(1, const Offset(19, 0)),
-    );
-    recognizer.dispose();
+    recognizer
+      ..handleEvent(
+        _up(1, const Offset(19, 0)),
+      )
+      ..dispose();
   });
 
   testWidgets(
@@ -163,9 +166,10 @@ void main() {
         };
       final down = _down(1);
 
-      recognizer.addPointer(down);
-      recognizer.handleEvent(down);
-      recognizer.handleEvent(_move(1, const Offset(1.5, 0)));
+      recognizer
+        ..addPointer(down)
+        ..handleEvent(down)
+        ..handleEvent(_move(1, const Offset(1.5, 0)));
       expect(filterCalls, 0);
       recognizer.handleEvent(_move(1, const Offset(2.1, 0)));
       expect(filterCalls, 0);
@@ -190,15 +194,17 @@ void main() {
           );
     final down = _down(1);
 
-    recognizer.addPointer(down);
-    recognizer.handleEvent(down);
-    recognizer.handleEvent(_move(1, const Offset(3, 0)));
+    recognizer
+      ..addPointer(down)
+      ..handleEvent(down)
+      ..handleEvent(_move(1, const Offset(3, 0)));
     expect(decision, isNull);
     recognizer.handleEvent(_move(1, const Offset(3, 20)));
     expect(decision?.action, PlayerSinglePointerGestureAction.fullScreen);
 
-    recognizer.handleEvent(_up(1, const Offset(3, 20)));
-    recognizer.dispose();
+    recognizer
+      ..handleEvent(_up(1, const Offset(3, 20)))
+      ..dispose();
   });
 
   testWidgets('rejected single-pointer direction safely leaves the arena', (
@@ -208,9 +214,10 @@ void main() {
       ..singlePointerMoveFilter = (_, _, _) => null;
     final down = _down(1);
 
-    recognizer.addPointer(down);
-    recognizer.handleEvent(down);
-    recognizer.handleEvent(_move(1, const Offset(0, 20)));
+    recognizer
+      ..addPointer(down)
+      ..handleEvent(down)
+      ..handleEvent(_move(1, const Offset(0, 20)));
 
     recognizer.dispose();
   });
@@ -227,15 +234,16 @@ void main() {
     final firstDown = _down(1);
     final secondDown = _down(2);
 
-    recognizer.addPointer(firstDown);
-    recognizer.handleEvent(firstDown);
-    recognizer.addPointer(secondDown);
-    recognizer.handleEvent(secondDown);
-    recognizer.handleEvent(_move(1, const Offset(20, 0)));
-    recognizer.handleEvent(_move(2, const Offset(30, 0)));
-    recognizer.handleEvent(_up(2, const Offset(30, 0)));
-    recognizer.handleEvent(_move(1, const Offset(0, 30)));
-    recognizer.handleEvent(_up(1, const Offset(0, 30)));
+    recognizer
+      ..addPointer(firstDown)
+      ..handleEvent(firstDown)
+      ..addPointer(secondDown)
+      ..handleEvent(secondDown)
+      ..handleEvent(_move(1, const Offset(20, 0)))
+      ..handleEvent(_move(2, const Offset(30, 0)))
+      ..handleEvent(_up(2, const Offset(30, 0)))
+      ..handleEvent(_move(1, const Offset(0, 30)))
+      ..handleEvent(_up(1, const Offset(0, 30)));
 
     expect(filterCalls, 0);
     recognizer.dispose();
@@ -246,8 +254,9 @@ void main() {
   ) async {
     final recognizer = _TestScaleGestureRecognizer();
     final firstDown = _down(1);
-    recognizer.addPointer(firstDown);
-    recognizer.handleEvent(firstDown);
+    recognizer
+      ..addPointer(firstDown)
+      ..handleEvent(firstDown);
     expect(recognizer.shouldCancelCurrentGesture, isFalse);
 
     recognizer.handleEvent(_cancel(1, Offset.zero));
@@ -256,9 +265,10 @@ void main() {
 
     final multiRecognizer = _TestScaleGestureRecognizer();
     final secondDown = _down(2, const Offset(10, 10));
-    multiRecognizer.addPointer(firstDown);
-    multiRecognizer.handleEvent(firstDown);
-    multiRecognizer.addPointer(secondDown);
+    multiRecognizer
+      ..addPointer(firstDown)
+      ..handleEvent(firstDown)
+      ..addPointer(secondDown);
     expect(multiRecognizer.shouldCancelCurrentGesture, isTrue);
     multiRecognizer.dispose();
   });

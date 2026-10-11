@@ -24,10 +24,10 @@ void main() {
       player: 'player',
       output: 'output',
       outputAttempts: 2,
-      disposeOutput: (output) async {
+      disposeOutput: (output) => Future<void>.sync(() {
         events.add('try-$output');
         throw StateError('output barrier failed');
-      },
+      }),
       disposePlayer: (player) async => events.add('dispose-$player'),
       retainForRetry: ({required output, required outputReleased}) =>
           events.add('retain:$output:$outputReleased'),
