@@ -217,9 +217,8 @@ void main() {
     recognizer
       ..addPointer(down)
       ..handleEvent(down)
-      ..handleEvent(_move(1, const Offset(0, 20)));
-
-    recognizer.dispose();
+      ..handleEvent(_move(1, const Offset(0, 20)))
+      ..dispose();
   });
 
   testWidgets('a multi-pointer gesture is not re-filtered after acceptance', (

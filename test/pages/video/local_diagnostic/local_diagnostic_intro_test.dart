@@ -29,11 +29,9 @@ void main() {
     await supportDirectory.delete(recursive: true);
   });
 
-  // The test framework must observe completion/errors of asynchronous reset.
-  // Do not drop the returned Future or merely silence the closure lint.
-  tearDown(() async {
-    await Get.reset();
-  });
+  // This App's GetResetExt.reset has a synchronous void contract. Register
+  // that callback directly; do not invent a Future or await a void result.
+  tearDown(Get.reset);
 
   test('Get.put initializes a network-free intro without Bilibili ids', () {
     final intro = Get.put(
@@ -58,14 +56,14 @@ void main() {
     expect(intro.nextPlay(), isFalse);
   });
 
-  test('awaited reset removes the diagnostic registration before reuse', () async {
+  test('synchronous reset removes the diagnostic registration before reuse', () {
     const tag = 'local-diagnostic-reset';
     Get.put(
       LocalDiagnosticIntroController(diagnosticHeroTag: tag),
       tag: tag,
     );
     expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isTrue);
-    await Get.reset();
+    Get.reset();
     expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isFalse);
   });
 
