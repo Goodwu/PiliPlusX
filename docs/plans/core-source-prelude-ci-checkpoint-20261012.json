@@ -221,7 +221,7 @@
       "artifact": 11713952189,
       "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
       "prepareVerifyFinalize": "each success; fresh-source-only;57steps exit0; exact before/after/final vector",
-      "bundle": "not a Release prelude step; independently proven only in source jobs",
+      "bundle": "actual bundle command passed inside Verify current media-kit package resolution; no separately archived bundle digest; native remains blocked",
       "reason": "current producer receipt null; native input root absent"
     },
     "Windows": {
@@ -229,7 +229,7 @@
       "artifact": 11714201466,
       "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
       "prepareVerifyFinalize": "each success; fresh-source-only;57steps exit0; exact before/after/final vector",
-      "bundle": "not a Release prelude step; independently proven only in source jobs",
+      "bundle": "actual bundle command passed inside Verify current media-kit package resolution; no separately archived bundle digest; native remains blocked",
       "reason": "current producer receipt null; native input root absent"
     },
     "AndroidPink": {
@@ -385,7 +385,7 @@
   "verdict": "Exact e31a+d916 source validation successful in independent and embedded runs; Build failed on six Release jobs; current Linux/Windows source prelude verified and native input blocked, no native/device acceptance.",
   "limits": [
     "No native/device acceptance",
-    "Linux/Windows Release prelude prepares/verifies/finalizes sources but does not run bundle; source jobs separately test/bundle",
+    "Linux/Windows Release prelude runs bundle inside resolution verification; source jobs separately provide archived bundle evidence; native remains blocked",
     "General pending snapshot only; not reported as success",
     "Earlier cancelled/failed vectors retained; no borrowed counts"
   ],
@@ -397,5 +397,34 @@
     "full": "summary.json",
     "files": "evidence-index.json",
     "rawLogs": 25
+  },
+  "sourcePreludeBundleCorrection": {
+    "originalRawSummarySha256": "ac15feb95da3a40de52084c5789d435615dc7b8503ae18136bd227e07597a9cd",
+    "evidence": {
+      "linux": {
+        "job": 114560490516,
+        "log": "/tmp/mk-linux-source-prelude-job.log",
+        "sha256": "b1ab9adcaf83f51ecbc5b849a882c3afec9ea1fe95d08d92b34de73473227e2f",
+        "step": "Verify current media-kit package resolution",
+        "stepConclusion": "success",
+        "actualCommand": "flutter build bundle --debug --no-pub",
+        "proof": "Exact command followed by explicit nonzero throw guard; successful step proceeds to finalize",
+        "bundleArtifactHash": "not independently archived in Release prelude artifact",
+        "nativeVerified": false
+      },
+      "windows": {
+        "job": 114560490505,
+        "log": "/tmp/mk-win-source-prelude-job.log",
+        "sha256": "4c45c27468fbbaca708e015f63e163dcd23971cd892f63d07357aeeeb8dbebf2",
+        "step": "Verify current media-kit package resolution",
+        "stepConclusion": "success",
+        "actualCommand": "flutter build bundle --debug --no-pub",
+        "proof": "Exact command followed by explicit nonzero throw guard; successful step proceeds to finalize",
+        "bundleArtifactHash": "not independently archived in Release prelude artifact",
+        "nativeVerified": false
+      }
+    },
+    "reason": "Previous summary searched separate step name and missed bundle command embedded in successful verification step",
+    "scope": "Historical e31a + d916 only; not current 1970 acceptance"
   }
 }
