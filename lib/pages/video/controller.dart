@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:media_kit_video/media_kit_video.dart'
     show VideoOutputTarget, EffectiveVideoRouteOptions, VideoOutputIntent;
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:piliplus/common/style.dart';
 import 'package:piliplus/common/widgets/pair.dart';
@@ -137,6 +139,12 @@ class VideoDetailController extends GetxController
   DashRouteSelection? _routeSelection;
   EffectiveVideoRouteOptions? _routeOptions;
   int _routeOptionsRevision = 0;
+
+  /// DV003: sniffed DOVI facts per source spec key. Keyed by rendition, so a
+  /// playurl revision that changes URLs re-sniffs; entries survive menu
+  /// re-renders within this page controller.
+  final Map<String, DoviFacts> _doviFactsCache = {};
+
   late final void Function(EffectiveVideoRouteOptions)
   _routeInvalidatedCallback = _invalidateRouteOptions;
   late final Future<void> Function(EffectiveVideoRouteOptions)
@@ -273,6 +281,13 @@ class VideoDetailController extends GetxController
     final configRevision = _routeOptionsRevision;
     final serial = ++_routingQuerySerial;
     _routeSelection = null;
+    final doviFacts = await _resolveDoviFacts();
+    if (revision != _playbackDataRevision ||
+        serial != _routingQuerySerial ||
+        configRevision != _routeOptionsRevision ||
+        !identical(options, _routeOptions)) {
+      return false;
+    }
     // A first FlutterView can attach while the initial query is outstanding.
     // Re-read that target once; do not publish a result for the previous one.
     for (var attempt = 0; attempt < 2; attempt++) {
@@ -281,6 +296,7 @@ class VideoDetailController extends GetxController
         tracks: data.dash?.video ?? const [],
         target: target,
         options: options,
+        doviFacts: doviFacts,
       );
       if (isClosed ||
           revision != _playbackDataRevision ||
@@ -297,6 +313,41 @@ class VideoDetailController extends GetxController
       return true;
     }
     return false;
+  }
+
+  /// DV003: Bilibili's Dolby Vision tier (126) carries no profile in its
+  /// codec string, so the rendition's own initialization segment is sniffed
+  /// (one bounded Range GET) to resolve the profile before route selection.
+  /// Failures stay absent from the map: unknown-DV semantics then keep the
+  /// tier gray instead of guessing.
+  Future<Map<String, DoviFacts>> _resolveDoviFacts() async {
+    final tracks = data.dash?.video ?? const <VideoItem>[];
+    final pending = <VideoItem, String>{};
+    for (final item in tracks) {
+      if (item.id != VideoQuality.dolbyVision.code) continue;
+      final spec = DashRouteSelection.specification(item);
+      if (spec == null || _doviFactsCache.containsKey(spec.key)) continue;
+      if (item.baseUrl?.isNotEmpty != true) continue;
+      final descriptor = HdrOutputSelector.descriptorFromDash(
+        quality: item.id,
+        codec: item.codecs,
+      );
+      if (descriptor?.hasUnresolvedDolbyVision != true) continue;
+      pending[item] = spec.key;
+    }
+    debugPrint('DOVI_SNIFF pending=${pending.length} cached=${_doviFactsCache.length}');
+    if (pending.isNotEmpty) {
+      await Future.wait(
+        pending.entries.map((entry) async {
+          final facts = await sniffDoviInitSegment(entry.key);
+          if (facts != null) {
+            _doviFactsCache[entry.value] = facts;
+          }
+        }),
+        eagerError: false,
+      );
+    }
+    return Map.unmodifiable(_doviFactsCache);
   }
 
   final Map<String, VideoDecodeCapability> _decodeCapabilities = {};

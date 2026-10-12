@@ -22,6 +22,8 @@
 - 用户明确要求归并DV001与media-kit PR#5：PR5最新5b279611以routing主线为base，DV001最新1095a43；三md初始切片及新增16行已独立复核并分别归库e162/aeaf，DEVICE修原配方，归并后最新完整向量P5/P8.4重测，未归并不能结项。
 - Release Python随机路径、OHOS工具链约束及iOS/mac pointer兼容修复已分别审查并提交；真实Release作业验收仍开放。继续CORE-R01、真实选项闭环；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
 
+- [DEVICE/DV003] B 站 126 杜比视界档面板恒灰已修复：根因=B 站 126 轨以 hvc1* 串下发（无 dvh1/dvhe 声明）→ 未知 DV 语义灰禁；修复=初始化段 DOVI 嗅探（dovi_sniff.dart，206→facts P8.4/compat4）+ descriptor 装配。宿主 281 tests/analyze 0 issues；LYA 真机面板不灰且自动选中 126 播放。分支 device/MK-ROUTING-20261011/DV003（基于 1970d440b），context=，中央登记 media-kit PR#4 6120961868/6122712443。待 CORE 归并后按最新向量 LG 复测。
+
 ## Now（当前推进，最多 3 条）
 
 - [ ] 修复 macOS `BV1vY4y1N7TY` Dolby Vision 亮度不足
