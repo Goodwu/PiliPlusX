@@ -2,7 +2,7 @@
 
 ## Current State
 
-唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码与审查集成者，DEVICE 仍维护原 DV001 native recipe/build/device acceptance。当前回读 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`，media-kit `e269d9669becb5812663200e7521901e8254c8bd`，FFmpeg `9aba43cf`，DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。主 PR 未合并、关闭或发布。
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码与审查集成者，DEVICE 仍维护原 DV001 native recipe/build/device acceptance。当前回读 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`（待推送文档 checkpoint），media-kit `5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f`（文档 checkpoint；源码基线 `e269d9669becb5812663200e7521901e8254c8bd`），FFmpeg `9aba43cf`，DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。主 PR 未合并、关闭或发布。
 
 query/DASH/unknown DV/F01/R01、auto/prefer/require 有效配置闭环、FFmpeg e8df200c 和失败感知兜底等完成项保留。旧“34 info”已不是当前问题：App source run 38255581451 四平台 analyze 均无 finding；不得按旧数字重开开发。产品 `experimental` 默认仍为 false；true 主验证，false 回归；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 不变，10-bit 与 lease 融合不重开。
 
