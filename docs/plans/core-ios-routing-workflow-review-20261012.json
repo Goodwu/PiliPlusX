@@ -1,0 +1,45 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "scope": "iOS routing source-only workflow",
+  "conclusion": "PASS_WITH_SCOPE",
+  "files": {
+    ".github/workflows/build.yml": "09ec033871815e4db399fcacacabdd3c29a13ff69c3c3e2188ebd842117a3432",
+    ".github/workflows/ios.yml": "e30be76d1cc42fdf29b050bd6ba599b58bf541fcc5f3860b61b48f71ccbca9e2",
+    "test/reusable_workflow_contract_test.py": "19dbbc0ead177bd6120b21eb65b0ce5984963f90aec847e7c6db92dbd7a0fdce"
+  },
+  "reviewer": "/root/ios_workflow_critical",
+  "originalReview": {
+    "path": "/tmp/mk-ios-routing-workflow-critical-review.json",
+    "sha256": "befbf94f91390e677e73edb02d3f11ba4c5cd6a9005067f73d437fee2759f2cd",
+    "conclusion": "REQUEST_CHANGES",
+    "P1": "variant finalize before bootstrap fresh finalize"
+  },
+  "r1": {
+    "P1Closed": true,
+    "actualHelperMemoryLifecycleRegression": "passed; SDK evidence mocked",
+    "actualBashExit37Probes": 3,
+    "actionlint": "passed",
+    "authorContractTestsPassed": 50,
+    "independentFull50Rerun": "ENOSPC tempdir creation; 93 errors; not passed",
+    "reportFilePersisted": false,
+    "evidenceAuthority": "reviewer tool outputs and final message; report write ENOSPC"
+  },
+  "flow": [
+    "captured vector and exact two checkouts",
+    "prepared iOS bootstrap",
+    "variant prepare/offline lock pubget",
+    "variant prebuild",
+    "source-only debug bundle",
+    "post-bundle source verify",
+    "bootstrap finalize fresh",
+    "variant finalize with actual fresh receipt",
+    "SOURCE_PREPARED_NATIVE_BLOCKED"
+  ],
+  "remaining": {
+    "hostedWorkflowExecuted": false,
+    "bundleExecutedForNewWorkflow": false,
+    "nativeInputAvailable": false,
+    "XcodeVerified": false,
+    "deviceVerified": false
+  }
+}

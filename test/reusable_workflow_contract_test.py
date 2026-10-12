@@ -4,8 +4,15 @@ These checks cover this repository's concrete job/step layouts, not arbitrary
 YAML. Actual GitHub workflow execution remains a separate integration gate.
 """
 from pathlib import Path
+import os
+import hashlib
+import json
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,8 +25,12 @@ def validate_apple_calls(text):
         body = block.group(1)
         if 'uses: ./.github/workflows/' + job + '.yml' not in body:
             raise ValueError('Unexpected callee ' + job)
-        if not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ github.event.pull_request.head.sha \|\| github.sha \}\}$', body, re.M):
+        if job == 'ios':
+            if not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ needs.routing-vector.outputs.app-sha \}\}$', body, re.M):
+                raise ValueError('Missing exact current source ref in ios')
+        elif not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ github.event.pull_request.head.sha \|\| github.sha \}\}$', body, re.M):
             raise ValueError('Missing exact current source ref in ' + job)
+    validate_ios_routing_calls(text)
 
 
 def platform_job(text, name, indent=2):
@@ -42,6 +53,153 @@ def validate_platform_routing_calls(text):
                 ('media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}', 'media-kit SHA')):
             if value not in body:
                 raise ValueError(name + ' misses ' + reason)
+
+
+def named_step(body, name):
+    match = re.search(r'^      - name: ' + re.escape(name) + r'\n(.*?)(?=^      - |\Z)',
+                      body, re.M | re.S)
+    if not match:
+        raise ValueError('Missing workflow step ' + name)
+    return match.group(1)
+
+
+def workflow_run_script(step):
+    lines = step.splitlines()
+    start = next((index for index, line in enumerate(lines) if line == '        run: |'), None)
+    if start is None:
+        raise ValueError('Expected a literal multiline run script')
+    script = []
+    for line in lines[start + 1:]:
+        if line and not line.startswith('          '):
+            break
+        script.append(line[10:] if line.startswith('          ') else '')
+    return '\n'.join(script) + '\n'
+
+
+def validate_ios_routing_calls(text):
+    body = platform_job(text, 'ios', indent=4)
+    for value, reason in (
+            ('needs: routing-vector', 'captured routing vector dependency'),
+            ('uses: ./.github/workflows/ios.yml', 'existing iOS reusable workflow'),
+            ('ref: ${{ needs.routing-vector.outputs.app-sha }}', 'exact App ref'),
+            ("routing-mode: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}", 'routing mode'),
+            ('app-sha: ${{ needs.routing-vector.outputs.app-sha }}', 'captured App SHA'),
+            ('media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}', 'captured media-kit SHA')):
+        if value not in body:
+            raise ValueError('iOS caller misses ' + reason)
+
+
+def validate_ios_routing_workflow(text):
+    calls = text.split('  workflow_call:\n', 1)[1].split('  workflow_dispatch:\n', 1)[0]
+    for value, reason in (
+            ('routing-mode:\n', 'routing mode input'),
+            ('required: false\n        default: false\n        type: boolean', 'default-false routing mode'),
+            ('app-sha:\n', 'App SHA input'),
+            ('media-kit-sha:\n', 'media-kit SHA input')):
+        if value not in calls:
+            raise ValueError('iOS reusable workflow misses ' + reason)
+    dispatch = text.split('  workflow_dispatch:\n', 1)[1].split('\njobs:', 1)[0]
+    if ('routing-mode:\n' not in dispatch or
+            'required: false\n        default: false\n        type: boolean' not in dispatch):
+        raise ValueError('iOS direct dispatch must declare default-false routing mode')
+    if 'app-sha:' in dispatch or 'media-kit-sha:' in dispatch:
+        raise ValueError('iOS direct dispatch cannot invent a captured source vector')
+
+    body = platform_job(text, 'build-macos-app')
+    for key in ('PILIPLUSX_SKIP_POINTER_FILTER_PATCH', 'PILIPLUSX_SKIP_GEETEST_IOS_PATCH'):
+        assignment = re.search(r'^      ' + re.escape(key) + r': (.+)$', body, re.M)
+        if not assignment or assignment.group(1) != "${{ !inputs.routing-mode && '1' || '' }}":
+            raise ValueError('Legacy iOS patch skip flag must be disabled in routing mode: ' + key)
+    steps = (
+        'Reject uncaptured routing dispatch before any production step',
+        'Prepare routing receipts directory',
+        'Checkout exact routing App source',
+        'Checkout exact routing media-kit source',
+        'Verify routing App base',
+        'Bootstrap private current iOS sources',
+        'Verify current media-kit source resolution',
+        'Prepare isolated routing iOS App variant',
+        'Verify routing iOS variant inputs before bundle',
+        'Build current routing iOS Flutter bundle',
+        'Verify current media-kit source resolution after bundle',
+        'Finalize original routing sources and freshness',
+        'Finalize routing iOS variant against fresh sources',
+        'Fail closed because no current iOS native producer input is available',
+        'Upload routing iOS source and native availability diagnostics')
+    positions = [body.find('      - name: ' + name) for name in steps]
+    if any(position < 0 for position in positions) or positions != sorted(positions):
+        raise ValueError('iOS routing lifecycle steps are missing or out of order')
+
+    preflight = named_step(body, steps[0])
+    for token in ('ROUTING_MODE', 'APP_SHA', 'MEDIA_KIT_SHA', 'APP_REF', 'HEAD_NAME',
+                  '^[0-9a-f]{40}$', 'APP_REF', 'HEAD_NAME', 'routing/MK-ROUTING-20261011', 'exit 1'):
+        if token not in preflight:
+            raise ValueError('iOS routing preflight misses ' + token)
+    if positions[0] > positions[1]:
+        raise ValueError('iOS routing preflight must precede all setup')
+
+    for name, required in {
+            steps[1]: ('if: ${{ inputs.routing-mode }}', 'core.longpaths true', 'core.autocrlf false',
+                       'core.eol lf', 'ROUTING_RESULTS=', 'EXPECTED_APP_SHA=', 'EXPECTED_MEDIA_KIT_SHA='),
+            steps[2]: ('if: ${{ inputs.routing-mode }}', 'repository: Goodwu/PiliPlusX',
+                       'ref: ${{ inputs.app-sha }}', 'path: app', 'persist-credentials: false'),
+            steps[3]: ('if: ${{ inputs.routing-mode }}', 'repository: Goodwu/media-kit',
+                       'ref: ${{ inputs.media-kit-sha }}', 'path: media-kit', 'persist-credentials: false'),
+            steps[4]: ('git rev-parse HEAD', 'git -C ../media-kit rev-parse HEAD',
+                       'merge-base --is-ancestor FETCH_HEAD HEAD'),
+            steps[5]: ('uses: ./app/.github/actions/routing-bootstrap', 'app-root: app',
+                       'media-kit-root: media-kit', 'app-sha: ${{ inputs.app-sha }}',
+                       'media-kit-sha: ${{ inputs.media-kit-sha }}', 'platform: ios'),
+            steps[6]: ('verify_routing_sources.py', 'routing-sources-before.json'),
+            steps[7]: ('scripts/prepare_ios_variant.py', '--variant "$ROUTING_VARIANT"',
+                       'if: ${{ inputs.routing-mode && steps.prepare.outcome == \'success\' }}',
+                       '--bootstrap "$ROUTING_RESULTS/bootstrap.json"', '--app-commit "$EXPECTED_APP_SHA"',
+                       '--media-kit-commit "$EXPECTED_MEDIA_KIT_SHA"'),
+            steps[8]: ('if: ${{ inputs.routing-mode && steps.variant_prepare.outcome == \'success\' }}',
+                       'id: variant_prebuild', 'scripts/prepare_ios_variant.py', '--check-prebuild'),
+            steps[9]: ('working-directory: ${{ runner.temp }}/av/ios/app',
+                       'id: routing_bundle', 'if: ${{ inputs.routing-mode && steps.variant_prepare.outcome == \'success\' && steps.variant_prebuild.outcome == \'success\' }}',
+                       'flutter build bundle --debug --no-pub', 'set -euo pipefail', 'tee "$ROUTING_RESULTS/bundle-build.log"'),
+            steps[10]: ('if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == \'success\' && steps.variant_prebuild.outcome == \'success\' && steps.routing_bundle.outcome == \'success\' }}',
+                        'id: source_verify_after', 'verify_routing_sources.py', 'routing-sources-after.json'),
+            steps[11]: ('if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == \'success\' && steps.variant_prebuild.outcome == \'success\' && steps.routing_bundle.outcome == \'success\' && steps.source_verify_after.outcome == \'success\' }}',
+                        'prepare_routing_ci.py', '--platform ios --finalize'),
+            steps[12]: ('if: ${{ !cancelled() && inputs.routing-mode && steps.variant_prepare.outcome == \'success\' && steps.variant_prebuild.outcome == \'success\' && steps.routing_bundle.outcome == \'success\' && steps.source_verify_after.outcome == \'success\' && steps.finalize.outcome == \'success\' }}',
+                        'id: variant_finalize', 'scripts/prepare_ios_variant.py', '--finalize'),
+            steps[13]: ("'stage': 'SOURCE_PREPARED_NATIVE_BLOCKED'",
+                        "'status': 'ios-current-native-input-unavailable'",
+                        "'currentProducerReceipt': None", "'xcodeBuildStarted': False",
+                        'if: ${{ inputs.routing-mode && steps.routing_bundle.outcome == \'success\' && steps.variant_finalize.outcome == \'success\' && steps.source_verify_after.outcome == \'success\' && steps.finalize.outcome == \'success\' }}',
+                        'SOURCE_PREPARED_NATIVE_BLOCKED', 'raise SystemExit(1)'),
+            steps[14]: ('if: ${{ always() && inputs.routing-mode }}',
+                        'actions/upload-artifact@v7', 'if-no-files-found: error')}.items():
+        step = named_step(body, name)
+        for token in required:
+            if token not in step:
+                raise ValueError('iOS step ' + name + ' misses ' + token)
+
+    for name in (steps[7], steps[8], steps[12]):
+        step = named_step(body, name)
+        if 'offline' in step or '--enforce-lockfile' in step:
+            raise ValueError('iOS variant lifecycle flags must remain owned by the reviewed helper')
+    for name in (steps[4], steps[6], steps[7], steps[8], steps[9], steps[10], steps[11], steps[12]):
+        step = named_step(body, name)
+        if 'tee ' in step and 'set -euo pipefail' not in step:
+            raise ValueError('iOS source or bundle command failure can be hidden by tee in ' + name)
+    for forbidden in ('flutter build ios', 'xcodebuild ', 'flutter_pub_get_with_retry.sh',
+                      'prepare_ci_dependencies.sh', 'pod install', 'pod update',
+                      'swift package resolve', 'media_kit_libs_ios_video@'):
+        routing = body[positions[1]:positions[14]]
+        if forbidden in routing:
+            raise ValueError('iOS routing source lane reaches legacy/native command ' + forbidden)
+
+    legacy = body[body.find('      - name: Checkout code'):]
+    if not legacy:
+        raise ValueError('iOS non-routing release lane is missing')
+    legacy_steps = re.split(r'^      - name: ', legacy, flags=re.M)[1:]
+    for step in legacy_steps:
+        if 'if: ${{ !inputs.routing-mode }}' not in step:
+            raise ValueError('Every legacy iOS production step must be disabled in routing mode')
 
 
 def validate_platform_source_workflow(text, platform, consumer, old_urls):
@@ -328,7 +486,9 @@ class ReusableSourceContractTests(unittest.TestCase):
         validate_apple_calls(self.text)
 
     def test_removing_required_ios_ref_is_detected(self):
-        broken = self.text.replace('            ref: ${{ github.event.pull_request.head.sha || github.sha }}\n', '', 1)
+        ios = platform_job(self.text, 'ios', indent=4)
+        broken = self.text.replace(ios, ios.replace(
+            '            ref: ${{ needs.routing-vector.outputs.app-sha }}\n', '', 1), 1)
         with self.assertRaisesRegex(ValueError, 'ios'):
             validate_apple_calls(broken)
 
@@ -604,6 +764,121 @@ class LinuxWindowsRoutingSourceWiringTests(unittest.TestCase):
         self.assertFalse(legacy_enabled('pull_request', branch, True, media_sha))
         self.assertFalse(refused('workflow_dispatch', 'main', False, '', ''))  # ordinary direct dispatch
         self.assertTrue(legacy_enabled('workflow_dispatch', 'main', False, ''))
+
+
+class IOSRoutingSourceWiringTests(unittest.TestCase):
+    def setUp(self):
+        self.caller = (ROOT / '.github/workflows/build.yml').read_text()
+        self.workflow = (ROOT / '.github/workflows/ios.yml').read_text()
+
+    def test_caller_passes_the_captured_vector_to_ios(self):
+        validate_ios_routing_calls(self.caller)
+
+    def test_reusable_ios_lane_prepares_sources_bundle_and_stops_before_native(self):
+        validate_ios_routing_workflow(self.workflow)
+
+    def test_caller_cannot_drop_library_sha_or_use_an_uncaptured_ref(self):
+        ios = platform_job(self.caller, 'ios', indent=4)
+        with self.assertRaisesRegex(ValueError, 'captured media-kit SHA'):
+            validate_ios_routing_calls(self.caller.replace(ios, ios.replace(
+                '            media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}\n', '', 1), 1))
+        with self.assertRaisesRegex(ValueError, 'exact current source ref'):
+            validate_apple_calls(self.caller.replace(ios, ios.replace(
+                '            ref: ${{ needs.routing-vector.outputs.app-sha }}\n', '', 1), 1))
+
+    def test_routing_path_rejects_missing_bundle_or_accidental_xcode(self):
+        with self.assertRaisesRegex(ValueError, 'flutter build bundle'):
+            validate_ios_routing_workflow(self.workflow.replace(
+                'flutter build bundle --debug --no-pub', 'flutter build bundle --no-pub', 1))
+        injected = self.workflow.replace(
+            '      - name: Fail closed because no current iOS native producer input is available',
+            '      - name: Accidental Xcode native build\n        if: ${{ inputs.routing-mode }}\n'
+            '        run: xcodebuild build\n\n'
+            '      - name: Fail closed because no current iOS native producer input is available', 1)
+        with self.assertRaisesRegex(ValueError, 'xcodebuild'):
+            validate_ios_routing_workflow(injected)
+
+    def test_routing_path_cannot_enable_old_legacy_steps(self):
+        broken = self.workflow.replace(
+            '        if: ${{ !inputs.routing-mode }}\n        uses: actions/checkout@v7',
+            '        uses: actions/checkout@v7', 1)
+        with self.assertRaisesRegex(ValueError, 'Every legacy iOS production step'):
+            validate_ios_routing_workflow(broken)
+
+    def test_actual_preflight_accepts_only_captured_vector_or_nonrouting_release(self):
+        body = platform_job(self.workflow, 'build-macos-app')
+        script = workflow_run_script(named_step(
+            body, 'Reject uncaptured routing dispatch before any production step'))
+        branch = 'routing/MK-ROUTING-20261011'
+        app_sha, media_sha = 'a' * 40, 'b' * 40
+
+        def invoke(mode, app, media, ref, head):
+            with tempfile.TemporaryDirectory(prefix='ios-routing-preflight-') as runner_temp:
+                env = dict(os.environ, ROUTING_MODE=mode, APP_SHA=app,
+                           MEDIA_KIT_SHA=media, APP_REF=ref, HEAD_NAME=head,
+                           RUNNER_TEMP=runner_temp)
+                return subprocess.run(['bash', '-c', script], env=env,
+                                      text=True, capture_output=True)
+
+        self.assertEqual(invoke('true', app_sha, media_sha, app_sha, branch).returncode, 0)
+        self.assertNotEqual(invoke('true', '', media_sha, '', branch).returncode, 0)
+        self.assertNotEqual(invoke('true', app_sha, media_sha, 'c' * 40, branch).returncode, 0)
+        self.assertNotEqual(invoke('false', '', '', '', branch).returncode, 0)
+        self.assertEqual(invoke('false', '', '', '', 'main').returncode, 0)
+
+    def test_actual_ios_variant_helper_requires_bootstrap_finalize_before_final_variant(self):
+        sys.path.insert(0, str(ROOT / 'scripts'))
+        import prepare_ios_variant as ios_variant
+
+        vector = {'app': 'a' * 40, 'media-kit': 'b' * 40}
+        sdk_identity = {'sdkCommit': 'c' * 40, 'sdkTree': 'd' * 40,
+                        'toolsPackageRoots': {'flutter_tools': '/fixture/flutter_tools'}}
+        toolchain = {'frameworkVersion': '3.47.2'}
+        execution = {'platform': 'ios', 'scriptSha256': 'e' * 64}
+        witness = {'sdkCommit': sdk_identity['sdkCommit'], 'reverseCheck': {'exitCode': 0}}
+        steps = [{'name': 'patch-SdkOnly', 'exitCode': 0},
+                 {'name': 'patch-PackagesOnly', 'exitCode': 0}]
+        bootstrap = {
+            'scope': 'routing-source-bootstrap', 'platform': 'ios',
+            'vector': vector, 'status': 'prepared-source-only', 'steps': list(steps),
+            'flutterRoot': '/fixture/runner/f', 'pubCache': '/fixture/runner/p',
+            'sdkCommit': sdk_identity['sdkCommit'], 'sdkTree': sdk_identity['sdkTree'],
+            'flutterToolsPackages': sdk_identity['toolsPackageRoots'], 'toolchain': toolchain,
+            'sdkPatchIdentity': sdk_identity, 'sdkPatchExecution': execution,
+            'iosSdkSemanticWitness': witness,
+            'sourceHashes': {'app/lib/scripts/patch.ps1': execution['scriptSha256']},
+        }
+        stable_receipt = {key: value for key, value in bootstrap.items()
+                          if key not in ('status', 'finalVector', 'steps')}
+        identity = {
+            **{key: bootstrap[key] for key in (
+                'scope', 'platform', 'vector', 'flutterRoot', 'pubCache', 'sdkCommit',
+                'sdkTree', 'flutterToolsPackages', 'toolchain', 'sdkPatchIdentity',
+                'sdkPatchExecution', 'iosSdkSemanticWitness')},
+            'status': 'prepared-source-only',
+            'outerStableSha256': hashlib.sha256(json.dumps(
+                stable_receipt, sort_keys=True, separators=(',', ':')).encode()).hexdigest(),
+            'outerPreparedSteps': list(steps),
+        }
+        identity['sha256'] = hashlib.sha256(json.dumps(
+            identity, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        actual_vector = {'app': vector['app'], 'media-kit': vector['media-kit']}
+        source, sdk, cache = (Path('/fixture/app'), Path('/fixture/runner/f'),
+                              Path('/fixture/runner/p'))
+        with patch.object(ios_variant, 'sdk_patch_identity', return_value=sdk_identity), \
+                patch.object(ios_variant, 'sdk_patch_execution_identity', return_value=execution), \
+                patch.object(ios_variant, 'ios_sdk_semantic_witness', return_value=witness):
+            ios_variant.verify_bootstrap_identity(
+                identity, bootstrap, source, sdk, cache, actual_vector, final=False)
+            with self.assertRaisesRegex(ios_variant.GateError, 'not bound to an iOS source bootstrap'):
+                ios_variant.verify_bootstrap_identity(
+                    identity, bootstrap, source, sdk, cache, actual_vector, final=True)
+
+            bootstrap['status'] = 'fresh-source-only'
+            bootstrap['finalVector'] = vector
+            bootstrap['steps'].append({'name': 'finalized-source-vector', 'exitCode': 0})
+            ios_variant.verify_bootstrap_identity(
+                identity, bootstrap, source, sdk, cache, actual_vector, final=True)
 
 
 class RoutingNativeWorkflowTests(unittest.TestCase):

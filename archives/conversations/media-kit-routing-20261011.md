@@ -20,6 +20,9 @@ DV001与PR5必须完整归并。历史三MD已归台账；公共matrix归唯一t
 
 下一步：完成原iOS当前组合真实variant验收、PR5四文件冻结V2，再root归档/精确stage/中文commit/push/readback；保留各源码向量，后续HEAD前进重新验收。Linux完整producer→consumer→generated bundle、iOS routing workflow/native、Windows native/其他Release和DEVICE同线程协作继续，不因源码绿或正确拒绝结项。
 
+
+iOS routing workflow三文件第一修正已V2 PASS_WITH_SCOPE：sourceverify→bootstrapfreshfinalize→variantfinalize顺序恢复，实际helper生命周期/三段bash exit37/actionlint通过；作者50contracts通过，独立50重跑因ENOSPC临时目录失败，不虚称通过。三个source冻结待准确提交，尚无真实hosted/bundle/native验收。PR5两P1窄修23tests曾过，24th canonical修正后完整复测被磁盘门阻断，未review-ready，不混入提交。
+
 ## History
 
 ### 2026-10-12 A hosted终态前阶段记录（历史）
