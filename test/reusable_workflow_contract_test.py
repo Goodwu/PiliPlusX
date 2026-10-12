@@ -28,9 +28,10 @@ def validate_apple_calls(text):
         if job == 'ios':
             if not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ needs.routing-vector.outputs.app-sha \}\}$', body, re.M):
                 raise ValueError('Missing exact current source ref in ios')
-        elif not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ github.event.pull_request.head.sha \|\| github.sha \}\}$', body, re.M):
+        elif not re.search(r'^        with:\n(?:            .*\n)*?            ref: \$\{\{ needs.routing-vector.outputs.app-sha \}\}$', body, re.M):
             raise ValueError('Missing exact current source ref in ' + job)
     validate_ios_routing_calls(text)
+    validate_mac_routing_calls(text)
 
 
 def platform_job(text, name, indent=2):
@@ -87,6 +88,94 @@ def validate_ios_routing_calls(text):
             ('media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}', 'captured media-kit SHA')):
         if value not in body:
             raise ValueError('iOS caller misses ' + reason)
+
+
+def validate_mac_routing_calls(text):
+    match = re.search(r'^    mac:\n(.*?)(?=^    [a-z][a-z0-9_-]*:|\Z)', text, re.M | re.S)
+    if not match:
+        raise ValueError('Missing mac job')
+    body = match.group(1)
+    for value, reason in (
+            ('needs: routing-vector', 'captured routing vector dependency'),
+            ('uses: ./.github/workflows/mac.yml', 'existing macOS reusable workflow'),
+            ('ref: ${{ needs.routing-vector.outputs.app-sha }}', 'exact App ref'),
+            ("routing-mode: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}", 'routing mode'),
+            ('app-sha: ${{ needs.routing-vector.outputs.app-sha }}', 'captured App SHA'),
+            ('media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}', 'captured media-kit SHA')):
+        if value not in body:
+            raise ValueError('macOS caller misses ' + reason)
+
+
+def validate_mac_routing_workflow(text):
+    calls = text.split('  workflow_call:\n', 1)[1].split('  workflow_dispatch:\n', 1)[0]
+    for value, reason in (
+            ('routing-mode:\n', 'routing mode input'),
+            ('required: false\n        default: false\n        type: boolean', 'default-false routing mode'),
+            ('app-sha:\n', 'App SHA input'),
+            ('media-kit-sha:\n', 'media-kit SHA input')):
+        if value not in calls:
+            raise ValueError('macOS reusable workflow misses ' + reason)
+    dispatch = text.split('  workflow_dispatch:\n', 1)[1].split('\njobs:', 1)[0]
+    if ('routing-mode:\n' not in dispatch or
+            'required: false\n        default: false\n        type: boolean' not in dispatch):
+        raise ValueError('macOS direct dispatch must declare default-false routing mode')
+    if 'app-sha:' in dispatch or 'media-kit-sha:' in dispatch:
+        raise ValueError('macOS direct dispatch cannot invent a captured source vector')
+
+    body = platform_job(text, 'build-mac-app')
+    assignment = re.search(r'^      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: (.+)$', body, re.M)
+    if not assignment or assignment.group(1) != "${{ !inputs.routing-mode && '1' || '' }}":
+        raise ValueError('Legacy macOS pointer patch skip must be disabled in routing mode')
+    steps = (
+        'Reject uncaptured routing dispatch before any production step',
+        'Prepare routing receipts directory',
+        'Checkout exact routing App source',
+        'Checkout exact routing media-kit source',
+        'Verify routing App base',
+        'Bootstrap private current macOS sources',
+        'Verify current media-kit source resolution before bundle',
+        'Build current routing macOS Flutter bundle',
+        'Verify current media-kit source resolution after bundle',
+        'Finalize current routing sources and freshness',
+        'Fail closed because no current macOS native producer input is available',
+        'Upload routing macOS source and native availability diagnostics')
+    positions = [body.find('      - name: ' + name) for name in steps]
+    if any(position < 0 for position in positions) or positions != sorted(positions):
+        raise ValueError('macOS routing lifecycle steps are missing or out of order')
+    preflight = named_step(body, steps[0])
+    for token in ('ROUTING_MODE', 'APP_SHA', 'MEDIA_KIT_SHA', 'APP_REF', 'HEAD_NAME',
+                  '^[0-9a-f]{40}$', 'routing/MK-ROUTING-20261011', 'exit 1'):
+        if token not in preflight:
+            raise ValueError('macOS routing preflight misses ' + token)
+    for stepname, required in {
+            steps[1]: ('if: ${{ inputs.routing-mode }}', 'core.autocrlf false', 'core.eol lf', 'ROUTING_RESULTS='),
+            steps[2]: ('if: ${{ inputs.routing-mode }}', 'repository: Goodwu/PiliPlusX',
+                       'ref: ${{ inputs.app-sha }}', 'path: app', 'persist-credentials: false'),
+            steps[3]: ('if: ${{ inputs.routing-mode }}', 'repository: Goodwu/media-kit',
+                       'ref: ${{ inputs.media-kit-sha }}', 'path: media-kit', 'persist-credentials: false'),
+            steps[5]: ('platform: macos', 'uses: ./app/.github/actions/routing-bootstrap'),
+            steps[6]: ('steps.prepare.outcome == \'success\'', 'verify_routing_sources.py'),
+            steps[7]: ('steps.source_verify_before.outcome == \'success\'', 'flutter build bundle --debug --no-pub'),
+            steps[8]: ('steps.routing_bundle.outcome == \'success\'', 'verify_routing_sources.py'),
+            steps[9]: ('steps.source_verify_after.outcome == \'success\'', '--platform macos --finalize'),
+            steps[10]: ('steps.finalize.outcome == \'success\'', 'SOURCE_PREPARED_NATIVE_BLOCKED',
+                        'mac-current-native-input-unavailable', 'nativeBinaryProvenanceVerified\': False',
+                        'deviceTest\': False', 'raise SystemExit(1)'),
+            steps[11]: ('always() && inputs.routing-mode', 'if-no-files-found: error') } .items():
+        content = named_step(body, stepname)
+        for token in required:
+            if token not in content:
+                raise ValueError('macOS routing step ' + stepname + ' misses ' + token)
+    routing_region = body.split('      - name: Reject uncaptured routing dispatch before any production step', 1)[1].split(
+        '      - name: Checkout exact release source', 1)[0]
+    for forbidden in ('run_macos_shared_release.py', 'approved_media_kit_revision',
+                      'release_manifest.py', 'xcodebuild', 'pod install', 'swift package'):
+        if forbidden in routing_region:
+            raise ValueError('macOS routing lane contains forbidden legacy/native operation: ' + forbidden)
+    legacy_region = body.split('      - name: Checkout exact release source', 1)[1]
+    legacy_steps = re.findall(r'^      - name: .*?\n(.*?)(?=^      - |\Z)', legacy_region, re.M | re.S)
+    if any('if: ${{ !inputs.routing-mode' not in step for step in legacy_steps):
+        raise ValueError('Every legacy macOS production step must be routing-disabled')
 
 
 def validate_ios_routing_workflow(text):
@@ -494,7 +583,7 @@ class ReusableSourceContractTests(unittest.TestCase):
 
     def test_removing_required_mac_ref_is_detected(self):
         prefix, suffix = self.text.split('    mac:\n', 1)
-        suffix = suffix.replace('            ref: ${{ github.event.pull_request.head.sha || github.sha }}\n', '', 1)
+        suffix = suffix.replace('            ref: ${{ needs.routing-vector.outputs.app-sha }}\n', '', 1)
         with self.assertRaisesRegex(ValueError, 'mac'):
             validate_apple_calls(prefix + '    mac:\n' + suffix)
 
@@ -825,6 +914,65 @@ class IOSRoutingSourceWiringTests(unittest.TestCase):
         self.assertNotEqual(invoke('true', app_sha, media_sha, 'c' * 40, branch).returncode, 0)
         self.assertNotEqual(invoke('false', '', '', '', branch).returncode, 0)
         self.assertEqual(invoke('false', '', '', '', 'main').returncode, 0)
+
+
+class MacRoutingSourceWiringTests(unittest.TestCase):
+    def setUp(self):
+        self.caller = (ROOT / '.github/workflows/build.yml').read_text()
+        self.workflow = (ROOT / '.github/workflows/mac.yml').read_text()
+
+    def test_caller_passes_captured_vector_to_mac(self):
+        validate_mac_routing_calls(self.caller)
+
+    def test_routing_lane_prepares_bundle_and_blocks_native(self):
+        validate_mac_routing_workflow(self.workflow)
+
+    def test_caller_cannot_drop_captured_media_sha_or_exact_ref(self):
+        mac = re.search(r'^    mac:\n(.*?)(?=^    [a-z][a-z0-9_-]*:|\Z)',
+                        self.caller, re.M | re.S).group(1)
+        with self.assertRaisesRegex(ValueError, 'captured media-kit SHA'):
+            validate_mac_routing_calls(self.caller.replace(mac, mac.replace(
+                '            media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}\n', '', 1), 1))
+        with self.assertRaisesRegex(ValueError, 'exact App ref'):
+            validate_mac_routing_calls(self.caller.replace(mac, mac.replace(
+                '            ref: ${{ needs.routing-vector.outputs.app-sha }}\n', '', 1), 1))
+
+    def test_preflight_rejects_incomplete_or_uncaptured_vectors(self):
+        body = platform_job(self.workflow, 'build-mac-app')
+        script = workflow_run_script(named_step(body, 'Reject uncaptured routing dispatch before any production step'))
+        branch = 'routing/MK-ROUTING-20261011'
+        app_sha, media_sha = 'a' * 40, 'b' * 40
+
+        def invoke(mode, app, media, ref, head):
+            with tempfile.TemporaryDirectory(prefix='mac-routing-preflight-') as runner_temp:
+                env = dict(os.environ, ROUTING_MODE=mode, APP_SHA=app,
+                           MEDIA_KIT_SHA=media, APP_REF=ref, HEAD_NAME=head,
+                           RUNNER_TEMP=runner_temp)
+                return subprocess.run(['bash', '-c', script], env=env,
+                                      text=True, capture_output=True)
+
+        self.assertEqual(invoke('true', app_sha, media_sha, app_sha, branch).returncode, 0)
+        self.assertNotEqual(invoke('true', '', media_sha, '', branch).returncode, 0)
+        self.assertNotEqual(invoke('true', app_sha, media_sha, 'c' * 40, branch).returncode, 0)
+        self.assertNotEqual(invoke('false', '', '', '', branch).returncode, 0)
+        self.assertEqual(invoke('false', '', '', '', 'main').returncode, 0)
+
+    def test_shell_pipe_failure_propagates_through_tee_and_skips_followup(self):
+        with tempfile.TemporaryDirectory(prefix='mac-routing-shell-') as temp:
+            marker = Path(temp) / 'must-not-run'
+            script = f"set -euo pipefail\nfalse | tee '{temp}/failed.log'\ntouch '{marker}'\n"
+            result = subprocess.run(['bash', '-c', script], text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(marker.exists())
+
+    def test_routing_lane_cannot_run_release_or_native_fallback(self):
+        injected = self.workflow.replace(
+            '      - name: Fail closed because no current macOS native producer input is available',
+            '      - name: Accidental legacy native recipe\n        if: ${{ inputs.routing-mode }}\n'
+            '        run: python3.11 scripts/run_macos_shared_release.py\n\n'
+            '      - name: Fail closed because no current macOS native producer input is available', 1)
+        with self.assertRaisesRegex(ValueError, 'forbidden legacy/native'):
+            validate_mac_routing_workflow(injected)
 
     def test_actual_ios_variant_helper_requires_bootstrap_finalize_before_final_variant(self):
         sys.path.insert(0, str(ROOT / 'scripts'))

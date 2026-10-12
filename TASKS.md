@@ -7,20 +7,12 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- Linux/Windows源码前置四文件第二修正V2 PASS_WITH_PENDING_HOSTED：43contracts/actionlint/20实际caller表达式边界及真实pwsh失败传播通过；native缺受审输入阶段准确失败，不代表Release完成。证据docs/plans/core-linux-windows-source-prelude-20261012.json，旧两轮REQUEST_CHANGES保留。
-
-- 当前已核对源码向量：库751d0cdd + App6c4c1b478。库CI38168100713 video772+3原mac Linux跳过/lab298/两strict0；App38168113931 SUCCESS及Build38168114089内四平台各268/strict0/bundle/finalize，hosted Python实际两次444、parser/kernel7与身份前后稳定。Build整体六Release仍失败；Android/Pink空accepted selector实际preAPI/preGradle拒绝，非native通过。精简证据docs/plans/core-native-ci-checkpoint-20261012.json；原失败/旧向量保留。
-
-- CONFIG实际闭环宿主V2 PASS：库v3作者762/Critical774/strict0、AppR1作者268Flutter/strict0/bundle/channel11与独立90+1通过，20/16冻结hash一致；当前准确源码切片已提交push/readback，最新提交组合CI/native/实机仍待。各轮真实失败不删除，完整记录见Current State与handoff。
-- CORE接手中央PR4 comment6110756605；唯一routing/MK-ROUTING-20261011/PR1保持draft。context=`archives/conversations/media-kit-routing-20261011.md`。
-- CORE-F01/App报告回归已实现并完成库6e7570fc+App569138fa宿主联合验证：192Flutter、bundle/来源/新鲜度成功，同AppSHA此前244Python保留，严格分析34info未清零。此为历史向量；当前CI03已清零，旧pending/62info/34info不再当前状态。
-- iOS私有source variant第二修正Critical PASS_WITH_SCOPE：26variant/31bootstrap+实际三SDK文件补丁语义/原Android重标签拒绝，六source hash一致；只接手已审源码检查点，真实最新iOS bootstrap/pubget/prebuild/hosted/native仍待。原两轮失败及SDK输入r1证据保留，Linux B/PR5未审切片不混入。
-- CORE-CI03 App1965ba0e+库bd9b9f85 source run38155973408 SUCCESS：严格分析No issues、211Flutter/1Chrome/263Python、Web/bundle/10包来源与freshness通过，中央6111284247。包名与6315处URI精确迁移，产品/native身份不变。最新App c51fd0973+库12966e7a source38156848733 SUCCESS：211Flutter/1Chrome/268Python、strict/Web/bundle/来源/freshness通过；库source38156773328 video591+3原mac跳过/lab298/strict通过。详见context。
-- 最新已核对Appf179+库915：Android/Linux/macOS真实bootstrap成功（各211Flutter/strictclean/bundle/来源），Python本轮各309；source38159246222/Build38159246432因Windows未知SDK修改失败，Build另6Release前置失败。Windows短路径/longpaths/完整拒绝前diff与hash窄修V1 29+19+13/Actionlint通过，待新runner验证；新库R01d8b98已推送独立255/strict通过，旧CI不重标。
-- native输入门四新文件critical复审43+2及真实LLVM反例通过：成功诊断/不可读dynsym拒绝、全ZIP CRC。接受账本空，未授权DEVICE/native候选；实际Android/Pink接线另审，设备验收未完成。
-- file URI来源核验本机转换已修，13目标+5关联及V1独立13通过，10包/非本地/路径逃逸门保留；真实Windows runner仍待验证。
-- 用户明确要求归并DV001与media-kit PR#5：PR5最新5b279611以routing主线为base，DV001最新1095a43；三md初始切片及新增16行已独立复核并分别归库e162/aeaf，DEVICE修原配方，归并后最新完整向量P5/P8.4重测，未归并不能结项。
-- Release Python随机路径、OHOS工具链约束及iOS/mac pointer兼容修复已分别审查并提交；真实Release作业验收仍开放。继续CORE-R01、真实选项闭环；DEVICE在原DV001修构建审查并做最新向量实机验收。产品默认experimental=false保留，主验证true及false。
+- 状态：进行中；唯一公共主线 routing/MK-ROUTING-20261011，CORE 负责集成，DEVICE 保持 native 构建/实机认领，所有主 PR 未合并。
+- 已实现 query/DASH/unknownDV/F01/R01/有效配置闭环，34 info 已清零；产品 experimental 默认 false 保持，true 主验证+false 回归及 LG YUV8/owner 门不变。
+- 已归并 PR5 公共矩阵至库38ffb729，27 mock/fixture 回归与 R4 审查通过；DV0011095a43 修复及八 APK/HDR/持续性能仍待回交，不能整项结案。
+- 当前 Appa05dfe1be+库38ffb729 独立 source CI API success，归档正在独立核验；上一个完整核验组合6d349+3817证据保留，不重标为新SHA。
+- macOS 当前源码前置三文件独立 Critical PASS_WITH_SCOPE/56 contracts，待提交及 hosted；iOS/Linux/Windows 已真实源码前置通过但当前 native 输入缺失，Android批准ledger空。所有 native/device 验收仍开放。
+- 精确测试向量、失败历史、恢复材料与剩余范围见唯一 context `archives/conversations/media-kit-routing-20261011.md`；旧 TASKS 快照已存该 context History。
 
 ## Now（当前推进，最多 3 条）
 

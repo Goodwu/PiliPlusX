@@ -500,10 +500,14 @@ jobs:
 
     mac:
         if: ${{ github.event_name == 'pull_request' || github.event.inputs.build_mac == 'true' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        needs: routing-vector
         uses: ./.github/workflows/mac.yml
         permissions: write-all
         with:
-            ref: ${{ github.event.pull_request.head.sha || github.sha }}
+            ref: ${{ needs.routing-vector.outputs.app-sha }}
+            routing-mode: ${{ needs.routing-vector.outputs.routing-mode == 'true' }}
+            app-sha: ${{ needs.routing-vector.outputs.app-sha }}
+            media-kit-sha: ${{ needs.routing-vector.outputs.media-kit-sha }}
             tag: ${{ github.event_name == 'push' && github.ref_name || (github.event_name == 'workflow_dispatch' && github.event.inputs.tag || '') }}
 
     win_x64:

@@ -1,0 +1,192 @@
+{
+  "verdict": "PASS_WITH_SCOPE",
+  "reviewScope": "macOS source prelude three frozen files, no native integration approval",
+  "head": "a05dfe1bea85e78a7b214b0e4044eab7902a3e06",
+  "files": {
+    ".github/workflows/build.yml": "c970895dcf8f10f3ff3ecb77fc100be5dcc0d8b1b4ba6d8f3330dee58b4b8ecc",
+    ".github/workflows/mac.yml": "299bfdb6ece3c4deccc6a17538e7c985ad9fffba764fb75c8e09d20002e1625d",
+    "test/reusable_workflow_contract_test.py": "57b3e7ec51ce067b798a742db43971c443279eb4bb4d617b48cce576a98eb6cd"
+  },
+  "blocking": [],
+  "nonblocking": [],
+  "checks": [
+    {
+      "probe": "legacy full step bodies normalized exact comparison to HEAD",
+      "pass": true
+    },
+    {
+      "probe": "actual preflight captured",
+      "exitCode": 0
+    },
+    {
+      "probe": "actual preflight missing-app",
+      "exitCode": 1
+    },
+    {
+      "probe": "actual preflight bad-library",
+      "exitCode": 1
+    },
+    {
+      "probe": "actual preflight wrong-ref",
+      "exitCode": 1
+    },
+    {
+      "probe": "actual preflight direct-branch",
+      "exitCode": 1
+    },
+    {
+      "probe": "actual preflight nonrouting-main",
+      "exitCode": 0
+    },
+    {
+      "probe": "actual preflight nonrouting-tag",
+      "exitCode": 0
+    },
+    {
+      "probe": "actual preflight library-mode-mismatch",
+      "exitCode": 1
+    },
+    {
+      "probe": "shellcheck actual bash scripts",
+      "count": 9,
+      "names": [
+        "Reject uncaptured routing dispatch before any production step",
+        "Prepare routing receipts directory",
+        "Verify routing App base",
+        "Verify current media-kit source resolution before bundle",
+        "Build current routing macOS Flutter bundle",
+        "Verify current media-kit source resolution after bundle",
+        "Finalize current routing sources and freshness",
+        "Fail closed because no current macOS native producer input is available",
+        "Generate and verify release metadata"
+      ],
+      "exitCode": 0
+    },
+    {
+      "probe": "actual bash/tee failure Verify current media-kit source resolution before bundle",
+      "exitCode": 37,
+      "continued": false
+    },
+    {
+      "probe": "actual bash/tee failure Build current routing macOS Flutter bundle",
+      "exitCode": 37,
+      "continued": false
+    },
+    {
+      "probe": "actual bash/tee failure Verify current media-kit source resolution after bundle",
+      "exitCode": 37,
+      "continued": false
+    },
+    {
+      "probe": "actual bash/tee failure Finalize current routing sources and freshness",
+      "exitCode": 37,
+      "continued": false
+    },
+    {
+      "probe": "actual native blocker shell/JSON",
+      "exitCode": 1,
+      "diag": {
+        "taskId": "MK-ROUTING-20261011",
+        "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
+        "status": "mac-current-native-input-unavailable",
+        "platform": "macos",
+        "appCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "mediaKitCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "bootstrapReceipt": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-macos-review-9dzk5w8n/r/bootstrap.json",
+        "bootstrapStatus": "fresh-source-only",
+        "currentConsumer": "macOS shared output consumer requires a current accepted native producer receipt",
+        "currentProducerReceipt": null,
+        "currentProducerReceiptStatus": "not-provided-to-this-workflow",
+        "nativeInputRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-macos-review-9dzk5w8n/absent-native",
+        "nativeInputRootExists": false,
+        "nativeBinaryProvenanceVerified": false,
+        "nativeBuildStarted": false,
+        "deviceTest": false
+      }
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": null,
+      "nativeBlockRan": true,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": "prepare",
+      "nativeBlockRan": false,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": "source_verify_before",
+      "nativeBlockRan": false,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": "routing_bundle",
+      "nativeBlockRan": false,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": "source_verify_after",
+      "nativeBlockRan": false,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "concrete condition chain",
+      "failedStep": "finalize",
+      "nativeBlockRan": false,
+      "alwaysEvidenceRan": true,
+      "legacyRan": false
+    },
+    {
+      "probe": "nonrouting release guard preservation",
+      "pass": true
+    }
+  ],
+  "unverified": [
+    "No new hosted macOS workflow run",
+    "No real Flutter pubget/bundle/native build or device execution in this review",
+    "Condition chain test evaluates the concrete simple expressions; it is not hosted GitHub scheduling proof"
+  ],
+  "triggers": [
+    "Changes to frozen source/SDK/bootstrap/finalize semantics",
+    "After integration collect actual latest-vector hosted bootstrap/bundle/freshness/native-blocker receipts"
+  ],
+  "filesAfter": {
+    ".github/workflows/build.yml": "c970895dcf8f10f3ff3ecb77fc100be5dcc0d8b1b4ba6d8f3330dee58b4b8ecc",
+    ".github/workflows/mac.yml": "299bfdb6ece3c4deccc6a17538e7c985ad9fffba764fb75c8e09d20002e1625d",
+    "test/reusable_workflow_contract_test.py": "57b3e7ec51ce067b798a742db43971c443279eb4bb4d617b48cce576a98eb6cd"
+  },
+  "frozenHashesUnchanged": true,
+  "testRun": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 test/reusable_workflow_contract_test.py",
+    "count": 56,
+    "seconds": 1.211,
+    "exitCode": 0
+  },
+  "actionlint": {
+    "files": [
+      ".github/workflows/build.yml",
+      ".github/workflows/mac.yml"
+    ],
+    "exitCode": 0
+  },
+  "verifiedFacts": [
+    "Caller shares routing-vector outputs; exact App ref and library SHA propagated",
+    "Canonical App/library checkouts check HEAD and App base before shared macos bootstrap",
+    "Shared bootstrap enforces expected source vectors and private SDK/cache and exports toolchain environment",
+    "Actual source verify and debug no-pub bundle commands followed by fresh-source finalize; bash pipefail propagates failure",
+    "Native blocker is gated on successful current source preparation, emits unavailable scope and returns failure",
+    "Always routing evidence upload retained; every legacy operation gated out in routing mode",
+    "Nonrouting legacy command/ref/tag/lock/native/sign/artifact bodies equal HEAD after normalization of added guards",
+    "Existing iOS/Linux/Windows workflow files untouched by this slice; caller diff only mac job"
+  ]
+}
