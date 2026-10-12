@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 /// Android HDR 选档与展示接入层（S12，验收 A7/A8）。
@@ -35,9 +36,15 @@ abstract final class HdrOutputSelector {
   /// 由 DASH codec 字符串与清晰度档位构造源描述（R2.3 hint）。
   /// 纯跨平台映射：只看 codec 串与 Bilibili 档位编号，无任何设备判断。
   /// 返回 null 表示 SDR/未知档，不给 hint（会话先按 SDR 打开，解码器复核）。
+  ///
+  /// [dovi] 是对该 rendition 初始化段的 DOVI 配置记录嗅探结果
+  /// （DV003：B 站 126 档以普通 `hvc1*` HEVC 串下发 DV 轨，profile 只能
+  /// 来自容器记录）。仅当 codec 串推导不出 profile 且档位声明 DV 意图时
+  /// 消费；解析失败/未知 profile 必须保持未知语义，不得猜测。
   static HdrSourceDescriptor? descriptorFromDash({
     int? quality,
     String? codec,
+    DoviFacts? dovi,
   }) {
     final normalized = codec?.trim().toLowerCase() ?? '';
     if (normalized.startsWith('dvh1') || normalized.startsWith('dvhe')) {
@@ -78,6 +85,43 @@ abstract final class HdrOutputSelector {
     if (quality == 126) {
       // The DV tier identifies metadata intent, not its profile, base-layer
       // encoding or layer structure. Unknown must remain unknown at selection.
+      // DV003: the tier carries no profile in its codec string; a resolved
+      // DOVI record sniffed from this rendition's own initialization segment
+      // is the rendition's own declaration and may fill the profile facts.
+      // Unrecognized profiles/compatibilities stay unknown (B1b), and the
+      // Session still reviews container facts at open.
+      final profile = dovi?.profile;
+      if (profile != null) {
+        switch (profile) {
+          case 5:
+            return HdrSourceDescriptor(
+              codec: 'hevc',
+              dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+              dvProfile: 5,
+              dvCompatibilityId: 0,
+              enhancementLayer: dovi!.elPresent,
+            );
+          case 8:
+          case 10:
+            // P8 base-layer signaling is declared by the compatibility id:
+            // 4 → HLG, 1 → HDR10(PQ); other ids stay explicit and unknown.
+            final compat = dovi!.compatibilityId;
+            final transfer = switch (compat) {
+              4 => 'hlg',
+              1 => 'pq',
+              _ => null,
+            };
+            return HdrSourceDescriptor(
+              codec: 'hevc',
+              transfer: transfer,
+              primaries: transfer == null ? null : 'bt.2020',
+              dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+              dvProfile: profile,
+              dvCompatibilityId: compat,
+              enhancementLayer: dovi.elPresent,
+            );
+        }
+      }
       return const HdrSourceDescriptor(
         dynamicMetadata: HdrDynamicMetadata.dolbyVision,
       );

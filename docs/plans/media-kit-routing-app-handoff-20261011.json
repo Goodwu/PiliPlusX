@@ -12,7 +12,7 @@
   "baseBranch": "fix/darwin-video-output-rebuild-barrier",
   "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
   "registrationCommit": "c62120d6d1b60fa97955aa23506b0b6e97a6ff72",
-  "status": "public_R01_config_and_analyzer_cleanup_source_validated_native_release_device_pending",
+  "status": "DEVICE_CODE_INTEGRATED_KNOWN_ISSUES_OPEN_CI_PAUSED",
   "history": {
     "previousFullLedgerRef": "077378ce91335cc0e1c06562b9949dea00b8ecf0",
     "previousFullLedgerPath": "docs/plans/media-kit-routing-app-handoff-20261011.json",
@@ -1485,6 +1485,745 @@
         "productionAppChanged": false,
         "productionLibraryChanged": false
       }
+    },
+    "before_CORE_DEVICE_INTEGRATION": {
+      "status": "public_R01_config_and_analyzer_cleanup_source_validated_native_release_device_pending",
+      "checkpoint": "CORE-LIFECYCLE-BOOTSTRAP-HOST-CI-20261012",
+      "checkpointScope": "Exact3884+4d1d App/library host source acceptance, actual Build native blockers, and9895 original-PR review. Docs archive; current general remains separately bounded.",
+      "nextAction": "Read actual Web6/full and artifacts from the executing exact4d1d general38275707106, preserving that run. Original DEVICE supplies DV001/PR5 and PR3/PR6 fixes for CORE review; check claims before another production slice.",
+      "succession": {
+        "role": "CORE-SUCCESSOR",
+        "solePublicIntegrator": true,
+        "registration": 6126383144,
+        "scopeSupplement": 6126444208,
+        "deviceReviewReply": 6126499419,
+        "nativeDeviceOwner": "existing DEVICE agent; no new DEVICE line",
+        "deviceBuildIntegration": "required_and_blocked_pending_original_PR_fixes",
+        "deviceArchivePR": 5,
+        "deviceArchiveHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "deviceArchiveStatus": "partial_common_matrix_and_historical_records_integrated_native_artifact_device_remaining",
+        "baseline": {
+          "phase": "Initial CORE successor takeover baseline before its first documentation checkpoint; not the current source implementation vector.",
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+          "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+          "deviceDV004PR6": "0fb163c6ec8d54c46698227175b9a21468605246",
+          "appDV003DV005PR3": "15551ede06b0cbec859d61e6d16f8dba2054bba1"
+        },
+        "productionAppChanged": false,
+        "productionLibraryChanged": false,
+        "scope": "Historical initial CORE takeover baseline and productionChanged flags only; current implementation and host validation are recorded in nextCodeSlice/latestValidation."
+      },
+      "currentObservedHeads": {
+        "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+        "mediaKit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+        "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "deviceDV004PR6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+        "appDV003DV005DV006PR3": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "phase": "Before this documentation archive; tested source vector is separately immutable."
+      },
+      "pendingCurrentHeadValidation": {
+        "status": "source and capability subscription host gates passed; remaining Web/native/device gates are explicit",
+        "web": {
+          "run": 38275707106,
+          "attempt": 1,
+          "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "runApiStatus": "in_progress",
+          "executionStatus": "four package jobs actually in_progress",
+          "conclusion": null,
+          "observationAtUtc": "2026-10-12T16:49:33Z",
+          "expectedPullRequestMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
+          "actualCheckoutLogsRead": false,
+          "actualPackageJobs": [
+            {
+              "id": 114913277114,
+              "name": "package:media_kit tests (Linux)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:07Z"
+            },
+            {
+              "id": 114913277440,
+              "name": "package:media_kit tests (Windows)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:07Z"
+            },
+            {
+              "id": 114913277627,
+              "name": "package:media_kit tests (Web)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:16Z"
+            },
+            {
+              "id": 114913277844,
+              "name": "package:media_kit tests (macOS)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:14Z"
+            }
+          ],
+          "webJob": 114913277627,
+          "webTargetedExpected": 6,
+          "webTargetedStep": {
+            "name": "Verify Web shuffle playlist snapshots",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-12T16:46:55Z",
+            "completed_at": "2026-10-12T16:47:22Z"
+          },
+          "webTargetedActualPassCount": null,
+          "fullActualPassCount": null,
+          "fullActualSkipCount": null,
+          "boundary": "Targeted step metadata success is distinct from six actual case logs; full Chrome still executing and its raw log has not been read.",
+          "webFullStep": {
+            "name": "Run dart test --platform chrome",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 9,
+            "started_at": "2026-10-12T16:47:22Z",
+            "completed_at": null
+          }
+        },
+        "video": "Five new real Session cases and full777+3skip passed on exact4d1d.",
+        "App": "Explicit pin acquisition, strict analyze, four268 and Python515+2 passed on exact3884+4d1d.",
+        "nativeAndDevice": "Not accepted; DV001/PR5 mandatory full integration remains unfinished."
+      },
+      "nextCodeSlice": {
+        "phase": "CORE-WEB-SHUFFLE-02+CORE-CAPABILITY-SUBSCRIPTION-01+CORE-BOOTSTRAP-VERSION-01",
+        "claims": [
+          6127642516,
+          6127809360,
+          6127846798
+        ],
+        "status": "implemented; App/bootstrap and subscription host validated; Web current run separately recorded",
+        "files": [
+          {
+            "repository": "Goodwu/media-kit",
+            "path": "media_kit/lib/src/player/web/player/real.dart",
+            "parentBlob": "1864968fd3128586c30b70e1fc6ff8833390565e",
+            "candidateBlob": "c5ad7ca432b1cb62b37f0f4a120b44501ea1ddda",
+            "sha256": "928e1ab8a91812e80230c1a65fd74c5941d45d5be47678f573c2efff4f9a9b42",
+            "bytes": 50029
+          },
+          {
+            "repository": "Goodwu/media-kit",
+            "path": "media_kit/test/src/player/player_test.dart",
+            "parentBlob": "cd8a27fe29f1bc558f6594d589515794aa71d010",
+            "candidateBlob": "0495efa2fcb9f50684a18d182986b15d34f0761e",
+            "sha256": "3f0d13d76f5f2e78e6524710244de604d9cf1d38730c9f5b869e830afadee3c2",
+            "bytes": 107691
+          },
+          {
+            "repository": "Goodwu/media-kit",
+            "path": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+            "parentBlob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
+            "candidateBlob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748",
+            "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609",
+            "bytes": 83379
+          },
+          {
+            "repository": "Goodwu/media-kit",
+            "path": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
+            "parentBlob": null,
+            "candidateBlob": "4a699a0d95e2470956252dcd1fba811346f18566",
+            "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b",
+            "bytes": 7929
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": ".github/actions/routing-bootstrap/action.yml",
+            "parentBlob": "df0cd41a1c9bb7c593162165a4bd1c4ed1d8b40e",
+            "candidateBlob": "6f22053c3a6d6356b9f967625271997075a204eb",
+            "sha256": "218606a4744edada180389019ed0441a2f164c4f37e694f79ae92b24eb687d0a",
+            "bytes": 3934
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": "scripts/prepare_routing_ci.py",
+            "parentBlob": "f4ba6019f4818efcadee50e8929f81315ded46f0",
+            "candidateBlob": "94684e1b03435f3e43c2c64fa87104a325a8534c",
+            "sha256": "460d94b21d6798a4efa0dede74b796bf9c47259dfa9dd9869878a35c58e50340",
+            "bytes": 30209
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": "scripts/routing_flutter_version.py",
+            "parentBlob": null,
+            "candidateBlob": "b79e05e27a1371c4568eb1d4bd5823c99d19f7dd",
+            "sha256": "6077ff2fd6afd37ebec54708bbfacf3c7189bdfa8758eaf5a32d5a85989d4f9e",
+            "bytes": 3644
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": "scripts/verify_routing_linux_native.py",
+            "parentBlob": "4ae53af249b6ea8c5beea1236a6b50e98b216a44",
+            "candidateBlob": "18e3428ba2f8c43e6f05c1d1f87c37ea28219590",
+            "sha256": "66d1d3487396e4d7ee1f19dc210891ec94ef8b58d3d74ee23724869a073d00c1",
+            "bytes": 67002
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": "test/routing_flutter_version_test.py",
+            "parentBlob": null,
+            "candidateBlob": "1484105106b1df29a6f032a625c7d767f70d9a28",
+            "sha256": "8beaaeb4cf92e21d267ee7696491b9e92e2466d9fe2893b9437d8fd0990d48af",
+            "bytes": 5327
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "path": "test/verify_routing_linux_native_test.py",
+            "parentBlob": "9316d24b73670b5fe5c15964a957e1dc6199e16f",
+            "candidateBlob": "c27a664f0c46f9c8e549daba34f4b00352eb324c",
+            "sha256": "f4c57e56fd7187ec21524e8e21417471cd9caa3a4b8c98d57d80245c813fa9d3",
+            "bytes": 29316
+          }
+        ],
+        "web02": {
+          "change": "All equal-URI queue skips impossible shuffle loop and retains exact occurrence/index; unchanged identity sequence also preserves index when restoring.",
+          "newCases": 2,
+          "targetedCasesAfterCommit": 6,
+          "remaining": "mixed duplicate URI occurrence and queue-edit mapping require separate scope"
+        },
+        "subscription": {
+          "change": "Native enable is caller enabled OR registered listener collection nonempty, preserving surviving Sessions; no drifting counters or ACK state cache.",
+          "newCases": 5,
+          "limits": "tests cover explicit failure retry, not automatic Session retry; native events/multiple engines/device acceptance pending"
+        },
+        "bootstrap": {
+          "change": "Standard Python reads restricted exact App environment.flutter before SDK acquisition, shared parser verifies frameworkVersion after installation; helper included in fixed Linux consumer provenance.",
+          "newCases": 11,
+          "focusedPythonPassed": 109,
+          "fullLocal": "FAILED intermediate full attempt:509 ran,1failure,5errors,5skips; macOS-only operations/absent Flutter SDK. Final focused109 pass does not replace hosted full suite.",
+          "priorFixtureFailure": "Default/tmp path237 failed existing >260 fixture assertion; retained, then focused suite passed under recorded longer TMPDIR."
+        },
+        "notChanged": [
+          "Session/gather behavior or Java/Surface/owner/ACK/lease",
+          "App controller/hdr_output or DEVICE native recipes",
+          "SDK patches or native approval ledger",
+          "default experimental=false; true primary and false regression",
+          "LG YUV8/FULL/range1 and exact device gates; 10-bit/lease fusion deferred"
+        ],
+        "hostValidation": {
+          "App": "docs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+          "library": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
+          "Web": {
+            "run": 38275707106,
+            "attempt": 1,
+            "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+            "runApiStatus": "in_progress",
+            "executionStatus": "four package jobs actually in_progress",
+            "conclusion": null,
+            "observationAtUtc": "2026-10-12T16:49:33Z",
+            "expectedPullRequestMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
+            "actualCheckoutLogsRead": false,
+            "actualPackageJobs": [
+              {
+                "id": 114913277114,
+                "name": "package:media_kit tests (Linux)",
+                "status": "in_progress",
+                "startedAt": "2026-10-12T16:45:07Z"
+              },
+              {
+                "id": 114913277440,
+                "name": "package:media_kit tests (Windows)",
+                "status": "in_progress",
+                "startedAt": "2026-10-12T16:45:07Z"
+              },
+              {
+                "id": 114913277627,
+                "name": "package:media_kit tests (Web)",
+                "status": "in_progress",
+                "startedAt": "2026-10-12T16:45:16Z"
+              },
+              {
+                "id": 114913277844,
+                "name": "package:media_kit tests (macOS)",
+                "status": "in_progress",
+                "startedAt": "2026-10-12T16:45:14Z"
+              }
+            ],
+            "webJob": 114913277627,
+            "webTargetedExpected": 6,
+            "webTargetedStep": {
+              "name": "Verify Web shuffle playlist snapshots",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-10-12T16:46:55Z",
+              "completed_at": "2026-10-12T16:47:22Z"
+            },
+            "webTargetedActualPassCount": null,
+            "fullActualPassCount": null,
+            "fullActualSkipCount": null,
+            "boundary": "Targeted step metadata success is distinct from six actual case logs; full Chrome still executing and its raw log has not been read.",
+            "webFullStep": {
+              "name": "Run dart test --platform chrome",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 9,
+              "started_at": "2026-10-12T16:47:22Z",
+              "completed_at": null
+            }
+          }
+        }
+      },
+      "evidenceIndex": {
+        "repository": "Goodwu/media-kit",
+        "path": "docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json",
+        "sha256": "a79a5b926bc051e80ff8d0f6b7c32d51b37d7994ed0352a7fd20b9db831e9979",
+        "reports": [
+          {
+            "path": "docs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+            "bytes": 148018,
+            "sha256": "1f48f122a109ee4c920165998c285cbf81bc0786af55f1c77cb34f9f03ac0dc1"
+          },
+          {
+            "path": "docs/plans/core-build-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+            "bytes": 357358,
+            "sha256": "fd81f6fd46edf081d7f4d691889c9eaf7d0ba75b4153f25af7f19a37e115dc27"
+          },
+          {
+            "path": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
+            "bytes": 57572,
+            "sha256": "640441a4dda97554c019a66d878a9445676c8b496b967f77267a5f3d82a4d5a2"
+          },
+          {
+            "path": "docs/plans/core-device-9895-review-20261012.json",
+            "bytes": 34489,
+            "sha256": "28b48edf0c95cc536f8e8761779715c17e7dfae22087ed4a90e91837afdc9d81"
+          },
+          {
+            "path": "docs/plans/core-device-9895-review-publication-receipt-20261012.json",
+            "bytes": 7796,
+            "sha256": "87ab79f4eff39f159b1c014a8602936a1002144ec99bc13b36a6b92052f49229"
+          },
+          {
+            "path": "docs/plans/core-source-3884-4d1d-independent-crosscheck-20261012.json",
+            "bytes": 10953,
+            "sha256": "8af6d4003fb3879fe9843fe8aea0727758130c1e7eccb4cecb40087e5c8c1bb2"
+          },
+          {
+            "path": "docs/plans/core-web-cow-chrome-a73d570-20261012.json",
+            "bytes": 7259,
+            "sha256": "08f603b3c6a6791a6b3d1b86c23550e2bc06fc7b297ac24723e0731e046c69b5"
+          },
+          {
+            "path": "docs/plans/core-general-ci-a73d570-terminal-20261012.json",
+            "bytes": 381899,
+            "sha256": "a8caf13ef6411eb5d1f743be31415d32f5bf35c88a9bb374adc4863214b9daf6"
+          }
+        ]
+      },
+      "latestValidation": {
+        "scope": "Exact App3884d3e8 + media-kit4d1d4b7d only; subsequent docs commits are not relabelled as tested.",
+        "vector": {
+          "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+          "appTree": "babf93595feed078058608d6aada5c4dd014ddd5",
+          "mediaKit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "mediaKitTree": "34dfc9a45c039e2f1da327f057dc8807f1cf3df3"
+        },
+        "app": {
+          "run": 38275714484,
+          "attempt": 1,
+          "conclusion": "success",
+          "actualArtifactZIPs": 5,
+          "flutterPassedEachPlatform": 268,
+          "analyzeIssuesEachPlatform": 0,
+          "pythonPassed": 515,
+          "pythonSkipped": 2,
+          "pythonTotal": 517,
+          "webDOMPassed": 1,
+          "webBuild": "success",
+          "dartAssetsBundleEach": "success",
+          "bootstrapStepsEach": 57,
+          "bootstrapStatus": "fresh-source-only",
+          "sourceHashesIndependentlyRecomputed": 2733,
+          "sourceHashScope": {
+            "AppLibAndTest": 1443,
+            "mediaKitTracked": 1290
+          },
+          "totalPackageRootsEach": 261,
+          "mediaKitPackageRootsEach": 10,
+          "sdkFlutter": "3.47.2",
+          "sdkDart": "3.13.2",
+          "evidence": "docs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json"
+        },
+        "appBuild": {
+          "run": 38275715109,
+          "attempt": 1,
+          "conclusion": "failure",
+          "terminalUpdatedAtUtc": "2026-10-12T16:25:07Z",
+          "actualArtifactZIPs": 11,
+          "jobTotals": {
+            "success": 7,
+            "failure": 6,
+            "skipped": 2
+          },
+          "ownSourceJobs": "All five passed; their own ZIPs independently verified, not borrowed from standalone source.",
+          "androidAndPink": "NATIVE_INPUT_ACQUISITION_SELECTION_BLOCKED; accepted manifest empty; commands=[]",
+          "linuxWindowsMacosIos": "SOURCE_PREPARED_NATIVE_BLOCKED; currentProducerReceipt=null; native input roots absent",
+          "windows": {
+            "job": 114900616789,
+            "artifact": 11758389846,
+            "explicitFlutterVersion": "3.47.2",
+            "flutterVersionFile": "",
+            "yqSubaction": "actual outcome=skipped; conclusion=skipped",
+            "freshBootstrapComplete": true,
+            "nativeInputApproved": false
+          },
+          "iosBaseFilesIndependentlyReplayed": 1920,
+          "iosApprovedPatchTransforms": 2,
+          "iosCommands": {
+            "total": 5814,
+            "gitCatFile": 5760,
+            "other": 54
+          },
+          "xcodeBuildStarted": false,
+          "acceptedNativeInputs": 0,
+          "evidence": "docs/plans/core-build-ci-3884d3e-4d1d4b7-checkpoint-20261012.json"
+        },
+        "librarySource": {
+          "run": 38275707566,
+          "attempt": 1,
+          "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "conclusion": "success",
+          "actualArtifactZIPs": 3,
+          "videoPassed": 777,
+          "videoSkipped": 3,
+          "newSubscriptionCasesActuallyPassed": 5,
+          "labPassed": 298,
+          "analyzeIssuesEach": 0,
+          "pythonToolsPassed": 45,
+          "sdkFlutter": "3.47.7",
+          "sdkDart": "3.13.5",
+          "evidence": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
+          "ancillary": {
+            "queryRun": 38275707339,
+            "actualAssertions": 34,
+            "androidPluginCompile": "success",
+            "darwinRun": 38275707332,
+            "darwinPassed": 9,
+            "ohosRun": 38275707109,
+            "ohosActualMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
+            "ohosLimit": "Distinct PR merge, SDK3.44.9+ohos; HAP not independently downloaded; no device/HDR acceptance."
+          }
+        },
+        "precedingGeneral": {
+          "run": 38272288190,
+          "attempt": 1,
+          "head": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+          "actualMerge": "97fd1956f300e275f128cb1a19c54531bb7b3f2a",
+          "actualMergeTree": "235b40d62e5f242fb494ad3bb4b2190c8ae6ff21",
+          "parents": [
+            "d761922721ad8da6bb186abd270bb096100944ea",
+            "a73d570b633a949aab6a31e8f68ec03a13643c31"
+          ],
+          "status": "completed",
+          "conclusion": "success",
+          "terminalUpdatedAtUtc": "2026-10-12T16:45:05Z",
+          "jobTotals": {
+            "success": 23,
+            "skipped": 1
+          },
+          "webJob": 114893652768,
+          "web": {
+            "conclusion": "success",
+            "targetedPassed": 4,
+            "fullPassed": 63,
+            "skipped": 27,
+            "actualLogsRead": true,
+            "evidence": "docs/plans/core-web-cow-chrome-a73d570-20261012.json"
+          },
+          "linuxAndWindowsEach": {
+            "passed": 81,
+            "skipped": 18
+          },
+          "macos": {
+            "passed": 88,
+            "skipped": 17,
+            "retryFailureMarkers": {
+              "retry": 2,
+              "outstandingWork": 2,
+              "failureMark": 1
+            },
+            "firstPassStabilityClaim": false
+          },
+          "actualArtifactZIPs": 8,
+          "actualZIPBytes": 123147729,
+          "innerFiles": 450,
+          "payloadSourceTxtCount": 0,
+          "uploadJobsAudited": 6,
+          "freshNativeApproved": false,
+          "evidence": "docs/plans/core-general-ci-a73d570-terminal-20261012.json"
+        },
+        "currentGeneral": {
+          "run": 38275707106,
+          "attempt": 1,
+          "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "runApiStatus": "in_progress",
+          "executionStatus": "four package jobs actually in_progress",
+          "conclusion": null,
+          "observationAtUtc": "2026-10-12T16:49:33Z",
+          "expectedPullRequestMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
+          "actualCheckoutLogsRead": false,
+          "actualPackageJobs": [
+            {
+              "id": 114913277114,
+              "name": "package:media_kit tests (Linux)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:07Z"
+            },
+            {
+              "id": 114913277440,
+              "name": "package:media_kit tests (Windows)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:07Z"
+            },
+            {
+              "id": 114913277627,
+              "name": "package:media_kit tests (Web)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:16Z"
+            },
+            {
+              "id": 114913277844,
+              "name": "package:media_kit tests (macOS)",
+              "status": "in_progress",
+              "startedAt": "2026-10-12T16:45:14Z"
+            }
+          ],
+          "webJob": 114913277627,
+          "webTargetedExpected": 6,
+          "webTargetedStep": {
+            "name": "Verify Web shuffle playlist snapshots",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-12T16:46:55Z",
+            "completed_at": "2026-10-12T16:47:22Z"
+          },
+          "webTargetedActualPassCount": null,
+          "fullActualPassCount": null,
+          "fullActualSkipCount": null,
+          "boundary": "Targeted step metadata success is distinct from six actual case logs; full Chrome still executing and its raw log has not been read.",
+          "webFullStep": {
+            "name": "Run dart test --platform chrome",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 9,
+            "started_at": "2026-10-12T16:47:22Z",
+            "completed_at": null
+          }
+        },
+        "historicalSourceReportUnchanged": "156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da"
+      },
+      "deviceReviews": {
+        "dv001": {
+          "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "status": "REQUEST_CHANGES_requirements_still_open",
+          "nativeRecipeOwner": "existing DEVICE on original native-build PR1",
+          "review": 5483753705,
+          "githubReviewState": "COMMENTED",
+          "required": [
+            "symbol reader errors reject; no error-to-NO_IMPORTS conversion",
+            "independent coverage of both Vulkan symbols including single, both, absent, weak, mixed, tool failure and malformed ELF",
+            "supported ABI/ELF handling; avoid partial mutation on failure",
+            "build failure propagation; clean staging; exact three-library member allowlist",
+            "real linked inputs, patches, NDK/helper and final JAR/APK/member hashes"
+          ]
+        },
+        "pr5": {
+          "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+          "status": "partially_integrated_full_native_artifact_device_integration_required",
+          "publicMatrix": "implemented; 27 synthetic/mocked tests are historical host evidence only",
+          "excludedScripts": [
+            "assemble-jar-arm64.sh",
+            "matrix-device-build.sh"
+          ],
+          "historicalProvenanceBanners": "three public banners retained; current PR5 raw bytes match after removing only the two-line banner",
+          "inventoryDigestCorrection": {
+            "old": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+            "new": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+            "sourceBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+            "sourceBytes": 2578
+          }
+        },
+        "dv004PR6": {
+          "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+          "verdict": "REQUEST_CHANGES",
+          "review": 5492587336,
+          "githubReviewState": "COMMENTED",
+          "repaired": [
+            "DV004_DIAG removed",
+            "AVC/nv12/copy fixture corrected and validates final resource facts"
+          ],
+          "blocking": [
+            "cross-round identity guard remains unreachable; Session latest-snapshot plan/hwdec validation is not actual-switch history",
+            "new FIRST-complete-only contract cannot resolve pending user semantics"
+          ],
+          "owner": "existing DEVICE; CORE review only"
+        },
+        "dv003DV005PR3": {
+          "head": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+          "verdict": "REQUEST_CHANGES",
+          "review": 5492931759,
+          "githubReviewState": "COMMENTED",
+          "report": "docs/plans/core-device-return-b180-review-20261012.json",
+          "repaired": [
+            "initial/refresh/reopen now pass initialDoviFacts",
+            "connect/headers share deadline, at most two backups, successful response accumulated buffer truncated",
+            "old playback revision writes rejected",
+            "sniffer exception log redacted",
+            "temporary absolute local JAR settings reverted before current head"
+          ],
+          "blocking": [
+            "new revision/cid/baseUrl producer key is still read by spec.key in selection; real126 remains unknown/gray",
+            "successful HTTP body can await a stalled next chunk forever; error take counts chunks; URI parsing outside try",
+            "in-flight Set skips without sharing/awaiting the Future, so a newer serial may publish empty facts permanently",
+            "local FileSource/DirectFileSource still dereference videoUrl before source split; full signed URL log remains",
+            "DOVI record not bound to selected track/sample entry; BL/RPU/color/compatibility/codec conflicts unresolved",
+            "284/analyze0 success logs are only inaccessible path references; docs claim all blockers cleared without evidence"
+          ],
+          "owner": "existing DEVICE; no parallel CORE implementation",
+          "diagnosticPackageScope": "debug suffix removal remains in DEVICE branch and must be scoped separately from public product integration",
+          "scope": "Prior original-PR review at b180; exact reviewed SHA is retained. Five affected DOVI/selection/controller files remain byte-identical at current9895.",
+          "currentUnchangedSourceHead": "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+        },
+        "device126Correction": {
+          "comment": 6126388894,
+          "priorClaim": "retracted by DEVICE: old 120 residual frame; switch did not happen; real 126 was blocked sourceMetadataUnknown before decoder creation",
+          "newDV005Claim": "DEVICE reports HEVC/P8.4/verified/frame progression and local tests; CORE raw-evidence acceptance pending",
+          "requiredEvidence": "raw decoder identity sequence, exact App/library/native/JAR/APK inputs, track/open generation, PTS, screenshot bytes and continuous playback evidence"
+        },
+        "latestDeviceCI": {
+          "checkedAtUtc": "2026-10-12T16:49:33Z",
+          "dd76Run": {
+            "run": 38269870720,
+            "attempt": 1,
+            "conclusion": "cancelled",
+            "sourceCapture": 114881247990,
+            "failure": "EXPECTED_APP_SHA differs from checked-out public routing head; exit1, final vector absent; downstream tests skipped"
+          },
+          "07953Run": {
+            "run": 38270201194,
+            "attempt": 1,
+            "conclusion": "cancelled"
+          },
+          "b180Run": {
+            "run": 38270385174,
+            "attempt": 1,
+            "status": "completed",
+            "conclusion": "failure",
+            "evidence": "docs/plans/core-device-final-refresh-20261012.json",
+            "artifact": "380-byte failure result only; not a native/App artifact"
+          },
+          "claimed284IndependentlyAccepted": false,
+          "9895Run": {
+            "run": 38274961135,
+            "attempt": 1,
+            "conclusion": "failure",
+            "limit": "Own step metadata only; old b180 failure logs not used as this run evidence."
+          }
+        },
+        "latestDeviceCriticalReview": {
+          "comment": 6126637477,
+          "createdAtUtc": "2026-10-12T14:48:40Z",
+          "verdict": "REQUEST_CHANGES",
+          "reportedBlocking": [
+            "B1 HTTP64KB/4s not enforced",
+            "B2 cache source-identity/revision isolation",
+            "B3 unreachable cross-round guard, invalid fixture, diagnostic removal in a new SHA",
+            "B4 named old Flutter/analyze logs reportedly contain223pass5fail/undefined_identifier; successful reviewed-SHA logs required",
+            "intent.reopen missing initialDoviFacts"
+          ],
+          "deviceReviewerClaim": "Reviewer reports real new LYA126 HEVC/P8.4 frames, while still rejecting combined integration",
+          "coreEvidenceBoundary": "The public comment contains the reviewer conclusion but no raw log/image bytes or complete native input vector; not an independent CORE artifact acceptance",
+          "ownership": "DEVICE states it will repair libraryPR6 then AppPR3 on the original branches; CORE does not overlap"
+        },
+        "userDecisionsOpen": [
+          "permitted temporary diagnostic scope",
+          "accept final plan fulfillment or require capture/rejection of any actual decoder switch"
+        ],
+        "claimBoundary": "CORE Web/subscription/bootstrap implementation claims are complete and host validation is recorded separately. Original DEVICE remains sole native/PR3/PR6 writer; check central claims before any new production slice.",
+        "newAppPR3Head": {
+          "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+          "review": 5493423824,
+          "verdict": "REQUEST_CHANGES",
+          "githubReviewState": "COMMENTED",
+          "reviewBodyReadBackExactly": true,
+          "evidence": "docs/plans/core-device-9895-review-20261012.json",
+          "scope": "DV006 two-file Kotlin addition; five DOVI/selection/controller files unchanged from b180.",
+          "newBlocking": [
+            "P1: NaN reset enters Window attributes and later fails the Dart interface range check.",
+            "P2: ContentObserver(null) emits Flutter events without a main-thread guarantee.",
+            "P2: application brightness EventSink is registered but never emits.",
+            "P2: system write capability always true and Settings.putInt results ignored.",
+            "P2: stop leaves handlers retaining the Activity in the cached engine."
+          ],
+          "priorBlockingStillOpen": [
+            "Rendition producer key and spec.key selection consumer mismatch.",
+            "HTTP successful body can stall beyond budget; error limit counts chunks.",
+            "In-flight Set skips instead of sharing the pending Future.",
+            "Local source null handling and complete signed URL logging.",
+            "Selected track, BL/RPU, codec/color/compatibility facts are not fully bound."
+          ],
+          "ownBuild": {
+            "run": 38274961135,
+            "attempt": 1,
+            "conclusion": "failure",
+            "limit": "Own step metadata only; old b180 failure logs not used as this run evidence."
+          },
+          "owner": "Original DEVICE repairs in original PR; CORE review only; not integrated."
+        },
+        "dv006PR3": {
+          "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+          "review": 5493423824,
+          "verdict": "REQUEST_CHANGES",
+          "githubReviewState": "COMMENTED",
+          "reviewBodyReadBackExactly": true,
+          "evidence": "docs/plans/core-device-9895-review-20261012.json",
+          "scope": "DV006 two-file Kotlin addition; five DOVI/selection/controller files unchanged from b180.",
+          "newBlocking": [
+            "P1: NaN reset enters Window attributes and later fails the Dart interface range check.",
+            "P2: ContentObserver(null) emits Flutter events without a main-thread guarantee.",
+            "P2: application brightness EventSink is registered but never emits.",
+            "P2: system write capability always true and Settings.putInt results ignored.",
+            "P2: stop leaves handlers retaining the Activity in the cached engine."
+          ],
+          "priorBlockingStillOpen": [
+            "Rendition producer key and spec.key selection consumer mismatch.",
+            "HTTP successful body can stall beyond budget; error limit counts chunks.",
+            "In-flight Set skips instead of sharing the pending Future.",
+            "Local source null handling and complete signed URL logging.",
+            "Selected track, BL/RPU, codec/color/compatibility facts are not fully bound."
+          ],
+          "ownBuild": {
+            "run": 38274961135,
+            "attempt": 1,
+            "conclusion": "failure",
+            "limit": "Own step metadata only; old b180 failure logs not used as this run evidence."
+          },
+          "owner": "Original DEVICE repairs in original PR; CORE review only; not integrated."
+        }
+      },
+      "currentImplementedScope": {
+        "doNotRepeat": true,
+        "items": [
+          "independent VideoRouteCapabilities.query(target:,sources:) and per-candidate App DASH filtering",
+          "P5/P8.4 admission and unknown-DV/color semantic gates",
+          "failure-aware SDR fallback and CORE-F01 original source facts separated from decoder observation",
+          "FFmpeg e8df200c decoder profile repair",
+          "CORE-R01 real dependency/output resource contracts, decoder review, bounded copy/software routes",
+          "effective auto/prefer/require through App selection/planner/Session/report; LG config claim guard",
+          "SDK/source provenance, platform source preludes and CI source checks",
+          "PR5 common matrix functionality and provenance-preserved historical review import"
+        ],
+        "limit": "source presence and recorded host validation do not grant native/device/performance acceptance",
+        "sourceIndex": "Goodwu/media-kit:docs/plans/core-successor-implementation-index-20261012.json"
+      }
     }
   },
   "completed": [
@@ -1605,7 +2344,7 @@
     }
   ],
   "latestValidation": {
-    "scope": "Exact App3884d3e8 + media-kit4d1d4b7d only; subsequent docs commits are not relabelled as tested.",
+    "scope": "HISTORICAL exact App3884+media-kit4d1d acceptance before DEVICE integration. All stored numbers/observations below retain those original inputs; no current candidate runtime result.",
     "vector": {
       "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
       "appTree": "babf93595feed078058608d6aada5c4dd014ddd5",
@@ -1822,10 +2561,25 @@
     "ffmpegPriorRun": 38130404541,
     "ffmpegPriorResult": "Prior successful17actual-selector cases perClang/GCC withsanitizers,6extractor tests, actualMediaCodec staticlibs arm64API24/35. No native changes in this phase.",
     "acceptedNativeInputs": 0,
-    "limit": "App dependency source verification is not a rerun of all library tests or a native link/device proof.",
+    "limit": "Last verified heads above are historical. Current DEVICE source integration has no new CI/native/device acceptance.",
     "standaloneLibraryVerifiedSource": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
     "standaloneLibrarySourceRun": 38275707566,
-    "standaloneLibraryEvidence": "docs/plans/core-library-source-4d1d4b7d-20261012.json"
+    "standaloneLibraryEvidence": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
+    "nativePublicRouting": {
+      "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+      "publicBranch": "routing/MK-ROUTING-20261011",
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "tree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+      "status": "PUBLIC_SOURCE_REF_CREATED_AND_READ_BACK",
+      "sourceEdits": 0,
+      "newPullRequests": 0,
+      "deviceHeadUnchanged": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "featureHeadUnchanged": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+      "mainHeadUnchanged": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+      "originalPr1StillOpen": true,
+      "buildsExecuted": 0,
+      "approvedInputs": 0
+    }
   },
   "legacyBuild": {
     "startupContract": "fixed",
@@ -1846,8 +2600,8 @@
     "Source preludes, query/DASH/F01/R01/config and analyzer cleanup are implemented; preserve exact tested vectors rather than redevelop from stale planned fields."
   ],
   "resumptionRule": "Use this existing task branch/PR1 plus media-kitPR4 and FFmpegPR1. Read current refs, central ledger and latest PR comments. Completed query/source-filter/fallback/Android7/native and unknown-source fixes are real commits; never recreate another branch or replay retired writers. Failed validation does not erase implementation.",
-  "checkpointPolicy": "Push recoverable stages promptly and read back. This is documentation only. Exact run/input/hash records are provenance, not obsolete build pins. Preserve source freshness gates and report intermediate failures accurately.",
-  "nextAction": "Read actual Web6/full and artifacts from the executing exact4d1d general38275707106, preserving that run. Original DEVICE supplies DV001/PR5 and PR3/PR6 fixes for CORE review; check claims before another production slice.",
+  "checkpointPolicy": "Push authorized stable integration and read back exact files/parents. Source-only import does not relabel old tests; CI paused with [skip ci].",
+  "nextAction": "Read back the merge and remove only confirmed merged frozen source branches as authorized. Same DEVICE retains open work; native original PR1 stays open. Later App/DV004 changes start from public HEAD with a central claim. CI and other code work remain paused; DV004 decisions remain open.",
   "succession": {
     "role": "CORE-SUCCESSOR",
     "solePublicIntegrator": true,
@@ -1855,10 +2609,10 @@
     "scopeSupplement": 6126444208,
     "deviceReviewReply": 6126499419,
     "nativeDeviceOwner": "existing DEVICE agent; no new DEVICE line",
-    "deviceBuildIntegration": "required_and_blocked_pending_original_PR_fixes",
+    "deviceBuildIntegration": "public_native_source_ref_integrated_recipe_artifact_device_acceptance_open",
     "deviceArchivePR": 5,
     "deviceArchiveHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
-    "deviceArchiveStatus": "partial_common_matrix_and_historical_records_integrated_native_artifact_device_remaining",
+    "deviceArchiveStatus": "PR5_ancestry_and_exact_non_executable_sources_integrated_recipe_acceptance_open",
     "baseline": {
       "phase": "Initial CORE successor takeover baseline before its first documentation checkpoint; not the current source implementation vector.",
       "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
@@ -1871,12 +2625,12 @@
     },
     "productionAppChanged": false,
     "productionLibraryChanged": false,
-    "scope": "Historical initial CORE takeover baseline and productionChanged flags only; current implementation and host validation are recorded in nextCodeSlice/latestValidation."
+    "scope": "Initial baseline/productionChanged flags remain historical; current code import and explicit deferred scope are in currentDeviceIntegration."
   },
   "centralLedgerCurrent": {
     "repository": "Goodwu/media-kit",
     "path": "docs/plans/media-kit-routing-handoff-20261011.json",
-    "evidenceIndex": "docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json",
+    "evidenceIndex": "docs/plans/core-device-integration-20261012.json",
     "testedVector": {
       "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
       "appTree": "babf93595feed078058608d6aada5c4dd014ddd5",
@@ -1885,82 +2639,26 @@
     }
   },
   "currentObservedHeads": {
-    "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
-    "mediaKit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+    "app": "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+    "mediaKit": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
     "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
     "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "nativePublicRouting": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
     "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
     "deviceDV004PR6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
     "appDV003DV005DV006PR3": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
-    "phase": "Before this documentation archive; tested source vector is separately immutable."
+    "phase": "Actual inputs immediately before this integration commit; resulting heads are bound by this commit and the central publication readback, not by old test labels."
   },
   "pendingCurrentHeadValidation": {
-    "status": "source and capability subscription host gates passed; remaining Web/native/device gates are explicit",
-    "web": {
-      "run": 38275707106,
-      "attempt": 1,
-      "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
-      "runApiStatus": "in_progress",
-      "executionStatus": "four package jobs actually in_progress",
-      "conclusion": null,
-      "observationAtUtc": "2026-10-12T16:49:33Z",
-      "expectedPullRequestMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
-      "actualCheckoutLogsRead": false,
-      "actualPackageJobs": [
-        {
-          "id": 114913277114,
-          "name": "package:media_kit tests (Linux)",
-          "status": "in_progress",
-          "startedAt": "2026-10-12T16:45:07Z"
-        },
-        {
-          "id": 114913277440,
-          "name": "package:media_kit tests (Windows)",
-          "status": "in_progress",
-          "startedAt": "2026-10-12T16:45:07Z"
-        },
-        {
-          "id": 114913277627,
-          "name": "package:media_kit tests (Web)",
-          "status": "in_progress",
-          "startedAt": "2026-10-12T16:45:16Z"
-        },
-        {
-          "id": 114913277844,
-          "name": "package:media_kit tests (macOS)",
-          "status": "in_progress",
-          "startedAt": "2026-10-12T16:45:14Z"
-        }
-      ],
-      "webJob": 114913277627,
-      "webTargetedExpected": 6,
-      "webTargetedStep": {
-        "name": "Verify Web shuffle playlist snapshots",
-        "status": "completed",
-        "conclusion": "success",
-        "number": 8,
-        "started_at": "2026-10-12T16:46:55Z",
-        "completed_at": "2026-10-12T16:47:22Z"
-      },
-      "webTargetedActualPassCount": null,
-      "fullActualPassCount": null,
-      "fullActualSkipCount": null,
-      "boundary": "Targeted step metadata success is distinct from six actual case logs; full Chrome still executing and its raw log has not been read.",
-      "webFullStep": {
-        "name": "Run dart test --platform chrome",
-        "status": "in_progress",
-        "conclusion": null,
-        "number": 9,
-        "started_at": "2026-10-12T16:47:22Z",
-        "completed_at": null
-      }
-    },
-    "video": "Five new real Session cases and full777+3skip passed on exact4d1d.",
-    "App": "Explicit pin acquisition, strict analyze, four268 and Python515+2 passed on exact3884+4d1d.",
-    "nativeAndDevice": "Not accepted; DV001/PR5 mandatory full integration remains unfinished."
+    "status": "PAUSED_BY_USER_FOR_DEVICE_INTEGRATION",
+    "newSourceVectorRuntimeValidated": false,
+    "priorObservedGeneralRun": 38275707106,
+    "priorObservationAtUtc": "2026-10-12T16:49:33Z",
+    "ciQueriedInThisPhase": false,
+    "nativeAndDevice": "Source integrated; recipe/artifact/device acceptance remains mandatory and incomplete; approved inputs 0."
   },
-  "checkpoint": "CORE-LIFECYCLE-BOOTSTRAP-HOST-CI-20261012",
-  "checkpointScope": "Exact3884+4d1d App/library host source acceptance, actual Build native blockers, and9895 original-PR review. Docs archive; current general remains separately bounded.",
+  "checkpoint": "CORE-DEVICE-INTEGRATION-20261012",
+  "checkpointScope": "User-requested DEVICE source integration with explicit deferred policy/recipe dispositions. CI and other work paused; no new runtime acceptance.",
   "deviceReviews": {
     "dv001": {
       "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
@@ -2088,7 +2786,7 @@
       "permitted temporary diagnostic scope",
       "accept final plan fulfillment or require capture/rejection of any actual decoder switch"
     ],
-    "claimBoundary": "CORE Web/subscription/bootstrap implementation claims are complete and host validation is recorded separately. Original DEVICE remains sole native/PR3/PR6 writer; check central claims before any new production slice.",
+    "claimBoundary": "CORE owns current public merge and authorized merged-source cleanup. Existing DEVICE retains native original PR1 and follow-up App/DV004 fixes from public HEAD after fresh central claim; no new DEVICE line.",
     "newAppPR3Head": {
       "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
       "review": 5493423824,
@@ -2148,233 +2846,70 @@
         "limit": "Own step metadata only; old b180 failure logs not used as this run evidence."
       },
       "owner": "Original DEVICE repairs in original PR; CORE review only; not integrated."
+    },
+    "currentIntegrationDisposition": {
+      "userOrderSupersedesPriorSchedulingOnly": true,
+      "sourceIntegratedDoesNotCloseReviewFindings": true,
+      "evidence": "docs/plans/core-device-integration-20261012.json",
+      "nativeOriginalOwnerUnchanged": true,
+      "dv004ProductionPolicyDeferred": true,
+      "deviceGestureReport": {
+        "source": "https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6128050177",
+        "scope": "DEVICE reports user LYA gesture brightness linkage and automatic-to-manual switch; no independent reset/event/lifecycle acceptance"
+      }
     }
   },
   "nextCodeSlice": {
-    "phase": "CORE-WEB-SHUFFLE-02+CORE-CAPABILITY-SUBSCRIPTION-01+CORE-BOOTSTRAP-VERSION-01",
+    "phase": "CORE-DEVICE-INTEGRATION-20261012",
+    "status": "source integration completed with explicit resolutions; other slices paused",
     "claims": [
-      6127642516,
-      6127809360,
-      6127846798
+      6128883314,
+      6128920010
     ],
-    "status": "implemented; App/bootstrap and subscription host validated; Web current run separately recorded",
-    "files": [
+    "evidenceIndex": "docs/plans/core-device-integration-20261012.json",
+    "openIssues": [
       {
-        "repository": "Goodwu/media-kit",
-        "path": "media_kit/lib/src/player/web/player/real.dart",
-        "parentBlob": "1864968fd3128586c30b70e1fc6ff8833390565e",
-        "candidateBlob": "c5ad7ca432b1cb62b37f0f4a120b44501ea1ddda",
-        "sha256": "928e1ab8a91812e80230c1a65fd74c5941d45d5be47678f573c2efff4f9a9b42",
-        "bytes": 50029
+        "id": "DV003_CACHE_IDENTITY",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "Producer uses revision/cid/baseUrl, selection consumes spec.key; in-flight Set does not share an awaited result."
       },
       {
-        "repository": "Goodwu/media-kit",
-        "path": "media_kit/test/src/player/player_test.dart",
-        "parentBlob": "cd8a27fe29f1bc558f6594d589515794aa71d010",
-        "candidateBlob": "0495efa2fcb9f50684a18d182986b15d34f0761e",
-        "sha256": "3f0d13d76f5f2e78e6524710244de604d9cf1d38730c9f5b869e830afadee3c2",
-        "bytes": 107691
+        "id": "DV003_HTTP_AND_FACTS",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "Successful body can wait without an absolute deadline; error take counts chunks; track/sample-entry and BL/RPU/color/codec/compatibility bindings remain incomplete."
       },
       {
-        "repository": "Goodwu/media-kit",
-        "path": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
-        "parentBlob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
-        "candidateBlob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748",
-        "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609",
-        "bytes": 83379
+        "id": "DV003_LOCAL_SOURCE_AND_LOGGING",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "videoUrl! precedes FileSource handling; full signed URL logging remains. Reopen initialDoviFacts forwarding is implemented and retained."
       },
       {
-        "repository": "Goodwu/media-kit",
-        "path": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
-        "parentBlob": null,
-        "candidateBlob": "4a699a0d95e2470956252dcd1fba811346f18566",
-        "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b",
-        "bytes": 7929
+        "id": "DV006_BRIGHTNESS",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "review": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+        "detail": "NaN reset, callback thread, application event emission, system permission/write result and cached-engine Activity handlers remain open."
       },
       {
-        "repository": "Goodwu/PiliPlusX",
-        "path": ".github/actions/routing-bootstrap/action.yml",
-        "parentBlob": "df0cd41a1c9bb7c593162165a4bd1c4ed1d8b40e",
-        "candidateBlob": "6f22053c3a6d6356b9f967625271997075a204eb",
-        "sha256": "218606a4744edada180389019ed0441a2f164c4f37e694f79ae92b24eb687d0a",
-        "bytes": 3934
+        "id": "DV004_IDENTITY_POLICY",
+        "status": "PRODUCTION_CHANGE_DEFERRED_PUBLIC_ASSERTION_RETAINED",
+        "review": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+        "detail": "Actual decoder sequence and both user decisions remain open; first-complete-only behavior is not enabled."
       },
       {
-        "repository": "Goodwu/PiliPlusX",
-        "path": "scripts/prepare_routing_ci.py",
-        "parentBlob": "f4ba6019f4818efcadee50e8929f81315ded46f0",
-        "candidateBlob": "94684e1b03435f3e43c2c64fa87104a325a8534c",
-        "sha256": "460d94b21d6798a4efa0dede74b796bf9c47259dfa9dd9869878a35c58e50340",
-        "bytes": 30209
-      },
-      {
-        "repository": "Goodwu/PiliPlusX",
-        "path": "scripts/routing_flutter_version.py",
-        "parentBlob": null,
-        "candidateBlob": "b79e05e27a1371c4568eb1d4bd5823c99d19f7dd",
-        "sha256": "6077ff2fd6afd37ebec54708bbfacf3c7189bdfa8758eaf5a32d5a85989d4f9e",
-        "bytes": 3644
-      },
-      {
-        "repository": "Goodwu/PiliPlusX",
-        "path": "scripts/verify_routing_linux_native.py",
-        "parentBlob": "4ae53af249b6ea8c5beea1236a6b50e98b216a44",
-        "candidateBlob": "18e3428ba2f8c43e6f05c1d1f87c37ea28219590",
-        "sha256": "66d1d3487396e4d7ee1f19dc210891ec94ef8b58d3d74ee23724869a073d00c1",
-        "bytes": 67002
-      },
-      {
-        "repository": "Goodwu/PiliPlusX",
-        "path": "test/routing_flutter_version_test.py",
-        "parentBlob": null,
-        "candidateBlob": "1484105106b1df29a6f032a625c7d767f70d9a28",
-        "sha256": "8beaaeb4cf92e21d267ee7696491b9e92e2466d9fe2893b9437d8fd0990d48af",
-        "bytes": 5327
-      },
-      {
-        "repository": "Goodwu/PiliPlusX",
-        "path": "test/verify_routing_linux_native_test.py",
-        "parentBlob": "9316d24b73670b5fe5c15964a957e1dc6199e16f",
-        "candidateBlob": "c27a664f0c46f9c8e549daba34f4b00352eb324c",
-        "sha256": "f4c57e56fd7187ec21524e8e21417471cd9caa3a4b8c98d57d80245c813fa9d3",
-        "bytes": 29316
+        "id": "DV001_NATIVE_ACCEPTANCE",
+        "status": "SOURCE_INTEGRATED_NATIVE_ACCEPTANCE_OPEN",
+        "review": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+        "detail": "Failed symbol reads reject; cover each Vulkan symbol and weak/none/tool-failure/bad-ELF combinations; propagate build failure, clean staging, exact members, linked inputs/patch/NDK/helper/JAR/APK provenance."
       }
     ],
-    "web02": {
-      "change": "All equal-URI queue skips impossible shuffle loop and retains exact occurrence/index; unchanged identity sequence also preserves index when restoring.",
-      "newCases": 2,
-      "targetedCasesAfterCommit": 6,
-      "remaining": "mixed duplicate URI occurrence and queue-edit mapping require separate scope"
-    },
-    "subscription": {
-      "change": "Native enable is caller enabled OR registered listener collection nonempty, preserving surviving Sessions; no drifting counters or ACK state cache.",
-      "newCases": 5,
-      "limits": "tests cover explicit failure retry, not automatic Session retry; native events/multiple engines/device acceptance pending"
-    },
-    "bootstrap": {
-      "change": "Standard Python reads restricted exact App environment.flutter before SDK acquisition, shared parser verifies frameworkVersion after installation; helper included in fixed Linux consumer provenance.",
-      "newCases": 11,
-      "focusedPythonPassed": 109,
-      "fullLocal": "FAILED intermediate full attempt:509 ran,1failure,5errors,5skips; macOS-only operations/absent Flutter SDK. Final focused109 pass does not replace hosted full suite.",
-      "priorFixtureFailure": "Default/tmp path237 failed existing >260 fixture assertion; retained, then focused suite passed under recorded longer TMPDIR."
-    },
-    "notChanged": [
-      "Session/gather behavior or Java/Surface/owner/ACK/lease",
-      "App controller/hdr_output or DEVICE native recipes",
-      "SDK patches or native approval ledger",
-      "default experimental=false; true primary and false regression",
-      "LG YUV8/FULL/range1 and exact device gates; 10-bit/lease fusion deferred"
-    ],
-    "hostValidation": {
-      "App": "docs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
-      "library": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
-      "Web": {
-        "run": 38275707106,
-        "attempt": 1,
-        "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
-        "runApiStatus": "in_progress",
-        "executionStatus": "four package jobs actually in_progress",
-        "conclusion": null,
-        "observationAtUtc": "2026-10-12T16:49:33Z",
-        "expectedPullRequestMerge": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
-        "actualCheckoutLogsRead": false,
-        "actualPackageJobs": [
-          {
-            "id": 114913277114,
-            "name": "package:media_kit tests (Linux)",
-            "status": "in_progress",
-            "startedAt": "2026-10-12T16:45:07Z"
-          },
-          {
-            "id": 114913277440,
-            "name": "package:media_kit tests (Windows)",
-            "status": "in_progress",
-            "startedAt": "2026-10-12T16:45:07Z"
-          },
-          {
-            "id": 114913277627,
-            "name": "package:media_kit tests (Web)",
-            "status": "in_progress",
-            "startedAt": "2026-10-12T16:45:16Z"
-          },
-          {
-            "id": 114913277844,
-            "name": "package:media_kit tests (macOS)",
-            "status": "in_progress",
-            "startedAt": "2026-10-12T16:45:14Z"
-          }
-        ],
-        "webJob": 114913277627,
-        "webTargetedExpected": 6,
-        "webTargetedStep": {
-          "name": "Verify Web shuffle playlist snapshots",
-          "status": "completed",
-          "conclusion": "success",
-          "number": 8,
-          "started_at": "2026-10-12T16:46:55Z",
-          "completed_at": "2026-10-12T16:47:22Z"
-        },
-        "webTargetedActualPassCount": null,
-        "fullActualPassCount": null,
-        "fullActualSkipCount": null,
-        "boundary": "Targeted step metadata success is distinct from six actual case logs; full Chrome still executing and its raw log has not been read.",
-        "webFullStep": {
-          "name": "Run dart test --platform chrome",
-          "status": "in_progress",
-          "conclusion": null,
-          "number": 9,
-          "started_at": "2026-10-12T16:47:22Z",
-          "completed_at": null
-        }
-      }
-    }
+    "productionAppChanged": true,
+    "productionLibraryGatherChanged": false,
+    "libraryCompatiblePlanNegativeTestsAdded": 2
   },
   "evidenceIndex": {
     "repository": "Goodwu/media-kit",
-    "path": "docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json",
-    "sha256": "a79a5b926bc051e80ff8d0f6b7c32d51b37d7994ed0352a7fd20b9db831e9979",
-    "reports": [
-      {
-        "path": "docs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
-        "bytes": 148018,
-        "sha256": "1f48f122a109ee4c920165998c285cbf81bc0786af55f1c77cb34f9f03ac0dc1"
-      },
-      {
-        "path": "docs/plans/core-build-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
-        "bytes": 357358,
-        "sha256": "fd81f6fd46edf081d7f4d691889c9eaf7d0ba75b4153f25af7f19a37e115dc27"
-      },
-      {
-        "path": "docs/plans/core-library-source-4d1d4b7d-20261012.json",
-        "bytes": 57572,
-        "sha256": "640441a4dda97554c019a66d878a9445676c8b496b967f77267a5f3d82a4d5a2"
-      },
-      {
-        "path": "docs/plans/core-device-9895-review-20261012.json",
-        "bytes": 34489,
-        "sha256": "28b48edf0c95cc536f8e8761779715c17e7dfae22087ed4a90e91837afdc9d81"
-      },
-      {
-        "path": "docs/plans/core-device-9895-review-publication-receipt-20261012.json",
-        "bytes": 7796,
-        "sha256": "87ab79f4eff39f159b1c014a8602936a1002144ec99bc13b36a6b92052f49229"
-      },
-      {
-        "path": "docs/plans/core-source-3884-4d1d-independent-crosscheck-20261012.json",
-        "bytes": 10953,
-        "sha256": "8af6d4003fb3879fe9843fe8aea0727758130c1e7eccb4cecb40087e5c8c1bb2"
-      },
-      {
-        "path": "docs/plans/core-web-cow-chrome-a73d570-20261012.json",
-        "bytes": 7259,
-        "sha256": "08f603b3c6a6791a6b3d1b86c23550e2bc06fc7b297ac24723e0731e046c69b5"
-      },
-      {
-        "path": "docs/plans/core-general-ci-a73d570-terminal-20261012.json",
-        "bytes": 381899,
-        "sha256": "a8caf13ef6411eb5d1f743be31415d32f5bf35c88a9bb374adc4863214b9daf6"
-      }
-    ]
+    "path": "docs/plans/core-device-integration-20261012.json",
+    "scope": "DEVICE source integration and explicit dispositions; prior host CI index preserved in history"
   },
   "currentImplementedScope": {
     "doNotRepeat": true,
@@ -2389,6 +2924,213 @@
       "PR5 common matrix functionality and provenance-preserved historical review import"
     ],
     "limit": "source presence and recorded host validation do not grant native/device/performance acceptance",
-    "sourceIndex": "Goodwu/media-kit:docs/plans/core-successor-implementation-index-20261012.json"
+    "sourceIndex": "Goodwu/media-kit:docs/plans/core-successor-implementation-index-20261012.json",
+    "deviceIntegration": {
+      "index": "docs/plans/core-device-integration-20261012.json",
+      "inputs": {
+        "mediaKitPublicParent": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+        "appPublicParent": "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+        "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "pr6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+        "appPr3": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "nativeDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83"
+      },
+      "appStatus": "CODE_INTEGRATED_KNOWN_ISSUES_OPEN",
+      "pr5Status": "ANCESTRY_AND_SOURCE_ARCHIVE_INTEGRATED_RECIPE_EXCLUDED",
+      "pr6Status": "ANCESTRY_AND_COMPATIBLE_TESTS_INTEGRATED_PRODUCTION_POLICY_DEFERRED",
+      "native": {
+        "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+        "publicBranch": "routing/MK-ROUTING-20261011",
+        "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "tree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+        "status": "PUBLIC_SOURCE_REF_CREATED_AND_READ_BACK",
+        "sourceEdits": 0,
+        "newPullRequests": 0,
+        "deviceHeadUnchanged": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "featureHeadUnchanged": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+        "mainHeadUnchanged": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+        "originalPr1StillOpen": true,
+        "buildsExecuted": 0,
+        "approvedInputs": 0
+      },
+      "ci": "PAUSED_BY_USER",
+      "openIssues": [
+        {
+          "id": "DV003_CACHE_IDENTITY",
+          "status": "OPEN_AFTER_CODE_IMPORT",
+          "detail": "Producer uses revision/cid/baseUrl, selection consumes spec.key; in-flight Set does not share an awaited result."
+        },
+        {
+          "id": "DV003_HTTP_AND_FACTS",
+          "status": "OPEN_AFTER_CODE_IMPORT",
+          "detail": "Successful body can wait without an absolute deadline; error take counts chunks; track/sample-entry and BL/RPU/color/codec/compatibility bindings remain incomplete."
+        },
+        {
+          "id": "DV003_LOCAL_SOURCE_AND_LOGGING",
+          "status": "OPEN_AFTER_CODE_IMPORT",
+          "detail": "videoUrl! precedes FileSource handling; full signed URL logging remains. Reopen initialDoviFacts forwarding is implemented and retained."
+        },
+        {
+          "id": "DV006_BRIGHTNESS",
+          "status": "OPEN_AFTER_CODE_IMPORT",
+          "review": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+          "detail": "NaN reset, callback thread, application event emission, system permission/write result and cached-engine Activity handlers remain open."
+        },
+        {
+          "id": "DV004_IDENTITY_POLICY",
+          "status": "PRODUCTION_CHANGE_DEFERRED_PUBLIC_ASSERTION_RETAINED",
+          "review": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+          "detail": "Actual decoder sequence and both user decisions remain open; first-complete-only behavior is not enabled."
+        },
+        {
+          "id": "DV001_NATIVE_ACCEPTANCE",
+          "status": "SOURCE_INTEGRATED_NATIVE_ACCEPTANCE_OPEN",
+          "review": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+          "detail": "Failed symbol reads reject; cover each Vulkan symbol and weak/none/tool-failure/bad-ELF combinations; propagate build failure, clean staging, exact members, linked inputs/patch/NDK/helper/JAR/APK provenance."
+        }
+      ],
+      "mergedBranchCleanup": {
+        "authorization": "User: 确定已合并的情况下，删除相应分支",
+        "condition": "Delete only after remote merge-parent/ancestor and source-disposition readback; require the source ref still equals the frozen source SHA.",
+        "candidates": [
+          {
+            "repository": "Goodwu/media-kit",
+            "branch": "device/MK-ROUTING-20261011/DV004",
+            "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b"
+          },
+          {
+            "repository": "Goodwu/media-kit",
+            "branch": "device/MK-ROUTING-20261011/DV-BUILD-01",
+            "head": "dc41787082752f234fed85db7fb7be3bd855cc45"
+          },
+          {
+            "repository": "Goodwu/PiliPlusX",
+            "branch": "device/MK-ROUTING-20261011/DV003",
+            "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+          }
+        ],
+        "retained": "All public routing refs and original native DEVICE PR1 branch; its feature-base PR remains unmerged and DEVICE recipe corrections continue there.",
+        "sourcePreservation": "Merge parents retain original source commits; PR6 deferred production policy and PR5 script source also remain as exact archived bytes.",
+        "receipt": "Actual deletion and ref readback results will be recorded in the central PR4 completion receipt.",
+        "followupOwnership": "Same existing DEVICE agent; native fixes stay in original PR1. After merged-source branch deletion, later App/DV004 changes start from the public integration head with a fresh central scope claim."
+      }
+    }
+  },
+  "currentDeviceIntegration": {
+    "index": "docs/plans/core-device-integration-20261012.json",
+    "inputs": {
+      "mediaKitPublicParent": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+      "appPublicParent": "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+      "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "pr6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "appPr3": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+      "nativeDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83"
+    },
+    "appStatus": "CODE_INTEGRATED_KNOWN_ISSUES_OPEN",
+    "pr5Status": "ANCESTRY_AND_SOURCE_ARCHIVE_INTEGRATED_RECIPE_EXCLUDED",
+    "pr6Status": "ANCESTRY_AND_COMPATIBLE_TESTS_INTEGRATED_PRODUCTION_POLICY_DEFERRED",
+    "native": {
+      "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+      "publicBranch": "routing/MK-ROUTING-20261011",
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "tree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+      "status": "PUBLIC_SOURCE_REF_CREATED_AND_READ_BACK",
+      "sourceEdits": 0,
+      "newPullRequests": 0,
+      "deviceHeadUnchanged": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "featureHeadUnchanged": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+      "mainHeadUnchanged": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+      "originalPr1StillOpen": true,
+      "buildsExecuted": 0,
+      "approvedInputs": 0
+    },
+    "ci": "PAUSED_BY_USER",
+    "openIssues": [
+      {
+        "id": "DV003_CACHE_IDENTITY",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "Producer uses revision/cid/baseUrl, selection consumes spec.key; in-flight Set does not share an awaited result."
+      },
+      {
+        "id": "DV003_HTTP_AND_FACTS",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "Successful body can wait without an absolute deadline; error take counts chunks; track/sample-entry and BL/RPU/color/codec/compatibility bindings remain incomplete."
+      },
+      {
+        "id": "DV003_LOCAL_SOURCE_AND_LOGGING",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "detail": "videoUrl! precedes FileSource handling; full signed URL logging remains. Reopen initialDoviFacts forwarding is implemented and retained."
+      },
+      {
+        "id": "DV006_BRIGHTNESS",
+        "status": "OPEN_AFTER_CODE_IMPORT",
+        "review": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+        "detail": "NaN reset, callback thread, application event emission, system permission/write result and cached-engine Activity handlers remain open."
+      },
+      {
+        "id": "DV004_IDENTITY_POLICY",
+        "status": "PRODUCTION_CHANGE_DEFERRED_PUBLIC_ASSERTION_RETAINED",
+        "review": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+        "detail": "Actual decoder sequence and both user decisions remain open; first-complete-only behavior is not enabled."
+      },
+      {
+        "id": "DV001_NATIVE_ACCEPTANCE",
+        "status": "SOURCE_INTEGRATED_NATIVE_ACCEPTANCE_OPEN",
+        "review": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+        "detail": "Failed symbol reads reject; cover each Vulkan symbol and weak/none/tool-failure/bad-ELF combinations; propagate build failure, clean staging, exact members, linked inputs/patch/NDK/helper/JAR/APK provenance."
+      }
+    ],
+    "mergedBranchCleanup": {
+      "authorization": "User: 确定已合并的情况下，删除相应分支",
+      "condition": "Delete only after remote merge-parent/ancestor and source-disposition readback; require the source ref still equals the frozen source SHA.",
+      "candidates": [
+        {
+          "repository": "Goodwu/media-kit",
+          "branch": "device/MK-ROUTING-20261011/DV004",
+          "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b"
+        },
+        {
+          "repository": "Goodwu/media-kit",
+          "branch": "device/MK-ROUTING-20261011/DV-BUILD-01",
+          "head": "dc41787082752f234fed85db7fb7be3bd855cc45"
+        },
+        {
+          "repository": "Goodwu/PiliPlusX",
+          "branch": "device/MK-ROUTING-20261011/DV003",
+          "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+        }
+      ],
+      "retained": "All public routing refs and original native DEVICE PR1 branch; its feature-base PR remains unmerged and DEVICE recipe corrections continue there.",
+      "sourcePreservation": "Merge parents retain original source commits; PR6 deferred production policy and PR5 script source also remain as exact archived bytes.",
+      "receipt": "Actual deletion and ref readback results will be recorded in the central PR4 completion receipt.",
+      "followupOwnership": "Same existing DEVICE agent; native fixes stay in original PR1. After merged-source branch deletion, later App/DV004 changes start from the public integration head with a fresh central scope claim."
+    }
+  },
+  "mergedBranchCleanup": {
+    "authorization": "User: 确定已合并的情况下，删除相应分支",
+    "condition": "Delete only after remote merge-parent/ancestor and source-disposition readback; require the source ref still equals the frozen source SHA.",
+    "candidates": [
+      {
+        "repository": "Goodwu/media-kit",
+        "branch": "device/MK-ROUTING-20261011/DV004",
+        "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b"
+      },
+      {
+        "repository": "Goodwu/media-kit",
+        "branch": "device/MK-ROUTING-20261011/DV-BUILD-01",
+        "head": "dc41787082752f234fed85db7fb7be3bd855cc45"
+      },
+      {
+        "repository": "Goodwu/PiliPlusX",
+        "branch": "device/MK-ROUTING-20261011/DV003",
+        "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+      }
+    ],
+    "retained": "All public routing refs and original native DEVICE PR1 branch; its feature-base PR remains unmerged and DEVICE recipe corrections continue there.",
+    "sourcePreservation": "Merge parents retain original source commits; PR6 deferred production policy and PR5 script source also remain as exact archived bytes.",
+    "receipt": "Actual deletion and ref readback results will be recorded in the central PR4 completion receipt.",
+    "followupOwnership": "Same existing DEVICE agent; native fixes stay in original PR1. After merged-source branch deletion, later App/DV004 changes start from the public integration head with a fresh central scope claim."
   }
 }

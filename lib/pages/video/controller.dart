@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:media_kit_video/media_kit_video.dart'
     show VideoOutputTarget, EffectiveVideoRouteOptions, VideoOutputIntent;
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:piliplus/common/style.dart';
 import 'package:piliplus/common/widgets/pair.dart';
@@ -137,6 +139,16 @@ class VideoDetailController extends GetxController
   DashRouteSelection? _routeSelection;
   EffectiveVideoRouteOptions? _routeOptions;
   int _routeOptionsRevision = 0;
+
+  /// DV003/B2: sniffed DOVI facts keyed by rendition identity
+  /// (playUrlDataRevision + cid + baseUrl), NOT by VideoSourceSpec.key —
+  /// the spec key describes codec/geometry only and two different videos can
+  /// collide on it. The generation captured when a sniff starts guards the
+  /// write: a result for a superseded playurl revision is dropped instead of
+  /// polluting the cache for the next rendition.
+  final Map<String, DoviFacts> _doviFactsCache = {};
+  final Set<String> _doviFactsInFlight = {};
+
   late final void Function(EffectiveVideoRouteOptions)
   _routeInvalidatedCallback = _invalidateRouteOptions;
   late final Future<void> Function(EffectiveVideoRouteOptions)
@@ -273,6 +285,13 @@ class VideoDetailController extends GetxController
     final configRevision = _routeOptionsRevision;
     final serial = ++_routingQuerySerial;
     _routeSelection = null;
+    final doviFacts = await _resolveDoviFacts();
+    if (revision != _playbackDataRevision ||
+        serial != _routingQuerySerial ||
+        configRevision != _routeOptionsRevision ||
+        !identical(options, _routeOptions)) {
+      return false;
+    }
     // A first FlutterView can attach while the initial query is outstanding.
     // Re-read that target once; do not publish a result for the previous one.
     for (var attempt = 0; attempt < 2; attempt++) {
@@ -281,6 +300,7 @@ class VideoDetailController extends GetxController
         tracks: data.dash?.video ?? const [],
         target: target,
         options: options,
+        doviFacts: doviFacts,
       );
       if (isClosed ||
           revision != _playbackDataRevision ||
@@ -297,6 +317,54 @@ class VideoDetailController extends GetxController
       return true;
     }
     return false;
+  }
+
+  /// DV003: Bilibili's Dolby Vision tier (126) carries no profile in its
+  /// codec string, so the rendition's own initialization segment is sniffed
+  /// (one bounded Range GET) to resolve the profile before route selection.
+  /// Failures stay absent from the map: unknown-DV semantics then keep the
+  /// tier gray instead of guessing.
+  String _doviFactsKey(VideoItem item) =>
+      '$_playbackDataRevision/${cid.value}/${item.baseUrl}';
+
+  Future<Map<String, DoviFacts>> _resolveDoviFacts() async {
+    final revision = _playbackDataRevision;
+    final tracks = data.dash?.video ?? const <VideoItem>[];
+    final pending = <VideoItem, String>{};
+    for (final item in tracks) {
+      if (item.id != VideoQuality.dolbyVision.code) continue;
+      final spec = DashRouteSelection.specification(item);
+      if (spec == null) continue;
+      final key = _doviFactsKey(item);
+      if (_doviFactsCache.containsKey(key) ||
+          _doviFactsInFlight.contains(key)) {
+        continue;
+      }
+      if (item.baseUrl?.isNotEmpty != true) continue;
+      final descriptor = HdrOutputSelector.descriptorFromDash(
+        quality: item.id,
+        codec: item.codecs,
+      );
+      if (descriptor?.hasUnresolvedDolbyVision != true) continue;
+      pending[item] = key;
+    }
+    debugPrint('DOVI_SNIFF pending=${pending.length} cached=${_doviFactsCache.length}');
+    if (pending.isNotEmpty) {
+      _doviFactsInFlight.addAll(pending.values);
+      await Future.wait(
+        pending.entries.map((entry) async {
+          final facts = await sniffDoviInitSegment(entry.key);
+          // A late result must not poison a newer rendition: only commit
+          // while this playurl revision is still current.
+          if (facts != null && revision == _playbackDataRevision) {
+            _doviFactsCache[entry.value] = facts;
+          }
+        }),
+        eagerError: false,
+      );
+      _doviFactsInFlight.removeAll(pending.values);
+    }
+    return Map.unmodifiable(_doviFactsCache);
   }
 
   final Map<String, VideoDecodeCapability> _decodeCapabilities = {};
@@ -1040,6 +1108,10 @@ class VideoDetailController extends GetxController
     }
     firstVideo = selected;
     videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
+    debugPrint(
+      'DV003_SEL quality=${currentVideoQa.code} '
+      'host=${Uri.parse(videoUrl ?? '').host}',
+    );
 
     /// 根据currentAudioQa 重新设置audioUrl
     if (currentAudioQa != null) {
@@ -1083,6 +1155,11 @@ class VideoDetailController extends GetxController
         _routeSelection?.options ?? (_routeOptions ??= request.resolve());
     final configRevision = _routeOptionsRevision;
     final dataRevision = _playbackDataRevision;
+    debugPrint(
+      'DV003_OPEN quality=${firstVideo.quality.code} '
+      'codec=${firstVideo.codecs} url=${Uri.parse(videoUrl!).host} '
+      'videoUrl=$videoUrl',
+    );
     await plPlayerController.setDataSource(
       isLocalVideoDiagnostic
           ? DirectFileSource(
@@ -1128,6 +1205,12 @@ class VideoDetailController extends GetxController
           ? null
           : firstVideo.quality.code,
       initialVideoCodec: isLocalVideoDiagnostic ? null : firstVideo.codecs,
+      // DV005: the sniffed DOVI facts must reach the session hint, otherwise
+      // a 126-tier open with a plain hvc1 codec string is unknown DV and the
+      // planner blocks it (sourceMetadataUnknown).
+      initialDoviFacts: isLocalVideoDiagnostic
+          ? null
+          : _doviFactsCache[_doviFactsKey(firstVideo)],
       autoFullScreenFlag: autoFullScreenFlag,
     );
 

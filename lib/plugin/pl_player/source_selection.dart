@@ -1,22 +1,33 @@
 import 'package:piliplus/models/video/play/url.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
 import 'package:piliplus/plugin/pl_player/hdr_output.dart';
 
 /// A single target/revision's source declarations. Never a process-global
 /// cache. Unknown SDR inputs may be tried explicitly; unknown HDR output
 /// does not advertise that the display can present HDR.
 class DashRouteSelection {
-  const DashRouteSelection.unknown({this.allowUnknown = true, this.options})
-    : _sources = const {};
+  const DashRouteSelection.unknown({
+    this.allowUnknown = true,
+    this.options,
+    this.doviFacts = const {},
+  }) : _sources = const {};
   DashRouteSelection._(
     Map<String, VideoRouteCapabilities> sources, {
     this.allowUnknown = true,
     this.options,
+    this.doviFacts = const {},
   }) : _sources = Map.unmodifiable(sources);
   final Map<String, VideoRouteCapabilities> _sources;
   final bool allowUnknown;
   final EffectiveVideoRouteOptions? options;
+
+  /// Sniffed DOVI configuration facts per source spec key (DV003): Bilibili's
+  /// DV tier carries no profile in its codec string, so the rendition's own
+  /// initialization segment is the only pre-open profile source. Absent
+  /// entries keep the unknown-DV semantics.
+  final Map<String, DoviFacts> doviFacts;
 
   bool? get displayHdr {
     if (_sources.isEmpty) return null;
@@ -47,6 +58,7 @@ class DashRouteSelection {
     required VideoOutputTarget target,
     bool allowUnknown = true,
     EffectiveVideoRouteOptions? options,
+    Map<String, DoviFacts> doviFacts = const {},
   }) async {
     final specs = <String, VideoSourceSpec>{};
     for (final item in tracks) {
@@ -70,6 +82,7 @@ class DashRouteSelection {
         return DashRouteSelection.unknown(
           allowUnknown: allowUnknown,
           options: options,
+          doviFacts: doviFacts,
         );
       }
       final revision =
@@ -78,6 +91,7 @@ class DashRouteSelection {
         return DashRouteSelection.unknown(
           allowUnknown: allowUnknown,
           options: options,
+          doviFacts: doviFacts,
         );
       }
       displayRevision = revision;
@@ -89,6 +103,7 @@ class DashRouteSelection {
       sources,
       allowUnknown: allowUnknown,
       options: options,
+      doviFacts: doviFacts,
     );
   }
 
@@ -100,6 +115,7 @@ class DashRouteSelection {
           HdrOutputSelector.descriptorFromDash(
             quality: item.id,
             codec: item.codecs,
+            dovi: doviFacts[spec.key],
           ) ??
           const HdrSourceDescriptor(),
       specification: spec,
@@ -121,9 +137,11 @@ class DashRouteSelection {
     // Unknown decoder support may permit a controlled SDR attempt. It cannot
     // authorize an unknown DV color interpretation, even without a snapshot
     // or when the server puts that codec in an ordinary quality tier.
+    final spec = specification(item);
     final descriptor = HdrOutputSelector.descriptorFromDash(
       quality: item.id,
       codec: item.codecs,
+      dovi: spec == null ? null : doviFacts[spec.key],
     );
     if (descriptor?.hasUnresolvedDolbyVision == true) return false;
     final hdrTier = item.id == 125 || item.id == 126 || item.id == 129;

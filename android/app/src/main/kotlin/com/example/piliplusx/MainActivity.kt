@@ -12,9 +12,17 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : AudioServiceActivity() {
     private val hdrChannel = "piliplusx/hdr_capabilities"
+    private lateinit var brightnessHandler: ScreenBrightnessHandler
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // DV006: screen_brightness_platform_interface ships a Dart-only
+        // MethodChannel ("github.com/aaassseee/screen_brightness") with no
+        // Android implementation in this app; without this handler every
+        // brightness call throws MissingPluginException and the player's
+        // brightness gesture silently does nothing.
+        brightnessHandler = ScreenBrightnessHandler(this, flutterEngine)
+        brightnessHandler.start()
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, hdrChannel)
             .setMethodCallHandler { call, result ->
                 if (call.method == "setWindowHdrMode") {
@@ -85,6 +93,7 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        if (this::brightnessHandler.isInitialized) brightnessHandler.stop()
         stopService(Intent(this, com.ryanheise.audioservice.AudioService::class.java))
         super.onDestroy()
     }

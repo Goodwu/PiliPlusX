@@ -2,6 +2,42 @@
 
 ## Current State
 
+CORE 按用户最新“先合 DEVICE、CI 等其它工作暂停”的指令完成本次源码归并。唯一公共集成分支仍为 `routing/MK-ROUTING-20261011`，公共主 PR 不向正式 base 合并、不发布。原 DEVICE 继续 native 原 PR 的配方修复与实机工作，没有新增 DEVICE 工作线。归并认领与显式处置见 [6128883314](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314)、[6128920010](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010)。
+
+### 本次归并与来源
+
+| 范围 | 来源与处置 |
+| --- | --- |
+| App PR3 | `9895e7dc040cdc06a33cceba4d4379eba3f596b5` 的9个代码/测试文件原字节归入：DV003 嗅探/缓存/选源、DV005 Session hint/reopen 透传、DV006 Android亮度通道，以及 debug去除`.debug` suffix。状态为 `CODE_INTEGRATED_KNOWN_ISSUES_OPEN`。 |
+| 库 PR6 / DV004 | `9a2c5768dd10e71975b7c3e76bb7125460a43e5b` 原始两文件完整归档；保留公共 gather 和既有跨轮拒绝断言，仅归入两项兼容 final-plan 负例。FIRST-complete-only 生产行为与成功夹具未启用，两个用户决定仍开放。 |
+| 库 PR5 | `dc41787082752f234fed85db7fb7be3bd855cc45` 归入 Git 来源历史，两脚本精确归档为非执行`.sh.txt`；已有公共matrix/审查文档及三provenance banner保留。两脚本继续排除于可执行配方。 |
+| native DV001 | 已建立同名公共 routing ref，指向 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，完整纳入3笔原 DEVICE 提交。原 DEVICE/feature/main 未改、原PR1仍开放。仅源码纳入，没有运行或批准配方。 |
+
+本次归并的公共父提交为库 `ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02` 与 App `ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7`；来源、完整文件blob/SHA与每项保留/归档/延后处置在 `Goodwu/media-kit:docs/plans/core-device-integration-20261012.json`。最终发布的准确新HEAD由本提交及中央回读回执绑定。FFmpeg仍为`9aba43cfbee182ade060cdccbe15340a0fbe3e83`。
+
+### 合入后仍开放
+
+- DV003：producer的revision/cid/baseUrl键与selection的spec.key消费断接，in-flight不共享等待；成功HTTP body仍可能无期限等下一chunk、错误take按chunk而非byte；本地videoUrl空值、完整签名URL日志、轨道/sample-entry与BL/RPU/颜色冲突门仍需修复。reopen的initialDoviFacts透传已修并保留。
+- DV006：NaN reset、事件线程、应用亮度事件不发送、系统权限/写入结果、cached engine残留Activity handler继续按review5493423824开放。新读[DEVICE回报6128050177](https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6128050177)称用户已在LYA手动确认手势数字/实际亮度联动、自动切手动；这项观察不覆盖上述问题。
+- DV004：实际decoder identity序列、临时诊断范围与“最终plan履行/捕获真实切换”的语义未决定。保留公共断言，不能把Git ancestry合入写成行为修复。后续DEVICE增量必须对照 disposition 核完整生产文件，不能仅看增量diff。
+- **DV001/PR5的配方整改、fresh native、JAR/APK来源、设备HDR与持续性能验收仍为必需、未完成范围。** 读取失败拒绝、双Vulkan独立组合、失败传播、clean staging、精确成员、实际链接/patch/NDK/helper与产物哈希仍待原DEVICE补齐；接受ledger空，批准native输入0。
+
+### 暂停范围与既有证据
+
+本次提交使用`[skip ci]`，CI跟进/新构建/其它代码切片按用户指令暂停；没有查询本阶段的新CI结果，也没有把旧结果借给新合成向量。本机仅做Git三方结构、逐文件来源、保留项与提交回读检查；没有新Flutter/Dart/Kotlin/native执行结果。现有workflow和批准门不变，原有runs不改动。
+
+此前完整受验组合仍严格为App`3884d3e8`+库`4d1d4b7d`，其宿主证据已由ebb/ed0归档，索引`docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`。旧general38275707106仅保留16:49:33 UTC的最后观察；本阶段不续查或预设其终态。历史a3b577+e269d报告SHA256`156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da`保持原字节。
+
+当前CORE Web快照/等值URI修复、Session订阅修复、精确Flutter pin引导及源码来源门继续保留；已完成query/DASH/F01/R01/config/FFmpeg不重开发。experimental默认false、true主验并回归false；LG YUV8/FULL/range1、精确设备门和owner/ACK/lease保持。普通Session、owner/carrier、完整生命周期、HDR与持续性能继续分层验，10-bit与lease融合继续延期。
+
+### 后续边界
+
+用户已追加授权“确定已合并的情况下，删除相应分支”。逐一回读归并父提交、源文件处置和未前进的来源HEAD后，清理已确认归并的App PR3、库PR5/PR6来源分支；实际删除与ref回读登记中央PR4。全部公共routing保留；native原PR1仍未合到feature base，保留其DEVICE分支供原配方修订。已删除来源分支的App/DV004后继修改由同一DEVICE从公共HEAD出发，先中央认领，原review问题持续跟踪。CI与其它开发维持暂停；DV004两个决策点不在本轮代为裁决。
+
+## History
+
+### 2026-10-12：用户要求优先归并DEVICE之前的Current State（历史快照）
+
 唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，原 DEVICE 继续 native 构建、实机及原 PR 修订。主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。两个隔离 checkout 的实现提交已推送回读；未知原 checkout 修改与 App `.zcodeignore` 未触碰。
 
 ### 已完成的实现与当前宿主验证
@@ -43,7 +79,6 @@ PR6@9a2仍REQUEST_CHANGES；实际decoder identity序列、跨轮guard以及用�
 
 完整证据索引为 `Goodwu/media-kit:docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`；冻结报告按原字节及SHA归档。中央[实现推送6128112984](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128112984)、[DV006复审6128220148](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128220148)及[本轮源码终态6128436938](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128436938)保留；新的准确HEAD与执行观察继续发布中央PR4。不得把已完成query/DASH/F01/R01/config/FFmpeg/SDK接线按旧planned字段重做。
 
-## History
 
 ### 2026-10-12：宿主CI终态归档前的Current State（历史快照）
 

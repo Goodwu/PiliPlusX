@@ -7,17 +7,15 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- CORE唯一公共集成；主PR保持OPEN/DRAFT、未合并/关闭/发布；未知dirty/App `.zcodeignore`保护。
-- 准确受验App3884d3e8+media-kit4d1d4b7d：source38275714484 SUCCESS，5实际ZIP；四Flutter各268/analyze0、Python515+2=517、57fresh/2733hash/261roots。随后仅档案提交不借用旧绿灯。
-- Build38275715109 FAILURE，11实际ZIP；自身5source子job全过；Android/Pink空accepted manifest，四其他平台SOURCE_PREPARED_NATIVE_BLOCKED，批准native0。Windows显式pin/yq跳过/fresh57已实证。
-- 库source38275707566 SUCCESS，3实际ZIP：video777+3skip（新增5订阅用例实际通过）、lab298/tools45/analyze0；App SDK3.47.2与库3.47.7分记。
-- Web COW及等值URI/index修复已实现，当前定向6项。新general38275707106@4d1d已实际运行；Web定向步骤16:46:55–16:47:22的metadata为success，完整Chrome从16:47:22继续执行。预期6项的实际case日志尚未取得，不能称已读6通过或full完成。 混合duplicate occurrence/队列编辑仍未完。
-- 上一轮a73 general38272288190已SUCCESS（23success/1release skip）：Web实际定向4通过、full63通过/27跳过；Linux/Windows各81通过/18跳过，macOS88通过/17跳过。mac有2次Retry、2条OutstandingWork及1条失败标记，按重试后成功保留。8实际ZIP/450内层文件、6上传job日志全核；payload中无source.txt，Android仍为旧发布JAR，不能替代fresh DV001。
-- App helper相关本机109通过；旧本机全量环境失败保留，本次hosted完整517另验。iOS1920文件/两patch/5814commands属源码重放，非Xcode/native构建。
-- DV001/PR5完整native/产物/实机归并必需未完；1095/dc417无修复移交，两recipe排除、三provenance banner保留；DEVICE原PR单写、CORE复审。
-- AppPR3@9895复审5493423824为REQUEST_CHANGES/COMMENTED：DV006新增1P1/4P2，原DOVI/HTTP/cache/track阻断未修。PR6@9a2及两项DV004用户决定开放。
-- 普通Session订阅宿主缺陷已修；完整owner/carrier/生命周期/HDR/持续性能仍分层验。experimental默认false、true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10bit/lease融合延期。
-- 下一步：核当前general38275707106的Web6与完整套件实际日志/产物；保留已执行的4d1d输入。原DEVICE在原PR补DV001/PR5与PR3/PR6修订，CORE续审。下一生产切片须先核认领。 唯一conversation及证据索引 `docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`；历史156cd314…报告不变。
+- 用户最新优先级：DEVICE源码归并；CI跟进、新构建与其它开发暂停。本次两仓提交带`[skip ci]`；公共主PR不向正式base合并、不发布。
+- App PR3@9895e7dc的9代码/测试文件已按源字节归入，含DV003/DV005/DV006和debug applicationId变化；状态CODE_INTEGRATED_KNOWN_ISSUES_OPEN。HTTP/cache/track/localURL与亮度reset/事件/权限/lifecycle问题继续开放。
+- 库PR6@9a2c5768归入来源历史并完整归档原文；公共gather及跨轮拒绝断言保留，新增2兼容plan负例。FIRST-complete-only行为未启用，实际decoder序列和两个用户决策继续开放。
+- PR5@dc417870的两脚本原文归档为`.sh.txt`，继续排除于可执行配方；公共matrix/已有审查文档和三provenance banner不覆盖。
+- native同名公共routing已指向1095a43a，包含3笔DEVICE原提交；原DEVICE/feature/main与原PR1不变。DV001/PR5配方整改、fresh native、最终JAR/APK、设备HDR与持续性能验收必需未完，接受ledger空、批准native0。
+- DV006新增读取DEVICE comment6128050177的LYA用户手势观察；该回报不关闭NaN reset/事件/权限/Activity handlers问题。原review结论继续有效，旧“暂不归并”的排期由本次用户指令更新。
+- 本次只核三方归并、精确source/blob/SHA、保留门与提交回读；没有新Flutter/Kotlin/native运行结论。此前App3884+库4d1d受验结果与历史a3b+e269结果保留原标签；general38275707106的最后已读观察停在16:49:33 UTC，本阶段不续查。
+- CORE Web/订阅/Flutter pin与既有query/DASH/F01/R01/config保留。experimental默认false，true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10-bit/lease融合延期。
+- 完整处置与来源索引：`docs/plans/core-device-integration-20261012.json`（库中央含独立报告）；唯一`archives/conversations/media-kit-routing-20261011.md`。用户已授权确认归并后删除相应来源分支；逐ref核HEAD/祖先/处置后清理，结果回读登记中央PR4。保留全部公共routing及未合并的native原PR1分支。后续同一DEVICE从公共HEAD认领App/DV004修订，native仍原PR1；CI与其它代码维持暂停。
 
 ## Now（当前推进，最多 3 条）
 
