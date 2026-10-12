@@ -161,11 +161,20 @@ def validate_mac_routing_workflow(text):
             steps[10]: ('steps.finalize.outcome == \'success\'', 'SOURCE_PREPARED_NATIVE_BLOCKED',
                         'mac-current-native-input-unavailable', 'nativeBinaryProvenanceVerified\': False',
                         'deviceTest\': False', 'raise SystemExit(1)'),
-            steps[11]: ('always() && inputs.routing-mode', 'if-no-files-found: error') } .items():
+            steps[11]: ('if-no-files-found: error',) } .items():
         content = named_step(body, stepname)
         for token in required:
             if token not in content:
                 raise ValueError('macOS routing step ' + stepname + ' misses ' + token)
+    metadata = named_step(body, 'Generate and verify release metadata')
+    if 'if: ${{ !inputs.routing-mode && success() }}' not in metadata:
+        raise ValueError('macOS release metadata must run only after successful nonrouting builds')
+    release_upload = named_step(body, 'Upload successful shared release payloads')
+    if 'if: ${{ !inputs.routing-mode && success() }}' not in release_upload:
+        raise ValueError('macOS release payload upload must remain limited to successful nonrouting builds')
+    diagnostics_upload = named_step(body, steps[11])
+    if 'if: ${{ always() && inputs.routing-mode }}' not in diagnostics_upload:
+        raise ValueError('macOS routing diagnostics must upload regardless of routing job outcome')
     routing_region = body.split('      - name: Reject uncaptured routing dispatch before any production step', 1)[1].split(
         '      - name: Checkout exact release source', 1)[0]
     for forbidden in ('run_macos_shared_release.py', 'approved_media_kit_revision',
@@ -973,6 +982,15 @@ class MacRoutingSourceWiringTests(unittest.TestCase):
             '      - name: Fail closed because no current macOS native producer input is available', 1)
         with self.assertRaisesRegex(ValueError, 'forbidden legacy/native'):
             validate_mac_routing_workflow(injected)
+
+    def test_release_metadata_is_success_only_and_diagnostics_are_always_uploaded(self):
+        with self.assertRaisesRegex(ValueError, 'release metadata must run only'):
+            validate_mac_routing_workflow(self.workflow.replace(
+                'if: ${{ !inputs.routing-mode && success() }}\n        shell: bash',
+                'if: success()\n        shell: bash', 1))
+        with self.assertRaisesRegex(ValueError, 'diagnostics must upload regardless'):
+            validate_mac_routing_workflow(self.workflow.replace(
+                'if: ${{ always() && inputs.routing-mode }}', 'if: ${{ success() }}', 1))
 
     def test_actual_ios_variant_helper_requires_bootstrap_finalize_before_final_variant(self):
         sys.path.insert(0, str(ROOT / 'scripts'))

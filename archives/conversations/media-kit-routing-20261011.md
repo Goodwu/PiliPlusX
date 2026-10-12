@@ -2,19 +2,21 @@
 
 ## Current State
 
-唯一公共集成分支为 routing/MK-ROUTING-20261011；root 为 CORE 唯一集成者，DEVICE 保持原 native 配方、构建和实机认领。当前远端观察 App a05dfe1bea85e78a7b214b0e4044eab7902a3e06、库 38ffb72920550d76c41948daa56aa01b4393681d、FFmpeg 9aba43cf、DV001 1095a43；主 PR 均未合并、关闭或发布。未知 dirty、原 SDK 和恢复材料保护。
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码与审查集成者，DEVICE 仍维护原 DV001 native recipe/build/device acceptance。当前回读 heads：App `36053e801b0803268b351aab80cdec20b6f46ac2`，media-kit `4824db1e92d947d8528e986dc1665c57b796ff75`，FFmpeg `9aba43cf`，DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，PR #5 `644908c93f09083f21720699227eb4e7a14d9c7a`。主 PR 未合并、关闭或发布。
 
-query/DASH/unknown DV/F01/FFmpeg e8df200c、R01 实际依赖与输出资源契约、decoder 复核和有界 copy/软件路线，以及 auto/prefer/require 有效配置闭环已实现。App 原 34 info 已清零，禁止按旧 planned 重做。experimental 产品默认 false，主验证 true 并保留 false 回归；LG YUV8/FULL/range1/精确设备/owner ACK lease 不变，10bit 与 lease 融合仍延期。
+query/DASH/unknown DV/F01/R01、auto/prefer/require 有效配置闭环、FFmpeg e8df200c 及失败感知兜底等此前完成项保留。原分析 34 info 不再是当前状态：App run 38253419649 的四平台 analyze 均无问题；不得按旧台账复做。产品 `experimental` 默认仍为 false；true 主验证，false 回归；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 不变，10-bit 与 lease 融合不重开。
 
-PR5 公共矩阵四文件已于库 38ffb729 整合并回读，27 synthetic/mocked 回归测试独立通过，四 committed blob 与 R4 Critical 冻结一致。原重复 JAR bundler 保持 DEVICE canonical。DV001 原 PR 仍无新修复回交；符号读取失败拒绝、两个 Vulkan 目标独立覆盖、构建失败传播、clean staging、最终成员和真实链接补丁来源待 DEVICE 修复。公共脚本归并不能代表 DV001 验收闭合，也未运行新八 APK 或实机。
+App run 38253419649 捕获 App `36053e801` + library `4824db1e`。四平台源码 bootstrap/analyze/Flutter tests/Dart bundle 均成功，各平台 Flutter 268 项；五个指定 artifact 的实际 ZIP SHA 与 API digest 相同，source.txt、57 步 fresh receipt、before/after/final vector 与十个 package roots 一致。整体 run failure 唯一原因是 Python 旧断言期待 `if: success()` 字面值；实际 workflow 使用 `if: ${{ !inputs.routing-mode && success() }}`。Python 505 项为 502 pass、1 fail、2 skip。断言修正后本地完整 Python suite 506/506 通过；尚需在提交后的新 hosted run 验证。外部证据报告 `docs/plans/core-source-ci-36053-4824-checkpoint-20261012.json` SHA256 `84019dbd6bcdb404fe8648483721c43760cf0a49e18993ac6f4d215d894be568`。kernel 字节没有从 artifact 独立重哈希，按报告限制记录。
 
-最新组合 a05dfe1be+38ffb729：App 独立 source 38250698262、库 source 38250657319 已 API success；准确测试数、attempt/artifact/source.txt/ZIP SHA 正在独立回读，不借旧归档。排除 App 同 SHA cancelled 38250692692。库 query 38250657360、Darwin 38250657547、OHOS 38250657787 已 API success；一般 CI 与 Build 38250698496 尚待终态。此处不将源码成功扩写为 native/device 验收。
+PR #5 公共 matrix 功能已在 media-kit branch，27 项测试明确是 synthetic/mocked 回归；库 source CI 38253137789 在 `4824db1e` 上通过。最新 PR #5 HEAD `644908c` 的 DV003 历史设计审查已按原始字节导入 DV-BUILD-01，manifest 记录 source commit/blob/SHA，排除两份 DEVICE shell scripts。PR #5 档案导入需随本轮提交/回读；这不是完整 DV001 整合，也不批准独立 App PR #3。
 
-上一已完整核验组合 6d349a06+3817b8f3：App 四平台各 268 Flutter/0skip、Python 499=497通过+2原 iOS 缺共享 SDK 跳过、Web DOM1；库 video772+3原 mac 专用 Linux 跳过、lab298、audit6+12。App SDK3.47.2、库 SDK3.47.7分开；8 artifact ZIP SHA 与 API digest/source.txt 已核。Build iOS/Linux/Windows 源码前置均完成 bootstrap57steps、实际 bundle 和 fresh finalize，准确 native-input-unavailable 失败，非 Release 成功。两份 core-*-6d349-checkpoint JSON 保留该历史向量。
+DV001 PR #1 当前 HEAD 仍为 `1095a43`，最新评论没有 DEVICE 修复回交。CORE 的 review5483753705/comment6110373174 仍未关闭：读取器失败不得解释为无 Vulkan 导入；两个目标符号须独立覆盖；构建失败传播、每次干净 staging、精确成员白名单，以及最终库成员与真实链接输入来源需可复核。DEVICE 继续原 PR 单写；CORE 不接管/重写 native recipe。PR #5 matrix/档案功能与 DV001 的整体源码、产物、证据归并仍未验收完成。
 
-macOS routing 三文件本轮 Critical PASS_WITH_SCOPE：56 contracts 独立通过、actionlint、9 shellcheck、22检查含实际 preflight/tee exit37/native blocker/条件链通过；legacy step bodies 保持。报告 core-macos-routing-workflow-review-20261012.json SHA256 1aff365943e3913986a6cca4a89260f3b3a8ed918bc51f753d1f904ef85b567a。当前等待准确提交/push/readback及新组合 hosted 源码前置验收，未运行本切片真实 bundle/native。Linux B 当前已有受审 consumer，但 generated fullBundleProvenanceVerified=false/releaseVerified=false；各平台当前批准 native 输入缺失，Android/Pink ledger 为空。
+独立 Critical V2 对 App PR #3 DV003 的结论仍为 REQUEST_CHANGES；四项传输上界/缓存串源与竞态/Session hint 未接线/轨道绑定与颜色冲突问题已落档，不把该旧基线 PR 原样并入，也不开第二 DEVICE 线。
 
-旧缓存清理授权未扩大：受审固定100批次只删4项，第5项 hardlink 元数据变化即停止，96项保留；新 cache/donors/SDK/App/库后验不变。实际释放85,913,600bytes，系统后续空间变化不归该清理。PREPARE6116072490、PARTIAL6116651070及原失败记录保留；清理已结束。真实新源码/native产物/八矩阵 APK/普通 Session 与 owner carrier/可见 HDR、生命周期和持续性能仍未验收，任务保持进行中。
+接手阶段当前待提交内容为：App 两条 Python workflow contract 修正、App/lib 台账及 DV003 review JSON、PR #5 最新历史审查记录与 manifest 更新、App/lib 同一份 CI 证据 checkpoint。应先推库再推 App；后续 App hosted run 必须捕获这两个最新 commit 的精确 source vector，运行中不得 pull/push 改变组合。新 run 结束后再回读 artifact/log/source.txt，更新中央 PR #4，并把清晰交接交给继任 CORE。
+
+native APK、普通 Session、owner/carrier、实机 HDR、生命周期与持续性能仍未验收；宿主测试、bundle、native 构建、设备观测分别报告，不互相替代。
 
 ## History
 

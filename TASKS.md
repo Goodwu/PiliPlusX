@@ -7,12 +7,14 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- 状态：进行中；唯一公共主线 routing/MK-ROUTING-20261011，CORE 负责集成，DEVICE 保持 native 构建/实机认领，所有主 PR 未合并。
-- 已实现 query/DASH/unknownDV/F01/R01/有效配置闭环，34 info 已清零；产品 experimental 默认 false 保持，true 主验证+false 回归及 LG YUV8/owner 门不变。
-- 已归并 PR5 公共矩阵至库38ffb729，27 mock/fixture 回归与 R4 审查通过；DV0011095a43 修复及八 APK/HDR/持续性能仍待回交，不能整项结案。
-- 当前 Appa05dfe1be+库38ffb729 独立 source CI API success，归档正在独立核验；上一个完整核验组合6d349+3817证据保留，不重标为新SHA。
-- macOS 当前源码前置三文件独立 Critical PASS_WITH_SCOPE/56 contracts，待提交及 hosted；iOS/Linux/Windows 已真实源码前置通过但当前 native 输入缺失，Android批准ledger空。所有 native/device 验收仍开放。
-- 精确测试向量、失败历史、恢复材料与剩余范围见唯一 context `archives/conversations/media-kit-routing-20261011.md`；旧 TASKS 快照已存该 context History。
+- 状态：进行中；唯一公共主线 `routing/MK-ROUTING-20261011`。CORE 是唯一集成者；DEVICE 继续维护原 DV001 native 构建与实机认领。主 PR 未合并/关闭/发布。
+- 最新已回读分支：App `36053e801b0803268b351aab80cdec20b6f46ac2`，media-kit `4824db1e92d947d8528e986dc1665c57b796ff75`，FFmpeg `9aba43cf`，DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，PR #5 `644908c93f09083f21720699227eb4e7a14d9c7a`。后两项不属于公共集成分支写权限。
+- App run 38253419649 对 `36053e801 + 4824db1e` 的四平台源码工作流均完成：每平台 Flutter 268/268、analyze 无问题、Dart bundle 成功，五份 artifact ZIP 均匹配 API digest，57 步 bootstrap 与 freshness/source vector 对齐。整次 run 因 Python 中一条旧 workflow 文本断言失败；实际 502 pass、1 fail、2 skip（共505）。该断言已修正；修正后本地全量 Python 506/506 通过，等待推送后的新 hosted run。核验报告 `docs/plans/core-source-ci-36053-4824-checkpoint-20261012.json`，外部采集 SHA256 `84019dbd6bcdb404fe8648483721c43760cf0a49e18993ac6f4d215d894be568`。
+- PR #5 的 matrix 功能已进入公共库，27 项 synthetic/mocked 回归在库 source CI 通过；本轮把 PR #5 最新 `644908c` 的 DV003 历史审查记录按原文及 Git blob/SHA 追加到 DV-BUILD-01 manifest。PR #5 文档集成已回读前仍属部分集成；不代表 DV001 或 DV003 接受。
+- DV001 当前仍为 `1095a43`，没有 DEVICE 新修复回交。原 PR 审查仍要求修复符号读取失败误判无导入、独立检查两个 Vulkan 目标符号、失败传播、干净 staging、准确库成员及实际链接来源。CORE 不接管其配方、不另写副本；等待 DEVICE 在原 PR 修复并由 CORE 复审。PR #5 与 DV001 的源码/证据归并尚不能标为完全闭合。
+- 本轮包括 App 测试断言修复、PR #5 最新档案导入、Critical DV003 审查记录和 CI 检查点；先推库再推 App 触发新鲜同源验证。34 条旧 info 状态以本次四平台 analyze 无问题为准，不重开旧计划开发。
+- native APK、设备 HDR、普通 Session、owner/carrier、持续性能仍待 DEVICE/CORE 后续验收；experimental 产品默认 false，继续以 true 为主场景并测 false；LG YUV8/FULL/range1、设备门和 owner/ACK/lease 保持。
+- 精确向量、历史失败和剩余验收见 `archives/conversations/media-kit-routing-20261011.md`。
 
 ## Now（当前推进，最多 3 条）
 
