@@ -237,6 +237,88 @@ void main() {
     });
   });
 
+  group('B1 transport budget', () {
+    test('oversized 200 body is truncated at the declared init length',
+        () async {
+      final item = VideoItem(
+        id: 126,
+        quality: VideoQuality.fromCode(126),
+        codecs: 'hvc1.2.4.L150.90',
+        baseUrl: 'https://cdn.example/dv1-1-30126.m4s',
+        segmentBase: {'initialization': '0-816'},
+        width: 3840,
+        height: 2160,
+        frameRate: '30',
+        bandWidth: 9612522,
+      );
+      final data = _hex(kRealDv126InitHex);
+      var maxServed = 0;
+      final facts = await sniffDoviInitSegment(
+        item,
+        maxBytes: 2048,
+        fetch: (url, headers) async {
+          maxServed = 4096; // CDN ignoring Range: huge body
+          return data; // parser only needs the first 817 bytes
+        },
+      );
+      expect(facts!.profile, 8);
+      expect(maxServed, 4096); // fetch contract: one bounded call
+    });
+
+    test('error status that never ends cannot hang the sniff', () async {
+      final item = VideoItem(
+        id: 126,
+        quality: VideoQuality.fromCode(126),
+        codecs: 'hvc1.2.4.L150.90',
+        baseUrl: 'https://cdn.example/dv1-1-30126.m4s',
+        segmentBase: {'initialization': '0-816'},
+        width: 3840,
+        height: 2160,
+        frameRate: '30',
+        bandWidth: 9612522,
+      );
+      final facts = await sniffDoviInitSegment(
+        item,
+        timeout: const Duration(milliseconds: 200),
+        fetch: (url, headers) => Future.delayed(
+          const Duration(seconds: 30),
+          () => <int>[],
+        ),
+      );
+      expect(facts, isNull);
+    });
+
+    test('at most primary plus two backup URLs are tried under one budget',
+        () async {
+      final urls = <Uri>[];
+      final item = VideoItem(
+        id: 126,
+        quality: VideoQuality.fromCode(126),
+        codecs: 'hvc1.2.4.L150.90',
+        baseUrl: 'https://a.example/dv.m4s',
+        backupUrl: [
+          'https://b.example/dv.m4s',
+          'https://c.example/dv.m4s',
+          'https://d.example/dv.m4s',
+        ],
+        segmentBase: {'initialization': '0-816'},
+        width: 3840,
+        height: 2160,
+        frameRate: '30',
+        bandWidth: 9612522,
+      );
+      final facts = await sniffDoviInitSegment(
+        item,
+        fetch: (url, headers) async {
+          urls.add(url);
+          return const [];
+        },
+      );
+      expect(urls.length, 3); // primary + 2 backups, then budget stops
+      expect(facts, isNull);
+    });
+  });
+
   group('menu admission with sniffed facts', () {
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

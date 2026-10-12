@@ -51,10 +51,13 @@ class DoviFacts {
 }
 
 /// Sniffs the DOVI configuration record from a DASH rendition without
-/// creating a player: one bounded Range GET over the initialization segment,
-/// then a bounded ISO-BMFF box walk. Returns null when anything is missing,
-/// truncated or unsupported — callers must treat null as "profile unknown",
-/// never as a known profile.
+/// creating a player. Transport contract (B1): a single [timeout] deadline
+/// covers connection, response headers, body reads and every candidate URL
+/// (primary plus at most two backups); received bytes are hard-capped at the
+/// declared initialization length (oversized bodies are truncated by
+/// stopping the read, not buffered); error-status bodies are drained under
+/// the same cap. Any failure returns null — callers must treat null as
+/// "profile unknown", never as a known profile.
 Future<DoviFacts?> sniffDoviInitSegment(
   VideoItem item, {
   int maxBytes = 65536,
@@ -65,29 +68,31 @@ Future<DoviFacts?> sniffDoviInitSegment(
   if (base == null || base.isEmpty) return null;
   final initEnd = _initializationByteCount(item.segmentBase) ?? maxBytes;
   if (initEnd <= 0 || initEnd > maxBytes) return null;
+  final deadline = DateTime.now().add(timeout);
+  final candidates = <Uri>[
+    Uri.parse(base),
+    ...?item.backupUrl?.where((u) => u.isNotEmpty).take(2).map(Uri.parse),
+  ];
   try {
-    final candidates = <Uri>[
-      if (base.isNotEmpty) Uri.parse(base),
-      ...?item.backupUrl?.where((u) => u.isNotEmpty).map(Uri.parse),
-    ];
-    List<int>? body;
     for (final uri in candidates) {
-      body = fetch != null
-          ? await fetch(uri, _headers).timeout(timeout)
-          : await _rangeGet(uri, initEnd, timeout);
+      if (!deadline.isAfter(DateTime.now())) return null;
+      final body = fetch != null
+          ? await fetch(uri, _headers)
+              .timeout(deadline.difference(DateTime.now()))
+          : await _rangeGet(uri, initEnd, deadline);
       debugPrint(
         'DOVI_SNIFF url=${uri.host} range=0-${initEnd - 1} '
         'bytes=${body.length}',
       );
-      if (body.length >= initEnd) break;
+      if (body.length >= initEnd) {
+        final facts = _parseDoviRecord(body.sublist(0, initEnd));
+        debugPrint('DOVI_SNIFF facts=${facts ?? 'none'}');
+        return facts;
+      }
     }
-    if (body == null || body.length < initEnd) return null;
-    if (body.length < initEnd) return null;
-    final facts = _parseDoviRecord(body.sublist(0, initEnd));
-    debugPrint('DOVI_SNIFF facts=${facts ?? 'none'}');
-    return facts;
+    return null;
   } on Object catch (error) {
-    debugPrint('DOVI_SNIFF failed: ${error.runtimeType} $error');
+    debugPrint('DOVI_SNIFF failed: ${error.runtimeType}');
     return null;
   }
 }
@@ -99,22 +104,43 @@ const Map<String, String> _headers = {
   'Referer': HttpString.baseUrl,
 };
 
-Future<List<int>> _rangeGet(Uri uri, int byteCount, Duration timeout) async {
+/// One bounded ranged read: a single [deadline] covers connection, response
+/// headers and body; received bytes are capped at [byteCount] (an oversized
+/// 200/206 body is truncated by stopping the read, not buffered);
+/// error-status bodies are drained under the same cap. An empty list means
+/// "no usable bytes within budget" — never a partial success.
+Future<List<int>> _rangeGet(Uri uri, int byteCount, DateTime deadline) async {
   final client = HttpClient();
   try {
-    final request = await client.getUrl(uri);
+    final connectionTimeout = deadline.difference(DateTime.now());
+    if (connectionTimeout <= Duration.zero) return const [];
+    final request = await client.getUrl(uri).timeout(connectionTimeout);
     _headers.forEach(request.headers.set);
     request.headers.set('Range', 'bytes=0-${byteCount - 1}');
-    final response = await request.close().timeout(timeout);
-    debugPrint('DOVI_SNIFF status=${response.statusCode} from ${uri.host}');
+    final response =
+        await request.close().timeout(deadline.difference(DateTime.now()));
     if (response.statusCode != 206 && response.statusCode != 200) {
-      await response.drain<void>();
+      final remaining = deadline.difference(DateTime.now());
+      if (remaining > Duration.zero) {
+        await response
+            .take(byteCount)
+            .drain<void>()
+            .timeout(remaining)
+            .catchError((Object _) {});
+      }
       return const [];
     }
-    return await response.fold<List<int>>(
-      <int>[],
-      (all, chunk) => all..addAll(chunk),
-    ).timeout(timeout);
+    final bytes = <int>[];
+    await for (final chunk in response) {
+      if (!deadline.isAfter(DateTime.now())) return const [];
+      final room = byteCount - bytes.length;
+      if (room <= 0) break;
+      bytes.addAll(chunk.length > room ? chunk.sublist(0, room) : chunk);
+      if (bytes.length >= byteCount) break;
+    }
+    return bytes;
+  } on Object {
+    return const [];
   } finally {
     client.close(force: true);
   }
@@ -135,29 +161,29 @@ int? _initializationByteCount(Map? segmentBase) {
 /// its 78-byte VisualSampleEntry fixed part before descending. `mdat`-style
 /// opaque boxes are never scanned. The DOVI configuration box lives inside
 /// the sample entry next to `hvcC`.
-  DoviFacts? _parseDoviRecord(List<int> data) {
-    DoviFacts? found;
-    void walk(int start, int end, bool sampleEntries) {
-      var off = start;
-      while (off + 8 <= end && found == null) {
-        final size = (data[off] << 24) | (data[off + 1] << 16) |
-            (data[off + 2] << 8) | data[off + 3];
-        final type = String.fromCharCodes(data.sublist(off + 4, off + 8));
-        var header = 8;
-        var declared = size;
-        if (size == 1) {
-          if (off + 16 > end) return;
-          declared = 0;
-          for (final b in data.sublist(off + 8, off + 16)) {
-            declared = (declared << 8) | b;
-          }
-          header = 16;
-        } else if (size == 0) {
-          declared = end - off;
+DoviFacts? _parseDoviRecord(List<int> data) {
+  DoviFacts? found;
+  void walk(int start, int end, bool sampleEntries) {
+    var off = start;
+    while (off + 8 <= end && found == null) {
+      final size = (data[off] << 24) | (data[off + 1] << 16) |
+          (data[off + 2] << 8) | data[off + 3];
+      final type = String.fromCharCodes(data.sublist(off + 4, off + 8));
+      var header = 8;
+      var declared = size;
+      if (size == 1) {
+        if (off + 16 > end) return;
+        declared = 0;
+        for (final b in data.sublist(off + 8, off + 16)) {
+          declared = (declared << 8) | b;
         }
-        if (declared < header || off + declared > end) return;
-        final boxEnd = off + declared;
-        final contentStart = off + header;
+        header = 16;
+      } else if (size == 0) {
+        declared = end - off;
+      }
+      if (declared < header || off + declared > end) return;
+      final boxEnd = off + declared;
+      final contentStart = off + header;
       if (type == 'dvcC' || type == 'dvvC' || type == 'dvwC') {
         found = DoviFacts.fromDvccBody(data.sublist(contentStart, boxEnd));
         return;

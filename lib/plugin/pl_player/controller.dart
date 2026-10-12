@@ -1067,6 +1067,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           autoFullScreenFlag: autoFullScreenFlag,
           initialVideoQuality: initialVideoQuality,
           initialVideoCodec: initialVideoCodec,
+          initialDoviFacts: initialDoviFacts,
         ),
       );
       final teardown = _playerTeardownFuture;

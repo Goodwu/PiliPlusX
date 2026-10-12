@@ -140,10 +140,14 @@ class VideoDetailController extends GetxController
   EffectiveVideoRouteOptions? _routeOptions;
   int _routeOptionsRevision = 0;
 
-  /// DV003: sniffed DOVI facts per source spec key. Keyed by rendition, so a
-  /// playurl revision that changes URLs re-sniffs; entries survive menu
-  /// re-renders within this page controller.
+  /// DV003/B2: sniffed DOVI facts keyed by rendition identity
+  /// (playUrlDataRevision + cid + baseUrl), NOT by VideoSourceSpec.key —
+  /// the spec key describes codec/geometry only and two different videos can
+  /// collide on it. The generation captured when a sniff starts guards the
+  /// write: a result for a superseded playurl revision is dropped instead of
+  /// polluting the cache for the next rendition.
   final Map<String, DoviFacts> _doviFactsCache = {};
+  final Set<String> _doviFactsInFlight = {};
 
   late final void Function(EffectiveVideoRouteOptions)
   _routeInvalidatedCallback = _invalidateRouteOptions;
@@ -320,32 +324,45 @@ class VideoDetailController extends GetxController
   /// (one bounded Range GET) to resolve the profile before route selection.
   /// Failures stay absent from the map: unknown-DV semantics then keep the
   /// tier gray instead of guessing.
+  String _doviFactsKey(VideoItem item) =>
+      '$_playbackDataRevision/${cid.value}/${item.baseUrl}';
+
   Future<Map<String, DoviFacts>> _resolveDoviFacts() async {
+    final revision = _playbackDataRevision;
     final tracks = data.dash?.video ?? const <VideoItem>[];
     final pending = <VideoItem, String>{};
     for (final item in tracks) {
       if (item.id != VideoQuality.dolbyVision.code) continue;
       final spec = DashRouteSelection.specification(item);
-      if (spec == null || _doviFactsCache.containsKey(spec.key)) continue;
+      if (spec == null) continue;
+      final key = _doviFactsKey(item);
+      if (_doviFactsCache.containsKey(key) ||
+          _doviFactsInFlight.contains(key)) {
+        continue;
+      }
       if (item.baseUrl?.isNotEmpty != true) continue;
       final descriptor = HdrOutputSelector.descriptorFromDash(
         quality: item.id,
         codec: item.codecs,
       );
       if (descriptor?.hasUnresolvedDolbyVision != true) continue;
-      pending[item] = spec.key;
+      pending[item] = key;
     }
     debugPrint('DOVI_SNIFF pending=${pending.length} cached=${_doviFactsCache.length}');
     if (pending.isNotEmpty) {
+      _doviFactsInFlight.addAll(pending.values);
       await Future.wait(
         pending.entries.map((entry) async {
           final facts = await sniffDoviInitSegment(entry.key);
-          if (facts != null) {
+          // A late result must not poison a newer rendition: only commit
+          // while this playurl revision is still current.
+          if (facts != null && revision == _playbackDataRevision) {
             _doviFactsCache[entry.value] = facts;
           }
         }),
         eagerError: false,
       );
+      _doviFactsInFlight.removeAll(pending.values);
     }
     return Map.unmodifiable(_doviFactsCache);
   }
@@ -1193,7 +1210,7 @@ class VideoDetailController extends GetxController
       // planner blocks it (sourceMetadataUnknown).
       initialDoviFacts: isLocalVideoDiagnostic
           ? null
-          : _doviFactsCache[DashRouteSelection.specification(firstVideo)?.key],
+          : _doviFactsCache[_doviFactsKey(firstVideo)],
       autoFullScreenFlag: autoFullScreenFlag,
     );
 
