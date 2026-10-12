@@ -174,6 +174,127 @@
       "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
       "fullNativeAPKAcceptance": false,
       "deviceAcceptance": false
+    },
+    "before_CORE_SUCCESSOR_CI_TAKEOVER_20261012": {
+      "containingCommit": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "preservedCurrentFields": {
+        "checkpoint": "CORE-LinuxB-iOS-source-prelude-integrated_PR5-R4-reviewed",
+        "latestValidation": {
+          "scope": "hosted_source_CI_and_release_source_prelude_only",
+          "vector": {
+            "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+            "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251"
+          },
+          "library": {
+            "run": 38243502467,
+            "conclusion": "success",
+            "videoPassed": 772,
+            "videoSkipped": 3,
+            "labPassed": 298,
+            "auditExtractorPassed": 6,
+            "auditRepairPassed": 12,
+            "flutterSDK": "3.47.7"
+          },
+          "app": {
+            "run": 38243549009,
+            "conclusion": "success",
+            "flutterPassedEachPlatform": 268,
+            "flutterSkippedEachPlatform": 0,
+            "pythonTotal": 499,
+            "pythonPassed": 497,
+            "pythonSkipped": 2,
+            "pythonSkipReason": "shared Flutter Git source is not present; iOS actual SDK tests",
+            "webDOMPassed": 1,
+            "flutterSDK": "3.47.2",
+            "sourceRootsVerified": 10,
+            "bootstrapStepsEach": 57,
+            "bundle": "passed_actual_commands_steps_kernel_receipts",
+            "kernelBytesIndependentlyRehashed": false
+          },
+          "releaseSourcePrelude": {
+            "buildRun": 38243549350,
+            "platforms": [
+              "iOS",
+              "Linux",
+              "Windows"
+            ],
+            "conclusion": "PASS_HOSTED_RELEASE_SOURCE_PRELUDE_ONLY",
+            "actualBootstrapBundleFreshness": "passed",
+            "uniqueFailureEach": "current-native-input-unavailable",
+            "nativeProductionSteps": "skipped"
+          },
+          "evidence": [
+            "docs/plans/core-source-ci-6d349-checkpoint-20261012.json",
+            "docs/plans/core-release-prelude-6d349-checkpoint-20261012.json"
+          ],
+          "fullNativeAPKAcceptance": false,
+          "deviceAcceptance": false,
+          "allReleaseGreen": false
+        },
+        "nextAction": "Integrate reviewed PR5 common matrix four-file slice, commit/push/readback and revalidate applicable latest vector; retain original DEVICE DV001 ownership and outstanding native producer/member/link/symbol/staging/device gates.",
+        "succession": {
+          "centralRegistration": 6110756605,
+          "centralDeviceReview": 6110762843,
+          "role": "CORE-SUCCESSOR",
+          "productionAppChanged": false
+        },
+        "currentObservedHeads": {
+          "phase": "remote readback before PR5 source commit; observational, not fixed future build inputs",
+          "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+          "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+          "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+          "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "pr5": "5b27961137a3b03e687dddbeb05a0320fcf6c60c"
+        },
+        "pendingCurrentHeadValidation": {
+          "status": "required_after_PR5_source_integration",
+          "reason": "highest validated vector above is 6d349+3817; do not relabel it as subsequent commits",
+          "nativeAndDevice": "not accepted"
+        },
+        "currentLibraryAndNative": {
+          "mediaKitPR": 4,
+          "mediaKitBranch": "routing/MK-ROUTING-20261011",
+          "mediaKitVerifiedSource": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+          "mediaKitUnknownSourceImplementation": "2a5d87f058f1fdb9a45d2874ebb0de4be4010441",
+          "mediaKitUnknownMatrix": "cb14f8536f8f0cc274dd17cc9e0ebaaa55e45eb8",
+          "mediaKitFallbackFix": "98a349f74b2066b476700becdde8b56e96645119",
+          "mediaKitSourceRun": 38149366499,
+          "sourceConclusion": "success",
+          "videoPassed": 571,
+          "videoLinuxSkipped": 3,
+          "labPassed": 298,
+          "videoAndLabAnalyze": "clean",
+          "javascriptExecutionAndWasmCompile": "success",
+          "ffmpegRepository": "Goodwu/FFmpeg",
+          "ffmpegBranch": "routing/MK-ROUTING-20261011",
+          "ffmpegPR": 1,
+          "ffmpegImplementation": "e8df200cdaba99cc98ba1def82034396d945597b",
+          "ffmpegVerifiedSource": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+          "ffmpegRun": 38130404541,
+          "ffmpegResult": "Prior successful17actual-selector cases perClang/GCC withsanitizers,6extractor tests, actualMediaCodec staticlibs arm64API24/35. No native changes in this phase.",
+          "limit": "Neither the App bundle nor limited static compilation proves the new FFmpeg is linked into a full mpv/helper/JAR/APK product. Do not reimplement existing native repair."
+        },
+        "legacyBuild": {
+          "startupContract": "fixed",
+          "hdrValidationLayout": "migrated_in_ea07f530_to_full_current_source_pipeline",
+          "androidAndPinkChannel": "actual_delegation_contract_verified_with_negative_tests",
+          "overallAcceptance": false,
+          "remaining": [
+            "Android/Pink/Windows/Linux source layout and patch/lock migration",
+            "Apple approved release input/preflight contract",
+            "Release manifest/source identity must reflect real linked current inputs",
+            "ABI and Android/Pink native parity checks must stay enabled"
+          ]
+        },
+        "requiredWork": [
+          "Continue Mac Release current-source prelude and all platforms native producer/consumer/ABI/channel/parity gates; iOS/Linux/Windows source preludes have actual validated evidence but native remains blocked.",
+          "Build the already repaired FFmpeg with latest complete mpv/helper/dependencies into a real test APK and verify final linked input provenance.",
+          "LG actual managed/native/device verification and existing other-platform executor adapters remain open; effective auto/prefer/require App/planner/Session/report implementation is complete in recorded host scope.",
+          "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance.",
+          "CORE-R01 importer/output/decoder review and executable copy/software alternatives are implemented and host/source-CI validated; real native carrier/runtime validation remains. Raw-bitstream/live-track extensions remain separate."
+        ]
+      },
+      "rule": "Historic validation remains attached to its original inputs; updated current fields supersede old pending/migration observations only."
     }
   },
   "completed": [
@@ -294,52 +415,132 @@
     }
   ],
   "latestValidation": {
-    "scope": "hosted_source_CI_and_release_source_prelude_only",
+    "scope": "hosted_source_tests_analyze_Dart_assets_bundle_and_Web_build_only; native_build_device_HDR_and_performance_not_accepted",
     "vector": {
-      "app": "6d349a06db9103996274e639c31d7d2a7554540a",
-      "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251"
-    },
-    "library": {
-      "run": 38243502467,
-      "conclusion": "success",
-      "videoPassed": 772,
-      "videoSkipped": 3,
-      "labPassed": 298,
-      "auditExtractorPassed": 6,
-      "auditRepairPassed": 12,
-      "flutterSDK": "3.47.7"
+      "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+      "mediaKitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
     },
     "app": {
-      "run": 38243549009,
+      "run": 38258403604,
+      "attempt": 1,
       "conclusion": "success",
+      "jobs": 6,
       "flutterPassedEachPlatform": 268,
-      "flutterSkippedEachPlatform": 0,
-      "pythonTotal": 499,
-      "pythonPassed": 497,
-      "pythonSkipped": 2,
-      "pythonSkipReason": "shared Flutter Git source is not present; iOS actual SDK tests",
-      "webDOMPassed": 1,
-      "flutterSDK": "3.47.2",
-      "sourceRootsVerified": 10,
-      "bootstrapStepsEach": 57,
-      "bundle": "passed_actual_commands_steps_kernel_receipts",
-      "kernelBytesIndependentlyRehashed": false
-    },
-    "releaseSourcePrelude": {
-      "buildRun": 38243549350,
+      "analyzeIssuesEachPlatform": 0,
       "platforms": [
-        "iOS",
+        "Android/source on Ubuntu",
         "Linux",
+        "macOS",
         "Windows"
       ],
-      "conclusion": "PASS_HOSTED_RELEASE_SOURCE_PRELUDE_ONLY",
-      "actualBootstrapBundleFreshness": "passed",
-      "uniqueFailureEach": "current-native-input-unavailable",
-      "nativeProductionSteps": "skipped"
+      "pythonTotal": 506,
+      "pythonPassed": 504,
+      "pythonSkipped": 2,
+      "pythonSkipReason": "shared Flutter Git source is not present; two iOS actual SDK tests",
+      "webDOMPassed": 1,
+      "webBuild": "success",
+      "dartAssetsBundleEach": "success",
+      "actualArtifactZIPs": 5,
+      "sourceHashesIndependentlyRecomputed": 2705,
+      "appLibTestHashes": 1442,
+      "mediaKitAllTrackedHashes": 1263,
+      "totalPackageRootsEach": 261,
+      "mediaKitPackageRootsEach": 10,
+      "bootstrapStepsEach": 57,
+      "bootstrapStatus": "fresh-source-only",
+      "kernelAndWebOutputBytesIndependentlyRehashed": false,
+      "evidence": "docs/plans/core-successor-app-source-ci-20261012.json"
     },
+    "appBuild": {
+      "run": 38258404288,
+      "attempt": 1,
+      "conclusion": "failure",
+      "jobTotals": {
+        "success": 7,
+        "failure": 6,
+        "skipped": 2
+      },
+      "actualArtifactZIPs": 11,
+      "embeddedSourceValidation": "own jobs/artifacts pass with the same 268/504+2 results; not borrowed from standalone38258403604",
+      "androidAndPink": "native acquisition stage=selection, commands=[], explicit selected manifest is empty",
+      "otherPlatforms": {
+        "platforms": [
+          "macOS",
+          "iOS",
+          "Windows x64",
+          "Linux x64"
+        ],
+        "status": "SOURCE_PREPARED_NATIVE_BLOCKED",
+        "producerReceipt": null,
+        "nativeInputRootExists": false
+      },
+      "iosVariant": "1918 base files verified; exactly two approved source transforms independently replayed and matched; 260/261 package roots unchanged; bundle success, Xcode build not started",
+      "acceptedNativeCandidates": 0,
+      "evidence": "docs/plans/core-successor-app-build-ci-20261012.json"
+    },
+    "libraryGeneral": {
+      "run": 38255531407,
+      "attempt": 1,
+      "conclusion": "failure",
+      "runHead": "e269d9669becb5812663200e7521901e8254c8bd",
+      "actualTestCheckout": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "mergeParents": [
+        "d761922721ad8da6bb186abd270bb096100944ea",
+        "e269d9669becb5812663200e7521901e8254c8bd"
+      ],
+      "mergeTree": "b8040c8c682e11bb92658a5605dffd4ef75d9896",
+      "jobTotals": {
+        "success": 22,
+        "failure": 1,
+        "skipped": 1
+      },
+      "web": {
+        "passed": 60,
+        "failed": 1,
+        "skipped": 27,
+        "failure": "player-set-shuffle"
+      },
+      "linux": {
+        "passed": 81,
+        "skipped": 16
+      },
+      "windows": {
+        "passed": 81,
+        "skipped": 16
+      },
+      "macos": {
+        "passed": 88,
+        "skipped": 15
+      },
+      "macosRetryLimit": "job ultimately succeeded; subtitle retry/OutstandingWork failures occurred earlier in its log and are not erased by the final summary",
+      "actualArtifactZIPs": 8,
+      "nativeLimit": "test app artifacts exist; Android build downloaded the old released v2026.013 arm64 JAR (mpv d24c59905/FFmpeg b4d2ea4), so these do not establish fresh DV001/current native acceptance",
+      "evidence": "docs/plans/core-successor-general-ci-20261012.json"
+    },
+    "excluded": {
+      "run": 38258394875,
+      "attempt": 1,
+      "conclusion": "cancelled",
+      "accepted": false
+    },
+    "historicalExactPair": {
+      "run": 38255581451,
+      "attempt": 1,
+      "conclusion": "success",
+      "app": "a3b577f3794634b497c6f82369bcc98d39d91fa2",
+      "mediaKit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "evidence": "docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+      "sha256": "156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da",
+      "relabelled": false
+    },
+    "evidenceRepository": "Goodwu/media-kit",
     "evidence": [
-      "docs/plans/core-source-ci-6d349-checkpoint-20261012.json",
-      "docs/plans/core-release-prelude-6d349-checkpoint-20261012.json"
+      "docs/plans/core-successor-app-source-ci-20261012.json",
+      "docs/plans/core-successor-app-build-ci-20261012.json",
+      "docs/plans/core-successor-general-ci-20261012.json",
+      "docs/plans/core-successor-checkpoint-20261012.json"
     ],
     "fullNativeAPKAcceptance": false,
     "deviceAcceptance": false,
@@ -348,25 +549,19 @@
   "currentLibraryAndNative": {
     "mediaKitPR": 4,
     "mediaKitBranch": "routing/MK-ROUTING-20261011",
-    "mediaKitVerifiedSource": "6e7570fcdaadeb66223a7327860000bb945daeb4",
-    "mediaKitUnknownSourceImplementation": "2a5d87f058f1fdb9a45d2874ebb0de4be4010441",
-    "mediaKitUnknownMatrix": "cb14f8536f8f0cc274dd17cc9e0ebaaa55e45eb8",
-    "mediaKitFallbackFix": "98a349f74b2066b476700becdde8b56e96645119",
-    "mediaKitSourceRun": 38149366499,
-    "sourceConclusion": "success",
-    "videoPassed": 571,
-    "videoLinuxSkipped": 3,
-    "labPassed": 298,
-    "videoAndLabAnalyze": "clean",
-    "javascriptExecutionAndWasmCompile": "success",
+    "mediaKitAppDependencyVerifiedSource": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "appSourceRun": 38258403604,
+    "standaloneLibraryHistoricalSource": "e269d9669becb5812663200e7521901e8254c8bd",
+    "standaloneLibraryHistoricalSourceRun": 38255531539,
     "ffmpegRepository": "Goodwu/FFmpeg",
     "ffmpegBranch": "routing/MK-ROUTING-20261011",
     "ffmpegPR": 1,
     "ffmpegImplementation": "e8df200cdaba99cc98ba1def82034396d945597b",
     "ffmpegVerifiedSource": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
-    "ffmpegRun": 38130404541,
-    "ffmpegResult": "Prior successful17actual-selector cases perClang/GCC withsanitizers,6extractor tests, actualMediaCodec staticlibs arm64API24/35. No native changes in this phase.",
-    "limit": "Neither the App bundle nor limited static compilation proves the new FFmpeg is linked into a full mpv/helper/JAR/APK product. Do not reimplement existing native repair."
+    "ffmpegPriorRun": 38130404541,
+    "ffmpegPriorResult": "Prior successful17actual-selector cases perClang/GCC withsanitizers,6extractor tests, actualMediaCodec staticlibs arm64API24/35. No native changes in this phase.",
+    "acceptedNativeInputs": 0,
+    "limit": "App dependency source verification is not a rerun of all library tests or a native link/device proof."
   },
   "legacyBuild": {
     "startupContract": "fixed",
@@ -374,41 +569,276 @@
     "androidAndPinkChannel": "actual_delegation_contract_verified_with_negative_tests",
     "overallAcceptance": false,
     "remaining": [
-      "Android/Pink/Windows/Linux source layout and patch/lock migration",
-      "Apple approved release input/preflight contract",
-      "Release manifest/source identity must reflect real linked current inputs",
-      "ABI and Android/Pink native parity checks must stay enabled"
+      "Accepted current native producer/consumer inputs for all enabled platforms",
+      "Actual linked source/patch/ABI/signature/channel/parity proof",
+      "General Web shuffle and current native/device/HDR/performance acceptance"
     ]
   },
   "requiredWork": [
-    "Continue Mac Release current-source prelude and all platforms native producer/consumer/ABI/channel/parity gates; iOS/Linux/Windows source preludes have actual validated evidence but native remains blocked.",
-    "Build the already repaired FFmpeg with latest complete mpv/helper/dependencies into a real test APK and verify final linked input provenance.",
-    "LG actual managed/native/device verification and existing other-platform executor adapters remain open; effective auto/prefer/require App/planner/Session/report implementation is complete in recorded host scope.",
-    "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance.",
-    "CORE-R01 importer/output/decoder review and executable copy/software alternatives are implemented and host/source-CI validated; real native carrier/runtime validation remains. Raw-bitstream/live-track extensions remain separate."
+    "Original DEVICE repairs DV001 and completes mandatory PR5/native artifact/device integration; CORE reviews without parallel native rewrites.",
+    "Fix original PR3/PR6 review blockers on the existing DEVICE branches; preserve both unresolved DV004 user decisions.",
+    "Link the existing FFmpeg repair with current mpv/helper/dependency sources into auditable JAR/APK inputs.",
+    "Ordinary Session, actual owner/carrier, lifecycle, HDR and sustained performance need separate current-vector acceptance.",
+    "Source preludes, query/DASH/F01/R01/config and analyzer cleanup are implemented; preserve exact tested vectors rather than redevelop from stale planned fields."
   ],
   "resumptionRule": "Use this existing task branch/PR1 plus media-kitPR4 and FFmpegPR1. Read current refs, central ledger and latest PR comments. Completed query/source-filter/fallback/Android7/native and unknown-source fixes are real commits; never recreate another branch or replay retired writers. Failed validation does not erase implementation.",
   "checkpointPolicy": "Push recoverable stages promptly and read back. This is documentation only. Exact run/input/hash records are provenance, not obsolete build pins. Preserve source freshness gates and report intermediate failures accurately.",
-  "nextAction": "Integrate reviewed PR5 common matrix four-file slice, commit/push/readback and revalidate applicable latest vector; retain original DEVICE DV001 ownership and outstanding native producer/member/link/symbol/staging/device gates.",
+  "nextAction": "After this evidence/documentation checkpoint is committed, pushed and read back, register CORE-WEB-SHUFFLE-01 with the two listed Web files; reproduce deterministically before fixing. Existing DEVICE keeps all original DV001/PR5 native and PR3/PR6 repair scopes. Native, ordinary Session, owner/carrier, lifecycle, HDR and sustained performance remain required.",
   "succession": {
-    "centralRegistration": 6110756605,
-    "centralDeviceReview": 6110762843,
     "role": "CORE-SUCCESSOR",
-    "productionAppChanged": false
+    "solePublicIntegrator": true,
+    "registration": 6126383144,
+    "scopeSupplement": 6126444208,
+    "deviceReviewReply": 6126499419,
+    "nativeDeviceOwner": "existing DEVICE agent; no new DEVICE line",
+    "deviceBuildIntegration": "required_and_blocked_pending_original_PR_fixes",
+    "deviceArchivePR": 5,
+    "deviceArchiveHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "deviceArchiveStatus": "partial_common_matrix_and_historical_records_integrated_native_artifact_device_remaining",
+    "baseline": {
+      "phase": "remote readback before this documentation checkpoint; these are inspected/tested inputs, not the subsequently committed documentation HEADs",
+      "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+      "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "deviceDV004PR6": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "appDV003DV005PR3": "15551ede06b0cbec859d61e6d16f8dba2054bba1"
+    },
+    "productionAppChanged": false,
+    "productionLibraryChanged": false
   },
-  "centralLedgerCurrent": "routing/MK-ROUTING-20261011: CORE-R01/CONFIG/CI03/source-prelude; registration6110756605 and scope6113083125; historical runs remain bound to their exact vectors",
+  "centralLedgerCurrent": "routing/MK-ROUTING-20261011: CORE-SUCCESSOR-CI-TAKEOVER-20261012; registration6126383144, scope6126444208 and review6126499419; containing documentation commits are not relabelled as tested inputs.",
   "currentObservedHeads": {
-    "phase": "remote readback before PR5 source commit; observational, not fixed future build inputs",
-    "app": "6d349a06db9103996274e639c31d7d2a7554540a",
-    "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+    "phase": "remote readback before this documentation checkpoint; these are inspected/tested inputs, not the subsequently committed documentation HEADs",
+    "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
     "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
     "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
-    "pr5": "5b27961137a3b03e687dddbeb05a0320fcf6c60c"
+    "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "deviceDV004PR6": "0fb163c6ec8d54c46698227175b9a21468605246",
+    "appDV003DV005PR3": "15551ede06b0cbec859d61e6d16f8dba2054bba1"
   },
   "pendingCurrentHeadValidation": {
-    "status": "required_after_PR5_source_integration",
-    "reason": "highest validated vector above is 6d349+3817; do not relabel it as subsequent commits",
-    "nativeAndDevice": "not accepted"
+    "status": "13b139b7_plus_5834ce5b_source_pair_verified; subsequent_documentation_commits_not_relabelled_as_this_pair",
+    "reason": "The source record covers its exact SHA/vector; any later run must preserve its own attempt, source.txt, artifacts and freshness result.",
+    "nativeAndDevice": "not accepted",
+    "generalWebShuffle": "failed; repair and exact-source validation pending"
   },
-  "checkpoint": "CORE-LinuxB-iOS-source-prelude-integrated_PR5-R4-reviewed"
+  "checkpoint": "CORE-SUCCESSOR-CI-TAKEOVER-20261012",
+  "checkpointScope": "Documentation/evidence only: CI terminal artifact audit and current DEVICE review; no production source, CI, SDK or native-recipe changes.",
+  "deviceReviews": {
+    "dv001": {
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "status": "REQUEST_CHANGES_requirements_still_open",
+      "nativeRecipeOwner": "existing DEVICE on original native-build PR1",
+      "review": 5483753705,
+      "githubReviewState": "COMMENTED",
+      "required": [
+        "symbol reader errors reject; no error-to-NO_IMPORTS conversion",
+        "independent coverage of both Vulkan symbols including single, both, absent, weak, mixed, tool failure and malformed ELF",
+        "supported ABI/ELF handling; avoid partial mutation on failure",
+        "build failure propagation; clean staging; exact three-library member allowlist",
+        "real linked inputs, patches, NDK/helper and final JAR/APK/member hashes"
+      ]
+    },
+    "pr5": {
+      "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "status": "partially_integrated_full_native_artifact_device_integration_required",
+      "publicMatrix": "implemented; 27 synthetic/mocked tests are historical host evidence only",
+      "excludedScripts": [
+        "assemble-jar-arm64.sh",
+        "matrix-device-build.sh"
+      ],
+      "historicalProvenanceBanners": "three public banners retained; current PR5 raw bytes match after removing only the two-line banner",
+      "inventoryDigestCorrection": {
+        "old": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "new": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "sourceBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+        "sourceBytes": 2578
+      }
+    },
+    "dv004PR6": {
+      "head": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "verdict": "REQUEST_CHANGES",
+      "review": 5492283452,
+      "githubReviewState": "COMMENTED",
+      "blocking": [
+        "partial rounds return before storing decoder identity; first complete round returns immediately, so cross-round guard is ineffective",
+        "new fixture mixes AVC identity, HEVC config and hardware pixels on a copy route; gather-only success does not prove Session validation"
+      ],
+      "owner": "existing DEVICE; CORE review only"
+    },
+    "dv003DV005PR3": {
+      "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "codeHead": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "verdict": "REQUEST_CHANGES",
+      "review": 5492283684,
+      "githubReviewState": "COMMENTED",
+      "partiallyRepaired": "initial and refresh Session hints now consume sniffed facts; do not repeat the old wholly-unwired finding",
+      "blocking": [
+        "no total HTTP deadline or enforced streaming byte bound; error drain and backups unbounded",
+        "cache is not isolated by source identity and lacks a revision guard",
+        "intent.reopen loses initialDoviFacts; settings reopen clears the hint",
+        "DOVI facts not bound to the selected video sample entry; layer/color/profile conflicts unresolved",
+        "new unconditional Uri.parse(videoUrl!) runs before local FileSource/DirectFileSource selection",
+        "full signed media URL in new diagnostic logging"
+      ],
+      "owner": "existing DEVICE; CORE review only"
+    },
+    "device126Correction": {
+      "comment": 6126388894,
+      "priorClaim": "retracted by DEVICE: old 120 residual frame; switch did not happen; real 126 was blocked sourceMetadataUnknown before decoder creation",
+      "newDV005Claim": "DEVICE reports HEVC/P8.4/verified/frame progression and local tests; CORE raw-evidence acceptance pending",
+      "requiredEvidence": "raw decoder identity sequence, exact App/library/native/JAR/APK inputs, track/open generation, PTS, screenshot bytes and continuous playback evidence"
+    },
+    "latestDeviceCI": {
+      "checkedAtUtc": "2026-10-12T14:45:42Z",
+      "appBuild38263795883": {
+        "head": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+        "attempt": 1,
+        "conclusion": "cancelled"
+      },
+      "appBuild38263881419": {
+        "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+        "attempt": 1,
+        "conclusion": "failure"
+      },
+      "sourceVectorJobs": [
+        114860777554,
+        114861539661
+      ],
+      "sourceFailure": "routing App HEAD differs from DEVICE PR EXPECTED_APP_SHA; exit1 before final vector output; downstream source/Flutter/Python/bundle skipped",
+      "pr6ExactHeadActionsRunCount": 0,
+      "reported186And775TestsIndependentlyVerified": false,
+      "evidence": "docs/plans/core-successor-device-ci-recheck-20261012.json"
+    },
+    "latestDeviceCriticalReview": {
+      "comment": 6126637477,
+      "createdAtUtc": "2026-10-12T14:48:40Z",
+      "verdict": "REQUEST_CHANGES",
+      "reportedBlocking": [
+        "B1 HTTP64KB/4s not enforced",
+        "B2 cache source-identity/revision isolation",
+        "B3 unreachable cross-round guard, invalid fixture, diagnostic removal in a new SHA",
+        "B4 named old Flutter/analyze logs reportedly contain223pass5fail/undefined_identifier; successful reviewed-SHA logs required",
+        "intent.reopen missing initialDoviFacts"
+      ],
+      "deviceReviewerClaim": "Reviewer reports real new LYA126 HEVC/P8.4 frames, while still rejecting combined integration",
+      "coreEvidenceBoundary": "The public comment contains the reviewer conclusion but no raw log/image bytes or complete native input vector; not an independent CORE artifact acceptance",
+      "ownership": "DEVICE states it will repair libraryPR6 then AppPR3 on the original branches; CORE does not overlap"
+    },
+    "userDecisionsOpen": [
+      "permitted temporary diagnostic scope",
+      "accept final plan fulfillment or require capture/rejection of any actual decoder switch"
+    ],
+    "claimBoundary": "no assertion relaxation or parallel writes to native recipes, controllers/sniffer, Session/gather, planner/backend/realizer/output, CI or SDK patches in this checkpoint"
+  },
+  "nextCodeSlice": {
+    "id": "CORE-WEB-SHUFFLE-01",
+    "status": "next bounded candidate; public ownership registration follows successful checkpoint commit/push/readback",
+    "reason": "general run38255531407 Web player-set-shuffle failed; the source-level mutable Playlist snapshot explanation requires a deterministic regression",
+    "files": [
+      "media_kit/lib/src/player/web/player/real.dart",
+      "media_kit/test/src/player/player_test.dart"
+    ],
+    "functions": [
+      "WebPlayer.setShuffle",
+      "existing shuffle tests and an immutable emitted Playlist snapshot regression"
+    ],
+    "method": "first capture an emitted Playlist and independent media copy; verify prior snapshots remain unchanged; then evaluate local copy-on-write in enable and restore branches",
+    "sourceIdentity": {
+      "inspectedHead": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "testedMerge": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "webRealBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+      "playerTestBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666"
+    },
+    "verification": "Chrome targeted regression then full Web package, exact run/attempt/SHA; no local Flutter/Dart available in this CORE environment",
+    "excludedChanges": [
+      "global Playlist/Media equality",
+      "stream distinct removal",
+      "lock/lifecycle changes without new evidence",
+      "larger random fixtures, retries or longer waits as a replacement for a mechanism fix",
+      "DEVICE-owned native/controller/sniffer/gather code"
+    ],
+    "adjacentRisks": "URI equality permits duplicate occurrences; all-equal shuffle and indexOf behavior require bounded investigation, not an unverified claim that they caused this run",
+    "productionChangedInThisCheckpoint": false
+  },
+  "evidenceIndex": {
+    "repository": "Goodwu/media-kit",
+    "path": "docs/plans/core-successor-checkpoint-20261012.json",
+    "reports": [
+      {
+        "path": "docs/plans/core-successor-app-source-ci-20261012.json",
+        "originalReportName": "source-ci-38258403604-checkpoint-20261012.json",
+        "sha256": "ad5bd4e0065788e4b952684780a3610d16e8277004b1b35370150af1ce807e82",
+        "bytes": 124270,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-app-build-ci-20261012.json",
+        "originalReportName": "build-ci-38258404288-checkpoint-20261012.json",
+        "sha256": "5bcf6304147af7acea600989b4a3c266d232b68031541abb0dd34520d840852d",
+        "bytes": 310441,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-general-ci-20261012.json",
+        "originalReportName": "core-successor-general-ci-20261012.json",
+        "sha256": "8c35d3a90da551f5ae4d4528136fb47ef8c34ca768d83f566ed4a6615e09e514",
+        "bytes": 112433,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-native-review-20261012.json",
+        "originalReportName": "native-handoff-review.json",
+        "sha256": "129278c26df024a74e5679f894a34f4babfc87842b41c568d074bcee74a21013",
+        "bytes": 14600,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-dv003-dv004-review-20261012.json",
+        "originalReportName": "core-dv004-dv003-successor-review-20261012.json",
+        "sha256": "29d5633a57abdc81325e9b5c3d59a0607201007e720218847021b8fdaeec31b2",
+        "bytes": 15101,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-pr5-byte-checks-20261012.json",
+        "originalReportName": "manifest-byte-checks.json",
+        "sha256": "9242e8bddf5f15983ee28896bedc4f8725cc56447dd96712b0c2f6f5dc5645ca",
+        "bytes": 2241,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-implementation-index-20261012.json",
+        "originalReportName": "implementation-source-index.json",
+        "sha256": "29b329a4998dc586a436fcb26e367da608dd8881af1154a50c3249ecb239b0bd",
+        "bytes": 54611,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      },
+      {
+        "path": "docs/plans/core-successor-device-ci-recheck-20261012.json",
+        "originalReportName": "core-dv003-dv004-ci-terminal-followup-20261012.json",
+        "sha256": "a97004be4c4805d064cafd035eab6789ab14a841f62c50f6f75fbe2e0687bc7a",
+        "bytes": 14873,
+        "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+      }
+    ]
+  },
+  "currentImplementedScope": {
+    "doNotRepeat": true,
+    "items": [
+      "independent VideoRouteCapabilities.query(target:,sources:) and per-candidate App DASH filtering",
+      "P5/P8.4 admission and unknown-DV/color semantic gates",
+      "failure-aware SDR fallback and CORE-F01 original source facts separated from decoder observation",
+      "FFmpeg e8df200c decoder profile repair",
+      "CORE-R01 real dependency/output resource contracts, decoder review, bounded copy/software routes",
+      "effective auto/prefer/require through App selection/planner/Session/report; LG config claim guard",
+      "SDK/source provenance, platform source preludes and CI source checks",
+      "PR5 common matrix functionality and provenance-preserved historical review import"
+    ],
+    "limit": "source presence and recorded host validation do not grant native/device/performance acceptance",
+    "sourceIndex": "Goodwu/media-kit:docs/plans/core-successor-implementation-index-20261012.json"
+  }
 }
