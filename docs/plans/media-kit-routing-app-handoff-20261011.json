@@ -122,6 +122,58 @@
       "evidence": "docs/plans/core-native-ci-checkpoint-20261012.json",
       "fullNativeAPKAcceptance": false,
       "currentDeviceAcceptance": false
+    },
+    "validationBeforePR5R4Integration": {
+      "scope": "Exact completed e31a+d916 source pair; Release/native/device acceptance separate",
+      "vector": {
+        "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+        "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+      },
+      "library": {
+        "run": 38169536268,
+        "videoPassed": 772,
+        "videoSkipped": 3,
+        "skipScope": "existing macOS-only Linux cases",
+        "labPassed": 298,
+        "strictIssues": 0
+      },
+      "app": {
+        "sourceRun": 38169989794,
+        "sourceConclusion": "success",
+        "buildRun": 38169989974,
+        "buildConclusion": "failure",
+        "flutterPassedEachPlatformEachMatrix": 268,
+        "strictIssues": 0,
+        "pythonActualIndependent": {
+          "passed": 451,
+          "seconds": 177.586,
+          "artifactId": 11713097959
+        },
+        "pythonActualEmbedded": {
+          "passed": 451,
+          "seconds": 182.022,
+          "artifactId": 11713209354
+        },
+        "parserTestsEach": 7,
+        "bundleAndSourceFinalize": "passed_for_exact_vector",
+        "releaseFailures": 6
+      },
+      "linuxWindowsReleasePrelude": {
+        "prepareVerifyFinalize": "success",
+        "actualBootstrapStepsEach": 57,
+        "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
+        "linuxArtifact": 11713952189,
+        "windowsArtifact": 11714201466,
+        "releaseBundleStep": false,
+        "nativeAccepted": false
+      },
+      "OHOS": {
+        "actualMerge": "eaee10dd9491592c5b13c1bcd2e544c8c7495154",
+        "scope": "unsigned source merge artifact, not pure library HEAD or device acceptance"
+      },
+      "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
+      "fullNativeAPKAcceptance": false,
+      "deviceAcceptance": false
     }
   },
   "completed": [
@@ -242,56 +294,56 @@
     }
   ],
   "latestValidation": {
-    "scope": "Exact completed e31a+d916 source pair; Release/native/device acceptance separate",
+    "scope": "hosted_source_CI_and_release_source_prelude_only",
     "vector": {
-      "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
-      "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+      "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+      "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251"
     },
     "library": {
-      "run": 38169536268,
+      "run": 38243502467,
+      "conclusion": "success",
       "videoPassed": 772,
       "videoSkipped": 3,
-      "skipScope": "existing macOS-only Linux cases",
       "labPassed": 298,
-      "strictIssues": 0
+      "auditExtractorPassed": 6,
+      "auditRepairPassed": 12,
+      "flutterSDK": "3.47.7"
     },
     "app": {
-      "sourceRun": 38169989794,
-      "sourceConclusion": "success",
-      "buildRun": 38169989974,
-      "buildConclusion": "failure",
-      "flutterPassedEachPlatformEachMatrix": 268,
-      "strictIssues": 0,
-      "pythonActualIndependent": {
-        "passed": 451,
-        "seconds": 177.586,
-        "artifactId": 11713097959
-      },
-      "pythonActualEmbedded": {
-        "passed": 451,
-        "seconds": 182.022,
-        "artifactId": 11713209354
-      },
-      "parserTestsEach": 7,
-      "bundleAndSourceFinalize": "passed_for_exact_vector",
-      "releaseFailures": 6
+      "run": 38243549009,
+      "conclusion": "success",
+      "flutterPassedEachPlatform": 268,
+      "flutterSkippedEachPlatform": 0,
+      "pythonTotal": 499,
+      "pythonPassed": 497,
+      "pythonSkipped": 2,
+      "pythonSkipReason": "shared Flutter Git source is not present; iOS actual SDK tests",
+      "webDOMPassed": 1,
+      "flutterSDK": "3.47.2",
+      "sourceRootsVerified": 10,
+      "bootstrapStepsEach": 57,
+      "bundle": "passed_actual_commands_steps_kernel_receipts",
+      "kernelBytesIndependentlyRehashed": false
     },
-    "linuxWindowsReleasePrelude": {
-      "prepareVerifyFinalize": "success",
-      "actualBootstrapStepsEach": 57,
-      "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
-      "linuxArtifact": 11713952189,
-      "windowsArtifact": 11714201466,
-      "releaseBundleStep": false,
-      "nativeAccepted": false
+    "releaseSourcePrelude": {
+      "buildRun": 38243549350,
+      "platforms": [
+        "iOS",
+        "Linux",
+        "Windows"
+      ],
+      "conclusion": "PASS_HOSTED_RELEASE_SOURCE_PRELUDE_ONLY",
+      "actualBootstrapBundleFreshness": "passed",
+      "uniqueFailureEach": "current-native-input-unavailable",
+      "nativeProductionSteps": "skipped"
     },
-    "OHOS": {
-      "actualMerge": "eaee10dd9491592c5b13c1bcd2e544c8c7495154",
-      "scope": "unsigned source merge artifact, not pure library HEAD or device acceptance"
-    },
-    "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
+    "evidence": [
+      "docs/plans/core-source-ci-6d349-checkpoint-20261012.json",
+      "docs/plans/core-release-prelude-6d349-checkpoint-20261012.json"
+    ],
     "fullNativeAPKAcceptance": false,
-    "deviceAcceptance": false
+    "deviceAcceptance": false,
+    "allReleaseGreen": false
   },
   "currentLibraryAndNative": {
     "mediaKitPR": 4,
@@ -329,7 +381,7 @@
     ]
   },
   "requiredWork": [
-    "Continue the other Release Build jobs' current-source layout/lock/patch/native-input migration, preserving source/ABI/channel/parity/preflight checks.",
+    "Continue Mac Release current-source prelude and all platforms native producer/consumer/ABI/channel/parity gates; iOS/Linux/Windows source preludes have actual validated evidence but native remains blocked.",
     "Build the already repaired FFmpeg with latest complete mpv/helper/dependencies into a real test APK and verify final linked input provenance.",
     "LG actual managed/native/device verification and existing other-platform executor adapters remain open; effective auto/prefer/require App/planner/Session/report implementation is complete in recorded host scope.",
     "Real device HDR/presentation/performance/lifecycle validation remains separate; existing other-line records are not current-candidate acceptance.",
@@ -337,7 +389,7 @@
   ],
   "resumptionRule": "Use this existing task branch/PR1 plus media-kitPR4 and FFmpegPR1. Read current refs, central ledger and latest PR comments. Completed query/source-filter/fallback/Android7/native and unknown-source fixes are real commits; never recreate another branch or replay retired writers. Failed validation does not erase implementation.",
   "checkpointPolicy": "Push recoverable stages promptly and read back. This is documentation only. Exact run/input/hash records are provenance, not obsolete build pins. Preserve source freshness gates and report intermediate failures accurately.",
-  "nextAction": "Finish Linux/Windows hosted source prelude; independently review and integrate Linux native consumer, iOS isolated source variant and PR5 public matrix. DEVICE fixes original DV001 recipe and returns current-source accepted native/device evidence. Preserve separate implementation/host/native/device gates; do not reimplement completed R01/CONFIG/34-info cleanup.",
+  "nextAction": "Integrate reviewed PR5 common matrix four-file slice, commit/push/readback and revalidate applicable latest vector; retain original DEVICE DV001 ownership and outstanding native producer/member/link/symbol/staging/device gates.",
   "succession": {
     "centralRegistration": 6110756605,
     "centralDeviceReview": 6110762843,
@@ -346,16 +398,17 @@
   },
   "centralLedgerCurrent": "routing/MK-ROUTING-20261011: CORE-R01/CONFIG/CI03/source-prelude; registration6110756605 and scope6113083125; historical runs remain bound to their exact vectors",
   "currentObservedHeads": {
-    "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6",
-    "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+    "phase": "remote readback before PR5 source commit; observational, not fixed future build inputs",
+    "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+    "mediaKit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
     "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
-    "DV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
-    "PR5": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
-    "notTestedByHistoricalRuns": true
+    "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "pr5": "5b27961137a3b03e687dddbeb05a0320fcf6c60c"
   },
   "pendingCurrentHeadValidation": {
-    "status": "source_validation_complete_release_native_pending",
-    "evidence": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
-    "nativeAcceptance": false
-  }
+    "status": "required_after_PR5_source_integration",
+    "reason": "highest validated vector above is 6d349+3817; do not relabel it as subsequent commits",
+    "nativeAndDevice": "not accepted"
+  },
+  "checkpoint": "CORE-LinuxB-iOS-source-prelude-integrated_PR5-R4-reviewed"
 }

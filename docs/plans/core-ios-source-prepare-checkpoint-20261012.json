@@ -1,0 +1,757 @@
+{
+  "status": "BLOCKED_ENVIRONMENT_DISK",
+  "scope": "current-source-ios-bootstrap-pubget-variant-prebuild-only",
+  "root": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+  "sdk": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+  "private_root": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam",
+  "bootstrap_output": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/ios-bootstrap-current",
+  "variant_root": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/ios-variant-work/app",
+  "app_sha": "1970d440b5b9d9ffc001866064581e4005b26b30",
+  "media_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+  "stages": [
+    {
+      "name": "app-remote-before",
+      "argv": [
+        "git",
+        "ls-remote",
+        "--exit-code",
+        "https://github.com/Goodwu/PiliPlusX.git",
+        "refs/heads/routing/MK-ROUTING-20261011"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1209061376,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app-remote-before.log",
+      "started_utc": "2026-10-11T20:34:01Z",
+      "pid": 63508,
+      "exit": 0,
+      "disk_after_bytes": 1208819712,
+      "log_sha256": "6d34d82b084f76c0570a8a1974201fc6ba690cc4291cbfe59aeb4f97300dfec7"
+    },
+    {
+      "name": "app-clone",
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "clone",
+        "--depth",
+        "1",
+        "--no-local",
+        "--branch",
+        "routing/MK-ROUTING-20261011",
+        "file:///Users/wuweiwei1/src/mk-core-routing-20261011/app",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1208819712,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app-clone.log",
+      "started_utc": "2026-10-11T20:34:03Z",
+      "pid": 63554,
+      "exit": 0,
+      "disk_after_bytes": 1128665088,
+      "log_sha256": "a592463d04451567fb047ef37beb515bee2f5255b7b3b37ff890cbaa29f95924"
+    },
+    {
+      "name": "app-canonical-origin",
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "remote",
+        "set-url",
+        "origin",
+        "https://github.com/Goodwu/PiliPlusX.git"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1128665088,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app-canonical-origin.log",
+      "started_utc": "2026-10-11T20:34:05Z",
+      "pid": 63562,
+      "exit": 0,
+      "disk_after_bytes": 1128542208,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "app-lf-config",
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "config",
+        "core.autocrlf",
+        "false"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1128542208,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app-lf-config.log",
+      "started_utc": "2026-10-11T20:34:07Z",
+      "pid": 63574,
+      "exit": 0,
+      "disk_after_bytes": 1128718336,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "media-remote-before",
+      "argv": [
+        "git",
+        "ls-remote",
+        "--exit-code",
+        "https://github.com/Goodwu/media-kit.git",
+        "refs/heads/routing/MK-ROUTING-20261011"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1128706048,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-remote-before.log",
+      "started_utc": "2026-10-11T20:34:09Z",
+      "pid": 63583,
+      "exit": 0,
+      "disk_after_bytes": 1128542208,
+      "log_sha256": "de2fc35c46dba191b7996055d48d87dca4534e37b1b9e19d2d0bc598bbfb393c"
+    },
+    {
+      "name": "media-clone",
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "clone",
+        "--depth",
+        "1",
+        "--no-local",
+        "--branch",
+        "routing/MK-ROUTING-20261011",
+        "file:///Users/wuweiwei1/src/mk-core-routing-20261011/media-kit",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1128538112,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-clone.log",
+      "started_utc": "2026-10-11T20:34:11Z",
+      "pid": 63599,
+      "exit": 0,
+      "disk_after_bytes": 1068703744,
+      "log_sha256": "fde39126a9ac8a2066fe5ff45eb43a186ca9f71c5090a59cd204d213f35cfbfc"
+    },
+    {
+      "name": "media-canonical-origin",
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "remote",
+        "set-url",
+        "origin",
+        "https://github.com/Goodwu/media-kit.git"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1068703744,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-canonical-origin.log",
+      "started_utc": "2026-10-11T20:34:13Z",
+      "pid": 63611,
+      "exit": 0,
+      "disk_after_bytes": 1068806144,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "media-lf-config",
+      "argv": [
+        "git",
+        "-C",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "config",
+        "core.autocrlf",
+        "false"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v",
+      "disk_before_bytes": 1068802048,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-lf-config.log",
+      "started_utc": "2026-10-11T20:34:16Z",
+      "pid": 63626,
+      "exit": 0,
+      "disk_after_bytes": 1068408832,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bootstrap-help",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/prepare_routing_ci.py",
+        "--help"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 1068400640,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/bootstrap-help.log",
+      "started_utc": "2026-10-11T20:34:18Z",
+      "pid": 63632,
+      "exit": 0,
+      "disk_after_bytes": 1068208128,
+      "log_sha256": "3cb54591b5f84864186486f2a2519eefa9a985feb1aebc581e0d41c2c3120498"
+    },
+    {
+      "name": "bootstrap-prepare",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/prepare_routing_ci.py",
+        "--platform",
+        "ios",
+        "--app-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "--media-kit-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "--flutter-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "--private-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam",
+        "--output",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/ios-bootstrap-current",
+        "--expected-app-sha",
+        "1970d440b5b9d9ffc001866064581e4005b26b30",
+        "--expected-media-kit-sha",
+        "d91639401862d84c68406aae3b2029400a4cfbd6"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 1068204032,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/bootstrap-prepare.log",
+      "started_utc": "2026-10-11T20:34:20Z",
+      "pid": 63697,
+      "exit": 0,
+      "disk_after_bytes": 165457920,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "variant-help",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/prepare_ios_variant.py",
+        "--help"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 165728256,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/variant-help.log",
+      "started_utc": "2026-10-11T20:36:54Z",
+      "pid": 65476,
+      "exit": 0,
+      "disk_after_bytes": 165396480,
+      "log_sha256": "d6dd64588afb128e06e03af139217c839f5305e19c25c0c518e9c3ff42030a6e"
+    },
+    {
+      "name": "variant-prepare",
+      "argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/prepare_ios_variant.py",
+        "--source",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "--media-kit-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "--variant",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/ios-variant-work/app",
+        "--receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/ios-variant-receipt.json",
+        "--bootstrap",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/ios-bootstrap-current/bootstrap.json",
+        "--app-commit",
+        "1970d440b5b9d9ffc001866064581e4005b26b30",
+        "--media-kit-commit",
+        "d91639401862d84c68406aae3b2029400a4cfbd6",
+        "--manifest-parser",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/android/tool/parse_routing_manifest.dart"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 165396480,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/variant-prepare.log",
+      "started_utc": "2026-10-11T20:36:56Z",
+      "classification": "ENVIRONMENT_DISK"
+    },
+    {
+      "name": "source-verify-help",
+      "argv": [
+        "python3",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/verify_routing_sources.py",
+        "--help"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 162897920,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/source-verify-help.log",
+      "low_disk_execution_reason": "independent source inspection/finalize, no source copy/pub download/native build; bounded small evidence writes",
+      "exit": 0,
+      "log_sha256": "96903a00662baee326950b1d89281bd9fc4e07bf3a9cf118bbc6486f3810421e",
+      "disk_after_bytes": 162881536
+    },
+    {
+      "name": "source-verify",
+      "argv": [
+        "python3",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/verify_routing_sources.py",
+        "--app-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "--media-kit-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "--output",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/source-resolution-verified.json"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 163131392,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/source-verify.log",
+      "low_disk_execution_reason": "independent source inspection/finalize, no source copy/pub download/native build; bounded small evidence writes",
+      "exit": 0,
+      "log_sha256": "f637d61277073b09412f522b101a0158f4d9d3bd1e70508ae13d2ccc9b127ff1",
+      "disk_after_bytes": 163102720
+    },
+    {
+      "name": "bootstrap-finalize",
+      "argv": [
+        "python3",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/scripts/prepare_routing_ci.py",
+        "--platform",
+        "ios",
+        "--app-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+        "--media-kit-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit",
+        "--flutter-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+        "--private-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam",
+        "--output",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/ios-bootstrap-current",
+        "--expected-app-sha",
+        "1970d440b5b9d9ffc001866064581e4005b26b30",
+        "--expected-media-kit-sha",
+        "d91639401862d84c68406aae3b2029400a4cfbd6",
+        "--finalize"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+      "disk_before_bytes": 163094528,
+      "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/bootstrap-finalize.log",
+      "low_disk_execution_reason": "independent source inspection/finalize, no source copy/pub download/native build; bounded small evidence writes",
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "disk_after_bytes": 162525184
+    }
+  ],
+  "frozen_sources": {
+    "app": {
+      "canonical_origin": "https://github.com/Goodwu/PiliPlusX.git",
+      "branch": "routing/MK-ROUTING-20261011",
+      "remote_head": "1970d440b5b9d9ffc001866064581e4005b26b30\trefs/heads/routing/MK-ROUTING-20261011",
+      "tree": "3b2c7634afccfbd1b4a9e4fe5749bf07f219b7a8",
+      "commit": "1970d440b5b9d9ffc001866064581e4005b26b30"
+    },
+    "media": {
+      "canonical_origin": "https://github.com/Goodwu/media-kit.git",
+      "branch": "routing/MK-ROUTING-20261011",
+      "remote_head": "d91639401862d84c68406aae3b2029400a4cfbd6\trefs/heads/routing/MK-ROUTING-20261011",
+      "tree": "de92eec61379f7b652ac828bb516a6005164e1b3",
+      "commit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+    }
+  },
+  "semanticFreshness": {
+    "bootstrap_status": "fresh-source-only",
+    "before_after_vector_equal": true,
+    "final_vector_equal": true,
+    "sdk_semantic_witness": {
+      "appCommit": "1970d440b5b9d9ffc001866064581e4005b26b30",
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "patchPath": "lib/scripts/bottom_sheet_ios_flutter.patch",
+      "patchSha256": "4cee4e14393a5815112c535d424d60ade3f250f531ca6a5829d6cc153ae10a7e",
+      "sdkFiles": {
+        "packages/flutter/lib/src/cupertino/route.dart": {
+          "headBlobSha1": "b990e163454b3131fc3b48e9a608f795f257bbdb",
+          "headBlobSha256": "10d92a5b9da983a0d825ff44864f5d3f461442d272a0e59a267d9df7a0405729",
+          "worktreeSha256": "7c2b76da2fffeceba147896312df64cb52638baca7396d7f366b8d6bef8124e7"
+        },
+        "packages/flutter/lib/src/material/scaffold.dart": {
+          "headBlobSha1": "efe8ff9d1a32c8ddc97303605a39d84104f4b1cf",
+          "headBlobSha256": "f8d89066d74d752d07fb3fca14a9aeccd1d131c085850bb32afa3b85cbb7eee9",
+          "worktreeSha256": "63dea180acaafa53f533d46924b3882c0a5d735df125728330f66cd20515b657"
+        },
+        "packages/flutter/lib/src/widgets/routes.dart": {
+          "headBlobSha1": "5c0b9b127fa4c4cbc615e40c58b3e41ef9d4ea29",
+          "headBlobSha256": "2c85e3ee8d5693083fbdb36c2c5e6a0e04fccab7706c1ff92e559d1dbd31f468",
+          "worktreeSha256": "5fc9d7c03d0df419bb338738658735359aee1dade5092d41ed781f7dad873498"
+        }
+      },
+      "reverseCheck": {
+        "argv": [
+          "git",
+          "apply",
+          "--reverse",
+          "--check",
+          "lib/scripts/bottom_sheet_ios_flutter.patch"
+        ],
+        "exitCode": 0
+      }
+    },
+    "sdk_patch_execution": {
+      "platform": "ios",
+      "sourceVector": {
+        "app": "1970d440b5b9d9ffc001866064581e4005b26b30",
+        "appTree": "3b2c7634afccfbd1b4a9e4fe5749bf07f219b7a8",
+        "media-kit": "d91639401862d84c68406aae3b2029400a4cfbd6",
+        "media-kitTree": "de92eec61379f7b652ac828bb516a6005164e1b3"
+      },
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f",
+      "pubCache": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/p",
+      "scriptPath": "lib/scripts/patch.ps1",
+      "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+      "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+      "phases": [
+        {
+          "name": "patch-SdkOnly",
+          "command": [
+            "pwsh",
+            "-NoLogo",
+            "-NoProfile",
+            "-File",
+            "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/lib/scripts/patch.ps1",
+            "ios",
+            "-SdkOnly"
+          ],
+          "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+          "exitCode": 0
+        },
+        {
+          "name": "patch-PackagesOnly",
+          "command": [
+            "pwsh",
+            "-NoLogo",
+            "-NoProfile",
+            "-File",
+            "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app/lib/scripts/patch.ps1",
+            "ios",
+            "-PackagesOnly"
+          ],
+          "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app",
+          "exitCode": 0
+        }
+      ]
+    }
+  },
+  "pending_stages": [
+    "variant-prepare including offline --enforce-lockfile pub get",
+    "variant-check-prebuild",
+    "variant-source-lock",
+    "variant-finalize"
+  ],
+  "disk_size_blocker": {
+    "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/disk-size-blocker.log",
+    "sha256": "0962125ad318aaa23c31435126fdd0cb637231119f8e021f61875a1dba27f62f",
+    "raw": "78008\t/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/app\n57316\t/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/media-kit\n810092\t/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/p\n48\t/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f/packages/flutter_tools/.dart_tool\n",
+    "free_bytes": 162525184,
+    "stage_reserve_bytes": 268435456,
+    "variant_copy_not_started": true
+  },
+  "protection_by_root": {
+    "original-sdk": {
+      "unchanged_in_recorded_baseline": true
+    },
+    "original-app": {
+      "unchanged_in_recorded_baseline": false
+    },
+    "original-media": {
+      "unchanged_in_recorded_baseline": false
+    },
+    "PiliPlusX": {
+      "unchanged_in_recorded_baseline": true
+    }
+  },
+  "final_source_checkout_state": {
+    "app": {
+      "head": "1970d440b5b9d9ffc001866064581e4005b26b30",
+      "tree": "3b2c7634afccfbd1b4a9e4fe5749bf07f219b7a8",
+      "tracked_status": "",
+      "origin": "https://github.com/Goodwu/PiliPlusX.git"
+    },
+    "media-kit": {
+      "head": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "tree": "de92eec61379f7b652ac828bb516a6005164e1b3",
+      "tracked_status": "",
+      "origin": "https://github.com/Goodwu/media-kit.git"
+    }
+  },
+  "remote_after": {
+    "app": {
+      "exit": 0,
+      "stdout": "1970d440b5b9d9ffc001866064581e4005b26b30\trefs/heads/routing/MK-ROUTING-20261011\n",
+      "stderr": ""
+    },
+    "media": {
+      "exit": 0,
+      "stdout": "d91639401862d84c68406aae3b2029400a4cfbd6\trefs/heads/routing/MK-ROUTING-20261011\n",
+      "stderr": ""
+    }
+  },
+  "unverified": [
+    "hosted workflow",
+    "Xcode",
+    "native bundle",
+    "IPA/APK",
+    "native binary provenance",
+    "runtime",
+    "visible playback"
+  ],
+  "nativeBuild": false,
+  "deviceTest": false,
+  "fullEvidence": {
+    "path": "/tmp/mk-ios-current-source-prepare-checkpoint.json",
+    "sha256": "e8f4d8d1d817bcd76bd8836d54c1938ff74b018f5caf99dfaeb562f07afdb494",
+    "bytes": 877639,
+    "notRewritten": true
+  },
+  "bootstrapActual": {
+    "status": "fresh-source-only",
+    "platform": "ios",
+    "toolchain": {
+      "frameworkVersion": "3.47.2",
+      "channel": "[user-branch]",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+      "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+      "engineCommitDate": "2026-08-26 18:46:13.000Z",
+      "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+      "engineBuildDate": "2026-08-27 03:23:07.677",
+      "dartSdkVersion": "3.13.2",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.2",
+      "flutterRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f"
+    },
+    "stepCount": 57,
+    "allStepsExitZero": true,
+    "stepResults": [
+      {
+        "name": "before-app-head",
+        "exitCode": 0
+      },
+      {
+        "name": "before-app-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "before-app-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "before-media-kit-head",
+        "exitCode": 0
+      },
+      {
+        "name": "before-media-kit-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "before-media-kit-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "app-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-tracked-files",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-tracked-files",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-root",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-head",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-status",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-working-diff",
+        "exitCode": 0
+      },
+      {
+        "name": "original-sdk-index-diff",
+        "exitCode": 0
+      },
+      {
+        "name": "private-sdk-root",
+        "exitCode": 0
+      },
+      {
+        "name": "flutter-tools-resolve",
+        "exitCode": 0
+      },
+      {
+        "name": "toolchain",
+        "exitCode": 0
+      },
+      {
+        "name": "toolchain-machine",
+        "exitCode": 0
+      },
+      {
+        "name": "resolve",
+        "exitCode": 0
+      },
+      {
+        "name": "patch-SdkOnly",
+        "exitCode": 0
+      },
+      {
+        "name": "patch-PackagesOnly",
+        "exitCode": 0
+      },
+      {
+        "name": "patched-sdk-status",
+        "exitCode": 0
+      },
+      {
+        "name": "patched-sdk-diff",
+        "exitCode": 0
+      },
+      {
+        "name": "app-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-tracked-files",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-tracked-files",
+        "exitCode": 0
+      },
+      {
+        "name": "after-app-head",
+        "exitCode": 0
+      },
+      {
+        "name": "after-app-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "after-app-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "after-media-kit-head",
+        "exitCode": 0
+      },
+      {
+        "name": "after-media-kit-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "after-media-kit-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "final-app-head",
+        "exitCode": 0
+      },
+      {
+        "name": "final-app-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "final-app-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "final-media-kit-head",
+        "exitCode": 0
+      },
+      {
+        "name": "final-media-kit-remote",
+        "exitCode": 0
+      },
+      {
+        "name": "final-media-kit-tree",
+        "exitCode": 0
+      },
+      {
+        "name": "app-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-clean-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-untracked-input",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-ignored-source-input",
+        "exitCode": 0
+      },
+      {
+        "name": "app-tracked-files",
+        "exitCode": 0
+      },
+      {
+        "name": "media-kit-tracked-files",
+        "exitCode": 0
+      }
+    ],
+    "sourceHashCount": 2681,
+    "sourceHashMapSha256": "282ae41929d932ce5a94cea38dadc5838ccbe26880d55ace7fc635e22f805603",
+    "sdkPatchIdentitySha256": "e561008e11df555c08ae7b83d39b11e120f279cebdd72b8fd5ab13ef308e04b0"
+  },
+  "concurrentChangesAttribution": "Lead corrected both source-prelude checkpoints/context; Linux writer changed its assigned nine-file candidate. Original SDK/Pili unchanged; clean validation clones HEAD/tree remain exact."
+}
