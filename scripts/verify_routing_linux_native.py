@@ -38,6 +38,7 @@ CONSUMER_SOURCE_PREFIXES = {
 }
 CONSUMER_SOURCE_FILES = {
     "Goodwu/PiliPlusX": frozenset({
+        "scripts/routing_flutter_version.py",
         "scripts/acquire_routing_linux_native.py", "scripts/verify_routing_linux_native.py",
         "scripts/verify_routing_sources.py", "scripts/prepare_routing_ci.py",
         "scripts/verify_media_kit_lock.py", "scripts/verify_workflow_media_kit_refs.py",
@@ -50,6 +51,7 @@ CONSUMER_SOURCE_FILES = {
 CONSUMER_REPOSITORIES = {"Goodwu/PiliPlusX", "Goodwu/media-kit"}
 REQUIRED_CONSUMER_PATHS = {
     "Goodwu/PiliPlusX": {
+        "scripts/routing_flutter_version.py",
         "scripts/acquire_routing_linux_native.py", "scripts/verify_routing_linux_native.py",
         "scripts/verify_routing_sources.py", "scripts/prepare_routing_ci.py",
         ".github/actions/routing-bootstrap/action.yml", ".github/workflows/build.yml",

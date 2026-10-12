@@ -318,6 +318,7 @@ else: sys.exit(2)
                 "lib/player.dart": "route API\n", "scripts/acquire_routing_linux_native.py": "acquire\n",
                 "scripts/verify_routing_linux_native.py": "verify\n", "scripts/verify_routing_sources.py": "source verify\n",
                 "scripts/prepare_routing_ci.py": "bootstrap\n", ".github/actions/routing-bootstrap/action.yml": "action\n",
+                "scripts/routing_flutter_version.py": "exact SDK pin\n",
                 "scripts/verify_media_kit_lock.py": "lock gate\n",
                 "scripts/verify_workflow_media_kit_refs.py": "workflow gate\n",
                 "scripts/verify_binary_arch.py": "abi gate\n", "scripts/release_manifest.py": "release\n",
@@ -397,6 +398,7 @@ else: sys.exit(2)
                 "scripts/verify_routing_linux_native.py": "verify\n",
                 "scripts/verify_routing_sources.py": "source verify\n",
                 "scripts/prepare_routing_ci.py": "bootstrap\n",
+                "scripts/routing_flutter_version.py": "exact SDK pin\n",
                 "scripts/verify_media_kit_lock.py": "lock gate\n",
                 "scripts/verify_workflow_media_kit_refs.py": "workflow gate\n",
                 "scripts/verify_binary_arch.py": "abi gate\n", "scripts/release_manifest.py": "release\n",
@@ -425,6 +427,17 @@ else: sys.exit(2)
                 "libs/universal/media_kit_libs_video/pubspec.yaml": "universal package\n",
             })
             accepted = gate.compute_consumer_source_closure(app, media)
+            pin_path = "scripts/routing_flutter_version.py"
+            pin = app / pin_path
+            pin.write_text("changed SDK selection\n")
+            with self.assertRaisesRegex(gate.GateError, "differs from CORE-approved closure"):
+                gate.require_consumer_source_closure(app, media, accepted)
+            pin.write_text("exact SDK pin\n")
+            git(app, "rm", pin_path)
+            with self.assertRaisesRegex(gate.GateError, "missing fixed inputs"):
+                gate.compute_consumer_source_closure(app, media)
+            pin.write_text("exact SDK pin\n")
+            git(app, "add", pin_path)
             (media / "media_kit_video/linux/CMakeLists.txt").write_text("changed\n")
             with self.assertRaisesRegex(gate.GateError, "(differs from CORE-approved closure|missing fixed inputs)"):
                 gate.require_consumer_source_closure(app, media, accepted)

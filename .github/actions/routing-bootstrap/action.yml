@@ -34,6 +34,17 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.13'
+    - name: Read the exact App Flutter version before SDK installation
+      id: flutter-pin
+      shell: pwsh
+      env:
+        INPUT_APP: ${{ inputs.app-root }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $app = Join-Path $env:GITHUB_WORKSPACE $env:INPUT_APP
+        $version = python (Join-Path $app 'scripts/routing_flutter_version.py') (Join-Path $app 'pubspec.yaml')
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to read the exact App Flutter version' }
+        "version=$version" >> $env:GITHUB_OUTPUT
     # The caller must also configure these before its initial App checkout.
     # This controls any SDK checkout performed by flutter-action on Windows.
     - name: Keep SDK patch inputs in LF form
@@ -48,7 +59,7 @@ runs:
     - uses: subosito/flutter-action@v2
       with:
         channel: stable
-        flutter-version-file: ${{ inputs.app-root }}/pubspec.yaml
+        flutter-version: ${{ steps.flutter-pin.outputs.version }}
         cache: false
         pub-cache: false
         cache-path: ${{ runner.temp }}/rb/s

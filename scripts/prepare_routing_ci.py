@@ -15,6 +15,7 @@ from urllib.parse import urljoin, urlparse
 from urllib.request import url2pathname
 
 from verify_routing_sources import verify
+from routing_flutter_version import flutter_version
 
 BRANCH = 'refs/heads/routing/MK-ROUTING-20261011'
 IOS_SDK_PATCH = 'lib/scripts/bottom_sheet_ios_flutter.patch'
@@ -392,9 +393,7 @@ class Bootstrap:
         self.receipt.update(flutterRoot=str(sdk), pubCache=str(cache), flutterToolsPackages=roots)
         self.run('toolchain', [str(flutter), '--version'], self.app)
         machine = json.loads(self.run('toolchain-machine', [str(flutter), '--version', '--machine'], self.app))
-        contract = re.findall(r'^  flutter: ([0-9]+\.[0-9]+\.[0-9]+)\s*$',
-                              (self.app / 'pubspec.yaml').read_text(encoding='utf-8'), re.MULTILINE)
-        if len(contract) != 1 or machine.get('frameworkVersion') != contract[0]:
+        if machine.get('frameworkVersion') != flutter_version(self.app / 'pubspec.yaml'):
             raise ValueError('Flutter toolchain does not match exact App pubspec contract')
         self.receipt['toolchain'] = machine
         return flutter, cache
