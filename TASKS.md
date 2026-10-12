@@ -7,17 +7,18 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- 状态：进行中；唯一公共分支 `routing/MK-ROUTING-20261011`，CORE 唯一公共集成。新接手登记 [6126383144](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126383144)，复审回交 [6126499419](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126499419)；原 DEVICE 继续 native/实机及原 PR 修订，无新增 DEVICE 线。主 PR 均 OPEN/DRAFT、未合并/关闭/发布。
-- 本检查点写入前核对 heads：App `13b139b797aa65d853cafb5cb207d17a6e7aceac`；media-kit `5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f`；FFmpeg `9aba43cfbee182ade060cdccbe15340a0fbe3e83`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR5 `dc41787082752f234fed85db7fb7be3bd855cc45`；库 PR6 `0fb163c6ec8d54c46698227175b9a21468605246`；App PR3 `15551ede06b0cbec859d61e6d16f8dba2054bba1`。本次随后文档提交不借旧 run 改标通过。
-- App source **38258403604 / attempt1 SUCCESS**，准确 `13b139b7 + 5834ce5b`：四平台 Flutter 各268/analyze0，Python504 pass+2 skip=506，bundle/Chrome DOM1/Web成功；5实际ZIP/API digest、57步fresh receipts、2705/2705源码哈希、261 roots内10个media-kit包全核。历史38255581451仍只证明 `a3b577f3 + e269d966`，报告SHA `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da` 不变；38258394875 CANCELLED排除。
-- App Build **38258404288 / attempt1 FAILURE**：7success/6failure/2skip，11实际ZIP全核；Android/Pink selected native manifest为空，另四平台 SOURCE_PREPARED_NATIVE_BLOCKED。source子任务和iOS批准变体/bundle通过只属源码层；批准native候选为0。上一38255582037仍失败关闭。
-- 库 general **38255531407 / attempt1 FAILURE**：run head `e269d966`、实际merge `811c7ba6`；Web60pass/1fail/27skip（player-set-shuffle），Linux/Windows各81pass16skip，macOS88pass15skip。8实际测试包已核；Android使用旧v2026.013发布JAR，不能作fresh native验收。此前source/query/Darwin/OHOS证据保留原向量与层级。
-- PR5公共matrix及历史审查已部分集成，27 synthetic/mocked tests；三个来源banner保留，两shell recipe继续排除。inventory65位SHA笔误已按PR5原始2578字节/blob33abc719纠正。**DV001/PR5完整native、产物、设备归并必需且未完成**；符号读取失败闭合、双Vulkan符号全组合、失败传播/干净staging/精确成员与链接patch/NDK/helper/JAR/APK来源，仍由DEVICE原PR修、CORE复审。
-- PR6 DV004审查5492283452为REQUEST_CHANGES：跨轮identity guard失效，fixture不足以证明Session；两项用户诊断/验收语义决定保留。PR3 DV003/DV005审查5492283684同为REQUEST_CHANGES：hint首次/refresh部分修复，但reopen丢facts；HTTP上界/超时、串源缓存竞态、轨道/颜色冲突未修；新增本地videoUrl空值及签名URL日志问题。API review状态均COMMENTED，不能当正式保护状态。
-- DEVICE6126388894撤回旧“126出图”为120残影；新DV005成功仅DEVICE reported、原始日志/输入向量/APK/JAR/画面/持续性证据待补，不记为只剩LG复测。最新6126637477组合终审同为REQUEST_CHANGES，并报告旧Flutter/analyze日志失败，继续原分支修。PR3最新Build38263881419失败、source下游skip；PR6精确HEAD仍无hostedrun，186/775自报未独立验证。
-- 已实现query/DASH/unknownDV/F01/R01/FFmpeg/config/SDK与source CI，不按旧planned或34info重做。experimental默认false，true主验证并回归false；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease保留；10-bit/lease融合延期。剩余native、普通Session/owner/carrier/生命周期、HDR/持续性能逐层验收。
-- 本轮仅文档/证据，保留原checkout未知dirty与App `.zcodeignore`；本环境没有Flutter/Dart/ADB/native SDK。检查点提交/推送/回读后登记下一候选CORE-WEB-SHUFFLE-01：仅Web setShuffle及对应测试，先确定性快照回归再局部修复，不与DEVICE共享文件并写。
-- 唯一详细上下文：`archives/conversations/media-kit-routing-20261011.md`。规范证据索引：`Goodwu/media-kit:docs/plans/core-successor-checkpoint-20261012.json`（各报告含SHA256）。
+- 进行中；CORE唯一公共集成，原DEVICE继续native/实机与原PR单写修订。主PR OPEN/DRAFT、未合并/关闭/发布；未知dirty和App `.zcodeignore`保护。
+- `CORE-WEB-SHUFFLE-01` 已实施并独立静审：setShuffle启用/恢复用新列表；2新增Web-only确定性回归，保留2原测试；CI仅Web job新增4项定向后跑原完整suite。认领6126963656/6127346332。**新代码hosted执行待验**，本地无Dart/Flutter/Chrome，不将静审写成测试通过。
+- 本阶段写入前公共组合 App `a98a57f2892592d5b8a25d6533ede4580d412ae5` + 库 `0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2`；随后包含Web的提交须另验。source38266831541/1 SUCCESS，5实际ZIP全核、四平台各268/analyze0、Python504+2=506、bundle/Chrome1/Web成功；57fresh步骤、2714源码hash和261roots/10库包均核。
+- 同组合Build38266831911/1 FAILURE，11实际ZIP全核；7success/6fail/2skip；Android/Pink空selected manifest、commands=[]，另四平台SOURCE_PREPARED_NATIVE_BLOCKED。iOS1918base/两patch重放与bundle通过只属源码层，未Xcode；批准native候选0。
+- 库source38266780378/1 SUCCESS，0c6ffeaf上video772+3skip/lab298/analyze0/工具6+12+27、3ZIP核；它实际SDK3.47.7/Dart3.13.5，与App固定3.47.2/3.13.2分别记录。general38266780432实际merge65531539、取证时仍运行，终态/内层artifact待续。
+- 历史13b+5834、a3b+e269各run保留原向量；旧报告SHA156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da不变。general38255531407 Web60pass1fail27skip保持历史，不能用旧发布JAR测试包替代fresh native。
+- **DV001/PR5完整native/产物/设备归并必需未完**；1095a43/dc417870无新修复或移交；符号失败闭合、双Vulkan全组合、失败传播/clean staging/精确成员/链接patch/NDK/helper/JAR/APK由DEVICE原PR修。matrix部分已集成，27synthetic/mocked；三个banner保留，两recipe继续排除。
+- AppPR3@b180 review5492931759 REQUEST_CHANGES/COMMENTED：reopen已修；新缓存键与selection消费者断接、HTTP成功body deadline/in-flight竞态、本地URL空值/签名日志、轨道与颜色层冲突仍阻断。284/0仅本机路径，未获成功原始日志；JAR本机路径误提交已撤回；debug身份另界定范围。
+- 库PR6@9a2 review5492587336仍REQUEST_CHANGES：DIAG删除和fixture改善保留，但跨轮guard与用户语义决定未解决。DV004临时诊断/最终plan或真实切换两决定保持未决；旧126残影撤回，不把新DEVICE自报写成仅剩LG。
+- Web另有已确认all-equal while不终止和duplicate occurrence身份问题，尚未修，后继单独认领；本切片不声称queue-edit策略全部正确。普通Session/owner/carrier/生命周期/HDR/持续性能继续分层验收。
+- 已有query/DASH/F01/R01/config/FFmpeg/SDK/CI不重做；experimental默认false，true主验并测false；LG YUV8/FULL/range1、精确设备、owner/ACK/lease保持，10bit/lease融合延期。
+- 下一步：push/readback本阶段后核准确新向量Web定向与全suite，继续旧general取证与DEVICE回交复审；仅认领无冲突独立片段。唯一context=`archives/conversations/media-kit-routing-20261011.md`；证据索引=`Goodwu/media-kit:docs/plans/core-web-shuffle-cow-checkpoint-20261012.json`。
 
 ## Now（当前推进，最多 3 条）
 

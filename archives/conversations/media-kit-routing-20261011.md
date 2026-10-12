@@ -2,6 +2,49 @@
 
 ## Current State
 
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，原 DEVICE 继续 native 构建、实机和原 PR 修订。主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。原 checkout 未知 dirty/untracked（含 App `.zcodeignore`）未触碰；两个隔离 routing 工作树在开始本切片前均 clean、ahead0/behind0。
+
+### 当前 Web 实现检查点
+
+`CORE-WEB-SHUFFLE-01` 已完成生产改动和独立源码审查，**新代码的 hosted 执行仍待验收**。原认领6126963656，新增 Web CI 写范围 [6127346332](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127346332) 已发布回读。`real.dart::setShuffle` 在启用和恢复时使用新列表，避免改写已经公开的 state/stream Playlist；不改 equality、distinct、native 或共享 Session。新增两个 Web-only 确定性回归分别检出启用和恢复分支的旧快照改写，验证当前唯一条目/index、成员、两轮 true/false 和重复调用事件数量。恢复分支回归仅验旧快照不可变，不为 shuffle 中增删队列的既有成员策略背书。
+
+原两项 shuffle 测试保留，纠正“增加随机样本即可消除故障”的误导注释。`ci.yml` 只在 Web job 的原完整 Chrome suite 前增加4项 shuffle 定向执行。独立静审确认可提交；修正了 dispose 不发送空 Playlist 的测试误设。`git diff --check` 通过。本地没有 Dart/Flutter/Chrome，未执行新红/绿用例；旧失败38255531407仍只证明原向量，不写成已对候选执行红测。完整静审和源码/blob/hash 见本检查点索引。
+
+另发现两个真实相邻问题，未夹带修复或称完成：所有 URI 等值时现有 while 不会结束；indexOf 按URI比较会丢重复条目身份。需要后续独立认领与确定性验证，不采用扩大随机列表、重试、延时或简单 identical 替代完整条目语义。
+
+### 本检查点之前的最新准确源码验收
+
+本次写入前远端为 App `a98a57f2892592d5b8a25d6533ede4580d412ae5` + media-kit `0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2`；以下运行只证明该组合，随后 Web/文档提交必须另验。FFmpeg `9aba43cfbee182ade060cdccbe15340a0fbe3e83`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR5 `dc41787082752f234fed85db7fb7be3bd855cc45`；PR6 `9a2c5768dd10e71975b7c3e76bb7125460a43e5b`；App PR3 `b18086d0d654a5f523296b41bdfb869c588cd3f0`。
+
+| 运行 / attempt1 | 精确输入 | 本轮实际结论 |
+| --- | --- | --- |
+| App source38266831541 | a98a57f + 0c6ffeaf | SUCCESS；5真实ZIP全部摘要/size匹配；四平台Flutter各268、analyze0，Python504pass+2skip=506，bundle、Chrome DOM1/Web成功。 |
+| App Build38266831911 | 同组合，独立jobs/artifacts | FAILURE；7success/6failure/2skip；11真实ZIP全核。Android/Pink native selected manifest空、commands=[]；其他四平台SOURCE_PREPARED_NATIVE_BLOCKED。 |
+| library source38266780378 | 0c6ffeaf | SUCCESS；3真实ZIP全核；video772pass/3skip、lab298、两analyze0、Python工具6+12+27通过。 |
+| library general38266780432 | run head0c6ffeaf，实际merge65531539 | 取证时仍in_progress；四平台package tests终态与全部artifact内层审计待续，不能称绿。 |
+
+App source/Build的57步fresh receipts、before/after/final向量、261 package roots中的10个库包均匹配。新源码清单为 **2714项**（App lib/test1442 + 库tracked1272）；固定Git树独立重算全部匹配，39个Swift symlink按同树目标解析。iOS1918个base文件和恰好两个批准patch变换已独立重放一致，bundle后停native门，未运行Xcode。App SDK是Flutter3.47.2/Dart3.13.2；库独立source实际使用3.47.7/3.13.5，不混标工具链。kernel/完整Web编译产物字节未归档，只承认日志与digest收据，不声称独立重算这些binary。
+
+历史13b139b+5834ce5b的source38258403604/Build38258404288、a3b577f+e269d966的38255581451及general38255531407保留原向量。历史报告SHA `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da` 两仓原字节不变。38266821993、38258394875取消结果不计验收。general测试包中的旧发布JAR仍不能替代DV001当前native候选。
+
+### DEVICE 当前回交与仍须完成的归并
+
+App PR3@b180 已由CORE在原PR发布 [review5492931759](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759)，正文REQUEST_CHANGES，GitHub状态COMMENTED。确认reopen facts、连接/响应头共享期限、成功累积buffer上限、两backup、旧revision写入拒绝等改善；本机JAR误提交已经撤回，不重复列为当前缺陷。但新revision/cid/baseUrl缓存键未接通仍读spec.key的selection，成功嗅探也不能授权真实126；HTTP成功体停顿仍可无限等待、错误take按chunk计数，in-flight Set不共享等待会使新serial发布空facts。本地source分流前videoUrl!及完整签名URL日志、DOVI轨道绑定/BL/RPU/颜色兼容冲突仍未修。284/analyze0只提供本机日志路径，未获CORE原始证据核验；dd76 hosted在routing SHA门失败、下游skip，07953取消，b180构建取证时运行中。debug包身份变更须与产品集成范围分开说明。
+
+PR6@9a2已移除DIAG并修正AVC/nv12/copy fixture；[review5492587336](https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336)仍为REQUEST_CHANGES，跨轮guard不可达及“FIRST complete sample”擅自收窄契约未解决。用户关于临时诊断范围和最终plan履行/真实切换验收的两项决定保持未决，CORE不放宽既有断言。旧“126出图”已撤回为120残影；新的DEVICE HEVC/P8.4画面报告不替代当前完整native/JAR/APK/轨道/代次/PTS/持续播放验收，不写成仅剩LG复测。
+
+**DV001与PR5完整native、产物、设备归并必需且未完成。** 无新配方修复或移交；DEVICE仍在原PR单写符号读取失败闭合、双Vulkan独立全组合、失败传播/原子处理、干净staging、精确成员及真实链接/patch/NDK/helper/JAR/APK来源。批准native ledger仍空，失败关闭保持。PR5公共matrix和历史审查已部分归档，27项为synthetic/mocked；三个provenance banner保留；两个shell recipe继续排除。
+
+### 接续与不可混用的验收层级
+
+提交、推送并回读本阶段后，先取新SHA的Web定向/完整suite结果；一般CI中未终态的旧run持续按各自向量取证，过渡进度发PR4，不为轮询频繁改文档。随后按认领推进无需用户决策的独立代码或复审。原DEVICE的App/sniffer/gather/native配方不并写；普通Session、owner/carrier、生命周期、HDR与持续性能均仍必需。query/DASH/unknownDV/F01/R01/FFmpeg/config/SDK/source CI已有实现不按旧planned重做。experimental默认false，true主验证并回归false；LG YUV8/FULL/range1、精确设备门与owner/ACK/lease不变；10-bit/lease融合延期。
+
+规范证据索引：`Goodwu/media-kit:docs/plans/core-web-shuffle-cow-checkpoint-20261012.json`，包含五份逐字节冻结报告：新App source、Build、库source、Web静审、DEVICE b180复审；各自的SHA256/字节数/source blobs和限制均独立记录。
+
+## History
+
+### 2026-10-12：Web COW检查点之前的Current State（历史快照）
+
 唯一公共集成分支 `routing/MK-ROUTING-20261011`；新 CORE 已接手，登记 [6126383144](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126383144)，范围补充 [6126444208](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126444208)，复审回交 [6126499419](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126499419)。CORE 唯一公共集成；现有 DEVICE 继续原 native/实机与 PR3/PR6 修订，不新增 DEVICE 工作线。所有主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。
 
 本检查点写入前重新回读：App `13b139b797aa65d853cafb5cb207d17a6e7aceac`；media-kit `5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f`；FFmpeg `9aba43cfbee182ade060cdccbe15340a0fbe3e83`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR5 `dc41787082752f234fed85db7fb7be3bd855cc45`；库 PR6 `0fb163c6ec8d54c46698227175b9a21468605246`；App PR3 `15551ede06b0cbec859d61e6d16f8dba2054bba1`（生产增量 `a2478d04`，后一笔仅档案）。这些是受审/受验输入，不是本次随后文档提交的 SHA；新提交不得借用旧 run 改标通过。
@@ -42,7 +85,6 @@ DEVICE [6126388894](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126
 
 native 之后还须同向量验普通 Session、实际 owner/carrier、生命周期、最新 P5/P8.4 true/false、实体 HDR 和持续性能。各层分别验收，不因宿主、bundle、旧 APK 或部分文档归并而结项。完整证据索引：`Goodwu/media-kit:docs/plans/core-successor-checkpoint-20261012.json`；三份 CI 报告 `core-successor-app-source-ci-20261012.json`、`core-successor-app-build-ci-20261012.json`、`core-successor-general-ci-20261012.json`，以及 native/PR3/PR6/字节来源/source index 均有独立 SHA256。
 
-## History
 
 ### 2026-10-12：CORE successor 更新前的 Current State（历史快照，已被顶部取代）
 
