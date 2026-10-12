@@ -11,6 +11,10 @@
 5. **过程教训（如实）**：首版 `_rangeGet` 未把 UA/Referer 头写入请求（`_headers` 只给了可注入 fetch），真机 403 一度被误归因传输栈指纹——specialist 复核抓出该版本绑定错误；修正后 dart:io 直连 CDN 即 206。DV003 实施登记与中央线程相关表述以本文件为准。
 6. **specialist 评审**（PR#5 分支 644908c9 `dv003-specialist-review.md`）：分两层（App 站点知识/库消费标准 descriptor）、三态准入设计、错标风险矩阵。本修复采纳其「嗅探优先」；三态准入因嗅探打通而不需要。
 
+## 2026-10-12 补全（DV005）
+
+上节"播放级验收未完成"由两个独立缺陷叠加：DV004（media-kit PR#6，复核误杀已修）与 DV005（本分支 a2478d04c：DV003 的嗅探 facts 只到菜单未到播放器——pl_player session.open hint 未消费 facts，126 被 planner 按 B1b 阻断 sourceMetadataUnknown；打通 initialDoviFacts 通道）。**LYA 真机 126 冷启动闭环**：dvProfile=8/compatId=4，baseLayerDirect→nativeHdr verified，OMX.hisi hevc，画面渲染+帧推进+零 FATAL（dv005-frame1.png）。开放项仅剩：CORE 归并后在 LG（PQ 面板）复测 126 convert/tone-map 路径。
+
 ## 开放项
 
 - DV003 归并后需按最新整合向量在 LG（PQ 面板，预期 convert/tone-map 路径）复测 126 档行为。
