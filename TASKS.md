@@ -8,17 +8,16 @@
 ## MK-ROUTING-20261011（CORE继任）
 
 - CORE唯一公共集成；主PR保持OPEN/DRAFT、未合并/关闭/发布；未知dirty/App `.zcodeignore`保护。
-- Web02等值URI同步循环及index保持已实现；新增2项，现Web定向6项。混合duplicate occurrence/队列编辑仍未完。
-- Android能力订阅按存活listener保持；新增5个真实Session测试。源码独立审查通过，Dart/实际native/设备执行仍待；不声称自动重试最后disable。
-- App SDK版本引导去除yq依赖，Python精确pin读取与安装后复核复用，Linux consumer来源补helper。11新测试；相关Python109通过；本机完整尝试因macOS/SDK环境失败，完整hosted待。
-- 写入前准确组合1fcc367c+a73d570b：source38272335487 SUCCESS，5ZIP，四Flutter各268/analyze0、Python504+2、57fresh/2720hash/261roots；新提交不得借旧绿灯。
-- 同组合Build38272335840 FAILURE，10ZIP。五native门失败关闭；Windows yq HTTP504在source准备前失败，无fresh receipt；批准native0。
-- 库source38272288163 SUCCESS，3ZIP、772+3skip/lab298/tools45。App SDK3.47.2和库3.47.7分别记录。
-- 旧general38266780432 SUCCESS，23success/1skip；8ZIP/450成员全核，mac字幕失败/重试历史保留。新general38272288190定向step metadata成功，full/log待；旧JAR不等fresh native。
-- **DV001/PR5完整native/产物/实机归并必需未完**；1095/dc417无修复移交，两recipe排除、三provenance banner保留；DEVICE原PR单写，CORE复审。
-- PR3 b180原review5492931759仍REQUEST_CHANGES/COMMENTED，Build38270385174失败且仅380B诊断；新9895仅DV006亮度Kotlin，原P1没修，增量待审。PR6@9a2 review5492587336及两DV004用户决定开放。
-- 普通Session/owner/carrier/生命周期/HDR/持续性能仍分层验；已有query/DASH/F01/R01/config/FFmpeg/SDK不重做。experimental默认false、true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10bit/lease融合延期。
-- 下一步：push/readback后核新向量Web6/video5/完整source，续DEVICE原PR复审。唯一conversation与证据索引core-lifecycle-bootstrap-checkpoint-20261012.json；历史156cd314…报告不变。
+- 准确受验App3884d3e8+media-kit4d1d4b7d：source38275714484 SUCCESS，5实际ZIP；四Flutter各268/analyze0、Python515+2=517、57fresh/2733hash/261roots。随后仅档案提交不借用旧绿灯。
+- Build38275715109 FAILURE，11实际ZIP；自身5source子job全过；Android/Pink空accepted manifest，四其他平台SOURCE_PREPARED_NATIVE_BLOCKED，批准native0。Windows显式pin/yq跳过/fresh57已实证。
+- 库source38275707566 SUCCESS，3实际ZIP：video777+3skip（新增5订阅用例实际通过）、lab298/tools45/analyze0；App SDK3.47.2与库3.47.7分记。
+- Web COW及等值URI/index修复已实现，当前定向6项。新general38275707106@4d1d已实际运行；Web定向步骤16:46:55–16:47:22的metadata为success，完整Chrome从16:47:22继续执行。预期6项的实际case日志尚未取得，不能称已读6通过或full完成。 混合duplicate occurrence/队列编辑仍未完。
+- 上一轮a73 general38272288190已SUCCESS（23success/1release skip）：Web实际定向4通过、full63通过/27跳过；Linux/Windows各81通过/18跳过，macOS88通过/17跳过。mac有2次Retry、2条OutstandingWork及1条失败标记，按重试后成功保留。8实际ZIP/450内层文件、6上传job日志全核；payload中无source.txt，Android仍为旧发布JAR，不能替代fresh DV001。
+- App helper相关本机109通过；旧本机全量环境失败保留，本次hosted完整517另验。iOS1920文件/两patch/5814commands属源码重放，非Xcode/native构建。
+- DV001/PR5完整native/产物/实机归并必需未完；1095/dc417无修复移交，两recipe排除、三provenance banner保留；DEVICE原PR单写、CORE复审。
+- AppPR3@9895复审5493423824为REQUEST_CHANGES/COMMENTED：DV006新增1P1/4P2，原DOVI/HTTP/cache/track阻断未修。PR6@9a2及两项DV004用户决定开放。
+- 普通Session订阅宿主缺陷已修；完整owner/carrier/生命周期/HDR/持续性能仍分层验。experimental默认false、true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10bit/lease融合延期。
+- 下一步：核当前general38275707106的Web6与完整套件实际日志/产物；保留已执行的4d1d输入。原DEVICE在原PR补DV001/PR5与PR3/PR6修订，CORE续审。下一生产切片须先核认领。 唯一conversation及证据索引 `docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`；历史156cd314…报告不变。
 
 ## Now（当前推进，最多 3 条）
 

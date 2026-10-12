@@ -2,6 +2,51 @@
 
 ## Current State
 
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，原 DEVICE 继续 native 构建、实机及原 PR 修订。主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。两个隔离 checkout 的实现提交已推送回读；未知原 checkout 修改与 App `.zcodeignore` 未触碰。
+
+### 已完成的实现与当前宿主验证
+
+- Web `setShuffle` 快照写时复制与所有 URI 等值时的同步死循环修复已实现，保留确切条目/index；定向测试现为6项。新general38275707106@4d1d已实际运行；Web定向步骤16:46:55–16:47:22的metadata为success，完整Chrome从16:47:22继续执行。预期6项的实际case日志尚未取得，不能称已读6通过或full完成。
+- Android能力通知按存活 listener 集合保留订阅，一个 Session 退出不关闭其他 Session 的通知。新增5项真实 Session/MethodChannel 用例已实际通过，全套777通过、3跳过；native显示器事件、多engine/视图和完整owner/ACK/lease仍另验。最后disable失败的自动重试未实现。
+- App使用已有Python读取唯一精确Flutter pin，在SDK安装前直接传版本并在安装后复核；Linux consumer来源包含新helper。Windows实际job已跳过yq、使用3.47.2并完成fresh bootstrap，旧HTTP504引导阻断消除。
+- 本机相关Python109通过及独立源码审查保留。旧本机全量509 ran/1fail/5errors/5skip和短/tmp夹具失败均属已归档历史，不能改写；本次完整hosted Python515通过、2跳过另有实际证据。
+
+### 精确组合与实际产物
+
+本轮完整受验组合为 App `3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377`（tree `babf93595feed078058608d6aada5c4dd014ddd5`）+ media-kit `4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2`（tree `34dfc9a45c039e2f1da327f057dc8807f1cf3df3`）。本次台账归档提交不继承该组合的测试标签。
+
+| run / attempt1 | 已核事实 |
+| --- | --- |
+| App source38275714484 | SUCCESS；5实际ZIP全核，四平台Flutter各268/analyze0，Python515通过+2跳过=517，Chrome DOM1/Web compile及各Dart/资源bundle成功。 |
+| App Build38275715109 | FAILURE；7success/6failure/2skip，11实际ZIP全核；其自身5个source子job全部通过，没有借用standalone证据。Android/Pink为空accepted manifest，commands=[]；Linux/Windows/macOS/iOS为SOURCE_PREPARED_NATIVE_BLOCKED。 |
+| library source38275707566 | SUCCESS；3实际ZIP全核，video777通过+3跳过（新增5项确实执行）、lab298、analyze0、工具45。 |
+
+16份App ZIP的57步fresh收据、2733源码hash（App lib/test1443+media-kit tracked1290）、261package roots/10本地库包及SDK源码/补丁身份均已独立核验。其中10份source ZIP另核source.txt，6份native诊断由bootstrap与vector收据绑定。App SDK为Flutter3.47.2/Dart3.13.2，库source为3.47.7/3.13.5，分开记录。App诊断ZIP只含kernel/完整Web输出哈希与步骤证据，没有独立归档这些二进制字节。
+
+iOS本轮1920文件、两份批准patch已独立重放；5814条数组commands全部exit0，其中5760=1920×3逐blob读取，其余54条。没有启动native Xcode构建。Windows job114900616789/artifact11758389846已完成fresh准备并抵达native gate；这证明引导修复，不是native批准。
+
+上一轮a73 general38272288190已SUCCESS（23success/1release skip）：Web实际定向4通过、full63通过/27跳过；Linux/Windows各81通过/18跳过，macOS88通过/17跳过。mac有2次Retry、2条OutstandingWork及1条失败标记，按重试后成功保留。8实际ZIP/450内层文件、6上传job日志全核；payload中无source.txt，Android仍为旧发布JAR，不能替代fresh DV001。
+
+query38275707339实际34断言与Android plugin Java编译通过；Darwin38275707332实际9项。OHOS38275707109用独立PR merge3222682893e9659fe44fbaa8977b160aa9bfe99a及另一SDK，HAP未独立下载，不合并为此组合的设备/HDR验收。旧1fcc+a73、a98+0c、13b+5834、a3b+e269报告保留原向量；历史156cd314…报告两仓原字节不变。
+
+### DEVICE 最新复审与必需剩余
+
+AppPR3 `9895e7dc040cdc06a33cceba4d4379eba3f596b5` 的DV006已在[原PR review5493423824](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824)回交并逐字回读：正文REQUEST_CHANGES，GitHub状态COMMENTED。新增P1为NaN reset使后续亮度getter范围校验失败；四项P2为线程派发、应用亮度事件未发送、系统权限/写入结果未核及cached engine遗留Activity handlers。原五份DOVI/selection/controller文件与b180相同，key/HTTP body预算/in-flight竞态、本地URL/签名日志、轨道与颜色冲突仍在；9895自身Build38274961135失败，不借旧日志解释它的新run。原DEVICE在原PR继续修，当前公共实现未归入这份回交。
+
+**DV001/PR5完整native、产物和设备归并必需未完，批准native输入仍0。** DV001仍1095a43a，PR5仍dc417870；符号读取失败拒绝、双Vulkan独立覆盖、失败传播/clean staging/精确成员、实际链接/patch/NDK/helper与最终JAR/APK可复核性由原DEVICE补齐，CORE复审。两recipe继续排除，三历史provenance banner保留。
+
+PR6@9a2仍REQUEST_CHANGES；实际decoder identity序列、跨轮guard以及用户对临时诊断范围、最终plan/真实切换验收的两项决定继续开放。普通Session/owner/carrier/完整生命周期、HDR与持续性能继续分层验，不能以宿主测试或旧发布JAR代替。experimental默认false、true主验并测false；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease保持，10-bit/lease融合延期。
+
+### 下一步与证据入口
+
+核当前general38275707106的Web6与完整套件实际日志/产物；保留已执行的4d1d输入。原DEVICE在原PR补DV001/PR5与PR3/PR6修订，CORE续审。下一生产切片须先核认领。
+
+完整证据索引为 `Goodwu/media-kit:docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`；冻结报告按原字节及SHA归档。中央[实现推送6128112984](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128112984)、[DV006复审6128220148](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128220148)及[本轮源码终态6128436938](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128436938)保留；新的准确HEAD与执行观察继续发布中央PR4。不得把已完成query/DASH/F01/R01/config/FFmpeg/SDK接线按旧planned字段重做。
+
+## History
+
+### 2026-10-12：宿主CI终态归档前的Current State（历史快照）
+
 唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，现有 DEVICE 保留 native/实机和原 PR 的单写范围。所有主 PR OPEN/DRAFT，未合并、未关闭、未发布。未知原 checkout 修改和 App `.zcodeignore` 未触碰。
 
 ### 本阶段已实现，当前提交尚待 hosted 验证
@@ -37,8 +82,6 @@ PR6@9a2 review5492587336仍REQUEST_CHANGES；跨轮guard和用户两项DV004诊�
 ### 下一步与证据入口
 
 本阶段commit/push/readback后核准确新向量的Web6项定向/完整suite、video新增5项/完整suite、App引导与完整source结果；保留进行中的a73旧run，不为插队取消或重标。继续原DEVICE新回交复审，不并写native/sniffer/gather。代码和各CI的冻结报告均在 `Goodwu/media-kit:docs/plans/core-lifecycle-bootstrap-checkpoint-20261012.json` 索引；后续真实HEAD与run capture发布中央PR4，旧结果只证明旧组合。
-
-## History
 
 ### 2026-10-12：生命周期/引导检查点之前的Current State（历史快照）
 
