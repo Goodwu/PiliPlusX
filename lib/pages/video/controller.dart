@@ -1091,6 +1091,10 @@ class VideoDetailController extends GetxController
     }
     firstVideo = selected;
     videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
+    debugPrint(
+      'DV003_SEL quality=${currentVideoQa.code} '
+      'host=${Uri.parse(videoUrl ?? '').host}',
+    );
 
     /// 根据currentAudioQa 重新设置audioUrl
     if (currentAudioQa != null) {
@@ -1134,6 +1138,11 @@ class VideoDetailController extends GetxController
         _routeSelection?.options ?? (_routeOptions ??= request.resolve());
     final configRevision = _routeOptionsRevision;
     final dataRevision = _playbackDataRevision;
+    debugPrint(
+      'DV003_OPEN quality=${firstVideo.quality.code} '
+      'codec=${firstVideo.codecs} url=${Uri.parse(videoUrl!).host} '
+      'videoUrl=$videoUrl',
+    );
     await plPlayerController.setDataSource(
       isLocalVideoDiagnostic
           ? DirectFileSource(
@@ -1179,6 +1188,12 @@ class VideoDetailController extends GetxController
           ? null
           : firstVideo.quality.code,
       initialVideoCodec: isLocalVideoDiagnostic ? null : firstVideo.codecs,
+      // DV005: the sniffed DOVI facts must reach the session hint, otherwise
+      // a 126-tier open with a plain hvc1 codec string is unknown DV and the
+      // planner blocks it (sourceMetadataUnknown).
+      initialDoviFacts: isLocalVideoDiagnostic
+          ? null
+          : _doviFactsCache[DashRouteSelection.specification(firstVideo)?.key],
       autoFullScreenFlag: autoFullScreenFlag,
     );
 

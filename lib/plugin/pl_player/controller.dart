@@ -28,6 +28,7 @@ import 'package:piliplus/plugin/pl_player/models/duration.dart';
 import 'package:piliplus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:piliplus/plugin/pl_player/models/frame_pacing_diagnostic.dart';
 import 'package:piliplus/plugin/pl_player/models/hdr_output_rebuild_queue.dart';
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
 import 'package:piliplus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:piliplus/plugin/pl_player/models/hdr.dart';
 import 'package:piliplus/plugin/pl_player/models/native_hdr_transaction.dart';
@@ -589,6 +590,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   StreamSubscription<HdrOutputEvent>? _hdrVideoEventSub;
   final Map<Player, _PlayerHdrSessionOwnership> _hdrSessionsByPlayer = {};
   int? _hdrQualityHint;
+  DoviFacts? _hdrDoviHint;
 
   /// 视频视图（HdrVideo）挂载信号。Android 会话的 PlatformView 输出绑定
   /// 依赖视图挂载，open 之前等待该信号（有界，超时兜底继续）。
@@ -1032,6 +1034,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     bool autoFullScreenFlag = false,
     int? initialVideoQuality,
     String? initialVideoCodec,
+    DoviFacts? initialDoviFacts,
   }) async {
     late final int sourceGeneration;
     final completed = Completer<void>();
@@ -1081,6 +1084,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _processing = true;
       _hdrCodecHint = initialVideoCodec;
       _hdrQualityHint = initialVideoQuality;
+      _hdrDoviHint = initialDoviFacts;
       // A source boundary needs a fresh native-output decision even when the
       // metadata tuple happens to match the preceding source.
       _lastHdrNativeOutputAttempt = null;
@@ -2398,6 +2402,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             hint: HdrOutputSelector.descriptorFromDash(
               quality: _hdrQualityHint,
               codec: _hdrCodecHint,
+              dovi: _hdrDoviHint,
             ),
             sourceSpec: dataSource.videoSpec,
             options: dataSource.routeOptions ?? _sourceRouteOptions,
@@ -2440,6 +2445,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           hint: HdrOutputSelector.descriptorFromDash(
             quality: _hdrQualityHint,
             codec: _hdrCodecHint,
+            dovi: _hdrDoviHint,
           ),
           sourceSpec: dataSource.videoSpec,
           options: dataSource.routeOptions ?? _sourceRouteOptions,
