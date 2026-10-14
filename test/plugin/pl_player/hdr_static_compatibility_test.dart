@@ -160,7 +160,7 @@ void main() {
       codec: 'hevc', transfer: 'pq',
       dynamicMetadata: HdrDynamicMetadata.hdr10Plus,
     );
-    final blocked = HdrOutputReport(
+    const blocked = HdrOutputReport(
       source: source,
       degradeReason: HdrDegradeReason.routeOptionsUnsatisfied,
     );

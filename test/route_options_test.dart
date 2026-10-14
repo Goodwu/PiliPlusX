@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:piliplus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart' show HdrMode;
 import 'package:piliplus/plugin/pl_player/route_options.dart';
 
 void main() {
