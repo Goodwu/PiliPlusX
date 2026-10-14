@@ -192,7 +192,6 @@ void main() {
                 enableHA: false,
                 hardwareDecoding: 'mediacodec',
                 android: true,
-                experimental: true,
               ).resolve(),
             );
             second = controller.setDataSource(
@@ -257,7 +256,8 @@ void main() {
           if (scenario == 'latest') {
             expect(latest!.output.isRequired, true);
           } else if (scenario == 'replacement') {
-            expect(latest!.experimental, true);
+            // Carried options prove that software requirement came from the request.
+            expect(latest!.decode.isRequired, true);
           }
           expect(controller.hasBlockedTeardowns, false);
           expect(
@@ -401,7 +401,6 @@ void main() {
         enableHA: true,
         hardwareDecoding: 'mediacodec',
         android: true,
-        experimental: true,
       ).resolve();
       await controller.setDataSource(
         NetworkSource(
@@ -531,7 +530,8 @@ void main() {
       expect(controller.dataSource.routeOptions, same(changed));
       expect(backend.plans.last.options, same(changed));
       expect(backend.plans.last.route.outputTransfer, HdrOutputTransfer.sdr);
-      expect(changed!.experimental, false);
+      // HDR-off must survive the replacement source's options.
+      expect(changed!.output.isRequired, true);
     } finally {
       controller
         ..onRouteOptionsInvalidated = null
