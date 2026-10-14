@@ -194,22 +194,68 @@ abstract final class HdrOutputSelector {
       HdrOutputTransfer.dolbyVision => '杜比视界',
       HdrOutputTransfer.sdr => 'SDR',
     };
+    // This phase deliberately supports only static PQ/HLG compatibility
+    // output for HDR10+ and Vivid. A successful C3/C4 is NOT dynamic HDR.
+    final staticDynamicSource =
+        source.dynamicMetadata == HdrDynamicMetadata.hdr10Plus ||
+        source.dynamicMetadata == HdrDynamicMetadata.hdrVivid;
+    if (staticDynamicSource &&
+        !actual.appliesDynamicMetadata &&
+        (actual.strategy == HdrStrategy.baseLayerDirect ||
+            actual.strategy == HdrStrategy.baseLayerConvert)) {
+      final compatibleOutput = actual.strategy == HdrStrategy.baseLayerConvert &&
+              source.transfer == 'hlg' &&
+              actual.outputTransfer == HdrOutputTransfer.pq
+          ? 'HLG→PQ 静态兼容转换'
+          : '静态 $transferName 兼容直出';
+      return '$sourceName · $compatibleOutput';
+    }
     final routeName = switch (actual.strategy) {
       HdrStrategy.baseLayerDirect => '$transferName 直出',
       HdrStrategy.baseLayerConvert => '转 $transferName 输出',
-      HdrStrategy.metadataReshape => 'RPU 重建 $transferName',
+      HdrStrategy.metadataReshape =>
+        source.dynamicMetadata == HdrDynamicMetadata.dolbyVision
+            ? 'RPU 重建 $transferName'
+            : '动态映射请求 $transferName（尚未验收）',
       HdrStrategy.toneMapSdr => 'tone-map SDR',
       HdrStrategy.sdrDirect => 'SDR 直出',
       HdrStrategy.nativeDolbyVision => '原生杜比视界',
-      // C1 原生动态 HDR10+/Vivid 直通（§C1「原生动态 HDR」类，源名已携带
-      // 制式）。通配臂保持对旧版依赖（无这两个枚举值）可编译；仅在实际
-      // 执行命中时渲染，不冒充动态映射成功。
-      _ => '原生动态 HDR',
+      HdrStrategy.nativeHdr10Plus => 'HDR10+ 原生动态请求（尚未验收）',
+      HdrStrategy.nativeHdrVivid => 'HDR Vivid 原生动态请求（尚未验收）',
     };
     if (actual.presentation == HdrPresentation.sdr) {
       return routeName;
     }
     return '$sourceName · $routeName';
+  }
+
+  /// Never label an HDR candidate fallback as tone-mapped SDR solely because
+  /// it followed a failed strategy. Use the actual destination transfer.
+  static String degradeNotice(HdrDegradedEvent event) {
+    final to = event.to;
+    if (to == null) return 'HDR 路由受阻（${event.reason.name}）';
+    if (to.outputTransfer == HdrOutputTransfer.sdr) {
+      return '已切换到 SDR（${event.reason.name}）';
+    }
+    if (to.metadataHandling == HdrMetadataHandling.baselineOnly) {
+      return '已改用静态 HDR 兼容输出（${event.reason.name}）';
+    }
+    return '已切换 HDR 路由（${event.reason.name}）';
+  }
+
+  static String blockedNotice(HdrErrorEvent event) =>
+      'HDR 路由失败（${event.reason?.name ?? event.error?.runtimeType ?? 'unknown'}）';
+
+  /// Retain the full candidate outcome for diagnostics. An unimplemented
+  /// dynamic C1/C2 entry must stay visible after a static C3/C4 succeeds.
+  static String candidateFailureSummary(HdrOutputReport report) {
+    final candidates = report.prediction?.candidates;
+    if (candidates == null) return 'unknown';
+    final failed = candidates.where((c) => c.skipReason != null);
+    if (failed.isEmpty) return 'none';
+    return failed.map((c) =>
+        '${c.stage?.name ?? 'sdr'}:${c.strategy.name}:${c.skipReason!.name}'
+    ).join('|');
   }
 
   /// dvProfile 统计日志（每次播放一行 key=value，供默认顺序与样片优先级
@@ -227,6 +273,9 @@ abstract final class HdrOutputSelector {
         'presentation=${report.actual?.presentation.name ?? 'unknown'}, '
         'confidence=${report.prediction?.confidence.name ?? 'unknown'}, '
         'degrade=${report.degradeReason?.name ?? 'none'}, '
+        'metadataRequest=${report.requestedMetadataHandling?.name ?? 'none'}, '
+        'metadataObserved=${report.metadataHandlingObserved ?? 'unknown'}, '
+        'candidateFailures=${candidateFailureSummary(report)}, '
         'quality=${quality ?? 'unknown'}, '
         'codec=${codec ?? 'unknown'}';
   }
