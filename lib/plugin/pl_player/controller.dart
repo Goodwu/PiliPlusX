@@ -1819,14 +1819,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           ),
         );
         hdrRouteInfo.value = HdrOutputSelector.routeLabel(report);
-        hdrDegradeNotice.value = null;
+        // Preserve the preceding typed fallback notice until this generation
+        // succeeds without degradation. Static HDR fallback is not SDR.
+        if (report.degradeReason == null) hdrDegradeNotice.value = null;
       case final HdrDegradedEvent degraded:
         debugPrint(
           'HDR degrade event: reason=${degraded.reason.name}, '
           'diagnostic=${degraded.diagnostic}',
         );
-        // 最小处理：播放信息提示「已降级 tone-map」。是否换源由 App 后续决策。
-        hdrDegradeNotice.value = '已降级 tone-map';
+        // Surface transfer and metadata ownership, not the mere presence
+        // of a fallback, determine whether this is SDR or static HDR.
+        hdrDegradeNotice.value = HdrOutputSelector.degradeNotice(degraded);
       case final HdrCapabilityChangedEvent changed:
         final displayHdr =
             changed.capabilities.displayHdrTypes?.isNotEmpty ?? false;
@@ -1839,6 +1842,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           'HDR error event: reason=${error.reason?.name}, '
           'diagnostic=${error.diagnostic}',
         );
+        hdrOutputError.value = HdrOutputSelector.blockedNotice(error);
+        hdrRouteInfo.value = null;
       case HdrReclassifiedEvent():
         break;
     }
