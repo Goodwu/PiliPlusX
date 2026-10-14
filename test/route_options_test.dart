@@ -93,7 +93,7 @@ void main() {
       hardwareDecoding: 'mediacodec',
       android: true,
     ).resolve();
-    final caps = HdrCapabilities(
+    const caps = HdrCapabilities(
       sdkInt: 29,
       displayHdrTypes: const {2},
       hevcDecoders: const [],
