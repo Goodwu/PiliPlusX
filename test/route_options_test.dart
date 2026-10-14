@@ -86,6 +86,57 @@ void main() {
     expect(otherPlatformOptions.importPreference, VideoImportPreference.auto);
   });
 
+  test('Android copy intent becomes a real SDR decoder/import candidate', () {
+    final effective = AppVideoRouteRequest.fromPreferences(
+      hdrMode: HdrMode.auto,
+      enableHA: true,
+      hardwareDecoding: 'mediacodec',
+      android: true,
+    ).resolve();
+    final caps = HdrCapabilities(
+      sdkInt: 29,
+      displayHdrTypes: const {2},
+      hevcDecoders: const [],
+      dolbyVisionDecoders: const [],
+      p5PipelineAvailable: true,
+      dataSpaceBridgeLoaded: true,
+      dataSpaceExt: null,
+    );
+    final planned = HdrRoutePlanner.plan(
+      source: const HdrSourceDescriptor(codec: 'hevc', transfer: 'bt.1886'),
+      capabilities: caps,
+      options: effective,
+    );
+    expect(planned.playable, isTrue);
+    expect(planned.selected.route!.hwdec, 'mediacodec-copy');
+    expect(planned.selected.route!.strategy, HdrStrategy.sdrDirect);
+  });
+
+  test('Require software beats Android copy import preference', () {
+    final effective = AppVideoRouteRequest.fromPreferences(
+      hdrMode: HdrMode.auto,
+      enableHA: false,
+      hardwareDecoding: 'mediacodec',
+      android: true,
+    ).resolve();
+    final planned = HdrRoutePlanner.plan(
+      source: const HdrSourceDescriptor(codec: 'hevc', transfer: 'bt.1886'),
+      capabilities: const HdrCapabilities(
+        sdkInt: 29,
+        displayHdrTypes: {2},
+        hevcDecoders: [],
+        dolbyVisionDecoders: [],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: true,
+        dataSpaceExt: null,
+      ),
+      options: effective,
+    );
+    expect(effective.decode.isRequired, isTrue);
+    expect(planned.playable, isTrue);
+    expect(planned.selected.route!.hwdec, 'no');
+  });
+
   test('HDR off requires SDR independently of any flag', () {
     final effective = adapt(mode: HdrMode.off).resolve();
     expect(effective.output.target, VideoOutputIntent.sdr);
