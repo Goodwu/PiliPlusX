@@ -95,9 +95,9 @@ void main() {
     ).resolve();
     const caps = HdrCapabilities(
       sdkInt: 29,
-      displayHdrTypes: const {2},
-      hevcDecoders: const [],
-      dolbyVisionDecoders: const [],
+      displayHdrTypes: {2},
+      hevcDecoders: [],
+      dolbyVisionDecoders: [],
       p5PipelineAvailable: true,
       dataSpaceBridgeLoaded: true,
       dataSpaceExt: null,

@@ -378,9 +378,13 @@ void main() {
       expect(
         controller.hdrVideoSession.value,
         isNotNull,
-        reason: 'persisted valid software setting must not strand the first local source',
+        reason: 'persisted hardware intent must use the runnable copy route',
       );
-      expect(backend.plans.last.route.hwdec, 'mediacodec');
+      expect(backend.plans.single.route.hwdec, 'mediacodec-copy');
+      expect(
+        controller.hdrVideoSession.value!.report.value.actual?.hwdec,
+        'mediacodec-copy',
+      );
     } finally {
       if (!release.isCompleted) release.complete();
       messenger.setMockMethodCallHandler(channel, (call) async => null);
@@ -415,13 +419,16 @@ void main() {
         ),
         autoplay: false,
       );
-      expect(backend.plans.length, greaterThanOrEqualTo(2));
+      expect(options.importPreference, VideoImportPreference.preferCopy);
+      expect(backend.plans, hasLength(2));
       for (final plan in backend.plans) {
         expect(plan.options, same(options));
         expect(plan.route.outputTransfer, HdrOutputTransfer.sdr);
       }
-      expect(backend.plans[0].route.hwdec, 'mediacodec');
-      expect(backend.plans[1].route.hwdec, 'mediacodec-copy');
+      // The fake backend accepts the alternate import after injected failure.
+      // This tests retry ordering, not native direct-bridge authorization.
+      expect(backend.plans[0].route.hwdec, 'mediacodec-copy');
+      expect(backend.plans[1].route.hwdec, 'mediacodec');
       expect(controller.dataSource.routeOptions, same(options));
       expect(
         harness.createdPlayers.single.options.containsKey('target-prim'),
@@ -435,8 +442,17 @@ void main() {
         controller.hdrVideoSession.value!.report.value.options,
         same(options),
       );
+      expect(
+        controller.hdrVideoSession.value!.report.value.actual?.hwdec,
+        backend.plans.last.route.hwdec,
+      );
+      final configuredBeforeRefresh = backend.plans.length;
       await controller.refreshPlayer(reason: 'config-snapshot-regression');
-      expect(backend.plans.last.options, same(options));
+      expect(backend.plans.length, greaterThan(configuredBeforeRefresh));
+      for (final plan in backend.plans.skip(configuredBeforeRefresh)) {
+        expect(plan.options, same(options));
+        expect(plan.route.outputTransfer, HdrOutputTransfer.sdr);
+      }
     },
   );
 
@@ -1934,7 +1950,7 @@ class _RouteBackend implements HdrOpenBackend<HdrOpenPlan> {
     plans.add(plan);
     hwdec = plan.route.hwdec;
     if (failFirst && plans.length == 1) {
-      throw StateError('direct import failure');
+      throw StateError('injected first configure failure (${plan.route.hwdec})');
     }
   }
 
