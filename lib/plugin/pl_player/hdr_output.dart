@@ -12,8 +12,8 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// `HdrVideoSession` 会话编排。
 abstract final class HdrOutputSelector {
   /// 跨平台策略偏好入口（R2.2 可选覆写）。默认使用库默认顺序
-  /// （先 HDR 输出、HDR 中直出优先，见需求 3.4）。如需调整顺序或开启
-  /// `allowExperimental`，在此构造 `HdrRoutingPolicy`，不新增设备判断。
+  /// （先 HDR 输出、HDR 中直出优先，见需求 3.4）。如需调整顺序，
+  /// 在此构造 `HdrRoutingPolicy`，不新增设备判断。
   static const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
 
   /// Query one explicit output target before creating a Player. A failure is
@@ -201,6 +201,10 @@ abstract final class HdrOutputSelector {
       HdrStrategy.toneMapSdr => 'tone-map SDR',
       HdrStrategy.sdrDirect => 'SDR 直出',
       HdrStrategy.nativeDolbyVision => '原生杜比视界',
+      // C1 原生动态 HDR10+/Vivid 直通（§C1「原生动态 HDR」类，源名已携带
+      // 制式）。通配臂保持对旧版依赖（无这两个枚举值）可编译；仅在实际
+      // 执行命中时渲染，不冒充动态映射成功。
+      _ => '原生动态 HDR',
     };
     if (actual.presentation == HdrPresentation.sdr) {
       return routeName;

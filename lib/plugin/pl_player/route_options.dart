@@ -39,7 +39,6 @@ class AppVideoRouteRequest {
     required HdrMode hdrMode,
     required bool enableHA,
     required String? hardwareDecoding,
-    bool experimental = false,
     bool android = false,
     VideoRouteFailurePolicy failurePolicy =
         VideoRouteFailurePolicy.allowAlternatives,
@@ -110,9 +109,8 @@ class AppVideoRouteRequest {
         output: hdrMode == HdrMode.off
             ? const VideoRouteSelection.require(VideoOutputIntent.sdr)
             : const VideoRouteSelection.auto(),
-        importPreference: _importPreference(tokens),
+        importPreference: _importPreference(tokens, android: android),
         failurePolicy: failurePolicy,
-        experimental: experimental,
       ),
       legacyHwdec: hardwareDecoding,
       legacyHwdecStatus: status,
@@ -121,7 +119,19 @@ class AppVideoRouteRequest {
     );
   }
 
-  static VideoImportPreference _importPreference(List<String>? tokens) {
+  static VideoImportPreference _importPreference(
+    List<String>? tokens, {
+    required bool android,
+  }) {
+    // Android direct surface import（hwdec=mediacodec）依赖 MKSURF 桥的
+    // owner 授权（lgExperimentOwnerToken → PlatformVideoView
+    // .setLgExperimentOwner）。未授权时导入器加载失败（MKSURF: bridge not
+    // initialized → Loading failed），视频帧没有合成路径，播放永久停在
+    // BUFFERING 黑屏。owner/ACK/lease 拓扑接入之前，Android 一律映射为
+    // preferCopy：仍是 mediacodec-copy 硬件解码，只是帧经 CPU 上传合成，
+    // 不需要该桥；legacy 的 mediacodec（含默认值）表达的是"硬件解码"意图，
+    // 导入方式由路由层按可执行能力落定。
+    if (android) return VideoImportPreference.preferCopy;
     for (final token in tokens ?? const <String>[]) {
       if (token == 'auto-copy' || token == 'mediacodec-copy') {
         return VideoImportPreference.preferCopy;

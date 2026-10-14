@@ -10,12 +10,10 @@ void main() {
     HdrMode mode = HdrMode.auto,
     bool enableHA = true,
     String? hwdec = 'auto',
-    bool experimental = false,
   }) => AppVideoRouteRequest.fromPreferences(
     hdrMode: mode,
     enableHA: enableHA,
     hardwareDecoding: hwdec,
-    experimental: experimental,
   );
 
   for (final request in [
@@ -38,9 +36,15 @@ void main() {
 
   for (final entry in {
     'mediacodec-copy,mediacodec': VideoImportPreference.preferCopy,
-    'mediacodec,mediacodec-copy': VideoImportPreference.preferDirect,
+    // Android always maps to copy import: the direct mediacodec importer
+    // needs the MKSURF bridge owner authorization that this build does not
+    // ship (see _importPreference). The legacy mediacodec token (including
+    // the default) expresses hardware-decode intent; the executable import
+    // mode is the route layer's call.
+    'mediacodec,mediacodec-copy': VideoImportPreference.preferCopy,
     'auto-copy,auto-safe': VideoImportPreference.preferCopy,
-    'auto-safe': VideoImportPreference.auto,
+    'auto-safe': VideoImportPreference.preferCopy,
+    'mediacodec': VideoImportPreference.preferCopy,
   }.entries) {
     test('ordered Android legacy ${entry.key} applies import preference', () {
       final options = AppVideoRouteRequest.fromPreferences(
@@ -62,21 +66,30 @@ void main() {
     expect(request.options.output?.preference, VideoRoutePreference.auto);
     expect(request.options.decode?.preference, VideoRoutePreference.prefer);
     expect(request.options.decode?.target, VideoDecodeTarget.hardware);
-    expect(request.options.experimental, false);
     expect(request.legacyHwdecStatus, LegacyHwdecPolicyStatus.automatic);
     expect(request.legacyHwdec, 'auto');
   });
 
-  test('HDR off requires SDR independently of experimental flag', () {
-    for (final experimental in [false, true]) {
-      final effective = adapt(
-        mode: HdrMode.off,
-        experimental: experimental,
-      ).resolve();
-      expect(effective.output.target, VideoOutputIntent.sdr);
-      expect(effective.output.isRequired, true);
-      expect(effective.experimental, experimental);
-    }
+  test('Android automatic decode prefers copy import until the bridge is authorized', () {
+    final androidOptions = AppVideoRouteRequest.fromPreferences(
+      hdrMode: HdrMode.auto,
+      enableHA: true,
+      hardwareDecoding: 'auto',
+      android: true,
+    ).resolve();
+    expect(androidOptions.importPreference, VideoImportPreference.preferCopy);
+    final otherPlatformOptions = AppVideoRouteRequest.fromPreferences(
+      hdrMode: HdrMode.auto,
+      enableHA: true,
+      hardwareDecoding: 'auto',
+    ).resolve();
+    expect(otherPlatformOptions.importPreference, VideoImportPreference.auto);
+  });
+
+  test('HDR off requires SDR independently of any flag', () {
+    final effective = adapt(mode: HdrMode.off).resolve();
+    expect(effective.output.target, VideoOutputIntent.sdr);
+    expect(effective.output.isRequired, true);
   });
 
   test('HA disabled requires software and retains legacy request', () {
@@ -162,7 +175,7 @@ void main() {
     expect(request.options.output?.isRequired, true);
   });
 
-  test('failure stop is independent of decode, output and experimental', () {
+  test('failure stop is independent of decode and output', () {
     final request = AppVideoRouteRequest.fromPreferences(
       hdrMode: HdrMode.off,
       enableHA: false,
@@ -173,7 +186,6 @@ void main() {
     expect(effective.failurePolicy, VideoRouteFailurePolicy.stop);
     expect(effective.decode.isRequired, true);
     expect(effective.output.isRequired, true);
-    expect(effective.experimental, false);
   });
 
   test('request reports are canonical, immutable and value comparable', () {
@@ -186,7 +198,8 @@ void main() {
     final map = request.toMap();
     expect(() => map['legacyHwdec'] = 'auto', throwsUnsupportedError);
     expect(
-      () => (map['requested'] as Map<String, Object?>)['experimental'] = true,
+      () => (map['requested'] as Map<String, Object?>)['failurePolicy'] =
+          'stop',
       throwsUnsupportedError,
     );
     expect(() => request.migrationNotes.add('ignored'), throwsUnsupportedError);
