@@ -417,11 +417,17 @@ class IOSVariantTests(unittest.TestCase):
 
 
 class IOSPatchSemanticsTests(unittest.TestCase):
-    flutter = APP.parent / '.runtime/flutter'
+    # CI already supplies its source-verified private SDK through FLUTTER_ROOT.
+    # Keep the local workspace convention only as a path fallback, not a skip.
+    flutter = Path(os.environ.get('FLUTTER_ROOT') or APP.parent / '.runtime/flutter').resolve()
 
     def setUp(self):
-        if not self.flutter.is_dir():
-            self.skipTest('shared Flutter Git source is not present')
+        self.assertTrue(self.flutter.is_dir(),
+                        f'Flutter Git source is required for iOS patch semantics: {self.flutter}')
+        git_root = Path(subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'], cwd=self.flutter, text=True).strip()).resolve()
+        self.assertEqual(git_root, self.flutter,
+                         'iOS semantic SDK source must be its own Git root')
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
@@ -435,7 +441,7 @@ class IOSPatchSemanticsTests(unittest.TestCase):
             target = root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(subprocess.check_output(
-                ['git', 'cat-file', 'blob', f'HEAD:{relative}'], cwd=self.flutter))
+                ['git', 'cat-file', 'blob', f'{self.sdk_head}:{relative}'], cwd=self.flutter))
         subprocess.run(['git', 'init', '-b', 'fixture'], cwd=root, check=True, capture_output=True)
         subprocess.run(['git', 'config', 'user.name', 'Fixture'], cwd=root, check=True, capture_output=True)
         subprocess.run(['git', 'config', 'user.email', 'fixture@example.invalid'], cwd=root, check=True, capture_output=True)
@@ -502,6 +508,26 @@ class IOSPatchSemanticsTests(unittest.TestCase):
         with patch.object(bootstrap_tools.subprocess, 'run', side_effect=fail_reverse):
             with self.assertRaisesRegex(ValueError, r'reverse patch check failed \(19\)'):
                 bootstrap_tools.ios_sdk_semantic_witness(self.app, ios_sdk, commit)
+
+
+class IOSPatchSourceTests(unittest.TestCase):
+    def test_missing_sdk_is_a_failure_not_a_skipped_semantic_test(self):
+        probe = IOSPatchSemanticsTests('test_real_three_file_ios_chain_passes_and_android_only_chain_fails')
+        with tempfile.TemporaryDirectory() as temp:
+            with patch.object(probe, 'flutter', Path(temp) / 'missing'):
+                with self.assertRaisesRegex(AssertionError, 'Flutter Git source is required'):
+                    probe.setUp()
+
+    def test_ancestor_repository_cannot_stand_in_for_sdk_source(self):
+        probe = IOSPatchSemanticsTests('test_real_three_file_ios_chain_passes_and_android_only_chain_fails')
+        with tempfile.TemporaryDirectory() as temp:
+            parent = Path(temp).resolve()
+            subprocess.run(['git', 'init', '-b', 'fixture'], cwd=parent, check=True, capture_output=True)
+            child = parent / 'not-sdk'
+            child.mkdir()
+            with patch.object(probe, 'flutter', child):
+                with self.assertRaisesRegex(AssertionError, 'SDK source must be its own Git root'):
+                    probe.setUp()
 
 
 if __name__ == '__main__':
