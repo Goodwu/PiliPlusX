@@ -905,10 +905,16 @@ class HeaderControlState extends State<HeaderControl>
                             plPlayerController.hdrRouteInfo.value;
                         final degrade =
                             plPlayerController.hdrDegradeNotice.value;
-                        if (route == null && degrade == null) {
+                        final candidates =
+                            plPlayerController.hdrCandidateInfo.value;
+                        if (route == null && degrade == null &&
+                            candidates == null) {
                           return const SizedBox.shrink();
                         }
-                        final text = [?route, ?degrade].join(' · ');
+                        final description = [?route, ?degrade].join(' · ');
+                        final text = candidates == null
+                            ? description
+                            : '$description\n候选诊断：$candidates';
                         return ListTile(
                           dense: true,
                           title: const Text('HDR 路由'),

@@ -626,6 +626,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 播放信息展示：会话 report.actual 的路由文案（「杜比视界 P8.4 · HLG 直出」）。
   final hdrRouteInfo = RxnString();
 
+  /// Candidate results originate exclusively from HdrVideoSession's report.
+  /// A C3 static fallback must not hide C1/C2 routeNotImplemented errors.
+  final hdrCandidateInfo = RxnString();
+
   /// 播放信息展示：降级提示（Degraded 事件的 App 侧最小处理）。
   final hdrDegradeNotice = RxnString();
 
@@ -1819,6 +1823,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           ),
         );
         hdrRouteInfo.value = HdrOutputSelector.routeLabel(report);
+        final candidates = HdrOutputSelector.candidateFailureSummary(report);
+        hdrCandidateInfo.value = candidates == 'none' || candidates == 'unknown'
+            ? null
+            : candidates;
         // Preserve the preceding typed fallback notice until this generation
         // succeeds without degradation. Static HDR fallback is not SDR.
         if (report.degradeReason == null) hdrDegradeNotice.value = null;
@@ -1844,6 +1852,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
         hdrOutputError.value = HdrOutputSelector.blockedNotice(error);
         hdrRouteInfo.value = null;
+        hdrCandidateInfo.value = null;
       case HdrReclassifiedEvent():
         break;
     }
@@ -3709,6 +3718,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _cancelSubForSeek();
 
     hdrRouteInfo.value = null;
+    hdrCandidateInfo.value = null;
     hdrDegradeNotice.value = null;
     danmakuController = null;
     _stopOrientationListener();
