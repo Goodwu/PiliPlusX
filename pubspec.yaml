@@ -215,44 +215,44 @@ dependency_overrides:
       path: media_kit
       # 当前 media-kit routing 全套源码统一提交；CI 按该真实向量验证。
       # HDR10+/Vivid 动态 B1–B4 已由用户暂缓，静态 PQ/HLG 兼容输出。
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_libs_android_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/android/media_kit_libs_android_video
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_libs_ios_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/ios/media_kit_libs_ios_video
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_libs_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/universal/media_kit_libs_video
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_libs_ohos:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/ohos/media_kit_libs_ohos
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_libs_windows_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_video:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: media_kit_video
       # HDR 能力查询、Session、PQ 呈现通道与按路由管理的 YUV arm。
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   media_kit_android_dataspace_vendor:
     git:
       url: https://github.com/Goodwu/media-kit.git
       path: libs/android/media_kit_android_dataspace_vendor
       # 自动注册；App 不复制设备判断或预先 arm。
-      ref: c7247139ee2865ae43f8d0663fc77a1aa8baea91
+      ref: 9f3fecf31385ae62f48e2b4d722ec1f711dc4bd8
   cached_network_image_ce:
     git:
       url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git

@@ -5,8 +5,12 @@
 
 <!-- 2026-10-04 最终新诊断Release构建59318 exit1：Intel smoke Bad CPU type；主机arch -x86_64 /usr/bin/true亦失败且Rosetta receipt缺失，环境前置不足。保持universal门禁。双架构静态closure与独立arm64 NOW/initialize0 PASS，不能替代Intel动态/最终签名/build。等待用户自行完成官方Rosetta许可确认安装后完整重建。demo本地4K59.94已获用户“播放流畅”反馈，Pili产品流畅性/HDR仍开放。 -->
 
+<!-- 2026-10-14 一次性运维：GitHub 单账号对同一仓库网络仅允许一个 fork（PiliPlusX 已占用），无法再 fork bggRGjQaUbCoE/PiliPlus；已创建独立仓库 Goodwu/PiliPlus，以 mirror clone + push（refs/heads 与 refs/tags）复制全部分支（main/dev/dom）与全部 tag，ls-remote 双向 diff 校验引用一致，默认分支 main 与上游 HEAD 同 commit。PR/issue/release 等非 git 引用未复制。 -->
+
 ## MK-ROUTING-20261011（CORE继任）
 
+- 2026-10-15 本地agent接续（本地agent会话）：三方对账后 ff 合并远端 5 提交至 `9b55f194`（分层契约文档+PQ 载体负例回归；pubspec 冲突按交接以远端 c7247139 统一组合为准，陈旧单包 pin 7a53bc78 作废，备份 /tmp/piliplusx-pubspec-wip-7a53bc78-20261015.yaml.bak）。P0 已完成：库 d5f30c7e 三项 hdr_yuv_presentation_contract_test 失败本地复现→夹具 seam 修复→提交 `9f3fecf3` 推送 media-kit routing 并读回；库侧 video 890/890、lab 292/292、架构 4 项、routing 工具全绿。W3 已完成：App 八项 media-kit overrides 统一 9f3fecf3，`scripts/verify_routing_sources.py` 十包 roots/freshness PASS（app 9b55f194 + lib 9f3fecf3），严格 analyze 0 issue（移除新库下不可达的旧依赖兜底 switch 分支），全量 305/305 测试 PASS。CI Build failure 为 native 准入 ledger 空的预期 fail-closed（W4），不以伪造准入变绿。
+- 2026-10-15 已将本地 routing 分支快进同步至 `personal/routing/MK-ROUTING-20261011` 的 `d128d36cf`（11 commits）；4 个工作区冲突已手工合并，保留本地依赖 pin `7a53bc78` 与额外断言。恢复副本 stash `codex-preserve-before-pull-20261015` 暂留（该轮 pin 已由本轮统一更新取代）。
 - 用户最新优先级：DEVICE源码归并；CI跟进、新构建与其它开发暂停。本次两仓提交带`[skip ci]`；公共主PR不向正式base合并、不发布。
 - App PR3@9895e7dc的9代码/测试文件已按源字节归入，含DV003/DV005/DV006和debug applicationId变化；状态CODE_INTEGRATED_KNOWN_ISSUES_OPEN。HTTP/cache/track/localURL与亮度reset/事件/权限/lifecycle问题继续开放。
 - 库PR6@9a2c5768归入来源历史并完整归档原文；公共gather及跨轮拒绝断言保留，新增2兼容plan负例。FIRST-complete-only行为未启用，实际decoder序列和两个用户决策继续开放。

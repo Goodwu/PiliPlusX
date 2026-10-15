@@ -256,7 +256,8 @@ void main() {
           if (scenario == 'latest') {
             expect(latest!.output.isRequired, true);
           } else if (scenario == 'replacement') {
-            // Carried options prove that software requirement came from the request.
+            // Carried options prove that enableHA:false from app preferences
+            // survives replacement as a software requirement.
             expect(latest!.decode.isRequired, true);
           }
           expect(controller.hasBlockedTeardowns, false);
@@ -546,7 +547,7 @@ void main() {
       expect(controller.dataSource.routeOptions, same(changed));
       expect(backend.plans.last.options, same(changed));
       expect(backend.plans.last.route.outputTransfer, HdrOutputTransfer.sdr);
-      // HDR-off must survive the replacement source's options.
+      // HDR-off must survive the replacement source's rebuilt options.
       expect(changed!.output.isRequired, true);
     } finally {
       controller
