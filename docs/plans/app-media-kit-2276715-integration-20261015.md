@@ -1,5 +1,7 @@
 # PiliPlusX 最新 media-kit 对接 / 2026-10-15
 
+> 2026-10-15 分层约束更新：[App 分层解耦对接契约](media-kit-layering-integration-contract-20261015.md)，版本 `MK-ROUTING-20261011/LAYERING-20261015-r1`。后续普通 owner 工作包按库侧 L01—L12 与 App 的 APP-L01—APP-L08 验收；应用不管理 token/lease、不调用厂商 arm、不复制设备路由。本次仅更新文档。以下起点、执行步骤、pending 和测试结果是原计划历史，续接须使用最新 refs 与 PR 回执，不退回原阅读 SHA。
+
 任务：MK-ROUTING-20261011。唯一 App 分支 `routing/MK-ROUTING-20261011` / Goodwu/PiliPlusX PR1；中央 Goodwu/media-kit PR4。不另起分支、不合并主 PR、不发布 Release、不改写用户本地 WIP。
 
 ## 本轮起点与已完成历史

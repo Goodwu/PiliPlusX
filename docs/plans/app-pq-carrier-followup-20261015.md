@@ -1,5 +1,7 @@
 # Latest-library C4 follow-up / 2026-10-15
 
+> 2026-10-15 后续设计入口：[App 分层解耦对接契约](media-kit-layering-integration-contract-20261015.md)，版本 `MK-ROUTING-20261011/LAYERING-20261015-r1`，内含库侧规范链接与 APP-L01—APP-L08。普通 YUV owner 必须由库的受管输出协议补齐，不由 App 注入实验 token。本段只登记设计约束；下文为原检查点历史，最新代码与 CI/native 终态以原 PR 后继回执及实际 refs 为准，不能将旧 pending 当作当前结论。
+
 Task MK-ROUTING-20261011; continue the existing App and library routing branches, App PR1 and library PR4. Initial plan remains app-media-kit-2276715-integration-20261015.md.
 
 Implemented this continuation: App b78bfbba updates eight packages to upstream2276715; 0f0d91e adds eight query/selection/diagnostic cases, whose main hosted job116331879939 passed301 Flutter,1 WebDOM, strict analysis, bundle and source finalization (artifact11959636550, independently checked SHA256978ca798132656de6fede3e7fd81ea0d3a8cc66649ef3dcbc159eecb0cb989d8). These are historical results for that exact pair, not the candidate containing this file.
