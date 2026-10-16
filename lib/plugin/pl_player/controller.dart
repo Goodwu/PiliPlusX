@@ -620,7 +620,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     reason: 'source-not-detected',
   );
   final hdrSurfaceGeneration = 0.obs;
-  final hdrDisplaySupportsHdr = false.obs;
+  /// Optimistic on Android: the async HDR capability query may not have
+  /// completed when the video URL is first fetched — starting as true
+  /// ensures the DASH response includes DV/HDR tiers for the quality menu.
+  /// The query result can still flip this to false later, triggering a
+  /// downgrade, but the reverse (missing the HDR tier on the first fetch)
+  /// is irreversible for that source.
+  final hdrDisplaySupportsHdr =
+      (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+          ? true.obs
+          : false.obs;
   final hdrOutputError = RxnString();
 
   /// 播放信息展示：会话 report.actual 的路由文案（「杜比视界 P8.4 · HLG 直出」）。
