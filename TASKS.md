@@ -28,7 +28,10 @@
 - 完整处置与来源索引：`docs/plans/core-device-integration-20261012.json`（库中央含独立报告）；唯一`archives/conversations/media-kit-routing-20261011.md`。用户已授权确认归并后删除相应来源分支；逐ref核HEAD/祖先/处置后清理，结果回读登记中央PR4。保留全部公共routing及未合并的native原PR1分支。后续同一DEVICE从公共HEAD认领App/DV004修订，native仍原PR1；CI与其它代码维持暂停。
 
 ## 长期约束（用户 2026-10-16 确认，适用于所有实机测试验收）
-4. 面板支持 HDR（displayHdrTypes 含 HDR10/HLG 任一）即可开启包括 DV 在内的 HDR 格式选择——DV 可以走转 PQ 显示路（baseLayerConvert），不应因面板无 DV 直通传输特性而置灰。App 画质选单的置灰逻辑应查询路由规划器可行性（baseLayerConvert 是否 ok），而非独立查 displayHdrTypes。
+4. 面板支持 HDR（displayHdrTypes 含 HDR10/HLG 任一）
+5. AVC 编码内容走 `mediacodec-copy` 可能是 AVC 编码特性而非 SDR 路线问题——LG 上 AVC（h264_mediacodec+mediacodec-copy）与 HEVC（hevc_mediacodec+surfacetexture）走了不同的硬解载体路径。需加入 AVC vs HEVC 对照测试用例验证。
+
+即可开启包括 DV 在内的 HDR 格式选择——DV 可以走转 PQ 显示路（baseLayerConvert），不应因面板无 DV 直通传输特性而置灰。App 画质选单的置灰逻辑应查询路由规划器可行性（baseLayerConvert 是否 ok），而非独立查 displayHdrTypes。
 
 
 
