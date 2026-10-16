@@ -53,6 +53,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
+import 'package:media_kit_video/media_kit_video.dart' show HdrOutputDiagnostics;
 
 WebViewEnvironment? webViewEnvironment;
 
@@ -120,6 +121,10 @@ void main() async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
   try {
     MediaKit.ensureInitialized();
+    // V2 裁决（Q1 取证）：启用库侧有界 HDR 诊断（每次打开复核一条
+    // 单行记录，含等待相位/A/B 快照；不含路径与签名 URL）。仅诊断消
+    // 费，不构成路由/owner/设备判断。
+    HdrOutputDiagnostics.enabled = true;
   } catch (e) {
     // 播放内核缺失（如 Android API<28 缺 Vulkan 1.1 符号）不能阻断整个
     // 应用启动；浏览等功能照常，播放路径按 mediaKitLoadFailed 降级。
