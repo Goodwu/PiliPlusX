@@ -35,16 +35,17 @@ void main() {
   }
 
   for (final entry in {
+    // Explicit copy intent (auto-copy / mediacodec-copy, or copy named
+    // first) still maps to preferCopy; the Android default (plain
+    // mediacodec, the auto family, or direct named first) prefers direct
+    // (see _importPreference). The importer only reorders candidates inside
+    // one stage, so the copy variant stays in the ordered list as a fallback
+    // either way.
     'mediacodec-copy,mediacodec': VideoImportPreference.preferCopy,
-    // Android always maps to copy import: the direct mediacodec importer
-    // needs the MKSURF bridge owner authorization that this build does not
-    // ship (see _importPreference). The legacy mediacodec token (including
-    // the default) expresses hardware-decode intent; the executable import
-    // mode is the route layer's call.
-    'mediacodec,mediacodec-copy': VideoImportPreference.preferCopy,
+    'mediacodec,mediacodec-copy': VideoImportPreference.preferDirect,
     'auto-copy,auto-safe': VideoImportPreference.preferCopy,
-    'auto-safe': VideoImportPreference.preferCopy,
-    'mediacodec': VideoImportPreference.preferCopy,
+    'auto-safe': VideoImportPreference.preferDirect,
+    'mediacodec': VideoImportPreference.preferDirect,
   }.entries) {
     test('ordered Android legacy ${entry.key} applies import preference', () {
       final options = AppVideoRouteRequest.fromPreferences(
@@ -70,23 +71,29 @@ void main() {
     expect(request.legacyHwdec, 'auto');
   });
 
-  test('Android automatic decode prefers copy import until the bridge is authorized', () {
-    final androidOptions = AppVideoRouteRequest.fromPreferences(
-      hdrMode: HdrMode.auto,
-      enableHA: true,
-      hardwareDecoding: 'auto',
-      android: true,
-    ).resolve();
-    expect(androidOptions.importPreference, VideoImportPreference.preferCopy);
-    final otherPlatformOptions = AppVideoRouteRequest.fromPreferences(
-      hdrMode: HdrMode.auto,
-      enableHA: true,
-      hardwareDecoding: 'auto',
-    ).resolve();
-    expect(otherPlatformOptions.importPreference, VideoImportPreference.auto);
-  });
+  test(
+    'Android automatic decode prefers direct import with copy as fallback',
+    () {
+      final androidOptions = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.auto,
+        enableHA: true,
+        hardwareDecoding: 'auto',
+        android: true,
+      ).resolve();
+      expect(
+        androidOptions.importPreference,
+        VideoImportPreference.preferDirect,
+      );
+      final otherPlatformOptions = AppVideoRouteRequest.fromPreferences(
+        hdrMode: HdrMode.auto,
+        enableHA: true,
+        hardwareDecoding: 'auto',
+      ).resolve();
+      expect(otherPlatformOptions.importPreference, VideoImportPreference.auto);
+    },
+  );
 
-  test('Android copy intent becomes a real SDR decoder/import candidate', () {
+  test('Android direct intent selects the direct SDR route and keeps copy fallback', () {
     final effective = AppVideoRouteRequest.fromPreferences(
       hdrMode: HdrMode.auto,
       enableHA: true,
@@ -108,11 +115,17 @@ void main() {
       options: effective,
     );
     expect(planned.playable, isTrue);
-    expect(planned.selected.route!.hwdec, 'mediacodec-copy');
+    expect(planned.selected.route!.hwdec, 'mediacodec');
     expect(planned.selected.route!.strategy, HdrStrategy.sdrDirect);
+    // The importer only reorders within a stage: the copy variant remains an
+    // ordered fallback candidate after the direct preference.
+    expect(
+      planned.candidates.map((candidate) => candidate.route?.hwdec),
+      contains('mediacodec-copy'),
+    );
   });
 
-  test('Require software beats Android copy import preference', () {
+  test('Require software beats Android import preference', () {
     final effective = AppVideoRouteRequest.fromPreferences(
       hdrMode: HdrMode.auto,
       enableHA: false,

@@ -120,7 +120,7 @@ void main() {
       final selection = await select();
       final prediction = selection.prediction(item)!;
       expect(selection.options, same(options));
-      expect(options.importPreference, VideoImportPreference.preferCopy);
+      expect(options.importPreference, VideoImportPreference.preferDirect);
       expect(selection.allows(item), isTrue);
       expect(prediction.selected.stage, HdrRouteStage.c4);
       expect(prediction.selected.route!.strategy, HdrStrategy.baseLayerConvert);

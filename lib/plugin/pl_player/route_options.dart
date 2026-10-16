@@ -123,21 +123,20 @@ class AppVideoRouteRequest {
     List<String>? tokens, {
     required bool android,
   }) {
-    // Android direct surface import（hwdec=mediacodec）依赖 MKSURF 桥的
-    // owner 授权（lgExperimentOwnerToken → PlatformVideoView
-    // .setLgExperimentOwner）。未授权时导入器加载失败（MKSURF: bridge not
-    // initialized → Loading failed），视频帧没有合成路径，播放永久停在
-    // BUFFERING 黑屏。owner/ACK/lease 拓扑接入之前，Android 一律映射为
-    // preferCopy：仍是 mediacodec-copy 硬件解码，只是帧经 CPU 上传合成，
-    // 不需要该桥；legacy 的 mediacodec（含默认值）表达的是"硬件解码"意图，
-    // 导入方式由路由层按可执行能力落定。
-    if (android) return VideoImportPreference.preferCopy;
     for (final token in tokens ?? const <String>[]) {
       if (token == 'auto-copy' || token == 'mediacodec-copy') {
         return VideoImportPreference.preferCopy;
       }
       if (token == 'mediacodec') return VideoImportPreference.preferDirect;
     }
+    // Android 缺省声明 direct 优先（用户裁决：载体路由表对所有编码适用，
+    // legacy mediacodec/默认值不再一律降级 mediacodec-copy）。候选集与排序
+    // 由库按设备能力生成：SDK≥26 才有非 copy 的 GPU 导入（AImageReader 类
+    // 路径，不依赖 MKSURF 桥授权），copy 保留为回退；显式 copy 意图
+    // （auto-copy/mediacodec-copy）仍映射 preferCopy。该偏好只重排同组
+    // 候选，不授权新载体，也不取消失败门：direct 候选失败后的软解回退仍
+    // 按失败处理。
+    if (android) return VideoImportPreference.preferDirect;
     return VideoImportPreference.auto;
   }
 

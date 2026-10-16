@@ -379,12 +379,13 @@ void main() {
       expect(
         controller.hdrVideoSession.value,
         isNotNull,
-        reason: 'persisted hardware intent must use the runnable copy route',
+        reason:
+            'persisted hardware intent must use the runnable direct route with copy as fallback',
       );
-      expect(backend.plans.single.route.hwdec, 'mediacodec-copy');
+      expect(backend.plans.single.route.hwdec, 'mediacodec');
       expect(
         controller.hdrVideoSession.value!.report.value.actual?.hwdec,
-        'mediacodec-copy',
+        'mediacodec',
       );
     } finally {
       if (!release.isCompleted) release.complete();
@@ -420,7 +421,7 @@ void main() {
         ),
         autoplay: false,
       );
-      expect(options.importPreference, VideoImportPreference.preferCopy);
+      expect(options.importPreference, VideoImportPreference.preferDirect);
       expect(backend.plans, hasLength(2));
       for (final plan in backend.plans) {
         expect(plan.options, same(options));
@@ -428,8 +429,8 @@ void main() {
       }
       // The fake backend accepts the alternate import after injected failure.
       // This tests retry ordering, not native direct-bridge authorization.
-      expect(backend.plans[0].route.hwdec, 'mediacodec-copy');
-      expect(backend.plans[1].route.hwdec, 'mediacodec');
+      expect(backend.plans[0].route.hwdec, 'mediacodec');
+      expect(backend.plans[1].route.hwdec, 'mediacodec-copy');
       expect(controller.dataSource.routeOptions, same(options));
       expect(
         harness.createdPlayers.single.options.containsKey('target-prim'),
