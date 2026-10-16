@@ -27,6 +27,12 @@
 - CORE Web/订阅/Flutter pin与既有query/DASH/F01/R01/config保留。experimental默认false，true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10-bit/lease融合延期。
 - 完整处置与来源索引：`docs/plans/core-device-integration-20261012.json`（库中央含独立报告）；唯一`archives/conversations/media-kit-routing-20261011.md`。用户已授权确认归并后删除相应来源分支；逐ref核HEAD/祖先/处置后清理，结果回读登记中央PR4。保留全部公共routing及未合并的native原PR1分支。后续同一DEVICE从公共HEAD认领App/DV004修订，native仍原PR1；CI与其它代码维持暂停。
 
+## 长期约束（用户 2026-10-16 确认，适用于所有实机测试验收）
+
+1. DV/HDR 视频必须激活 HDR 显示（SF 层/HDR 显示状态实证），SDR 回退不计为通过。
+2. 必须使用硬解（hwdec-current 为硬解模式），软解回退不计为通过。
+3. 支持 HDR 显示的设备必须能够选择 DV/HDR 格式（UI 可选且可选后实际播放），置灰不可选=失败。
+
 ## Now（当前推进，最多 3 条）
 
 - [ ] 修复 macOS `BV1vY4y1N7TY` Dolby Vision 亮度不足
