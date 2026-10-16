@@ -1,6 +1,7 @@
 # MK-ROUTING-20261011 App
 
 ## Current State
+2026-10-16：W5 设备验证完成（可验证范围内）。App 6e14a9b18+库 9f3fecf3+源码管线 JAR a1899af2 的 APK（86047fb9…）在模拟器与两台真机执行安装/冷启/深链/输出创建/零 ANR-FATAL 验证全过；起播被**解码复核门**系统性阻断：LG 两签名（budget exhausted / endpoint changed: video-params/pixelformat）、marble 一签名（endpoint changed: hwdec-current），三台次复现=10-13"间歇 flake"在普通 App 路径实为确定性阻断，证据已归档 /tmp/w5-verify-20261015/。复核门修法属 DV004 用户裁决，本轮不改。模拟器起播观察另受 AVD 环境（DNS/时钟/dumpsys 挂起）阻塞。W4 ELF 根因=NDK r27c lld 默认无 build-id，DV001 fdee781 已修（链接加 -Wl,--build-id=sha1），待 CI 重跑。上段接续会话的 ff/W3/P0 状态仍有效；本条只更新验证与阻断事实。
 
 2026-10-15（本地agent接续会话）：ff 合并远端 5 提交至 `9b55f194`（分层契约 + PQ 载体负例；pubspec 冲突以远端 c7247139 统一组合为准，7a53bc78 单包 pin 作废）。库侧 P0：d5f30c7e 三项 hdr_yuv_presentation_contract_test 失败本地复现并修复——784df146 默认 arm 构造语义变化 × 旧 `_exercise` 夹具未注入/未声明能力；修法为经 `yuvWindowArm:` seam 注入真实管理器 + FakeArmAtoms 替身 + `_issuedPlan` 声明 yuvWindow 通道，断言与生产默认零改动；库提交 `9f3fecf3` 已推送 media-kit routing 并读回；库侧 video 890/890、lab 292/292、managed_output 4、routing 工具 6+17+27 全绿（证据 /tmp/mk-p0-fix-evidence-20261015/）。App 侧 W3：八项 overrides 统一 9f3fecf3，十包 roots/freshness PASS，analyze 0（移除新库下不可达的旧依赖兜底分支），全量 305/305。CI Build failure=native 准入 ledger 空的预期 fail-closed（W4 开放）。上段"未运行测试/analyze、未提交推送"的快进状态由本条取代：本轮已完成提交与推送，stash 恢复副本保留。
 
