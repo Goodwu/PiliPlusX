@@ -11,23 +11,30 @@ class DashRouteSelection {
   const DashRouteSelection.unknown({
     this.allowUnknown = true,
     this.options,
-    this.doviFacts = const {},
+    this.doviFactsResolver,
   }) : _sources = const {};
   DashRouteSelection._(
     Map<String, VideoRouteCapabilities> sources, {
     this.allowUnknown = true,
     this.options,
-    this.doviFacts = const {},
+    this.doviFactsResolver,
   }) : _sources = Map.unmodifiable(sources);
   final Map<String, VideoRouteCapabilities> _sources;
   final bool allowUnknown;
   final EffectiveVideoRouteOptions? options;
 
-  /// Sniffed DOVI configuration facts per source spec key (DV003): Bilibili's
-  /// DV tier carries no profile in its codec string, so the rendition's own
-  /// initialization segment is the only pre-open profile source. Absent
-  /// entries keep the unknown-DV semantics.
-  final Map<String, DoviFacts> doviFacts;
+  /// Sniffed DOVI configuration facts (DV003): Bilibili's DV tier carries no
+  /// profile in its codec string, so the rendition's own initialization
+  /// segment is the only pre-open profile source. The resolver is bound to
+  /// the rendition identity by the probe that produced it — a
+  /// VideoSourceSpec.key describes codec/geometry only and two renditions
+  /// can collide on it, so it must never become the lookup token. A missing
+  /// resolver or a null result keeps the unknown-DV semantics.
+  final DoviFacts? Function(VideoItem)? doviFactsResolver;
+
+  /// Single facts entry for every judgment path; a missing resolver and a
+  /// missing rendition are the same "unknown" case.
+  DoviFacts? _doviFactsFor(VideoItem item) => doviFactsResolver?.call(item);
 
   bool? get displayHdr {
     if (_sources.isEmpty) return null;
@@ -58,7 +65,7 @@ class DashRouteSelection {
     required VideoOutputTarget target,
     bool allowUnknown = true,
     EffectiveVideoRouteOptions? options,
-    Map<String, DoviFacts> doviFacts = const {},
+    DoviFacts? Function(VideoItem)? doviFactsResolver,
   }) async {
     final specs = <String, VideoSourceSpec>{};
     for (final item in tracks) {
@@ -82,7 +89,7 @@ class DashRouteSelection {
         return DashRouteSelection.unknown(
           allowUnknown: allowUnknown,
           options: options,
-          doviFacts: doviFacts,
+          doviFactsResolver: doviFactsResolver,
         );
       }
       final revision =
@@ -91,7 +98,7 @@ class DashRouteSelection {
         return DashRouteSelection.unknown(
           allowUnknown: allowUnknown,
           options: options,
-          doviFacts: doviFacts,
+          doviFactsResolver: doviFactsResolver,
         );
       }
       displayRevision = revision;
@@ -103,7 +110,7 @@ class DashRouteSelection {
       sources,
       allowUnknown: allowUnknown,
       options: options,
-      doviFacts: doviFacts,
+      doviFactsResolver: doviFactsResolver,
     );
   }
 
@@ -115,7 +122,7 @@ class DashRouteSelection {
           HdrOutputSelector.descriptorFromDash(
             quality: item.id,
             codec: item.codecs,
-            dovi: doviFacts[spec.key],
+            dovi: _doviFactsFor(item),
           ) ??
           const HdrSourceDescriptor(),
       specification: spec,
@@ -141,7 +148,7 @@ class DashRouteSelection {
     final descriptor = HdrOutputSelector.descriptorFromDash(
       quality: item.id,
       codec: item.codecs,
-      dovi: spec == null ? null : doviFacts[spec.key],
+      dovi: spec == null ? null : _doviFactsFor(item),
     );
     if (descriptor?.hasUnresolvedDolbyVision == true) return false;
     final hdrTier = item.id == 125 || item.id == 126 || item.id == 129;

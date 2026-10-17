@@ -405,9 +405,10 @@ void main() {
       final selection = await DashRouteSelection.query(
         tracks: [item],
         target: target,
-        doviFacts: {
-          DashRouteSelection.specification(item)!.key: facts,
-        },
+        // DV003: facts reach judgment through the rendition-bound resolver,
+        // not a spec-key map (the spec key is not a cache token).
+        doviFactsResolver: (rendition) =>
+            identical(rendition, item) ? facts : null,
       );
       // DV003 acceptance: the tier is no longer gray.
       expect(selection.allows(item), isTrue);

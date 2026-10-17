@@ -147,7 +147,22 @@ class VideoDetailController extends GetxController
   /// write: a result for a superseded playurl revision is dropped instead of
   /// polluting the cache for the next rendition.
   final Map<String, DoviFacts> _doviFactsCache = {};
-  final Set<String> _doviFactsInFlight = {};
+  final Map<String, Future<DoviFacts?>> _doviFactsInFlight = {};
+
+  /// Outer bound on one shared sniff task: the same budget a raw
+  /// sniffDoviInitSegment call gives itself, so a wedged fetch cannot hold
+  /// the route probe open past it.
+  static const Duration _doviSniffBudget = Duration(seconds: 4);
+
+  /// DV003 narrow test seam: swaps only the sniff transport; key derivation,
+  /// in-flight sharing and the cache/generation handling stay on the
+  /// production path.
+  Future<DoviFacts?> Function(VideoItem) _doviSniff = sniffDoviInitSegment;
+
+  @visibleForTesting
+  void setDoviSniffForTesting(Future<DoviFacts?> Function(VideoItem) sniff) {
+    _doviSniff = sniff;
+  }
 
   late final void Function(EffectiveVideoRouteOptions)
   _routeInvalidatedCallback = _invalidateRouteOptions;
@@ -285,7 +300,7 @@ class VideoDetailController extends GetxController
     final configRevision = _routeOptionsRevision;
     final serial = ++_routingQuerySerial;
     _routeSelection = null;
-    final doviFacts = await _resolveDoviFacts();
+    final doviFactsResolver = await _resolveDoviFacts();
     if (revision != _playbackDataRevision ||
         serial != _routingQuerySerial ||
         configRevision != _routeOptionsRevision ||
@@ -300,7 +315,7 @@ class VideoDetailController extends GetxController
         tracks: data.dash?.video ?? const [],
         target: target,
         options: options,
-        doviFacts: doviFacts,
+        doviFactsResolver: doviFactsResolver,
       );
       if (isClosed ||
           revision != _playbackDataRevision ||
@@ -323,48 +338,132 @@ class VideoDetailController extends GetxController
   /// codec string, so the rendition's own initialization segment is sniffed
   /// (one bounded Range GET) to resolve the profile before route selection.
   /// Failures stay absent from the map: unknown-DV semantics then keep the
-  /// tier gray instead of guessing.
-  String _doviFactsKey(VideoItem item) =>
-      '$_playbackDataRevision/${cid.value}/${item.baseUrl}';
+  /// tier gray instead of guessing. The key is the rendition identity —
+  /// never VideoSourceSpec.key, which only describes codec/geometry and can
+  /// collide across renditions.
+  String _doviFactsKeyFor(
+    VideoItem item, {
+    required int revision,
+    required int cid,
+  }) => '$revision/$cid/${item.baseUrl}';
 
-  Future<Map<String, DoviFacts>> _resolveDoviFacts() async {
+  String _doviFactsKey(VideoItem item) =>
+      _doviFactsKeyFor(item, revision: _playbackDataRevision, cid: cid.value);
+
+  /// DV005: the open-time hint reads the cache through the same rendition
+  /// key the resolver writes, so a re-open of the current rendition reuses
+  /// its container facts while a new revision/cid/track starts without an
+  /// inherited hint.
+  DoviFacts? get _initialDoviFacts => isLocalVideoDiagnostic
+      ? null
+      : _doviFactsCache[_doviFactsKey(firstVideo)];
+
+  @visibleForTesting
+  DoviFacts? get initialDoviFactsForTesting => _initialDoviFacts;
+
+  /// One shared task per rendition key. Every caller awaits the same future
+  /// instead of skipping, so a concurrent probe for this rendition receives
+  /// the result rather than racing a duplicate request. The commit and the
+  /// in-flight cleanup live inside the task: the write consumes only the
+  /// timeout-wrapped future's result (a late raw-sniff completion is
+  /// dropped), and the removal checks future identity so it never deletes a
+  /// replacement task registered under the same key.
+  Future<DoviFacts?> _sniffDoviTask(
+    String key,
+    VideoItem item,
+    int revision,
+    int cidValue,
+  ) {
+    final bounded = _sniffDoviBounded(item);
+    final task = bounded.then<DoviFacts?>((facts) {
+      // A result computed for this rendition must not poison a newer one.
+      if (facts != null &&
+          revision == _playbackDataRevision &&
+          cidValue == cid.value) {
+        _doviFactsCache[key] = facts;
+      }
+      return facts;
+    });
+    // The stored entry is this exact future: the cleanup only removes the
+    // slot it still owns.
+    late final Future<DoviFacts?> guarded;
+    guarded = task.whenComplete(() {
+      if (identical(_doviFactsInFlight[key], guarded)) {
+        _doviFactsInFlight.remove(key);
+      }
+    });
+    return guarded;
+  }
+
+  /// Bounded, never-throwing view of one sniff: a timeout or a failing
+  /// transport is "no facts", not a failed probe.
+  Future<DoviFacts?> _sniffDoviBounded(VideoItem item) async {
+    try {
+      // The timeout's onTimeout is runtime-checked against the reified type
+      // argument of the sniff future; an injected sniff that never returns
+      // null reifies Future<DoviFacts>, so the type is normalized first.
+      final result =
+          await _doviSniff(
+                item,
+              )
+              .then<DoviFacts?>((facts) => facts)
+              .timeout(
+                _doviSniffBudget,
+                onTimeout: () => null,
+              );
+      return result;
+    } on Object {
+      return null;
+    }
+  }
+
+  /// DV003: resolves the DOVI facts of this rendition set's unresolved-DV
+  /// tracks and returns a frozen resolver for route selection. The resolver
+  /// binds the revision/cid captured here plus a snapshot of this round's
+  /// entries, so a selection built now keeps judging exactly the rendition
+  /// this probe was for even after the active identity or cache moved on.
+  Future<DoviFacts? Function(VideoItem)> _resolveDoviFacts() async {
     final revision = _playbackDataRevision;
     final tracks = data.dash?.video ?? const <VideoItem>[];
-    final pending = <VideoItem, String>{};
+    final roundKeys = <String>{};
+    final tasks = <Future<DoviFacts?>>[];
+    // cid is a page-argument field: renditions without an unresolved-DV
+    // track never need it, matching the old per-track key derivation.
+    int? roundCid;
     for (final item in tracks) {
       if (item.id != VideoQuality.dolbyVision.code) continue;
-      final spec = DashRouteSelection.specification(item);
-      if (spec == null) continue;
-      final key = _doviFactsKey(item);
-      if (_doviFactsCache.containsKey(key) ||
-          _doviFactsInFlight.contains(key)) {
-        continue;
-      }
+      if (DashRouteSelection.specification(item) == null) continue;
       if (item.baseUrl?.isNotEmpty != true) continue;
       final descriptor = HdrOutputSelector.descriptorFromDash(
         quality: item.id,
         codec: item.codecs,
       );
       if (descriptor?.hasUnresolvedDolbyVision != true) continue;
-      pending[item] = key;
-    }
-    debugPrint('DOVI_SNIFF pending=${pending.length} cached=${_doviFactsCache.length}');
-    if (pending.isNotEmpty) {
-      _doviFactsInFlight.addAll(pending.values);
-      await Future.wait(
-        pending.entries.map((entry) async {
-          final facts = await sniffDoviInitSegment(entry.key);
-          // A late result must not poison a newer rendition: only commit
-          // while this playurl revision is still current.
-          if (facts != null && revision == _playbackDataRevision) {
-            _doviFactsCache[entry.value] = facts;
-          }
-        }),
-        eagerError: false,
+      roundCid ??= cid.value;
+      final key = _doviFactsKeyFor(item, revision: revision, cid: roundCid);
+      roundKeys.add(key);
+      if (_doviFactsCache.containsKey(key)) continue;
+      tasks.add(
+        _doviFactsInFlight.putIfAbsent(
+          key,
+          () => _sniffDoviTask(key, item, revision, roundCid!),
+        ),
       );
-      _doviFactsInFlight.removeAll(pending.values);
     }
-    return Map.unmodifiable(_doviFactsCache);
+    debugPrint(
+      'DOVI_SNIFF pending=${tasks.length} cached=${_doviFactsCache.length}',
+    );
+    await Future.wait(tasks);
+    final cidValue = roundCid;
+    if (cidValue == null) return (_) => null;
+    final Map<String, DoviFacts> snapshot = Map.unmodifiable(
+      <String, DoviFacts>{
+        for (final entry in _doviFactsCache.entries)
+          if (roundKeys.contains(entry.key)) entry.key: entry.value,
+      },
+    );
+    return (VideoItem item) =>
+        snapshot[_doviFactsKeyFor(item, revision: revision, cid: cidValue)];
   }
 
   final Map<String, VideoDecodeCapability> _decodeCapabilities = {};
@@ -1208,9 +1307,7 @@ class VideoDetailController extends GetxController
       // DV005: the sniffed DOVI facts must reach the session hint, otherwise
       // a 126-tier open with a plain hvc1 codec string is unknown DV and the
       // planner blocks it (sourceMetadataUnknown).
-      initialDoviFacts: isLocalVideoDiagnostic
-          ? null
-          : _doviFactsCache[_doviFactsKey(firstVideo)],
+      initialDoviFacts: _initialDoviFacts,
       autoFullScreenFlag: autoFullScreenFlag,
     );
 
