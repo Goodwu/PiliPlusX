@@ -5,7 +5,7 @@
 
 <!-- 2026-10-04 最终新诊断Release构建59318 exit1：Intel smoke Bad CPU type；主机arch -x86_64 /usr/bin/true亦失败且Rosetta receipt缺失，环境前置不足。保持universal门禁。双架构静态closure与独立arm64 NOW/initialize0 PASS，不能替代Intel动态/最终签名/build。等待用户自行完成官方Rosetta许可确认安装后完整重建。demo本地4K59.94已获用户“播放流畅”反馈，Pili产品流畅性/HDR仍开放。 -->
 
-<!-- 2026-10-14 一次性运维：GitHub 单账号对同一仓库网络仅允许一个 fork（PiliPlusX 已占用），无法再 fork bggRGjQaUbCoE/PiliPlus；已创建独立仓库 Goodwu/PiliPlus，以 mirror clone + push（refs/heads 与 refs/tags）复制全部分支（main/dev/dom）与全部 tag，ls-remote 双向 diff 校验引用一致，默认分支 main 与上游 HEAD 同 commit。PR/issue/release 等非 git 引用未复制。 -->
+<!-- 2026-10-17 一次性运维：GitHub 单账号对同一仓库网络仅允许一个 fork（PiliPlusX 已占用），无法再 fork bggRGjQaUbCoE/PiliPlus；已创建独立仓库 Goodwu/PiliPlus，以 mirror clone + push（refs/heads 与 refs/tags）复制全部分支（main/dev/dom）与全部 tag，ls-remote 双向 diff 校验引用一致。PR/issue/release 等非 git 引用未复制。同日新增每日同步：`.github/workflows/sync-upstream.yml` 位于专用孤儿分支 `ci/upstream-sync` 并已设为该仓默认分支（GitHub schedule 只能由默认分支触发），每日 UTC 01:30（北京 09:30）+ 手动 dispatch，镜像 main/dev/dom 与全部 tag（force+prune），脚本先取回 ci/upstream-sync 防止 --prune 误删自身。验收：dispatch 运行 39045345192 端到端成功、引用与上游 diff 一致；首次 39044871448 失败根因是该仓 Actions 默认 workflow 权限为 read 压制 GITHUB_TOKEN 写操作，已改 write。同步为强镜像语义，main/dev/dom 上不得保留自有提交。 -->
 
 ## MK-ROUTING-20261011（CORE继任）
 
@@ -31,7 +31,7 @@
 
 1. DV/HDR 视频必须激活 HDR 显示（SF 层/HDR 显示状态实证），SDR 回退不计为通过。
 2. 必须使用硬解（hwdec-current 为硬解模式），软解回退不计为通过。
-3. 支持 HDR 显示的设备必须能够选择 DV/HDR 格式（UI 可选且可选后实际播放），置灰不可选=失败。面板支持 HDR（displayHdrTypes 含 HDR10/HLG/DV 任一）即可开启包括 DV 在内的 HDR 格式选择——DV 可以走转 PQ 显示路（baseLayerConvert），不应因面板无 DV 直通传输特性而置灰；App 画质选单的置灰逻辑应查询路由规划器可行性（baseLayerConvert 是否 ok），而非独立查 displayHdrTypes。
+3. 支持 HDR 显示的设备必须能够选择 DV/HDR 格式（UI 可选且可选后实际播放），置灰不可选=失败。DV 可以走转 PQ 显示路（baseLayerConvert），不应因面板无 DV 直通传输特性而置灰。**HDR 档菜单准入策略（用户 2026-10-17 裁决，取代本条此前「App 画质选单的置灰逻辑应查询路由规划器可行性」的表述）**：(a) 档位编号即内容声明（126=杜比视界、125=HDR10、129=HDR Vivid），菜单不做第二层内容确认；(b) HDR 档的菜单被动准入只有两个同步输入——面板 HDR 能力（displayHdrTypes 含 HDR10/HLG/DV/HDR10+ 任一；vendor 输出能力串不是面板类型）与用户「HDR 模式」偏好：面板有 HDR 且未关闭 → 一律可选（白），面板无 HDR 或用户关闭 HDR → 一律灰禁并自动降级到 SDR 轨；菜单不咨询规划器、不等待嗅探；(c) 规划器可行性只在「即将打开源」时咨询（点击、冷启动、面板变化降级、设置/输出目标变化重开及一切 network rendition 开源），开源前拒绝→保留当前播放 + 提示；(d) PiliPlusX 不使用 HDR→SDR tone-map：B 站 DASH 恒带 SDR 轨，SDR 输出即播 SDR 轨，SDR 面板灰禁 HDR 档为最终态；(e) 嗅探 facts 与容器复核只服务播放层（DV005 通道 + Session 打开时复核）。
 4. **载体路由表对所有编码一律适用**（用户 2026-10-17 裁决）：任何编码都需要满足路由表，而不只是 HEVC 和 HDR/DV 视频。AVC 走 `mediacodec-copy` 不符合设计，**AVC 应走 direct 路径**（用户 2026-10-17 明确裁决"AVC走copy路径不对，应该走direct路径"）；旧条目"AVC 走 copy 可能是编码特性、需对照测试"已被本裁决取代——对照测试证据（marble 上 AVC 4K 与 HEVC/DV 4K 同一 vendor 实例级 OUT 端口失败、LG 上 AVC copy/HEVC direct 分叉）已归档，结论为路线选择问题而非编码特性。
 5. **判断只允许依据设备能力，不允许依据设备名称**（用户 2026-10-17 裁决）：App 层不得出现设备名称相关参数判断；设备专属实现收缩至 vendor ext 层（自带指纹门与能力自报），库/规划器只消费能力自报（如 pqPresentation {rgbSurface,yuvWindow}、dataSpaceExt applicable），不得以 ext id 等设备名派生字符串作为判断条件。
 

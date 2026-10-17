@@ -134,6 +134,19 @@ class _BlockedPlayerTeardown {
   final bool outputReleased;
 }
 
+/// 页面对新 options 的 rendition 决策（R1/B1 三态）。
+enum RouteOptionsDecision {
+  /// 页面已用新 options 完成重开：L 跳过 setOptions。
+  reopened,
+
+  /// 当前 rendition 仍准入：L 原地应用——无已发布会话时以新 options 重开
+  /// 既有 intent（网络首开被本次配置变化排空的场景），有会话则 setOptions。
+  keepCurrent,
+
+  /// 决策已被更新的 revision/serial/数据或页面关闭淘汰：L 直接返回。
+  superseded,
+}
+
 class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   final PlayerLifecyclePorts _lifecyclePorts;
   Player? _videoPlayerController;
@@ -461,7 +474,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   _RouteSourceIntent? _routeSourceIntent;
   int _routeOptionsRevision = 0;
   void Function(EffectiveVideoRouteOptions options)? onRouteOptionsInvalidated;
-  Future<void> Function(EffectiveVideoRouteOptions options)?
+
+  /// 页面 rendition 决策先于 session setOptions：reopened 表示页面已用新
+  /// options 完成重开（L 跳过 setOptions，避免以旧 media 再开一次）；
+  /// keepCurrent 表示当前 rendition 仍准入，setOptions 原地生效；
+  /// superseded 表示决策已过期，L 不得落地任何 Session 副作用。
+  Future<RouteOptionsDecision> Function(EffectiveVideoRouteOptions)?
   onRouteOptionsChanged;
 
   bool get usesAndroidRouting => _lifecyclePorts.usesAndroidSession;
@@ -515,7 +533,29 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           throw StateError('Previous output has not been released');
         }
       }
-      await hdrVideoSession.value?.setOptions(options);
+      // 页面 rendition 决策先于任何 Session 副作用（R1/B1）。
+      final decision =
+          await onRouteOptionsChanged?.call(options) ??
+          RouteOptionsDecision.keepCurrent;
+      // await 之后、任何 Session 副作用之前复核时效性：被淘汰的决策不得
+      // 落地（不 setOptions、不重开、不发布）。
+      if (decision == RouteOptionsDecision.superseded ||
+          revision != _routeOptionsRevision ||
+          _fsDisposed ||
+          !identical(options, _sourceRouteOptions)) {
+        return;
+      }
+      if (decision != RouteOptionsDecision.reopened) {
+        // keep-current（B2）：网络首开被本次配置变化排空时无已发布会话，
+        // ensureRouteSourceOptions 以新 options 重开既有 intent（网络源与
+        // 文件源同一路径）；已有会话则原地 setOptions。
+        final session = hdrVideoSession.value;
+        if (session == null) {
+          await ensureRouteSourceOptions(options);
+        } else {
+          await session.setOptions(options);
+        }
+      }
     } on Object catch (error) {
       if (revision == _routeOptionsRevision &&
           !_fsDisposed &&
@@ -529,10 +569,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         !identical(options, _sourceRouteOptions)) {
       return;
     }
-    final changed = onRouteOptionsChanged;
-    if (changed != null) {
-      await changed(options);
-    } else {
+    // 页面回调已在新 options 语义下完成决策（重开或原地），仅在页面未
+    // 接管 rendition 决策时兜底收敛文件源。
+    if (onRouteOptionsChanged == null) {
       await ensureRouteSourceOptions(options);
     }
   }
@@ -620,6 +659,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     reason: 'source-not-detected',
   );
   final hdrSurfaceGeneration = 0.obs;
+
   /// Optimistic on Android: the async HDR capability query may not have
   /// completed when the video URL is first fetched — starting as true
   /// ensures the DASH response includes DV/HDR tiers for the quality menu.
@@ -628,8 +668,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// is irreversible for that source.
   final hdrDisplaySupportsHdr =
       (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
-          ? true.obs
-          : false.obs;
+      ? true.obs
+      : false.obs;
   final hdrOutputError = RxnString();
 
   /// 播放信息展示：会话 report.actual 的路由文案（「杜比视界 P8.4 · HLG 直出」）。

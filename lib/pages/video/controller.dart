@@ -4,9 +4,10 @@ import 'dart:math' show min;
 import 'dart:ui';
 
 import 'package:media_kit_video/media_kit_video.dart'
-    show VideoOutputTarget, EffectiveVideoRouteOptions, VideoOutputIntent;
+    show VideoOutputTarget, EffectiveVideoRouteOptions;
 import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
 import 'package:piliplus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart' show HdrMode;
 import 'package:piliplus/plugin/pl_player/source_selection.dart';
 import 'package:piliplus/common/style.dart';
 import 'package:piliplus/common/widgets/pair.dart';
@@ -120,7 +121,13 @@ class VideoDetailController extends GetxController
   late TabController tabCtr;
 
   // 请求返回的视频信息
-  late PlayUrlModel data;
+  /// DASH 响应的可空影子：面板回调可能早于首个响应到达（请求前的
+  /// refresh 会同步触发 `_onHdrDisplayChanged`），回调读取 [data] 前必须
+  /// 先看 [_hasPlaybackData]，不允许用 try/catch 吞 LateInitializationError。
+  PlayUrlModel? _playbackData;
+  PlayUrlModel get data => _playbackData!;
+  bool get _hasPlaybackData => _playbackData != null;
+  set data(PlayUrlModel value) => _playbackData = value;
   final RxBool videoState = false.obs;
 
   /// 播放器配置 画质 音质 解码格式
@@ -164,9 +171,36 @@ class VideoDetailController extends GetxController
     _doviSniff = sniff;
   }
 
+  /// 路由相关平台判定的最窄测试 seam：生产默认 `Platform.isAndroid`，生产
+  /// 零变化；宿主测试注入 true 后才能命中 Android 专属分支。
+  bool _routingPlatformIsAndroid = Platform.isAndroid;
+
+  @visibleForTesting
+  set routingPlatformIsAndroidForTesting(bool value) {
+    _routingPlatformIsAndroid = value;
+  }
+
+  /// 本策略涉及的页面 toast 的最窄测试观察点：生产默认直接走 SmartDialog；
+  /// 宿主测试没有 overlay，注入 sink 后改为按序记录文案与相对时点。
+  void Function(String message)? _pageToastSink;
+
+  @visibleForTesting
+  set pageToastSinkForTesting(void Function(String message)? sink) {
+    _pageToastSink = sink;
+  }
+
+  void _toast(String message) {
+    final sink = _pageToastSink;
+    if (sink != null) {
+      sink(message);
+      return;
+    }
+    SmartDialog.showToast(message);
+  }
+
   late final void Function(EffectiveVideoRouteOptions)
   _routeInvalidatedCallback = _invalidateRouteOptions;
-  late final Future<void> Function(EffectiveVideoRouteOptions)
+  late final Future<RouteOptionsDecision> Function(EffectiveVideoRouteOptions)
   _routeChangedCallback = _refreshRouteOptions;
 
   void _invalidateRouteOptions(EffectiveVideoRouteOptions options) {
@@ -177,36 +211,52 @@ class VideoDetailController extends GetxController
     videoQualityMenuRevision.value++;
   }
 
-  Future<void> _refreshRouteOptions(EffectiveVideoRouteOptions options) async {
-    if (isClosed || !identical(_routeOptions, options)) return;
+  /// 设置变化重开（E1，R1/B1）：在 L 的任何 Session 副作用之前完成
+  /// rendition 决策，三态语义见 [RouteOptionsDecision]。
+  Future<RouteOptionsDecision> _refreshRouteOptions(
+    EffectiveVideoRouteOptions options,
+  ) async {
+    if (isClosed || !identical(_routeOptions, options)) {
+      return RouteOptionsDecision.superseded;
+    }
     if (isFileSource) {
+      // 文件源没有 rendition 决策，由 ensureRouteSourceOptions 收敛：尚无
+      // 已发布会话时它执行 intent.reopen（此时 L 必须跳过 setOptions，否则
+      // 会对重开后的 source 再开一次）；已有会话时 setOptions 原地生效。
+      final hadSession = plPlayerController.hdrVideoSession.value != null;
       await plPlayerController.ensureRouteSourceOptions(options);
-      return;
+      return hadSession
+          ? RouteOptionsDecision.keepCurrent
+          : RouteOptionsDecision.reopened;
     }
     final revision = _playbackDataRevision;
     final configRevision = _routeOptionsRevision;
-    if (revision == 0 || !await _probeRoutingCapabilities(revision)) {
-      return;
-    }
-    if (isClosed ||
+    if (revision == 0 ||
+        !await _probeRoutingCapabilities(revision) ||
+        isClosed ||
         revision != _playbackDataRevision ||
         configRevision != _routeOptionsRevision) {
-      return;
+      // probe 已被更新的 serial/configRevision/数据淘汰：交 L 的时效复核
+      // 直接丢弃本次决策。
+      return RouteOptionsDecision.superseded;
     }
     final current = currentVideoQa.value;
-    if (current != null && findVideoByQa(current.code) != null) {
-      await updatePlayer();
-      return;
+    if (current != null &&
+        _openAdmitsQuality(current.code) &&
+        findVideoByQa(current.code) != null) {
+      return RouteOptionsDecision.keepCurrent;
     }
-    final eligible =
-        data.dash?.video?.where(_routeAllows).toList() ?? const <VideoItem>[];
-    if (eligible.isEmpty) {
+    // 先选轨、再提交状态（复审 4）：候选经共用兜底选轨（同一 8K 资格门），
+    // 选不出可播轨时不写入虚假降档状态，按既有空集语义停播。
+    final fallback = _pickFallbackSdrTrack();
+    if (fallback == null) {
       await plPlayerController.stopForRouteOptions('当前路由配置没有可播放资源');
-      return;
+      return RouteOptionsDecision.reopened;
     }
-    currentVideoQa.value = eligible.first.quality;
-    plPlayerController.cacheVideoQa = eligible.first.quality.code;
+    currentVideoQa.value = fallback.quality;
+    plPlayerController.cacheVideoQa = fallback.quality.code;
     await updatePlayer();
+    return RouteOptionsDecision.reopened;
   }
 
   @visibleForTesting
@@ -218,6 +268,21 @@ class VideoDetailController extends GetxController
       ..onRouteOptionsChanged = _routeChangedCallback;
     return _probeRoutingCapabilities(revision);
   }
+
+  /// `probeRoutingForTesting` 不覆盖 HDR 面板回调的绑定；这是最窄的
+  /// 测试入口，绑定后经 owner 的 `onHdrDisplayChanged` 触发降级链路。
+  @visibleForTesting
+  void bindHdrDisplayCallbackForTesting() {
+    plPlayerController.onHdrDisplayChanged = _hdrDisplayChangedCallback;
+  }
+
+  @visibleForTesting
+  Future<void> refreshRoutingTargetForTesting() => _refreshRoutingTarget();
+
+  @visibleForTesting
+  Future<void> selectInitialSourceForTesting({
+    bool autoFullScreenFlag = false,
+  }) => _selectInitialSource(autoFullScreenFlag: autoFullScreenFlag);
 
   @visibleForTesting
   void invalidateRouteOptionsForTesting(EffectiveVideoRouteOptions options) =>
@@ -242,7 +307,7 @@ class VideoDetailController extends GetxController
     _videoOutputTarget = VideoOutputTarget.flutterView(view);
     plPlayerController.videoOutputTarget = _videoOutputTarget;
     _routeSelection = null;
-    if (!Platform.isAndroid ||
+    if (!_routingPlatformIsAndroid ||
         _playbackDataRevision == 0 ||
         isQuerying ||
         isFileSource) {
@@ -266,23 +331,69 @@ class VideoDetailController extends GetxController
     // An old target snapshot never authorizes the new output.
     final current = currentVideoQa.value;
     if (current == null) return;
-    if (findVideoByQa(current.code) == null) {
-      final eligible =
-          data.dash?.video?.where(_routeAllows).toList() ?? const <VideoItem>[];
-      if (eligible.isEmpty) {
+    if (!_openAdmitsQuality(current.code) ||
+        findVideoByQa(current.code) == null) {
+      // 先选轨、再提交状态（复审 4）：共用兜底选轨（同一 8K 资格门），
+      // 选不出可播轨时不写入虚假降档状态，按既有空集语义停播。
+      final fallback = _pickFallbackSdrTrack();
+      if (fallback == null) {
         await plPlayerController.stopForRouteOptions('当前显示目标没有可播放路由');
         return;
       }
-      currentVideoQa.value = eligible.first.quality;
-      plPlayerController.cacheVideoQa = eligible.first.quality.code;
+      currentVideoQa.value = fallback.quality;
+      plPlayerController.cacheVideoQa = fallback.quality.code;
     }
     await updatePlayer();
   }
 
-  bool get _allowsHdrSourceAsSdr =>
-      plPlayerController.usesAndroidRouting &&
-      _routeOptions?.output.isRequired == true &&
-      _routeOptions?.output.target == VideoOutputIntent.sdr;
+  /// 五个开源入口共用的 rendition 准入（§3.3/R2）：SDR 档在 Android 路由面
+  /// 走逐轨路由判断、其它面恒准入；HDR 档在**所有**平台都必须满足面板能力
+  /// 与用户 HDR 偏好——非 Android 面仅跳过规划器预测与逐轨路由（呈现由
+  /// 会话在 open 时裁决）。require(sdr) 不再豁免 HDR 呈现检查。
+  bool _openAdmits(VideoItem item) {
+    if (!_isHdrQuality(item.id)) {
+      if (!plPlayerController.usesAndroidRouting) return true;
+      return _routeAllows(item);
+    }
+    if (!plPlayerController.hdrDisplaySupportsHdr.value || _hdrModeOff) {
+      return false;
+    }
+    if (!plPlayerController.usesAndroidRouting) return true;
+    if (!_routeAllows(item)) return false;
+    return HdrOutputSelector.isHdrPresentable(
+      (_routeSelection ?? DashRouteSelection.unknown(options: _routeOptions))
+          .prediction(item),
+    );
+  }
+
+  bool _openAdmitsQuality(int quality) =>
+      _tracksForQuality(quality).any(_openAdmits);
+
+  /// 降级/兜底共用的 SDR 选轨（复审 4）：候选 = 非 HDR ∧ [_openAdmits]，
+  /// 先经与普通最终选源**同一** 8K 资格门（macOS 硬解确认——127 是 8K 但
+  /// 非 HDR 编号，不过滤会直接绕门），取质量值最大的档位，再交回
+  /// [findVideoByQa] 统一选定具体 codec（多 codec 8K 只会返回已确认硬解的
+  /// 那条）。返回 null 表示没有可降级到的可播 SDR 轨；调用方（D 面板降级、
+  /// E1/E2 重开兜底、playerInit 兜底）必须**先选轨、再提交状态**。
+  VideoItem? _pickFallbackSdrTrack() {
+    final admitted = tracksEligibleForPlayback(
+      tracks: (data.dash?.video ?? const <VideoItem>[])
+          .where((item) => !_isHdrQuality(item.id))
+          .where(_openAdmits)
+          .toList(),
+      gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+      decodeCapabilities: _decodeCapabilities,
+    );
+    if (admitted.isEmpty) return null;
+    final quality = admitted
+        .map((item) => item.quality.code)
+        .reduce((a, b) => a > b ? a : b);
+    return findVideoByQa(
+      quality,
+      setCodecs: true,
+      requireConfirmedEightKHardware: true,
+    );
+  }
 
   bool _routeAllows(VideoItem item) =>
       !plPlayerController.usesAndroidRouting ||
@@ -326,8 +437,9 @@ class VideoDetailController extends GetxController
       }
       if (!identical(target, _videoOutputTarget)) continue;
       _routeSelection = selection;
-      plPlayerController.hdrDisplaySupportsHdr.value =
-          selection.displayHdr ?? false;
+      // 面板标志只由 L 的 probe/事件链写入（§3.4）：selection.displayHdr
+      // 的路由查询结果不覆写它——查询失败（_sources 为空 → null）会误灰
+      // 能力正常的好面板。
       videoQualityMenuRevision.value++;
       return true;
     }
@@ -467,6 +579,21 @@ class VideoDetailController extends GetxController
   }
 
   final Map<String, VideoDecodeCapability> _decodeCapabilities = {};
+
+  /// 最窄测试注入：宿主打不到 `_probeEightKDecodeCapabilities` 的生产触发
+  /// 点（真实 playurl 响应），8K 门相关用例以此摆放探测结果；键为
+  /// [VideoDecodeCapability.key]，生产零行为变化。
+  @visibleForTesting
+  void seedDecodeCapabilitiesForTesting(
+    Iterable<VideoDecodeCapability> capabilities,
+  ) {
+    _decodeCapabilities
+      ..clear()
+      ..addAll({
+        for (final capability in capabilities) capability.key: capability,
+      });
+  }
+
   AudioQuality? currentAudioQa;
   // `findVideoByQa` is also the initial source selector. Give that first
   // transaction a safe preference before it has had a prior rendition from
@@ -768,26 +895,44 @@ class VideoDetailController extends GetxController
     );
   }
 
-  void _onHdrDisplayChanged(bool displayHdr) {
-    if (displayHdr ||
-        _allowsHdrSourceAsSdr ||
-        isFileSource ||
-        data.dash == null) {
-      return;
-    }
+  Future<void> _onHdrDisplayChanged(bool displayHdr) async {
+    if (displayHdr || isFileSource) return;
+    // 先判当前档再访问 data：非 HDR 播放与面板能力无关。
     final current = currentVideoQa.value;
     if (current == null || !_isHdrQuality(current.code)) return;
-
-    final fallback = data.dash!.video!.firstWhereOrNull(
-      (item) => !_isHdrQuality(item.id) && _routeAllows(item),
-    );
-    if (fallback == null || fallback.quality.code == current.code) return;
-
-    final newQuality = fallback.quality;
+    // 首个面板回调可能早于首个 DASH 响应（请求前的 refresh 同步触发）：
+    // 此时没有可降级的播放，交由响应后的冷启动准入处理。
+    if (!_hasPlaybackData) return;
+    final revision = _playbackDataRevision;
+    // 先选轨、再提交状态（复审 4）：共用兜底选轨（非 HDR ∧ 准入 ∧ 同一
+    // 8K 资格门）。127 是 8K 但非 HDR 编号——选不出可播轨时不得写入虚假的
+    // 降档状态（否则 currentVideoQa 停在被拒的 8K，后续回调因当前档非 HDR
+    // 直接返回，再无降级机会），也不得报「已切换」。
+    final fallbackTrack = _pickFallbackSdrTrack();
+    if (fallbackTrack == null) {
+      _toast('当前显示器不支持 HDR，且没有可播放的 SDR 画质');
+      return;
+    }
+    final newQuality = fallbackTrack.quality;
     plPlayerController.cacheVideoQa = newQuality.code;
     currentVideoQa.value = newQuality;
-    updatePlayer();
-    SmartDialog.showToast('当前显示器不支持 HDR，已切换到：${newQuality.desc}');
+    try {
+      // 「已切换到」只在 updatePlayer 的选源通过并完成初始化调用之后发出：
+      // 选源被拒时返回 false，保留当前播放且不播报成功；true 不等于播放成功。
+      if (!await updatePlayer()) return;
+    } on Object catch (error) {
+      // 本回调的 Future 由 L 丢弃：失败必须留痕而非静默吞掉，且不得再
+      // 报「已切换」。
+      debugPrint('HDR downgrade reopen failed: ${error.runtimeType}');
+      return;
+    }
+    // 重开期间可能已被新响应/新回调/页面关闭取代：不得播报过期决策。
+    if (isClosed ||
+        revision != _playbackDataRevision ||
+        currentVideoQa.value?.code != newQuality.code) {
+      return;
+    }
+    _toast('当前显示器不支持 HDR，已切换到：${newQuality.desc}');
   }
 
   bool _isHdrQuality(int? code) =>
@@ -795,10 +940,10 @@ class VideoDetailController extends GetxController
       code == VideoQuality.hdr.code ||
       code == VideoQuality.hdrVivid.code;
 
-  /// HDR eligibility and the eventual codec choice use the SAME per-track
-  /// source result; a supported rendition cannot authorize another codec.
-  bool _hdrTierPresentable(int quality) =>
-      !Platform.isAndroid || _tracksForQuality(quality).any(_routeAllows);
+  /// §1.7/X：「HDR 模式=关闭」是菜单灰禁与开源准入的第二个输入。同步读
+  /// 用户偏好，不耦合规划器；与 R 的 HdrMode.off → require(sdr) 映射同源，
+  /// 设置变化经 onRouteOptionsInvalidated 推高 videoQualityMenuRevision。
+  bool get _hdrModeOff => Pref.hdrMode == HdrMode.off;
 
   List<VideoItem> _tracksForQuality(int quality) =>
       data.dash?.video
@@ -813,18 +958,15 @@ class VideoDetailController extends GetxController
     );
   }
 
+  /// 菜单是被动的（§1.2/§1.3）：只消费面板能力与用户 HDR 偏好这两个同步
+  /// 事实，不咨询规划器、不等待嗅探、不触发能力查询。路由不可行的档位
+  /// 保持可点，点击时由开源前守卫拒绝并解释。
   VideoQualityEligibility qualityEligibility(int quality) {
-    if (Platform.isAndroid && !_tracksForQuality(quality).any(_routeAllows)) {
-      return const VideoQualityEligibility(
-        VideoQualityIneligibility.routeUnsupported,
-      );
-    }
     return videoQualityEligibility(
       quality: quality,
       tracks: _tracksForQuality(quality),
-      displaySupportsHdr:
-          _allowsHdrSourceAsSdr ||
-          plPlayerController.hdrDisplaySupportsHdr.value,
+      displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+      hdrModeOff: _hdrModeOff,
       gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
       decodeCapabilities: _decodeCapabilities,
     );
@@ -856,21 +998,39 @@ class VideoDetailController extends GetxController
     videoQualityMenuRevision.value++;
   }
 
+  /// 保留当前播放（§1.8）：开源前各道拒绝（轨存在性、面板/偏好、路由）
+  /// 都不触碰 Player；进入真实 open 之后的失败按播放器既有错误契约处理。
   Future<bool> changeVideoQuality(int quality) async {
-    final revision = _playbackDataRevision;
-    if (!await _probeRoutingCapabilities(revision)) return false;
-    final eligibility = qualityEligibility(quality);
     if (_tracksForQuality(quality).isEmpty) {
-      SmartDialog.showToast('当前分 P 不提供该画质');
+      _toast('当前分 P 不提供该画质');
       return false;
     }
+    // 面板能力与用户 HDR 偏好是同步事实，先于 probe 快速拒绝。
+    final eligibility = qualityEligibility(quality);
     if (!eligibility.enabled) {
-      SmartDialog.showToast(eligibility.message);
+      _toast(eligibility.message);
       return false;
     }
-    // 开播前预测（A7）：本机无法呈现为 HDR 的档位不请求，回落 SDR 档。
-    if (!_hdrTierPresentable(quality)) {
-      SmartDialog.showToast('当前设备无法以 HDR 呈现该档位，请选择 SDR 画质');
+    final revision = _playbackDataRevision;
+    // Android 路由面的 probe 会恰好递增一次 serial；非 Android 路由面没有
+    // probe，serial 不动，复核必须相应豁免，否则误杀全部非 Android 点击。
+    final serial = plPlayerController.usesAndroidRouting
+        ? _routingQuerySerial
+        : null;
+    final bool probed = await _probeRoutingCapabilities(revision);
+    // 陈旧 probe：被更新 revision/serial 淘汰时不提示、不报成功。
+    if (!probed ||
+        revision != _playbackDataRevision ||
+        (serial != null && serial + 1 != _routingQuerySerial)) {
+      return false;
+    }
+    // 路由拒绝统一用 routeUnsupported 文案，与面板/偏好拒绝区分。
+    if (!_openAdmitsQuality(quality)) {
+      _toast(
+        const VideoQualityEligibility(
+          VideoQualityIneligibility.routeUnsupported,
+        ).message,
+      );
       return false;
     }
     final selected = findVideoByQa(
@@ -878,14 +1038,15 @@ class VideoDetailController extends GetxController
       setCodecs: true,
       requireConfirmedEightKHardware: true,
     );
-    if (selected == null || revision != _playbackDataRevision) {
-      SmartDialog.showToast('当前画质资源不可用');
+    if (selected == null) {
+      _toast('当前画质资源不可用');
       return false;
     }
     final newQa = VideoQuality.fromCode(quality);
     plPlayerController.cacheVideoQa = newQa.code;
     currentVideoQa.value = newQa;
-    updatePlayer();
+    // await 之后再返回 true：菜单的「画质已变为」随之落在真实开源之后。
+    await updatePlayer();
     return true;
   }
 
@@ -1143,9 +1304,10 @@ class VideoDetailController extends GetxController
     bool requireConfirmedEightKHardware = false,
   }) {
     /// 根据currentVideoQa和currentDecodeFormats 重新设置videoUrl
+    /// 选源收敛点（R2）：结果交由 playerInit 边界做最终准入（B3）。
     var videoList = data.dash!.video!
         .where((i) => i.id == qa)
-        .where(_routeAllows)
+        .where(_openAdmits)
         .toList();
     if (requireConfirmedEightKHardware) {
       videoList = tracksEligibleForPlayback(
@@ -1186,10 +1348,14 @@ class VideoDetailController extends GetxController
     return bestVideo ?? videoList.first;
   }
 
-  /// 更新画质、音质
-  Future<void> updatePlayer() async {
+  /// 更新画质、音质。返回选源是否通过并完成了初始化调用：选源被拒（如 8K
+  /// 门拒）返回 false 且保留当前播放——降级路径（D/E1/E2）以此区分「已切换」
+  /// 与「未切换」。true 不是打开/播放成功的收据：playerInit 内部仍有早退路径，
+  /// 且 open 失败会落为 error 状态后正常返回。既有 `await updatePlayer();`
+  /// 调用点忽略返回值亦兼容。
+  Future<bool> updatePlayer() async {
     final currentVideoQa = this.currentVideoQa.value;
-    if (currentVideoQa == null) return;
+    if (currentVideoQa == null) return false;
     _autoPlay.value = true;
     playedTime = plPlayerController.videoPlayerController?.state.position;
     plPlayerController
@@ -1202,8 +1368,8 @@ class VideoDetailController extends GetxController
       requireConfirmedEightKHardware: true,
     );
     if (selected == null) {
-      SmartDialog.showToast('当前画质资源不可用');
-      return;
+      _toast('当前画质资源不可用');
+      return false;
     }
     firstVideo = selected;
     videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
@@ -1222,6 +1388,7 @@ class VideoDetailController extends GetxController
     }
 
     await playerInit();
+    return true;
   }
 
   Future<void>? _initPlayerIfNeeded(bool autoFullScreenFlag) {
@@ -1244,6 +1411,33 @@ class VideoDetailController extends GetxController
     Duration? seek = defaultST ?? playedTime;
     if (seek == .zero) seek = null;
     seek ??= getFirstSegment();
+    // 最终网络 rendition 准入（R2/B3）：playerInit 是所有 network open 的
+    // 提交边界（页面恢复、首次手动播放、音质/codec 变更、播放地址编辑等
+    // 入口都经此），firstVideo 不满足准入时在这里降档或拒绝。文件源与本地
+    // 诊断源没有 DASH rendition，显式例外（editPlayUrl 的手动地址也经此
+    // 入口、受同一 rendition 准入约束，地址本身不在此校验）。
+    if (!isFileSource && !isLocalVideoDiagnostic && !_openAdmits(firstVideo)) {
+      final requestedCode =
+          currentVideoQa.value?.code ?? firstVideo.quality.code;
+      var admitted = findVideoByQa(
+        requestedCode,
+        setCodecs: true,
+        requireConfirmedEightKHardware: true,
+      );
+      // 复用冷启动/降级共用兜底选轨（复审 4 统一）：非 HDR ∧ 准入 ∧
+      // 同一 8K 资格门（macOS 硬解确认，B3-d/e），具体 codec 由
+      // findVideoByQa 统一选择/复核——不选回未授权 codec。
+      admitted ??= _pickFallbackSdrTrack();
+      if (admitted == null) {
+        _toast('当前解码或 HDR 输出路径不支持该画质，已取消打开');
+        return;
+      }
+      final newQuality = admitted.quality;
+      plPlayerController.cacheVideoQa = newQuality.code;
+      currentVideoQa.value = newQuality;
+      firstVideo = admitted;
+      videoUrl = VideoUtils.getCdnUrl(admitted.playUrls);
+    }
     final request = plPlayerController.readRouteRequest();
     if (plPlayerController.usesAndroidRouting &&
         request.hasUnsupportedLegacyRequest) {
@@ -1497,165 +1691,7 @@ class VideoDetailController extends GetxController
         }
       }
 
-      final List<VideoItem> videoList = data.dash!.video!
-          .where(_routeAllows)
-          .toList();
-      if (videoList.isEmpty) {
-        await plPlayerController.stopForRouteOptions('当前配置没有可用的解码及输出路径');
-        SmartDialog.showToast('当前设备没有可用的解码及输出路径');
-        isQuerying = false;
-        return;
-      }
-      // if (kDebugMode) debugPrint("allVideosList:${allVideosList}");
-      // 当前可播放的最高质量视频
-      final curHighestVideoQa = videoList.first.quality.code;
-      // 预设的画质为null，则当前可用的最高质量
-      int targetVideoQa = curHighestVideoQa;
-      var cacheVideoQa = plPlayerController.cacheVideoQa!;
-      // Display capability has been probed above, so this is a real negative
-      // result rather than the controller's initial unknown=false state.
-      if (!_allowsHdrSourceAsSdr &&
-          !plPlayerController.hdrDisplaySupportsHdr.value &&
-          _isHdrQuality(cacheVideoQa)) {
-        final sdrVideos = videoList
-            .where((item) => !_isHdrQuality(item.id))
-            .toList();
-        if (sdrVideos.isNotEmpty) {
-          cacheVideoQa = sdrVideos
-              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
-              .quality
-              .code;
-          plPlayerController.cacheVideoQa = cacheVideoQa;
-        }
-      }
-      if (cacheVideoQa <= curHighestVideoQa) {
-        // 如果预设的画质低于当前最高
-        targetVideoQa = videoList
-            .map((item) => item.quality.code)
-            .toSet()
-            .toList()
-            .findClosestTarget(
-              (e) => e <= cacheVideoQa,
-              (a, b) => a > b ? a : b,
-            );
-      }
-      // Bilibili may report ordinary 4K (80) as the first/maximum entry in
-      // accept_quality even when the DASH list also contains HDR tiers.  On
-      // an HDR-capable display, a "highest" preference (127) must resolve to
-      // the best available HDR tier instead of silently opening ordinary 4K.
-      if (plPlayerController.hdrDisplaySupportsHdr.value &&
-          cacheVideoQa >= VideoQuality.hdr.code) {
-        final hdrVideos = videoList
-            .where((item) => _isHdrQuality(item.quality.code))
-            .where((item) => item.quality.code <= cacheVideoQa)
-            .toList();
-        if (hdrVideos.isNotEmpty) {
-          targetVideoQa = hdrVideos
-              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
-              .quality
-              .code;
-        }
-      }
-      if (!_allowsHdrSourceAsSdr &&
-          !plPlayerController.hdrDisplaySupportsHdr.value &&
-          _isHdrQuality(targetVideoQa)) {
-        final sdrVideos = videoList
-            .where((item) => !_isHdrQuality(item.id))
-            .toList();
-        if (sdrVideos.isNotEmpty) {
-          targetVideoQa = sdrVideos
-              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
-              .quality
-              .code;
-          plPlayerController.cacheVideoQa = targetVideoQa;
-        }
-      }
-      // A default 8K preference is only safe after a matching macOS hardware
-      // decode probe. During probing (or on failure), start on the best
-      // eligible non-8K rendition rather than a black AV1 output.
-      if (!qualityEligibility(targetVideoQa).enabled) {
-        final fallback = highestEligibleNonEightKTrack(
-          tracks: videoList,
-          displaySupportsHdr:
-              _allowsHdrSourceAsSdr ||
-              plPlayerController.hdrDisplaySupportsHdr.value,
-          gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
-          decodeCapabilities: _decodeCapabilities,
-        );
-        if (fallback != null) {
-          targetVideoQa = fallback.quality.code;
-          plPlayerController.cacheVideoQa = targetVideoQa;
-        }
-      }
-      // 开播前预测（R1.2/A7）：「片源与显示能力是否一致」由 predict 决定。
-      // 预测不可呈现（不可播或仅 tone-map）的 HDR 档回落到最高 SDR 档。
-      if (_isHdrQuality(targetVideoQa) && !_hdrTierPresentable(targetVideoQa)) {
-        final sdrVideos = videoList
-            .where((item) => !_isHdrQuality(item.id))
-            .toList();
-        if (sdrVideos.isNotEmpty) {
-          final sdrTarget = sdrVideos
-              .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
-              .quality
-              .code;
-          targetVideoQa = sdrTarget;
-          plPlayerController.cacheVideoQa = sdrTarget;
-        }
-      }
-      if (kDebugMode) {
-        debugPrint(
-          'Video quality selection: displayHdr='
-          '${plPlayerController.hdrDisplaySupportsHdr.value}, '
-          'cached=$cacheVideoQa, target=$targetVideoQa, '
-          'available=${videoList.map((item) => item.quality.code).join(",")}',
-        );
-      }
-      currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
-
-      /// Select the initial URL through the same track transaction used by
-      /// the menu. An 8K quality can expose AV1 and HEVC at once: a positive
-      /// HEVC probe must not be followed by the legacy preference path
-      /// selecting the unavailable AV1 rendition.
-      final selectedVideo = findVideoByQa(
-        targetVideoQa,
-        setCodecs: true,
-        requireConfirmedEightKHardware: true,
-      );
-      if (selectedVideo == null) {
-        SmartDialog.showToast('当前画质资源不可用');
-        isQuerying = false;
-        return;
-      }
-      firstVideo = selectedVideo;
-      _setVideoHeight();
-
-      videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
-
-      /// 优先顺序 设置中指定质量 -> 当前可选的最高质量
-      AudioItem? firstAudio;
-      final audioList = data.dash?.audio;
-      if (audioList != null && audioList.isNotEmpty) {
-        final List<int> audioIds = audioList.map((map) => map.id!).toList();
-        int closestNumber = audioIds.findClosestTarget(
-          (e) => e <= plPlayerController.cacheAudioQa,
-          (a, b) => a > b ? a : b,
-        );
-        if (!audioIds.contains(plPlayerController.cacheAudioQa) &&
-            audioIds.any((e) => e > plPlayerController.cacheAudioQa)) {
-          closestNumber = AudioQuality.k192.code;
-        }
-        firstAudio = audioList.firstWhere(
-          (e) => e.id == closestNumber,
-          orElse: () => audioList.first,
-        );
-        audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
-        if (firstAudio.id case final int id?) {
-          currentAudioQa = AudioQuality.fromCode(id);
-        }
-      } else {
-        audioUrl = '';
-      }
-      await _initPlayerIfNeeded(autoFullScreenFlag);
+      await _selectInitialSource(autoFullScreenFlag: autoFullScreenFlag);
     } else {
       _autoPlay.value = false;
       videoState.value = false;
@@ -1665,6 +1701,179 @@ class VideoDetailController extends GetxController
       result.toast();
     }
     isQuerying = false;
+  }
+
+  /// 冷启动实选（C 入口）：候选轨先经 [_openAdmits] 准入，缓存偏好被
+  /// 拒绝时按质量值降到最高 SDR 档并提示一次；候选集为空则停播。
+  /// 从 [queryVideoUrl] 提取仅为本切片可测（宿主打不到真实 playurl），
+  /// 判定逻辑与原内联实现一一对应。
+  Future<void> _selectInitialSource({required bool autoFullScreenFlag}) async {
+    final List<VideoItem> videoList = data.dash!.video!
+        .where(_openAdmits)
+        .toList();
+    if (videoList.isEmpty) {
+      await plPlayerController.stopForRouteOptions('当前配置没有可用的解码及输出路径');
+      SmartDialog.showToast('当前设备没有可用的解码及输出路径');
+      isQuerying = false;
+      return;
+    }
+    // if (kDebugMode) debugPrint("allVideosList:${allVideosList}");
+    // 当前可播放的最高质量视频：显式取 admitted 轨中质量值最大者，
+    // 不依赖服务器列表顺序（R4）。
+    final curHighestVideoQa = videoList
+        .map((item) => item.quality.code)
+        .reduce((a, b) => a > b ? a : b);
+    // 预设的画质为null，则当前可用的最高质量
+    int targetVideoQa = curHighestVideoQa;
+    var cacheVideoQa = plPlayerController.cacheVideoQa!;
+    final requestedVideoQa = cacheVideoQa;
+    // Display capability has been probed above, so this is a real negative
+    // result rather than the controller's initial unknown=false state.
+    // 用户关闭 HDR（§1.7/X）与面板无 HDR 同为拒绝输入。
+    if ((!plPlayerController.hdrDisplaySupportsHdr.value || _hdrModeOff) &&
+        _isHdrQuality(cacheVideoQa)) {
+      final sdrVideos = videoList
+          .where((item) => !_isHdrQuality(item.id))
+          .toList();
+      if (sdrVideos.isNotEmpty) {
+        cacheVideoQa = sdrVideos
+            .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+            .quality
+            .code;
+        plPlayerController.cacheVideoQa = cacheVideoQa;
+      }
+    }
+    if (cacheVideoQa <= curHighestVideoQa) {
+      // 如果预设的画质低于当前最高
+      targetVideoQa = videoList
+          .map((item) => item.quality.code)
+          .toSet()
+          .toList()
+          .findClosestTarget(
+            (e) => e <= cacheVideoQa,
+            (a, b) => a > b ? a : b,
+          );
+    }
+    // Bilibili may report ordinary 4K (80) as the first/maximum entry in
+    // accept_quality even when the DASH list also contains HDR tiers.  On
+    // an HDR-capable display, a "highest" preference (127) must resolve to
+    // the best available HDR tier instead of silently opening ordinary 4K.
+    if (plPlayerController.hdrDisplaySupportsHdr.value &&
+        cacheVideoQa >= VideoQuality.hdr.code) {
+      final hdrVideos = videoList
+          .where((item) => _isHdrQuality(item.quality.code))
+          .where((item) => item.quality.code <= cacheVideoQa)
+          .toList();
+      if (hdrVideos.isNotEmpty) {
+        targetVideoQa = hdrVideos
+            .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+            .quality
+            .code;
+      }
+    }
+    if ((!plPlayerController.hdrDisplaySupportsHdr.value || _hdrModeOff) &&
+        _isHdrQuality(targetVideoQa)) {
+      final sdrVideos = videoList
+          .where((item) => !_isHdrQuality(item.id))
+          .toList();
+      if (sdrVideos.isNotEmpty) {
+        targetVideoQa = sdrVideos
+            .reduce((a, b) => a.quality.code > b.quality.code ? a : b)
+            .quality
+            .code;
+        plPlayerController.cacheVideoQa = targetVideoQa;
+      }
+    }
+    // A default 8K preference is only safe after a matching macOS hardware
+    // decode probe. During probing (or on failure), start on the best
+    // eligible non-8K rendition rather than a black AV1 output.
+    if (!qualityEligibility(targetVideoQa).enabled) {
+      final fallback = highestEligibleNonEightKTrack(
+        tracks: videoList,
+        displaySupportsHdr: plPlayerController.hdrDisplaySupportsHdr.value,
+        hdrModeOff: _hdrModeOff,
+        gateEightKWithHardware: PlatformFeatureSupport.isMacOS,
+        decodeCapabilities: _decodeCapabilities,
+      );
+      if (fallback != null) {
+        targetVideoQa = fallback.quality.code;
+        plPlayerController.cacheVideoQa = targetVideoQa;
+      }
+    }
+    // 真实降档提示条件（R4）：请求/缓存的 HDR 档以有效 rendition 形式存在
+    // 于本片 DASH 且被准入拒绝；档不存在或无合格 codec 时不提示。
+    final requestedOffered = data.dash!.video!.any(
+      (item) =>
+          item.id == requestedVideoQa &&
+          DashRouteSelection.specification(item) != null,
+    );
+    final demotedFromHdr =
+        _isHdrQuality(requestedVideoQa) &&
+        targetVideoQa != requestedVideoQa &&
+        requestedOffered;
+    if (kDebugMode) {
+      debugPrint(
+        'Video quality selection: displayHdr='
+        '${plPlayerController.hdrDisplaySupportsHdr.value}, '
+        'cached=$cacheVideoQa, target=$targetVideoQa, '
+        'available=${videoList.map((item) => item.quality.code).join(",")}',
+      );
+    }
+    currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
+
+    /// Select the initial URL through the same track transaction used by
+    /// the menu. An 8K quality can expose AV1 and HEVC at once: a positive
+    /// HEVC probe must not be followed by the legacy preference path
+    /// selecting the unavailable AV1 rendition.
+    final selectedVideo = findVideoByQa(
+      targetVideoQa,
+      setCodecs: true,
+      requireConfirmedEightKHardware: true,
+    );
+    if (selectedVideo == null) {
+      SmartDialog.showToast('当前画质资源不可用');
+      isQuerying = false;
+      return;
+    }
+    firstVideo = selectedVideo;
+    _setVideoHeight();
+    // 降档提示放在最终选源成功之后（R4）：选源失败不提示「已切换」。
+    if (demotedFromHdr) {
+      final target = VideoQuality.fromCode(targetVideoQa);
+      _toast(
+        _hdrModeOff
+            ? '已关闭 HDR 输出，已切换到：${target.desc}'
+            : '当前设备无法以 HDR 播放该档位，已切换到：${target.desc}',
+      );
+    }
+
+    videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
+
+    /// 优先顺序 设置中指定质量 -> 当前可选的最高质量
+    AudioItem? firstAudio;
+    final audioList = data.dash?.audio;
+    if (audioList != null && audioList.isNotEmpty) {
+      final List<int> audioIds = audioList.map((map) => map.id!).toList();
+      int closestNumber = audioIds.findClosestTarget(
+        (e) => e <= plPlayerController.cacheAudioQa,
+        (a, b) => a > b ? a : b,
+      );
+      if (!audioIds.contains(plPlayerController.cacheAudioQa) &&
+          audioIds.any((e) => e > plPlayerController.cacheAudioQa)) {
+        closestNumber = AudioQuality.k192.code;
+      }
+      firstAudio = audioList.firstWhere(
+        (e) => e.id == closestNumber,
+        orElse: () => audioList.first,
+      );
+      audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
+      if (firstAudio.id case final int id?) {
+        currentAudioQa = AudioQuality.fromCode(id);
+      }
+    } else {
+      audioUrl = '';
+    }
+    await _initPlayerIfNeeded(autoFullScreenFlag);
   }
 
   late final List<PostSegmentModel> postList = <PostSegmentModel>[];

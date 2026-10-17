@@ -379,8 +379,7 @@ void main() {
       expect(
         controller.hdrVideoSession.value,
         isNotNull,
-        reason:
-            'persisted hardware intent must use the runnable direct route with copy as fallback',
+        reason: 'persisted hardware intent must use the runnable direct route with copy as fallback',
       );
       expect(backend.plans.single.route.hwdec, 'mediacodec');
       expect(
@@ -528,11 +527,10 @@ void main() {
       }
       ..onRouteOptionsChanged = (options) async {
         expect(options, same(invalidated));
-        expect(
-          controller.hdrVideoSession.value!.report.value.options,
-          same(options),
-        );
+        // R1/B1：回调先于 session setOptions——此刻 report 仍持有旧 options。
         changed = options;
+        // rendition 决策交还 L：keep-current，继续执行 setOptions 原地生效。
+        return RouteOptionsDecision.keepCurrent;
       };
     var setStateCalls = 0;
     try {
@@ -546,6 +544,11 @@ void main() {
       expect(setStateCalls, 1);
       expect(changed, isNotNull);
       expect(controller.dataSource.routeOptions, same(changed));
+      // setOptions 已在回调之后执行：report 携带新 options。
+      expect(
+        controller.hdrVideoSession.value!.report.value.options,
+        same(changed),
+      );
       expect(backend.plans.last.options, same(changed));
       expect(backend.plans.last.route.outputTransfer, HdrOutputTransfer.sdr);
       // HDR-off must survive the replacement source's rebuilt options.
@@ -830,7 +833,11 @@ void main() {
             true,
           );
           expect(page.routingSelectionForTesting!.displayHdr, false);
-          page.currentVideoQa.value = VideoQuality.high1080;
+          // R1 契约：rendition 仍准入时回调返回 false、由 setOptions 原地
+          // 生效；要让「配置等待真实页面源事务」的屏障可见，须让当前档在
+          // 新配置下失去准入（缓存 126 不在 DASH）→ 回调内页面降档重开
+          // selected.mp4，并被 beforeOpen 门控挂起。
+          page.currentVideoQa.value = VideoQuality.fromCode(126);
           final applying = controller.applyRoutePreferences().then((_) {
             applied = true;
           });
@@ -910,10 +917,23 @@ void main() {
       );
       final options = await tester.runAsync(() async {
         final changed = Completer<EffectiveVideoRouteOptions>();
-        controller.onRouteOptionsChanged = (options) async =>
-            changed.complete(options);
+        final session = controller.hdrVideoSession.value!;
+        controller.onRouteOptionsChanged = (options) async {
+          changed.complete(options);
+          // R1/B1 契约：回调先于 setOptions；rendition 仍准入，交还 L 原地生效。
+          return RouteOptionsDecision.keepCurrent;
+        };
         await tester.tap(find.byType(Switch));
-        return changed.future.timeout(const Duration(seconds: 5));
+        final result = await changed.future.timeout(const Duration(seconds: 5));
+        // 等 setOptions 完成：report 携带新 options 实例后再继续断言。
+        final deadline = DateTime.now().add(const Duration(seconds: 5));
+        while (!identical(session.report.value.options, result)) {
+          if (DateTime.now().isAfter(deadline)) {
+            fail('setOptions did not publish the new options within 5s');
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        return result;
       });
       await tester.pump();
       expect(GStorage.setting.get(SettingBoxKey.enableHA), false);
@@ -1952,7 +1972,9 @@ class _RouteBackend implements HdrOpenBackend<HdrOpenPlan> {
     plans.add(plan);
     hwdec = plan.route.hwdec;
     if (failFirst && plans.length == 1) {
-      throw StateError('injected first configure failure (${plan.route.hwdec})');
+      throw StateError(
+        'injected first configure failure (${plan.route.hwdec})',
+      );
     }
   }
 
