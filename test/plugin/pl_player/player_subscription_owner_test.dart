@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:PiliPlus/plugin/pl_player/models/player_subscription_owner.dart';
+import 'package:piliplus/plugin/pl_player/models/player_subscription_owner.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

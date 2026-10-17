@@ -1,0 +1,246 @@
+{
+  "scope": "Exact hosted CI evidence; source success does not prove native/device acceptance",
+  "vector": {
+    "observedAt": "2026-10-11T19:43:58.254151+00:00",
+    "heads": {
+      "PiliPlusX": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+      "media-kit": "751d0cdd69c26374d452fbf672c5600ce59f2387"
+    },
+    "matchesVerifiedVector": true
+  },
+  "runs": {
+    "38168100713": {
+      "head_sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38168100713"
+    },
+    "38168100532": {
+      "head_sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38168100532"
+    },
+    "38168100664": {
+      "head_sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "run_attempt": 1,
+      "status": "pending",
+      "conclusion": null,
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38168100664"
+    },
+    "38168113931": {
+      "head_sha": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38168113931"
+    },
+    "38168100584": {
+      "head_sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38168100584"
+    },
+    "38168100554": {
+      "head_sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38168100554"
+    },
+    "38168114089": {
+      "head_sha": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38168114089"
+    }
+  },
+  "counts": {
+    "video": {
+      "passed": 772,
+      "skipped": 3,
+      "strict": "No issues found"
+    },
+    "lab": {
+      "passed": 298,
+      "strict": "No issues found"
+    },
+    "AppFlutterEachMatrixJob": 268,
+    "PythonSource": {
+      "passed": 444,
+      "seconds": 172.79
+    },
+    "PythonBuild": {
+      "passed": 444,
+      "seconds": 155.603
+    },
+    "DarwinWidget": 9,
+    "hostQueryAssertions": 34,
+    "ChromeDom": 1
+  },
+  "sourceMatrices": {
+    "sourceRun": 38168113931,
+    "buildRun": 38168114089,
+    "platforms": [
+      "defaultAndroid",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "eachFlutterPassed": 268,
+    "strict": "No issues found",
+    "bootstrap": "fresh-source-only; 2679 tracked hashes, 10 routing packages, 261 all roots, 102 tools roots, zero escapes; exact before/after/final vector; clean original SDK; no inherited SKIP patch variable",
+    "SDK": "d3b14c876900e553bc736ca19295fc09e3853e8e"
+  },
+  "parser": {
+    "hostedPythonJobs": [
+      114554855450,
+      114554862580
+    ],
+    "actualPassedEach": 444,
+    "semanticChecks": 7,
+    "kernelCompile": "actual CI unittest invokes real Dart compile kernel and asserts exit0; temporary kernel not retained",
+    "identityProof": "7 checks unchanged; 30 commands exit0; prepared bootstrap SHA independently reconstructed from final receipt",
+    "preparedBootstrapSHA256": "fea113a579f8e0376f0d020a52419919811557503575997b459e3c499741b5dc",
+    "toolReceiptHostedAcceptance": false,
+    "proofFile": "parser-proof-verification.json"
+  },
+  "releaseFailures": {
+    "androidPink": "missing-accepted-native-input: explicit selected manifest is empty;selection;commands=[];native/deviceVerified=false",
+    "linux": "private PUB_CACHE /home/runner/.pub-cache missing",
+    "windows": "path ../media-kit/libs/windows/media_kit_libs_windows_video missing;pubget66",
+    "ios": "media_kit/core vendor/video expected0fa6 but mismatch",
+    "mac": "accepted release version tag missing"
+  },
+  "OHOSActualInputs": [
+    "2026-10-11T19:27:39.9655489Z HEAD is now at 2a60daab Merge 751d0cdd69c26374d452fbf672c5600ce59f2387 into d761922721ad8da6bb186abd270bb096100944ea",
+    "2026-10-11T19:28:22.1413335Z HEAD is now at 2ece1aae docs+test: HCPP input block 设计契约文档与静态契约测试脚本",
+    "2026-10-11T19:29:51.2816368Z Artifact ohos-pubspec-lock has been successfully uploaded! Final size is 4896 bytes. Artifact ID is 11712424964",
+    "2026-10-11T19:31:20.2066093Z ✓ Built build/ohos/hap/entry-default-unsigned.hap (61.1MB).",
+    "2026-10-11T19:31:20.5733176Z       \"sha256\": \"cd9530ba9f8d8a42bdfeeb22f7f085ff782b6933356912e2cda3c647beaa6f94\"",
+    "2026-10-11T19:31:20.5741746Z   \"source_commit\": \"2a60daab1f0d33dbf3862850523095c3d33b6077\",",
+    "2026-10-11T19:31:22.9980598Z Artifact media-kit-ohos-arm64-unsigned has been successfully uploaded! Final size is 27336143 bytes. Artifact ID is 11712609539"
+  ],
+  "limits": [
+    "native selection missing accepted input is rejection proof, not positive native/device",
+    "general initialpending snapshot only",
+    "kernel test checks compiler exit0; ephemeral dill itself is not retained as exported artifact",
+    "parser hostedAcceptance field false is tool boundary; actual two hosted jobs succeeded"
+  ],
+  "fullEvidence": "summary.json",
+  "index": "evidence-index.json",
+  "history": "Earlier failure vectors remain unchanged in their original evidence directories; no prior result relabeled",
+  "artifacts": [
+    {
+      "run": "38168100713",
+      "id": 11712948389,
+      "zipSHA256": "78c58dd13ba6b3d0fd904b4d29269e28cd526345691dd2dbf495af11d45ca75a"
+    },
+    {
+      "run": "38168100713",
+      "id": 11712479542,
+      "zipSHA256": "69ddb6f70191c0bebda1a27822d426fdc2ac175f841b223e5e76cb844cb45113"
+    },
+    {
+      "run": "38168100713",
+      "id": 11712982973,
+      "zipSHA256": "14bfbd3f92aac43ddbb4c365c61b27f49126939931fcd64d936c2d5066865170"
+    },
+    {
+      "run": "38168100532",
+      "id": 11712424964,
+      "zipSHA256": "c35f5a2424fdc0279b81e864ee01234962c3fe0940cc2370bb5453b0850e177a"
+    },
+    {
+      "run": "38168113931",
+      "id": 11712609866,
+      "zipSHA256": "b375b0654ea34709476f8799334e658a7b5226c6ce1ce184f1338d670ce95861"
+    },
+    {
+      "run": "38168113931",
+      "id": 11713250310,
+      "zipSHA256": "03b769eafc06dc52e0b8ce1945c6232ebee6bccca9c5c615b77da251b11c153e"
+    },
+    {
+      "run": "38168113931",
+      "id": 11713620035,
+      "zipSHA256": "a54bf490d8fa7b26e9360786543cd87faf6eef45a3d19e8edec77ee780533d7f"
+    },
+    {
+      "run": "38168113931",
+      "id": 11712749595,
+      "zipSHA256": "5dfdcbc75c010a7ad35a9309867ccaa72eb782753aa209a38b76713b5444838d"
+    },
+    {
+      "run": "38168113931",
+      "id": 11712604745,
+      "zipSHA256": "fe9e82fbe9aa12fe620a8114b643c4fa8ff74c29d2dbc8facd85744ba260b55a"
+    },
+    {
+      "run": "38168100584",
+      "id": 11711909891,
+      "zipSHA256": "86ceb0a6de4d0959c0f0cab2bc9cf08b208e1f6d220729a4e8397afdc988f8fa"
+    },
+    {
+      "run": "38168100554",
+      "id": 11712509587,
+      "zipSHA256": "78df1aa50094e9cbb26a12afffb01dcbf3b8fb8b429d6410435439735aca67bb"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712804256,
+      "zipSHA256": "f481941359816f3dd7865aadc5ab892ff07dc733a074de08deec9eb432547b2f"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712809238,
+      "zipSHA256": "bc16f1f9cb1af099ede6b111b3f13947bffd62628d891f2e47cdd615316c1d2f"
+    },
+    {
+      "run": "38168114089",
+      "id": 11713170315,
+      "zipSHA256": "853ba555a8186071bada3a2e915883ce66c30bb1f0f3c815e9e0562521e84382"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712704527,
+      "zipSHA256": "bb80b3da439462f764ac4839f1ba3671d5e83c05a966c12f9ca3e632d18151e4"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712449501,
+      "zipSHA256": "34cb90026a0356ec8e700aed607f0687be1f1b2d8579ae2ec5ba0a890c9f0aa9"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712224176,
+      "zipSHA256": "68dda9c9c20aee57429096cd1cb85bba20a4177d19409d32170e4861736ccffa"
+    },
+    {
+      "run": "38168114089",
+      "id": 11712409679,
+      "zipSHA256": "e875ae5d1fdbaa9f73f3b10dc60339e682be31104d4081b6a335f22a6020afa2"
+    },
+    {
+      "run": "38168114089",
+      "id": 11713311097,
+      "zipSHA256": "0b327b3b9bc91ea14f88fab9f446044dfeb6e1e08703c44856dc486a92c7d464"
+    }
+  ],
+  "sourceVector": {
+    "appSHA": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+    "appTree": "3cd578c3d6e135539b77ac9a7d6696710a410ea9",
+    "librarySHA": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+    "libraryTree": "8ba73d04994a0ccc8af30613e0569dfe608e91d6"
+  },
+  "verdict": "Library source video772+3skip/lab298strictclean. App source success at6c4+751, Build embedded source/Python allsuccess; Build failure6Release incl realnativeemptyinputrejection. Actual hostedPython444 twice and7bootstrapboundparsersemantic/identity/kernel checks pass, fullfinalize freshness stable; no native/devicepositive.",
+  "rawIndex": {
+    "path": "evidence-index.json",
+    "fullSummary": "summary.json",
+    "rawLogCount": 25
+  }
+}

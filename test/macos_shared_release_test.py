@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
@@ -483,8 +484,23 @@ class SharedReleaseTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/mac.yml").read_text()
         self.assertLess(workflow.index("Validate source and approved shared inputs"),
                         workflow.index("Setup Flutter"))
-        self.assertIn("if: success()", workflow)
-        self.assertIn("if: failure()", workflow)
+        def step(name: str) -> str:
+            match = re.search(r"^      - name: " + re.escape(name) + r"\n(.*?)(?=^      - |\Z)",
+                              workflow, re.M | re.S)
+            self.assertIsNotNone(match, f"missing workflow step: {name}")
+            return match.group(1)
+
+        preflight = step("Validate source and approved shared inputs")
+        self.assertIn("if: ${{ !inputs.routing-mode }}", preflight)
+        self.assertIn("run_macos_shared_release.py --preflight", preflight)
+        self.assertIn("if: ${{ !inputs.routing-mode }}", step("Setup Flutter"))
+        self.assertIn("if: ${{ !inputs.routing-mode }}", step("Build and verify shared release distribution"))
+        success_guard = "if: ${{ !inputs.routing-mode && success() }}"
+        self.assertIn(success_guard, step("Generate and verify release metadata"))
+        self.assertIn(success_guard, step("Upload successful shared release payloads"))
+        self.assertIn("if: ${{ !inputs.routing-mode && failure() }}", step("Upload failure diagnostics"))
+        self.assertIn("if: ${{ always() && inputs.routing-mode }}",
+                      step("Upload routing macOS source and native availability diagnostics"))
         self.assertIn("release-macos-arm64", workflow)
         self.assertIn("shared-distribution.json", (ROOT / "scripts/release_manifest.py").read_text())
         self.assertIn('--source-checkout "$GITHUB_WORKSPACE"', workflow)

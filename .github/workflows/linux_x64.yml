@@ -8,19 +8,158 @@ on:
         required: false
         default: ""
         type: string
+      routing-mode:
+        description: "Prepare the exact routing source vector and stop before native consumption."
+        required: false
+        default: false
+        type: boolean
+      app-sha:
+        description: "Exact App commit from the shared routing-vector job."
+        required: false
+        default: ""
+        type: string
+      media-kit-sha:
+        description: "Exact media-kit commit from the shared routing-vector job."
+        required: false
+        default: ""
+        type: string
   workflow_dispatch:
+    inputs:
+      routing-mode:
+        description: "Direct dispatch cannot capture the shared routing source vector."
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build-linux-app:
-    name: Release Linux x64
+    name: Linux x64 workflow
     runs-on: ubuntu-latest
     steps:
+      - name: Reject uncaptured routing dispatch before any production step
+        if: ${{ (inputs.routing-mode && (inputs.app-sha == '' || inputs.media-kit-sha == '')) || (!inputs.routing-mode && inputs.media-kit-sha != '') || (github.ref_name == 'routing/MK-ROUTING-20261011' && !inputs.routing-mode) }}
+        shell: pwsh
+        run: throw 'Uncaptured routing dispatch is refused; invoke this workflow through build.yml routing-vector.'
+
+      - name: Prepare routing receipts directory
+        if: ${{ inputs.routing-mode }}
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP/rb/r" | Out-Null
+
+      - name: Configure exact source checkout line endings and path support
+        if: ${{ inputs.routing-mode }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git config --global core.longpaths true
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to enable Git long paths' }
+          git config --global core.autocrlf false
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to disable Git line conversion' }
+          git config --global core.eol lf
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to set Git LF checkout' }
+
+      - name: Checkout exact App source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v4
+        with:
+          repository: Goodwu/PiliPlusX
+          ref: ${{ inputs.app-sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact media-kit source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ inputs.media-kit-sha }}
+          path: media-kit
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare isolated current-source SDK and package patches
+        if: ${{ inputs.routing-mode }}
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ inputs.app-sha }}
+          media-kit-sha: ${{ inputs.media-kit-sha }}
+          platform: linux
+
+      - name: Verify current media-kit package resolution
+        if: ${{ inputs.routing-mode && steps.prepare.outcome == 'success' }}
+        working-directory: app
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output "$env:RUNNER_TEMP/rb/r/routing-sources-linux.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Current media-kit source resolution verification failed' }
+          flutter build bundle --debug --no-pub
+          if ($LASTEXITCODE -ne 0) { throw 'Current-source Flutter bundle build failed' }
+
+      - name: Finalize current-source freshness
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        id: finalize
+        working-directory: app
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root $env:FLUTTER_ROOT --private-root '${{ steps.prepare.outputs.private-root }}' --output "$env:RUNNER_TEMP/rb/r" --expected-app-sha '${{ inputs.app-sha }}' --expected-media-kit-sha '${{ inputs.media-kit-sha }}' --platform linux --finalize
+          if ($LASTEXITCODE -ne 0) { throw 'Final current-source freshness verification failed' }
+
+      - name: Fail closed because no current native producer input is available
+        if: ${{ inputs.routing-mode && steps.finalize.outcome == 'success' }}
+        id: native_block
+        shell: pwsh
+        env:
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+          ROUTING_RESULTS: ${{ runner.temp }}/rb/r
+          NATIVE_ROOT: ${{ runner.temp }}/routing-native-linux
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $diagnostic = [ordered]@{
+            taskId = 'MK-ROUTING-20261011'
+            stage = 'SOURCE_PREPARED_NATIVE_BLOCKED'
+            status = 'linux-current-native-input-unavailable'
+            platform = 'linux'
+            appCommit = $env:APP_SHA
+            mediaKitCommit = $env:MEDIA_KIT_SHA
+            bootstrapReceipt = (Join-Path $env:ROUTING_RESULTS 'bootstrap.json')
+            bootstrapStatus = 'fresh-source-only'
+            currentConsumer = 'media_kit_video/linux/CMakeLists.txt -> Flutter Linux CMake consumer'
+            previousDownloadUrls = @('https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip', 'https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64_header.zip')
+            currentProducerReceipt = $null
+            currentProducerReceiptStatus = 'not-provided-to-this-workflow'
+            nativeInputRoot = $env:NATIVE_ROOT
+            nativeInputRootExists = (Test-Path -LiteralPath $env:NATIVE_ROOT)
+            nativeBinaryProvenanceVerified = $false
+            deviceTest = $false
+          }
+          $json = $diagnostic | ConvertTo-Json -Depth 8
+          [System.IO.File]::WriteAllText((Join-Path $env:ROUTING_RESULTS 'linux-native-blocked.json'), $json + "`n", [System.Text.UTF8Encoding]::new($false))
+          throw 'SOURCE_PREPARED_NATIVE_BLOCKED: current native producer receipt and accepted local input are unavailable.'
+
+      - name: Upload routing source and native availability diagnostics
+        if: ${{ always() && inputs.routing-mode }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: routing-linux-source-native-diagnostics-${{ inputs.app-sha }}
+          path: ${{ runner.temp }}/rb/r
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Checkout repository
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Install dependencies
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake libgtk-3-dev ninja-build libayatana-appindicator3-dev unzip webkit2gtk-4.1 libasound2-dev rpm patchelf
@@ -41,6 +180,7 @@ jobs:
         shell: bash
 
       - name: Setup flutter
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -48,36 +188,46 @@ jobs:
           cache: true
 
       - name: Set and Extract version
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         shell: pwsh
         run: lib/scripts/build.ps1 linux
 
       - name: Apply Patch
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         shell: pwsh
         run: lib/scripts/patch.ps1 Linux
 
       - name: Resolve locked dependencies
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: flutter pub get --enforce-lockfile
 
       - name: Patch extended nested scroll view pointer boundary
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: python3 scripts/prepare_ohos_package_patches.py --workspace "$GITHUB_WORKSPACE"
 
       - name: Verify media-kit lock
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
       - name: Verify workflow media-kit references
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: python3 scripts/verify_workflow_media_kit_refs.py --commit 73536efdda482f2d5eefe2feb7038db419944b96
 
         #TODO: deb and rpm packages need to be build
       - name: Build Linux
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: flutter build linux --release --dart-define-from-file=pili_release.json --no-pub
 
       - name: Verify Linux architecture
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: python3 scripts/verify_binary_arch.py build/linux/x64/release/bundle/piliplus --platform linux --arch x86_64
 
       - name: Package .tar.gz
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: tar -zcvf PiliPlus_linux_${{ env.version }}_amd64.tar.gz -C build/linux/x64/release/bundle .
 
       - name: Packege deb
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: |
           printf "建立构建目录...\n"
           mkdir "PiliPlus_linux_${{ env.version }}_amd64"
@@ -121,6 +271,7 @@ jobs:
         shell: bash
 
       - name: Packege rpm
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: |
           printf "建立 RPM 构建目录...\n"
           RPM_BUILD_ROOT="$PWD/rpm_build"
@@ -200,6 +351,7 @@ jobs:
         shell: bash
 
       - name: Package AppImage
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: |
           printf "下载 appimagetool...\n"
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
@@ -243,6 +395,7 @@ jobs:
         shell: bash
 
       - name: Generate Linux release manifest
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         run: |
           mkdir -p release-metadata/linux
           cp PiliPlus_linux_*.tar.gz PiliPlus_linux_*.deb PiliPlus_linux_*.rpm PiliPlus_linux_*.AppImage release-metadata/linux/
@@ -256,7 +409,7 @@ jobs:
           mv release-metadata/linux/SHA256SUMS PiliPlus_linux_${{ env.version }}_amd64.SHA256SUMS
 
       - name: Release
-        if: ${{ inputs.tag != '' && !contains(inputs.tag, 'test') }}
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' && inputs.tag != '' && !contains(inputs.tag, 'test') }}
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag }}
@@ -272,6 +425,7 @@ jobs:
             PiliPlus_linux_*.SHA256SUMS
 
       - name: Upload linux targz package
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: actions/upload-artifact@v7
         with:
           archive: false
@@ -282,6 +436,7 @@ jobs:
             PiliPlus_linux_*.SHA256SUMS
 
       - name: Upload linux deb package
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: actions/upload-artifact@v7
         with:
           archive: false
@@ -289,6 +444,7 @@ jobs:
           path: PiliPlus_linux_*.deb
 
       - name: Upload linux rpm package
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: actions/upload-artifact@v7
         with:
           archive: false
@@ -296,6 +452,7 @@ jobs:
           path: PiliPlus_linux_*.rpm
 
       - name: Upload linux AppImage package
+        if: ${{ !inputs.routing-mode && inputs.media-kit-sha == '' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
         uses: actions/upload-artifact@v7
         with:
           archive: false

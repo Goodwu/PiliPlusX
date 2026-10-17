@@ -11,46 +11,235 @@ on:
         description: Immutable source commit; must equal the peeled release tag commit
         required: true
         type: string
+      routing-mode:
+        description: Prepare the captured App/library source vector and stop before native consumption.
+        required: false
+        default: false
+        type: boolean
+      app-sha:
+        description: Exact App commit from the shared routing-vector job.
+        required: false
+        default: ''
+        type: string
+      media-kit-sha:
+        description: Exact media-kit commit from the shared routing-vector job.
+        required: false
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       tag:
         description: Release tag to build
         required: true
         type: string
+      routing-mode:
+        description: Direct dispatch cannot capture the shared routing source vector.
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build-mac-app:
-    name: macOS shared release (ARM64 hosted)
+    name: macOS workflow (ARM64 hosted)
     runs-on: macos-26
     permissions:
       contents: read
     env:
       PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
       PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
-      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: "1"
+      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: ${{ !inputs.routing-mode && '1' || '' }}
     steps:
+      - name: Reject uncaptured routing dispatch before any production step
+        shell: bash
+        env:
+          ROUTING_MODE: ${{ inputs.routing-mode }}
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+          APP_REF: ${{ inputs.ref }}
+          HEAD_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$ROUTING_MODE" == "true" ]]; then
+            mkdir -p "$RUNNER_TEMP/rb/r"
+            printf 'routing-mode=%s\napp=%s\nmedia-kit=%s\nref=%s\n' \
+              "$ROUTING_MODE" "$APP_SHA" "$MEDIA_KIT_SHA" "$APP_REF" > "$RUNNER_TEMP/rb/r/dispatch-preflight.txt"
+            [[ "$APP_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Routing macOS requires a captured 40-character App SHA.' >&2; exit 1; }
+            [[ "$MEDIA_KIT_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Routing macOS requires a captured 40-character media-kit SHA.' >&2; exit 1; }
+            [[ "$APP_REF" == "$APP_SHA" ]] || { echo 'Routing macOS ref must equal the captured App SHA.' >&2; exit 1; }
+          else
+            [[ -z "$MEDIA_KIT_SHA" ]] || { echo 'A media-kit SHA requires routing mode.' >&2; exit 1; }
+            [[ "$HEAD_NAME" != 'routing/MK-ROUTING-20261011' ]] || { echo 'Direct routing-branch builds are refused; invoke build.yml with its captured source vector.' >&2; exit 1; }
+          fi
+
+      - name: Prepare routing receipts directory
+        if: ${{ inputs.routing-mode }}
+        shell: bash
+        env:
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+        run: |
+          set -euo pipefail
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          mkdir -p "$RUNNER_TEMP/rb/r"
+          printf 'ROUTING_RESULTS=%s\nEXPECTED_APP_SHA=%s\nEXPECTED_MEDIA_KIT_SHA=%s\n' \
+            "$RUNNER_TEMP/rb/r" "$APP_SHA" "$MEDIA_KIT_SHA" >> "$GITHUB_ENV"
+
+      - name: Checkout exact routing App source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v7
+        with:
+          repository: Goodwu/PiliPlusX
+          ref: ${{ inputs.app-sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact routing media-kit source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v7
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ inputs.media-kit-sha }}
+          path: media-kit
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify routing App base
+        if: ${{ inputs.routing-mode }}
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$EXPECTED_MEDIA_KIT_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" | tee "$ROUTING_RESULTS/source.txt"
+
+      - name: Bootstrap private current macOS sources
+        if: ${{ inputs.routing-mode }}
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ inputs.app-sha }}
+          media-kit-sha: ${{ inputs.media-kit-sha }}
+          platform: macos
+
+      - name: Verify current media-kit source resolution before bundle
+        if: ${{ inputs.routing-mode && steps.prepare.outcome == 'success' }}
+        id: source_verify_before
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output "$ROUTING_RESULTS/routing-sources-before.json" 2>&1 | tee "$ROUTING_RESULTS/source-verify-before.log"
+
+      - name: Build current routing macOS Flutter bundle
+        if: ${{ inputs.routing-mode && steps.prepare.outcome == 'success' && steps.source_verify_before.outcome == 'success' }}
+        id: routing_bundle
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build bundle --debug --no-pub 2>&1 | tee "$ROUTING_RESULTS/bundle-build.log"
+
+      - name: Verify current media-kit source resolution after bundle
+        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == 'success' && steps.routing_bundle.outcome == 'success' }}
+        id: source_verify_after
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output "$ROUTING_RESULTS/routing-sources-after.json" 2>&1 | tee "$ROUTING_RESULTS/source-verify-after.log"
+
+      - name: Finalize current routing sources and freshness
+        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == 'success' && steps.routing_bundle.outcome == 'success' && steps.source_verify_after.outcome == 'success' }}
+        id: finalize
+        working-directory: app
+        shell: bash
+        env:
+          PRIVATE_ROOT: ${{ steps.prepare.outputs.private-root }}
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "$PRIVATE_ROOT" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform macos --finalize 2>&1 | tee "$ROUTING_RESULTS/source-finalize.log"
+
+      - name: Fail closed because no current macOS native producer input is available
+        if: ${{ inputs.routing-mode && steps.routing_bundle.outcome == 'success' && steps.source_verify_after.outcome == 'success' && steps.finalize.outcome == 'success' }}
+        id: native_block
+        shell: bash
+        env:
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+          ROUTING_RESULTS: ${{ runner.temp }}/rb/r
+          NATIVE_ROOT: ${{ runner.temp }}/routing-native-macos
+        run: |
+          set -euo pipefail
+          python3 - "$ROUTING_RESULTS/macos-native-blocked.json" <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          diagnostic = {
+              'taskId': 'MK-ROUTING-20261011',
+              'stage': 'SOURCE_PREPARED_NATIVE_BLOCKED',
+              'status': 'mac-current-native-input-unavailable',
+              'platform': 'macos',
+              'appCommit': os.environ['APP_SHA'],
+              'mediaKitCommit': os.environ['MEDIA_KIT_SHA'],
+              'bootstrapReceipt': str(Path(os.environ['ROUTING_RESULTS']) / 'bootstrap.json'),
+              'bootstrapStatus': 'fresh-source-only',
+              'currentConsumer': 'macOS shared output consumer requires a current accepted native producer receipt',
+              'currentProducerReceipt': None,
+              'currentProducerReceiptStatus': 'not-provided-to-this-workflow',
+              'nativeInputRoot': os.environ['NATIVE_ROOT'],
+              'nativeInputRootExists': Path(os.environ['NATIVE_ROOT']).exists(),
+              'nativeBinaryProvenanceVerified': False,
+              'nativeBuildStarted': False,
+              'deviceTest': False,
+          }
+          Path(sys.argv[1]).write_text(json.dumps(diagnostic, indent=2) + '\n', encoding='utf-8')
+          print('SOURCE_PREPARED_NATIVE_BLOCKED: current macOS native producer receipt and accepted local input are unavailable.', file=sys.stderr)
+          raise SystemExit(1)
+          PY
+
+      - name: Upload routing macOS source and native availability diagnostics
+        if: ${{ always() && inputs.routing-mode }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: routing-macos-source-native-diagnostics-${{ inputs.app-sha }}
+          path: ${{ runner.temp }}/rb/r
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Checkout exact release source
+        if: ${{ !inputs.routing-mode }}
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.ref || inputs.tag }}
 
-      # This gate runs before setup-flutter, package installation, Pub, or any
-      # SDK/package patch. Missing or malformed approved revisions fail here.
+      # This legacy gate remains limited to the nonrouting release path.
       - name: Validate source and approved shared inputs
+        if: ${{ !inputs.routing-mode }}
         run: python3.11 scripts/run_macos_shared_release.py --preflight
 
       - name: Setup Flutter
+        if: ${{ !inputs.routing-mode }}
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version-file: pubspec.yaml
 
       - name: Build and verify shared release distribution
+        if: ${{ !inputs.routing-mode }}
         run: python3.11 scripts/run_macos_shared_release.py
 
       - name: Generate and verify release metadata
-        if: success()
+        if: ${{ !inputs.routing-mode && success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -75,7 +264,7 @@ jobs:
           cp release-metadata/macos/SHA256SUMS "$prefix.SHA256SUMS"
 
       - name: Upload successful shared release payloads
-        if: success()
+        if: ${{ !inputs.routing-mode && success() }}
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
@@ -83,7 +272,7 @@ jobs:
           path: ${{ runner.temp }}/piliplusx-shared-candidate/*/distribution/*
 
       - name: Upload failure diagnostics
-        if: failure()
+        if: ${{ !inputs.routing-mode && failure() }}
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: ignore

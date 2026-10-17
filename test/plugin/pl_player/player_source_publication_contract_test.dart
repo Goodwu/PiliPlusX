@@ -1,10 +1,32 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piliplus/plugin/pl_player/models/player_lifecycle_ports.dart';
 
 void main() {
   final source = File('lib/plugin/pl_player/controller.dart')
       .readAsStringSync();
+
+  test(
+    'production routing defaults to the actual platform without override',
+    () {
+      final production = PlayerLifecyclePorts.production();
+      expect(production.androidSessionOverride, isNull);
+      expect(production.usesAndroidSession, Platform.isAndroid);
+      PlayerLifecyclePorts platformOverride(bool android) =>
+          PlayerLifecyclePorts(
+            createPlayer: production.createPlayer,
+            probeHdr: production.probeHdr,
+            createOutput: production.createOutput,
+            displayChanges: production.displayChanges,
+            disposeOutput: production.disposeOutput,
+            disposePlayer: production.disposePlayer,
+            androidSessionOverride: android,
+          );
+      expect(platformOverride(true).usesAndroidSession, true);
+      expect(platformOverride(false).usesAndroidSession, false);
+    },
+  );
 
   test('only Android publishes the view callback before source open', () {
     final setDataSource = source.substring(
@@ -12,7 +34,7 @@ void main() {
       source.indexOf('\n  String? shadersDirPath;'),
     );
     final androidCallback = setDataSource.indexOf(
-      'if (Platform.isAndroid) onInit?.call();',
+      'if (_lifecyclePorts.usesAndroidSession) onInit?.call();',
     );
     final createController = setDataSource.indexOf(
       'await _createVideoController(',
@@ -38,7 +60,7 @@ void main() {
       );
       final initialize = setDataSource.indexOf('await _initializePlayer();');
       final callback = setDataSource.indexOf(
-        'if (!Platform.isAndroid) onInit?.call();',
+        'if (!_lifecyclePorts.usesAndroidSession) onInit?.call();',
       );
       final guard = setDataSource.indexOf('_playerCount == 0', initialize);
 

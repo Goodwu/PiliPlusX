@@ -1,7 +1,8 @@
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 void main() => runApp(const PiliPlusWebApp());
 
@@ -22,13 +23,13 @@ class WebPlayerPage extends StatefulWidget {
 }
 
 class _WebPlayerPageState extends State<WebPlayerPage> {
-  late final html.VideoElement _video;
+  late final web.HTMLVideoElement _video;
   final _url = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _video = html.VideoElement()
+    _video = web.HTMLVideoElement()
       ..controls = true
       ..setAttribute('playsinline', 'true')
       ..style.width = '100%'
@@ -41,18 +42,20 @@ class _WebPlayerPageState extends State<WebPlayerPage> {
 
   @override
   void dispose() {
-    _video.pause();
-    _video.src = '';
+    _video
+      ..pause()
+      ..src = '';
     _url.dispose();
     super.dispose();
   }
 
-  void _open() {
+  Future<void> _open() async {
     final value = _url.text.trim();
     if (value.isEmpty) return;
-    _video.src = value;
-    _video.load();
-    _video.play();
+    _video
+      ..src = value
+      ..load();
+    await _video.play().toDart;
   }
 
   @override
@@ -65,8 +68,8 @@ class _WebPlayerPageState extends State<WebPlayerPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Expanded(
-                child: const HtmlElementView(viewType: 'piliplus-sdr-video'),
+              const Expanded(
+                child: HtmlElementView(viewType: 'piliplus-sdr-video'),
               ),
               const SizedBox(height: 12),
               Row(

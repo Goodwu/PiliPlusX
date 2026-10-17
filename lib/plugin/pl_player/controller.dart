@@ -5,64 +5,66 @@ import 'dart:io' show Directory, File, FileMode, Platform, pid;
 import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
-import 'package:PiliPlus/common/assets.dart';
-import 'package:PiliPlus/http/browser_ua.dart';
-import 'package:PiliPlus/http/constants.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/models/common/account_type.dart';
-import 'package:PiliPlus/models/common/audio_normalization.dart';
-import 'package:PiliPlus/models/common/super_resolution_type.dart';
-import 'package:PiliPlus/models/common/video/video_type.dart';
-import 'package:PiliPlus/models/user/danmaku_rule.dart';
-import 'package:PiliPlus/models/video/play/url.dart';
-import 'package:PiliPlus/models_new/video/video_shot/data.dart';
-import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
-import 'package:PiliPlus/pages/setting/models/play_settings.dart'
+import 'package:piliplus/common/assets.dart';
+import 'package:piliplus/http/browser_ua.dart';
+import 'package:piliplus/http/constants.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/video.dart';
+import 'package:piliplus/models/common/account_type.dart';
+import 'package:piliplus/models/common/audio_normalization.dart';
+import 'package:piliplus/models/common/super_resolution_type.dart';
+import 'package:piliplus/models/common/video/video_type.dart';
+import 'package:piliplus/models/user/danmaku_rule.dart';
+import 'package:piliplus/models/video/play/url.dart';
+import 'package:piliplus/models_new/video/video_shot/data.dart';
+import 'package:piliplus/pages/danmaku/danmaku_model.dart';
+import 'package:piliplus/pages/setting/models/play_settings.dart'
     show kMaxVolume;
-import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_status.dart';
-import 'package:PiliPlus/plugin/pl_player/models/double_tap_type.dart';
-import 'package:PiliPlus/plugin/pl_player/models/duration.dart';
-import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
-import 'package:PiliPlus/plugin/pl_player/models/frame_pacing_diagnostic.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr_output_rebuild_queue.dart';
-import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hdr.dart';
-import 'package:PiliPlus/plugin/pl_player/models/native_hdr_transaction.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_initialization_transaction.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_lifecycle_ports.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_resource_lease.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_subscription_owner.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_reference_release.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_teardown_transaction.dart';
-import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen_request_queue.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
-import 'package:PiliPlus/plugin/pl_player/hdr_output.dart';
-import 'package:PiliPlus/plugin/pl_player/hdr_platform.dart';
-import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/android/android_helper.dart';
-import 'package:PiliPlus/utils/android/bindings.g.dart';
-import 'package:PiliPlus/utils/asset_utils.dart';
-import 'package:PiliPlus/utils/device_utils.dart';
-import 'package:PiliPlus/utils/duration_utils.dart';
-import 'package:PiliPlus/utils/extension/box_ext.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/feed_back.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/path_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/pages/sponsor_block/block_mixin.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/models/data_status.dart';
+import 'package:piliplus/plugin/pl_player/models/double_tap_type.dart';
+import 'package:piliplus/plugin/pl_player/models/duration.dart';
+import 'package:piliplus/plugin/pl_player/models/fullscreen_mode.dart';
+import 'package:piliplus/plugin/pl_player/models/frame_pacing_diagnostic.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr_output_rebuild_queue.dart';
+import 'package:piliplus/plugin/pl_player/dovi_sniff.dart';
+import 'package:piliplus/plugin/pl_player/models/heart_beat_type.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/models/native_hdr_transaction.dart';
+import 'package:piliplus/plugin/pl_player/models/play_repeat.dart';
+import 'package:piliplus/plugin/pl_player/models/play_status.dart';
+import 'package:piliplus/plugin/pl_player/models/player_initialization_transaction.dart';
+import 'package:piliplus/plugin/pl_player/models/player_lifecycle_ports.dart';
+import 'package:piliplus/plugin/pl_player/models/player_resource_lease.dart';
+import 'package:piliplus/plugin/pl_player/models/player_subscription_owner.dart';
+import 'package:piliplus/plugin/pl_player/models/player_reference_release.dart';
+import 'package:piliplus/plugin/pl_player/models/player_teardown_transaction.dart';
+import 'package:piliplus/plugin/pl_player/models/video_fit_type.dart';
+import 'package:piliplus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:piliplus/plugin/pl_player/utils/fullscreen_request_queue.dart';
+import 'package:piliplus/plugin/pl_player/utils/player_touch_trace.dart';
+import 'package:piliplus/plugin/pl_player/hdr_output.dart';
+import 'package:piliplus/plugin/pl_player/hdr_platform.dart';
+import 'package:piliplus/services/service_locator.dart';
+import 'package:piliplus/utils/accounts.dart';
+import 'package:piliplus/utils/android/android_helper.dart';
+import 'package:piliplus/utils/android/bindings.g.dart';
+import 'package:piliplus/utils/asset_utils.dart';
+import 'package:piliplus/utils/device_utils.dart';
+import 'package:piliplus/utils/duration_utils.dart';
+import 'package:piliplus/utils/extension/box_ext.dart';
+import 'package:piliplus/utils/extension/num_ext.dart';
+import 'package:piliplus/utils/feed_back.dart';
+import 'package:piliplus/utils/image_utils.dart';
+import 'package:piliplus/utils/media_kit_compat.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/path_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
@@ -76,6 +78,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' hide HdrCapabilities;
+import 'package:piliplus/plugin/pl_player/route_options.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:path/path.dart' as path;
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -83,6 +86,20 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 typedef PlayCallback = Future<void>? Function();
+
+class _RouteSourceIntent {
+  const _RouteSourceIntent({
+    required this.source,
+    required this.generation,
+    required this.completed,
+    required this.reopen,
+  });
+
+  final DataSource source;
+  final int generation;
+  final Completer<void> completed;
+  final Future<void> Function(DataSource source) reopen;
+}
 
 class _InitializedVideoPlayer {
   const _InitializedVideoPlayer(
@@ -115,6 +132,19 @@ class _BlockedPlayerTeardown {
 
   final VideoController? video;
   final bool outputReleased;
+}
+
+/// 页面对新 options 的 rendition 决策（R1/B1 三态）。
+enum RouteOptionsDecision {
+  /// 页面已用新 options 完成重开：L 跳过 setOptions。
+  reopened,
+
+  /// 当前 rendition 仍准入：L 原地应用——无已发布会话时以新 options 重开
+  /// 既有 intent（网络首开被本次配置变化排空的场景），有会话则 setOptions。
+  keepCurrent,
+
+  /// 决策已被更新的 revision/serial/数据或页面关闭淘汰：L 直接返回。
+  superseded,
 }
 
 class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
@@ -440,9 +470,166 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 从而在 open 完成前先挂载播放器 UI（PlatformView 拓扑的输出绑定
   /// 需要视频视图先挂载）。
   final hdrVideoSession = Rxn<HdrVideoSession>();
+  EffectiveVideoRouteOptions? _sourceRouteOptions;
+  _RouteSourceIntent? _routeSourceIntent;
+  int _routeOptionsRevision = 0;
+  void Function(EffectiveVideoRouteOptions options)? onRouteOptionsInvalidated;
+
+  /// 页面 rendition 决策先于 session setOptions：reopened 表示页面已用新
+  /// options 完成重开（L 跳过 setOptions，避免以旧 media 再开一次）；
+  /// keepCurrent 表示当前 rendition 仍准入，setOptions 原地生效；
+  /// superseded 表示决策已过期，L 不得落地任何 Session 副作用。
+  Future<RouteOptionsDecision> Function(EffectiveVideoRouteOptions)?
+  onRouteOptionsChanged;
+
+  bool get usesAndroidRouting => _lifecyclePorts.usesAndroidSession;
+
+  AppVideoRouteRequest readRouteRequest() =>
+      AppVideoRouteRequest.fromPreferences(
+        hdrMode: Pref.hdrMode,
+        enableHA: Pref.enableHA,
+        hardwareDecoding: Pref.hardwareDecoding,
+        android: _lifecyclePorts.usesAndroidSession,
+      );
+
+  /// Called only after a preference has been persisted successfully.
+  Future<void> applyRoutePreferences() async {
+    if (!_lifecyclePorts.usesAndroidSession || _fsDisposed) return;
+    final revision = ++_routeOptionsRevision;
+    final request = readRouteRequest();
+    final options = request.resolve();
+    final intent = _routeSourceIntent;
+    final unpublished =
+        _videoPlayerController == null &&
+        intent != null &&
+        !intent.completed.isCompleted;
+    // Invalidate the private first-open owner before any settings await. It
+    // must finish releasing before the latest intent can create a replacement.
+    if (unpublished) ++_hdrSourceGeneration;
+    onRouteOptionsInvalidated?.call(options);
+    if (request.hasUnsupportedLegacyRequest) {
+      await stopForRouteOptions(request.unsupportedReason!);
+      if (unpublished) {
+        await intent.completed.future;
+        await teardownDrain;
+      }
+      return;
+    }
+    _sourceRouteOptions = options;
+    if (intent != null) {
+      dataSource = intent.source.withRouteOptions(options);
+    }
+    try {
+      if (unpublished) {
+        await intent.completed.future;
+        await teardownDrain;
+        if (revision != _routeOptionsRevision ||
+            _fsDisposed ||
+            !identical(intent, _routeSourceIntent) ||
+            !identical(options, _sourceRouteOptions)) {
+          return;
+        }
+        if (_blockedTeardowns.isNotEmpty) {
+          throw StateError('Previous output has not been released');
+        }
+      }
+      // 页面 rendition 决策先于任何 Session 副作用（R1/B1）。
+      final decision =
+          await onRouteOptionsChanged?.call(options) ??
+          RouteOptionsDecision.keepCurrent;
+      // await 之后、任何 Session 副作用之前复核时效性：被淘汰的决策不得
+      // 落地（不 setOptions、不重开、不发布）。
+      if (decision == RouteOptionsDecision.superseded ||
+          revision != _routeOptionsRevision ||
+          _fsDisposed ||
+          !identical(options, _sourceRouteOptions)) {
+        return;
+      }
+      if (decision != RouteOptionsDecision.reopened) {
+        // keep-current（B2）：网络首开被本次配置变化排空时无已发布会话，
+        // ensureRouteSourceOptions 以新 options 重开既有 intent（网络源与
+        // 文件源同一路径）；已有会话则原地 setOptions。
+        final session = hdrVideoSession.value;
+        if (session == null) {
+          await ensureRouteSourceOptions(options);
+        } else {
+          await session.setOptions(options);
+        }
+      }
+    } on Object catch (error) {
+      if (revision == _routeOptionsRevision &&
+          !_fsDisposed &&
+          identical(options, _sourceRouteOptions)) {
+        await stopForRouteOptions('路由配置无法满足：${error.runtimeType}');
+      }
+      return;
+    }
+    if (revision != _routeOptionsRevision ||
+        _fsDisposed ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    // 页面回调已在新 options 语义下完成决策（重开或原地），仅在页面未
+    // 接管 rendition 决策时兜底收敛文件源。
+    if (onRouteOptionsChanged == null) {
+      await ensureRouteSourceOptions(options);
+    }
+  }
+
+  /// File sources have no rendition selection. Complete their current source
+  /// intent after the invalidated private first-open owner has released.
+  Future<void> ensureRouteSourceOptions(
+    EffectiveVideoRouteOptions options,
+  ) async {
+    final intent = _routeSourceIntent;
+    final revision = _routeOptionsRevision;
+    if (intent == null ||
+        _fsDisposed ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    await intent.completed.future;
+    await teardownDrain;
+    if (revision != _routeOptionsRevision ||
+        _fsDisposed ||
+        !identical(intent, _routeSourceIntent) ||
+        !identical(options, _sourceRouteOptions)) {
+      return;
+    }
+    if (_blockedTeardowns.isNotEmpty) {
+      throw StateError('Previous output has not been released');
+    }
+    if (hdrVideoSession.value != null) return;
+    await intent.reopen(intent.source.withRouteOptions(options));
+  }
+
+  Future<void> stopForRouteOptions(String reason) async {
+    final sourceGeneration = ++_hdrSourceGeneration;
+    hdrOutputError.value = reason;
+    dataStatus.value = DataStatus.error;
+    _stopFramePacingDiagnostics();
+    _removeListeners();
+    _unbindNativeSurfaceState();
+    try {
+      await _videoPlayerController?.pause();
+    } on Object catch (error) {
+      debugPrint('Route stop pause failed: ${error.runtimeType}');
+    }
+    // Release the output through the existing session/Player ownership barrier.
+    _schedulePlayerTeardown();
+    final teardown = _playerTeardownFuture;
+    await teardownDrain;
+    if (_blockedTeardowns.isEmpty &&
+        identical(_playerTeardownFuture, teardown)) {
+      _playerTeardownFuture = null;
+    }
+    if (sourceGeneration == _hdrSourceGeneration) _processing = false;
+  }
+
   StreamSubscription<HdrOutputEvent>? _hdrVideoEventSub;
   final Map<Player, _PlayerHdrSessionOwnership> _hdrSessionsByPlayer = {};
   int? _hdrQualityHint;
+  DoviFacts? _hdrDoviHint;
 
   /// 视频视图（HdrVideo）挂载信号。Android 会话的 PlatformView 输出绑定
   /// 依赖视图挂载，open 之前等待该信号（有界，超时兜底继续）。
@@ -472,11 +659,25 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     reason: 'source-not-detected',
   );
   final hdrSurfaceGeneration = 0.obs;
-  final hdrDisplaySupportsHdr = false.obs;
+
+  /// Optimistic on Android: the async HDR capability query may not have
+  /// completed when the video URL is first fetched — starting as true
+  /// ensures the DASH response includes DV/HDR tiers for the quality menu.
+  /// The query result can still flip this to false later, triggering a
+  /// downgrade, but the reverse (missing the HDR tier on the first fetch)
+  /// is irreversible for that source.
+  final hdrDisplaySupportsHdr =
+      (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+      ? true.obs
+      : false.obs;
   final hdrOutputError = RxnString();
 
   /// 播放信息展示：会话 report.actual 的路由文案（「杜比视界 P8.4 · HLG 直出」）。
   final hdrRouteInfo = RxnString();
+
+  /// Candidate results originate exclusively from HdrVideoSession's report.
+  /// A C3 static fallback must not hide C1/C2 routeNotImplemented errors.
+  final hdrCandidateInfo = RxnString();
 
   /// 播放信息展示：降级提示（Degraded 事件的 App 侧最小处理）。
   final hdrDegradeNotice = RxnString();
@@ -886,15 +1087,58 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     bool autoFullScreenFlag = false,
     int? initialVideoQuality,
     String? initialVideoCodec,
+    DoviFacts? initialDoviFacts,
   }) async {
     late final int sourceGeneration;
+    final completed = Completer<void>();
     try {
       _sourceLocalDiagnostic = isLocalDiagnosticSource(dataSource);
       sourceGeneration = ++_hdrSourceGeneration;
+      _routeSourceIntent = _RouteSourceIntent(
+        source: dataSource,
+        generation: sourceGeneration,
+        completed: completed,
+        reopen: (source) => setDataSource(
+          source,
+          isLive: isLive,
+          autoplay: autoplay,
+          seekTo: seekTo,
+          speed: speed,
+          width: width,
+          height: height,
+          duration: duration,
+          isVertical: isVertical,
+          aid: aid,
+          bvid: bvid,
+          cid: cid,
+          epid: epid,
+          seasonId: seasonId,
+          pgcType: pgcType,
+          videoType: videoType,
+          onInit: onInit,
+          volume: volume,
+          autoFullScreenFlag: autoFullScreenFlag,
+          initialVideoQuality: initialVideoQuality,
+          initialVideoCodec: initialVideoCodec,
+          initialDoviFacts: initialDoviFacts,
+        ),
+      );
+      final teardown = _playerTeardownFuture;
+      if (teardown != null) {
+        await teardownDrain;
+        if (sourceGeneration != _hdrSourceGeneration) return;
+        if (_blockedTeardowns.isNotEmpty) {
+          throw StateError('Previous output has not been released');
+        }
+        if (identical(_playerTeardownFuture, teardown)) {
+          _playerTeardownFuture = null;
+        }
+      }
       _stopFramePacingDiagnostics();
       _processing = true;
       _hdrCodecHint = initialVideoCodec;
       _hdrQualityHint = initialVideoQuality;
+      _hdrDoviHint = initialDoviFacts;
       // A source boundary needs a fresh native-output decision even when the
       // metadata tuple happens to match the preceding source.
       _lastHdrNativeOutputAttempt = null;
@@ -913,6 +1157,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       this.width = width;
       this.height = height;
       this.dataSource = dataSource;
+      if (_lifecyclePorts.usesAndroidSession) {
+        if (dataSource.routeOptions case final options?) {
+          _sourceRouteOptions = options;
+        } else {
+          final request = readRouteRequest();
+          if (request.hasUnsupportedLegacyRequest) {
+            await stopForRouteOptions(request.unsupportedReason!);
+            throw StateError(request.unsupportedReason!);
+          }
+          _sourceRouteOptions = request.resolve();
+          this.dataSource = dataSource = dataSource.withRouteOptions(
+            _sourceRouteOptions!,
+          );
+        }
+      }
       _autoPlay = autoplay;
       // 初始化视频倍速
       // _playbackSpeed.value = speed;
@@ -942,7 +1201,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // Android 会话的 PlatformView 输出绑定需要 HdrVideo 视图先挂载，
       // 因此只能在 Android open 前通知页面。其他平台要等普通
       // VideoController 发布后再通知，否则页面会因 controller 为空而不挂载。
-      if (Platform.isAndroid) onInit?.call();
+      if (_lifecyclePorts.usesAndroidSession) onInit?.call();
       // 配置Player 音轨、字幕等等
       await _createVideoController(
         dataSource,
@@ -965,7 +1224,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         _startFramePacingDiagnostics(currentPlayer, sourceGeneration);
       }
 
-      updateDuration(duration ?? _videoPlayerController!.state.duration);
+      if (currentPlayer == null) {
+        hdrOutputError.value =
+            'Source initialization produced no current Player';
+        throw StateError(hdrOutputError.value!);
+      }
+      updateDuration(duration ?? currentPlayer.state.duration);
       position.value = buffered.value = seekTo?.inSeconds ?? 0;
 
       dataStatus.value = .loaded;
@@ -983,19 +1247,25 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           _fsDisposed) {
         return;
       }
-      if (!Platform.isAndroid) onInit?.call();
+      if (!_lifecyclePorts.usesAndroidSession) onInit?.call();
     } catch (err, stackTrace) {
       // An older queued native open may fail after a replacement source has
       // already entered loading. Its error is diagnostic only; publishing it
       // would turn the replacement page into DataStatus.error.
       if (sourceGeneration == _hdrSourceGeneration) {
         dataStatus.value = DataStatus.error;
+        if (mediaKitLoadFailed) {
+          SmartDialog.showToast(
+            '播放内核（libmpv）加载失败，当前设备暂不支持视频播放',
+          );
+        }
         if (kDebugMode) {
           debugPrint(stackTrace.toString());
           debugPrint('plPlayer err:  $err');
         }
       }
     } finally {
+      completed.complete();
       // An older open must not advertise the newer open as idle.
       if (sourceGeneration == _hdrSourceGeneration) {
         _processing = false;
@@ -1055,13 +1325,23 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
+  /// The intended Flutter/native output, independent from Player identity.
+  VideoOutputTarget videoOutputTarget =
+      const VideoOutputTarget.applicationView();
+
+  bool _isCurrentRouteOptions(EffectiveVideoRouteOptions? options) =>
+      !_lifecyclePorts.usesAndroidSession ||
+      identical(options, _sourceRouteOptions);
+
   Future<_InitializedVideoPlayer?> _initPlayer({
     required int sourceGeneration,
+    EffectiveVideoRouteOptions? routeOptions,
   }) async {
     assert(_videoPlayerController == null);
     final opt = {
       'video-sync': Pref.videoSync,
-      if (Pref.hdrMode == HdrMode.off) ...{
+      if (!_lifecyclePorts.usesAndroidSession &&
+          Pref.hdrMode == HdrMode.off) ...{
         'target-prim': 'bt.709',
         'target-trc': 'bt.1886',
       },
@@ -1077,31 +1357,30 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     final player = await _lifecyclePorts.createPlayer(
-      PlayerConfiguration(
-        logLevel: kDebugMode ? .warn : .error,
-        options: opt,
-      ),
+      PlayerConfiguration(logLevel: kDebugMode ? .warn : .error, options: opt),
     );
 
     final resources = PlayerResourceLease<VideoController>();
     return resources.run<_InitializedVideoPlayer?>(() async {
       assert(_videoController == null);
 
-      if (Platform.isAndroid) {
+      if (_lifecyclePorts.usesAndroidSession) {
         // Android：HDR 输出编排整体交给 media-kit HdrVideoSession（R2）。
         // App 侧不探测设备、不选择输出拓扑；只保留能力快照（选档与
         // 展示用）和事件消费。
-        final session = HdrVideoSession(
+        final session = _lifecyclePorts.newHdrSession(
           player,
-          policy: HdrOutputSelector.policy,
+          videoOutputTarget,
         );
         _hdrSessionsByPlayer[player] = _PlayerHdrSessionOwnership(session);
         // A new source can start while the capability query awaits; the stale
         // path disposes the session and the local Player together.
-        final capabilities = await HdrOutputSelector.queryCapabilities(
-          player: player,
+        final routeCapabilities = await HdrOutputSelector.queryCapabilities(
+          target: videoOutputTarget,
         );
+        final capabilities = routeCapabilities?.hdr;
         if (sourceGeneration != _hdrSourceGeneration ||
+            !_isCurrentRouteOptions(routeOptions) ||
             _playerCount == 0 ||
             _fsDisposed) {
           await resources.release(
@@ -1160,9 +1439,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           try {
             return await _lifecyclePorts.createOutput(
               player,
-              _videoConfiguration(
-                nativeSurface: useNativeSurface,
-              ),
+              _videoConfiguration(nativeSurface: useNativeSurface),
             );
           } on Object catch (error) {
             if (sourceGeneration != _hdrSourceGeneration ||
@@ -1255,9 +1532,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 非 Android 平台的输出重建（macOS 原生 surface / OHOS XComponent）。
   /// Android 不再走此路径：会话 API 在内部完成复核重建与降级（R2.3/R3.1）。
-  Future<void> _rebuildVideoOutput({
-    bool nativeSurface = false,
-  }) async {
+  Future<void> _rebuildVideoOutput({bool nativeSurface = false}) async {
     final player = _videoPlayerController;
     final old = _videoController;
     final sourceGeneration = _hdrSourceGeneration;
@@ -1379,10 +1654,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         );
         _refreshHdrDecision();
         unawaited(
-          _applyHdrOutputParameters(
-            player,
-            sourceGeneration: sourceGeneration,
-          ),
+          _applyHdrOutputParameters(player, sourceGeneration: sourceGeneration),
         );
         debugPrint('HDR dataspace applied after output rebuild');
       }
@@ -1435,10 +1707,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     required Player player,
   }) {
     late final Future<void> rebuildFuture;
-    rebuildFuture =
-        _rebuildVideoOutput(
-          nativeSurface: nativeSurface,
-        ).whenComplete(() {
+    rebuildFuture = _rebuildVideoOutput(nativeSurface: nativeSurface)
+        .whenComplete(() {
           final queuedNativeSurface = _hdrOutputRebuildQueue.complete(
             mayReplay: () =>
                 !_fsDisposed &&
@@ -1457,9 +1727,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           }
         });
     _videoOutputRebuildFuture = rebuildFuture;
-    unawaited(
-      rebuildFuture,
-    );
+    unawaited(rebuildFuture);
   }
 
   String _hdrOutputSignature(HdrPlaybackDecision decision) =>
@@ -1503,12 +1771,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> refreshHdrDisplayCapabilities() async {
     final refreshGeneration = ++_hdrDisplayRefreshGeneration;
     if (Platform.isAndroid) {
-      // Android：能力查询走 media-kit R1 快照（无 Player 时 P5 管线保守
-      // 按缺失处理，拿到 Player 后重新查询）；显示 HDR 能力变化由会话
-      // CapabilityChanged 事件驱动。
-      final capabilities = await HdrOutputSelector.queryCapabilities(
-        player: _videoPlayerController,
+      // Query the current output target, including before Player creation.
+      // Session capability notifications use the same target-aware service.
+      final routeCapabilities = await HdrOutputSelector.queryCapabilities(
+        target: videoOutputTarget,
       );
+      final capabilities = routeCapabilities?.hdr;
       if (refreshGeneration != _hdrDisplayRefreshGeneration) return;
       final displayHdr = capabilities?.displayHdrTypes?.isNotEmpty ?? false;
       if (displayHdr != hdrDisplaySupportsHdr.value) {
@@ -1604,14 +1872,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           ),
         );
         hdrRouteInfo.value = HdrOutputSelector.routeLabel(report);
-        hdrDegradeNotice.value = null;
+        final candidates = HdrOutputSelector.candidateFailureSummary(report);
+        hdrCandidateInfo.value = candidates == 'none' || candidates == 'unknown'
+            ? null
+            : candidates;
+        // Preserve the preceding typed fallback notice until this generation
+        // succeeds without degradation. Static HDR fallback is not SDR.
+        if (report.degradeReason == null) hdrDegradeNotice.value = null;
       case final HdrDegradedEvent degraded:
         debugPrint(
           'HDR degrade event: reason=${degraded.reason.name}, '
           'diagnostic=${degraded.diagnostic}',
         );
-        // 最小处理：播放信息提示「已降级 tone-map」。是否换源由 App 后续决策。
-        hdrDegradeNotice.value = '已降级 tone-map';
+        // Surface transfer and metadata ownership, not the mere presence
+        // of a fallback, determine whether this is SDR or static HDR.
+        hdrDegradeNotice.value = HdrOutputSelector.degradeNotice(degraded);
       case final HdrCapabilityChangedEvent changed:
         final displayHdr =
             changed.capabilities.displayHdrTypes?.isNotEmpty ?? false;
@@ -1624,15 +1899,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           'HDR error event: reason=${error.reason?.name}, '
           'diagnostic=${error.diagnostic}',
         );
+        hdrOutputError.value = HdrOutputSelector.blockedNotice(error);
+        hdrRouteInfo.value = null;
+        hdrCandidateInfo.value = null;
       case HdrReclassifiedEvent():
         break;
     }
   }
 
-  Future<bool> _setHdrColorSpace(
-    Player player, {
-    int? sourceGeneration,
-  }) {
+  Future<bool> _setHdrColorSpace(Player player, {int? sourceGeneration}) {
     final generation = sourceGeneration ?? _hdrSourceGeneration;
     final surfaceGeneration = hdrSurfaceGeneration.value;
     final transaction = _hdrOutputTransactionGate.run<bool>(
@@ -1833,10 +2108,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           generation == _hdrSourceGeneration &&
           identical(player, _videoPlayerController) &&
           surfaceGeneration == hdrSurfaceGeneration.value,
-      action: () => _applyHdrOutputParametersSerial(
-        player,
-        sourceGeneration: generation,
-      ),
+      action: () =>
+          _applyHdrOutputParametersSerial(player, sourceGeneration: generation),
     );
     return run.then<void>((_) {});
   }
@@ -2004,6 +2277,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (player == null) {
       final initialized = await _initPlayer(
         sourceGeneration: sourceGeneration,
+        routeOptions: dataSource.routeOptions,
       );
       if (initialized == null) return;
       final initializedPlayer = initialized.player;
@@ -2019,6 +2293,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       final published = await initialized.lease.publishIfCurrent(
         isCurrent: () =>
             sourceGeneration == _hdrSourceGeneration &&
+            _isCurrentRouteOptions(dataSource.routeOptions) &&
             _playerCount > 0 &&
             !_fsDisposed &&
             _videoPlayerController == null,
@@ -2108,6 +2383,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // player/shader initialization. The shared Player may already belong to
     // the replacement source at this point.
     if (sourceGeneration != _hdrSourceGeneration ||
+        !_isCurrentRouteOptions(dataSource.routeOptions) ||
         !identical(player, _videoPlayerController)) {
       return;
     }
@@ -2150,10 +2426,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final media = Media(
       video,
       start: seekTo,
-      httpHeaders: {
-        'User-Agent': BrowserUa.pc,
-        'Referer': HttpString.baseUrl,
-      },
+      httpHeaders: {'User-Agent': BrowserUa.pc, 'Referer': HttpString.baseUrl},
       extras: extras.isEmpty ? null : extras,
     );
     if (hdrVideoSession.value != null && !onlyPlayAudio.value) {
@@ -2180,6 +2453,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       player: currentPlayer,
       isCurrent: () =>
           sourceGeneration == _hdrSourceGeneration &&
+          _isCurrentRouteOptions(dataSource.routeOptions) &&
           _playerCount > 0 &&
           identical(currentPlayer, _videoPlayerController),
       open: (player) {
@@ -2192,7 +2466,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             hint: HdrOutputSelector.descriptorFromDash(
               quality: _hdrQualityHint,
               codec: _hdrCodecHint,
+              dovi: _hdrDoviHint,
             ),
+            sourceSpec: dataSource.videoSpec,
+            options: dataSource.routeOptions ?? _sourceRouteOptions,
+            target: dataSource.outputTarget ?? videoOutputTarget,
             play: false,
           );
         }
@@ -2231,7 +2509,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           hint: HdrOutputSelector.descriptorFromDash(
             quality: _hdrQualityHint,
             codec: _hdrCodecHint,
+            dovi: _hdrDoviHint,
           ),
+          sourceSpec: dataSource.videoSpec,
+          options: dataSource.routeOptions ?? _sourceRouteOptions,
+          target: dataSource.outputTarget ?? videoOutputTarget,
           play: true,
         );
       }
@@ -2365,10 +2647,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       },
       isCurrent: isCurrent,
       readProperties: () => FramePacingPropertyReadback.read(
-        getProperty: (property) => player.getProperty(
-          property,
-          waitForInitialization: false,
-        ),
+        getProperty: (property) =>
+            player.getProperty(property, waitForInitialization: false),
         isCurrent: isCurrent,
         playerHandle: playerHandle,
         sourceGeneration: sourceGeneration,
@@ -2390,10 +2670,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   /// 播放事件监听
-  void _startListeners(
-    NativePlayer player, {
-    required int sourceGeneration,
-  }) {
+  void _startListeners(NativePlayer player, {required int sourceGeneration}) {
     assert(_subscriptions == null);
     final stream = player.stream;
     final subscriptionOwner = PlayerSubscriptionOwner();
@@ -3305,22 +3582,20 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   void _scheduleFullScreenDisposalCleanup() {
     if (_fsCleanupInFlight) return;
     _fsCleanupInFlight = true;
-    unawaited(
-      () async {
-        try {
-          await _restoreFullScreenPlatformState(
-            _fullScreenRequestQueue.cancel(),
-            _fullScreenOwner,
-          );
-        } catch (error, stackTrace) {
-          debugPrint('Fullscreen disposal cleanup aborted: $error');
-          if (kDebugMode) debugPrint(stackTrace.toString());
-        } finally {
-          // A failed cleanup must not permanently disable a later retry.
-          _fsCleanupInFlight = false;
-        }
-      }(),
-    );
+    unawaited(() async {
+      try {
+        await _restoreFullScreenPlatformState(
+          _fullScreenRequestQueue.cancel(),
+          _fullScreenOwner,
+        );
+      } catch (error, stackTrace) {
+        debugPrint('Fullscreen disposal cleanup aborted: $error');
+        if (kDebugMode) debugPrint(stackTrace.toString());
+      } finally {
+        // A failed cleanup must not permanently disable a later retry.
+        _fsCleanupInFlight = false;
+      }
+    }());
   }
 
   Future<void> triggerFullScreen({
@@ -3492,6 +3767,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _cancelSubForSeek();
 
     hdrRouteInfo.value = null;
+    hdrCandidateInfo.value = null;
     hdrDegradeNotice.value = null;
     danmakuController = null;
     _stopOrientationListener();
@@ -3592,15 +3868,28 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (identical(hdrVideoSession.value, session)) {
         hdrVideoSession.value = null;
       }
-      final events = ownership!.events;
-      if (events != null) await events.cancel();
-      if (identical(_hdrVideoEventSub, events)) {
-        _hdrVideoEventSub = null;
-      }
       try {
+        final events = ownership!.events;
+        if (events != null) await events.cancel();
+        if (identical(_hdrVideoEventSub, events)) {
+          _hdrVideoEventSub = null;
+        }
         await session.dispose();
+        if (session.lastDisposeReport?.clean != true) {
+          throw StateError('HDR Session cleanup is incomplete');
+        }
       } catch (error) {
-        debugPrint('HDR session dispose failed: $error');
+        // Keep the exact Session/Player owner until every native output stage
+        // has released. A failed dispose must never become Player termination.
+        _hdrSessionsByPlayer[player] = ownership!;
+        _blockedTeardowns[player] = _BlockedPlayerTeardown(
+          video: video,
+          outputReleased: outputAlreadyReleased,
+        );
+        _lifecyclePorts.onHdrTeardownRetainedForTesting?.call(player);
+        _scheduleBlockedTeardownRetry();
+        debugPrint('HDR session dispose failed; Player retained: $error');
+        return;
       }
     }
     final result = await PlayerTeardownTransaction<Player, VideoController>()
@@ -3681,9 +3970,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> takeScreenshot() async {
     SmartDialog.showToast('截图中');
-    final time = DurationUtils.formatDuration(
-      positionInMilliseconds / 1000,
-    ).replaceAll(':', '-');
+    final time = DurationUtils.formatDuration(positionInMilliseconds / 1000)
+        .replaceAll(':', '-');
     final imageBytes = await videoPlayerController?.screenshot();
     if (imageBytes != null) {
       final codec = await ui.instantiateImageCodec(imageBytes);

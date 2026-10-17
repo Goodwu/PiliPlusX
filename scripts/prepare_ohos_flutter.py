@@ -122,6 +122,25 @@ def apply_patch(root: Path, patch: Path) -> bool:
     raise SystemExit(f"OHOS Flutter patch drift: {patch.name}\n{check.stderr.decode(errors='replace')}")
 
 
+def pointer_filter_constructor(text: str) -> str:
+    """Match the two reviewed constructor shapes without dropping SDK options.
+
+    scrollable_gesture.patch adds the horizontal factory before this patch
+    runs on standard Flutter. Keep that factory and add only the vertical
+    pointer admission field. Other/duplicate shapes remain a hard failure.
+    """
+    prefix = "    this.hitTestBehavior = HitTestBehavior.opaque,\n"
+    suffix = "  }) : assert(semanticChildCount == null || semanticChildCount >= 0);"
+    candidates = (
+        prefix + suffix,
+        prefix + "    this.horizontalDragGestureRecognizer = HorizontalDragGestureRecognizer.new,\n" + suffix,
+    )
+    matches = [candidate for candidate in candidates if candidate in text]
+    if len(matches) != 1 or text.count(matches[0]) != 1:
+        raise SystemExit("OHOS Flutter pointer filter constructor drift in scrollable.dart")
+    return matches[0]
+
+
 def patch_pointer_filter(root: Path) -> int:
     scrollable = root / "packages/flutter/lib/src/widgets/scrollable.dart"
     scrollable_text = scrollable.read_text(encoding="utf-8")
@@ -146,8 +165,9 @@ def patch_pointer_filter(root: Path) -> int:
     if custom_applied or all(scrollable_marker_state):
         scrollable_changed = False
     elif "_VerticalDragGestureRecognizer:" in scrollable_text and not any(scrollable_marker_state):
+        constructor = pointer_filter_constructor(scrollable_text)
         custom_expected = (
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            constructor,
             "  /// {@template flutter.widgets.Scrollable.axisDirection}",
             "                      ..isDyAllowed = _isDyAllowed",
             "typedef IsDyAllowed = bool Function(double dy);",
@@ -158,8 +178,8 @@ def patch_pointer_filter(root: Path) -> int:
             if scrollable_text.count(expected) != 1:
                 raise SystemExit("OHOS Flutter pointer filter source drift in custom scrollable.dart")
         scrollable_text = scrollable_text.replace(
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n    this.pointerDownFilter,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            constructor,
+            constructor.replace("\n  })", "\n    this.pointerDownFilter,\n  })", 1),
             1,
         )
         scrollable_text = scrollable_text.replace(
@@ -192,8 +212,9 @@ def patch_pointer_filter(root: Path) -> int:
     elif any(custom_marker_state) or (any(scrollable_marker_state) and not all(scrollable_marker_state)):
         raise SystemExit("OHOS Flutter pointer filter is partially applied to scrollable.dart")
     else:
+        constructor = pointer_filter_constructor(scrollable_text)
         scrollable_expected = (
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            constructor,
             "  /// {@template flutter.widgets.Scrollable.axisDirection}",
             "            VerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(\n                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (VerticalDragGestureRecognizer instance) {",
             "            VerticalDragGestureRecognizer:\n                GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(\n                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),\n                  (VerticalDragGestureRecognizer instance) {\n                    instance\n                      ..onDown = _handleDragDown",
@@ -202,8 +223,8 @@ def patch_pointer_filter(root: Path) -> int:
             if scrollable_text.count(expected) != 1:
                 raise SystemExit("OHOS Flutter pointer filter source drift in scrollable.dart")
         scrollable_text = scrollable_text.replace(
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
-            "    this.hitTestBehavior = HitTestBehavior.opaque,\n    this.pointerDownFilter,\n  }) : assert(semanticChildCount == null || semanticChildCount >= 0);",
+            constructor,
+            constructor.replace("\n  })", "\n    this.pointerDownFilter,\n  })", 1),
             1,
         )
         scrollable_text = scrollable_text.replace(

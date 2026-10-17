@@ -11,8 +11,8 @@ import 'package:flutter/gestures.dart'
         PointerCancelEvent,
         ScaleGestureRecognizer,
         VerticalDragGestureRecognizer;
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:piliplus/plugin/pl_player/utils/player_touch_trace.dart';
 
 typedef PlayerPointerDownFilter = bool Function(PointerDownEvent event);
 

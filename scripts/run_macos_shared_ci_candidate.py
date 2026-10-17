@@ -347,6 +347,20 @@ def compatibility_plan(root: Path) -> dict[str, bytes]:
     return plan
 
 
+def expected_pointer_filter_removal(source: bytes) -> bytes:
+    """Independently constrain the App patch to one complete approved line."""
+    lines = list(re.finditer(
+        rb"^[ \t]*pointerDownFilter: _allowOuterVideoPointer,\r?\n", source, re.M
+    ))
+    if len(lines) != 1 or len(re.findall(rb"\bpointerDownFilter\b", source)) != 1:
+        raise CandidateError(
+            "standard Flutter pointer-filter source must occur exactly once "
+            "as the approved full argument line"
+        )
+    start, end = lines[0].span()
+    return source[:start] + source[end:]
+
+
 def load_approved_revision() -> str:
     if digest(LOCK) != LOCK_SHA256:
         raise CandidateError("fixed acquisition lock differs from reviewed identity")
@@ -597,10 +611,7 @@ def run_pipeline(report: dict, source_ref: str, revision: str, *,
         raise CandidateError("release source transaction refuses symlink patch files")
     old_patch_files = [(path, path.read_bytes()) for path in normalized_patch_files]
     old_view = view_file.read_bytes()
-    compat_pointer_line = b"            pointerDownFilter: _allowOuterVideoPointer,\n"
-    if old_view.count(compat_pointer_line) != 1:
-        raise CandidateError("standard Flutter pointer-filter source must occur exactly once")
-    expected_view = old_view.replace(compat_pointer_line, b"", 1)
+    expected_view = expected_pointer_filter_removal(old_view)
     old_package_config = package_config.read_bytes() if package_config.is_file() else None
     pub_cache = run_dir / "pub-cache"
     pub_cache.mkdir()

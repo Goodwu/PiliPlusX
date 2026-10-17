@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:PiliPlus/plugin/pl_player/models/player_initialization_transaction.dart';
-import 'package:PiliPlus/plugin/pl_player/models/player_resource_lease.dart';
+import 'package:piliplus/plugin/pl_player/models/player_initialization_transaction.dart';
+import 'package:piliplus/plugin/pl_player/models/player_resource_lease.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -59,8 +59,9 @@ void main() {
           return 'output-a';
         },
         disposePair: (output) async {
-          events.add('dispose-output:$output');
-          events.add('dispose-player-a');
+          events
+            ..add('dispose-output:$output')
+            ..add('dispose-player-a');
         },
       );
 

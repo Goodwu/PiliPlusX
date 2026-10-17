@@ -80,7 +80,8 @@ android {
 //            )
         }
         debug {
-            applicationIdSuffix = ".debug"
+            // Same applicationId as release so a debug build overwrites the
+            // installed release in place (keeps login state for diagnosis).
         }
     }
 

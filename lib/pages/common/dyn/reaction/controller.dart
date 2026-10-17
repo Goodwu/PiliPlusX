@@ -1,8 +1,8 @@
-import 'package:PiliPlus/http/dynamics.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models_new/dynamic/dyn_reaction/data.dart';
-import 'package:PiliPlus/models_new/dynamic/dyn_reaction/item.dart';
-import 'package:PiliPlus/pages/common/common_list_controller.dart';
+import 'package:piliplus/http/dynamics.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/models_new/dynamic/dyn_reaction/data.dart';
+import 'package:piliplus/models_new/dynamic/dyn_reaction/item.dart';
+import 'package:piliplus/pages/common/common_list_controller.dart';
 import 'package:get/get.dart';
 
 class DynReactController

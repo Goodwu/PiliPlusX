@@ -1,4 +1,4 @@
-import 'package:PiliPlus/models/video/play/url.dart';
+import 'package:piliplus/models/video/play/url.dart';
 import 'package:flutter/services.dart';
 
 /// The macOS 8K gate is deliberately independent from HDR output capability.
@@ -44,6 +44,8 @@ class VideoDecodeCapability {
 enum VideoQualityIneligibility {
   none,
   displayHdrUnsupported,
+  hdrModeOff,
+  routeUnsupported,
   eightKProbePending,
   eightKProbeFailed,
   eightKHardwareUnsupported,
@@ -57,6 +59,8 @@ class VideoQualityEligibility {
 
   String get message => switch (reason) {
     VideoQualityIneligibility.displayHdrUnsupported => '当前显示器不支持 HDR 输出',
+    VideoQualityIneligibility.hdrModeOff => '已关闭 HDR 输出',
+    VideoQualityIneligibility.routeUnsupported => '当前解码或 HDR 输出路径不支持该档位',
     VideoQualityIneligibility.eightKProbePending => '正在检测当前设备的 8K 解码能力',
     VideoQualityIneligibility.eightKProbeFailed => '无法确认当前设备的 8K 解码能力',
     VideoQualityIneligibility.eightKHardwareUnsupported => '当前设备不支持对应编码的 8K 硬解',
@@ -81,10 +85,16 @@ VideoQualityEligibility videoQualityEligibility({
   required int quality,
   required List<VideoItem> tracks,
   required bool displaySupportsHdr,
+  bool hdrModeOff = false,
   required bool gateEightKWithHardware,
   required Map<String, VideoDecodeCapability> decodeCapabilities,
 }) {
   final isHdr = quality == 125 || quality == 126 || quality == 129;
+  // 用户偏好是菜单灰禁的第二个输入（§1.7/X）：HDR 档在任何面板上都不再
+  // 以 tone-map 打开，优先于面板能力给出「已关闭 HDR 输出」的解释。
+  if (isHdr && hdrModeOff) {
+    return const VideoQualityEligibility(VideoQualityIneligibility.hdrModeOff);
+  }
   if (isHdr && !displaySupportsHdr) {
     return const VideoQualityEligibility(
       VideoQualityIneligibility.displayHdrUnsupported,
@@ -143,6 +153,7 @@ List<VideoItem> tracksEligibleForPlayback({
 VideoItem? highestEligibleNonEightKTrack({
   required List<VideoItem> tracks,
   required bool displaySupportsHdr,
+  bool hdrModeOff = false,
   required bool gateEightKWithHardware,
   required Map<String, VideoDecodeCapability> decodeCapabilities,
 }) {
@@ -155,15 +166,14 @@ VideoItem? highestEligibleNonEightKTrack({
       quality: track.quality.code,
       tracks: qualityTracks,
       displaySupportsHdr: displaySupportsHdr,
+      hdrModeOff: hdrModeOff,
       gateEightKWithHardware: gateEightKWithHardware,
       decodeCapabilities: decodeCapabilities,
     ).enabled;
   });
   final items = eligible.toList();
   if (items.isEmpty) return null;
-  return items.reduce(
-    (a, b) => a.quality.code > b.quality.code ? a : b,
-  );
+  return items.reduce((a, b) => a.quality.code > b.quality.code ? a : b);
 }
 
 /// A separate channel method keeps decode support from being accidentally

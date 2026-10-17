@@ -1,12 +1,12 @@
-import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
-import 'package:PiliPlus/pages/video/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:piliplus/common/style.dart';
+import 'package:piliplus/common/widgets/button/icon_button.dart';
+import 'package:piliplus/common/widgets/image/network_img_layer.dart';
+import 'package:piliplus/common/widgets/progress_bar/segment_progress_bar.dart';
+import 'package:piliplus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:piliplus/pages/common/slide/common_slide_page.dart';
+import 'package:piliplus/pages/video/controller.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/utils/duration_utils.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 

@@ -20,12 +20,27 @@ from pathlib import Path
 OHOS_MEDIA_KIT_REF = "0fa6afe9cd9af8d8437919257d81a27c643f2f63"
 
 
-def replace_once(path: Path, old: str, new: str) -> None:
-    text = path.read_text(encoding="utf-8")
-    count = text.count(old)
-    if count != 1:
-        raise SystemExit(f"OHOS preparation expected one occurrence of {old!r} in {path}, found {count}")
-    path.write_text(text.replace(old, new), encoding="utf-8")
+def normalize_constraint(text: str, section: str | None, old: str, new: str) -> str:
+    """Accept exactly one known old/new field in its documented pubspec scope."""
+    start, end = 0, len(text)
+    if section is not None:
+        sections = list(re.finditer(
+            rf"^{re.escape(section)}:\n(.*?)(?=^[^\s#]|\Z)", text, re.M | re.S
+        ))
+        if len(sections) != 1:
+            raise SystemExit(f"OHOS preparation expected one {section} section, found {len(sections)}")
+        start, end = sections[0].span(1)
+    body = text[start:end]
+    field = old.split(":", 1)[0] + ":"
+    values = re.findall(rf"^{re.escape(field)}.*$", body, re.M)
+    if values not in ([old], [new]):
+        raise SystemExit(
+            f"OHOS preparation expected exactly one {old!r} or {new!r} "
+            f"in {section or 'root'}, found {values!r}"
+        )
+    if values == [old]:
+        body = re.sub(rf"^{re.escape(old)}$", lambda _: new, body, flags=re.M)
+    return text[:start] + body + text[end:]
 
 
 def matching_brace(text: str, opening: int) -> int:
@@ -166,25 +181,26 @@ def main() -> None:
     pubspec = root / "pubspec.yaml"
 
     replacements = (
-        ("  sdk: \">=3.13.0\"", "  sdk: \">=3.12.0 <4.0.0\""),
+        ("environment", "  sdk: \">=3.13.0\"", "  sdk: \">=3.12.0 <4.0.0\""),
         # The OHOS fork reports 0.0.0-unknown to pub even though its checked
         # out revision is the pinned 3.44.9 implementation.  The toolchain is
         # verified by revision/version before this step, so the app constraint
         # must be open in the isolated copy for pub's solver to proceed.
-        ("  flutter: 3.47.2", "  flutter: any"),
-        ("name: PiliPlus", "name: piliplus"),
-        ("  flex_seed_scheme: ^5.0.0", "  flex_seed_scheme: ^4.0.1"),
-        ("  material_ui: ^1.0.0", "  material_ui: 1.0.0"),
+        ("environment", "  flutter: 3.47.2", "  flutter: any"),
+        (None, "name: PiliPlus", "name: piliplus"),
+        ("dependencies", "  flex_seed_scheme: ^5.0.0", "  flex_seed_scheme: ^4.0.1"),
+        ("dependencies", "  material_ui: ^1.0.0", "  material_ui: 1.0.0"),
     )
-    already_prepared = pubspec.read_text(encoding="utf-8").startswith("name: piliplus\n")
-    if not already_prepared:
-        for old, new in replacements:
-            replace_once(pubspec, old, new)
+    pubspec_text = pubspec.read_text(encoding="utf-8")
+    package_name_was_lowercase = bool(re.search(r"^name: piliplus$", pubspec_text, re.M))
+    # A normalized package name says nothing about toolchain compatibility.
+    # Validate each field independently, including partially converted copies.
+    for section, old, new in replacements:
+        pubspec_text = normalize_constraint(pubspec_text, section, old, new)
 
     # The Windows override is useful to the desktop build, but it makes the
     # OHOS Dart 3.12 solver require a non-existent desktop path.  OHOS uses
     # the universal and OHOS media-kit packages only.
-    pubspec_text = pubspec.read_text(encoding="utf-8")
     for package in ("media_kit_libs_windows_video", "media_kit_libs_video"):
         pubspec_text, removed = re.subn(
             rf"\n  {package}:\n(?: {{4,}}.*\n)*",
@@ -295,7 +311,7 @@ def main() -> None:
         if count:
             path.write_text(text.replace("package:PiliPlus/", "package:piliplus/"), encoding="utf-8")
             changed += count
-    if not changed and not already_prepared:
+    if not changed and not package_name_was_lowercase:
         raise SystemExit("OHOS preparation found no package:PiliPlus imports; refusing silent drift")
 
     # material_ui 1.0.0 defines its own ColorScheme type while flex_seed_scheme

@@ -650,12 +650,15 @@ def render_host(directory, frameworks, preserve):
         shutil.copy2(HOST / name, directory / name)
     project = directory / 'FrameworkSigningHost.xcodeproj'
     project.mkdir()
-    content = (HOST / 'project.pbxproj.in').read_text().replace('__FRAMEWORK_SOURCE_ROOT__', str(frameworks))
+    content = (HOST / 'project.pbxproj.in').read_text()
     for name in FRAMEWORKS:
         content = content.replace('__' + name.upper() + '_SIGN_ATTRIBUTE__',
                                   '' if preserve[name] else 'CodeSignOnCopy,')
-    if '__' in content:
+    # Check template syntax before inserting path data. tempfile names may
+    # legitimately contain '__'; paths must not be scanned or re-substituted.
+    if '__' in content.replace('__FRAMEWORK_SOURCE_ROOT__', ''):
         fail('host template contains unresolved placeholders')
+    content = content.replace('__FRAMEWORK_SOURCE_ROOT__', str(frameworks))
     (project / 'project.pbxproj').write_text(content)
     return project
 

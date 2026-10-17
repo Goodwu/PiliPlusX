@@ -168,7 +168,7 @@ $MouseCursorPatch = "lib/scripts/mouse_cursor.patch"
 
 $GeetestIOSPatch = "lib/scripts/geetest_ios.patch"
 
-if (-not $PackagesOnly -and $platform.ToLower() -eq "ios") {
+if (-not $SdkOnly -and -not $PackagesOnly -and $platform.ToLower() -eq "ios") {
     Apply-RequiredPatch $BottomSheetIOSPiliPlusPatch
     if ($env:PILIPLUSX_SKIP_GEETEST_IOS_PATCH -ne "1") {
         Apply-RequiredPatch $GeetestIOSPatch

@@ -1,6 +1,6 @@
-import 'package:PiliPlus/http/constants.dart';
-import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/http/constants.dart';
+import 'package:piliplus/http/init.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:dio/dio.dart';
 
 class HkApiRetryInterceptor extends Interceptor {

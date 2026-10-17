@@ -167,7 +167,9 @@ class FakeTools:
 
 class AcquisitionTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix='ci-input-test-')
+        # Double underscores are valid in paths and in tempfile's random names.
+        # Exercise them deterministically, including both signing/payload gates.
+        self.temporary = tempfile.TemporaryDirectory(prefix='ci-input-test-__')
         self.root = Path(self.temporary.name).resolve()
         self.addCleanup(self.temporary.cleanup)
         self.output, self.logs = self.root / 'raw', self.root / 'fetch-logs'
@@ -461,6 +463,31 @@ class SignatureAndPayloadTests(unittest.TestCase):
             project = ci.render_host(Path(tmp) / 'host', Path('/fixed/frameworks'),
                                      {n: True for n in ci.FRAMEWORKS})
             self.assertNotIn('CodeSignOnCopy,', (project / 'project.pbxproj').read_text())
+
+    def test_host_inserts_double_underscore_paths_as_literal_data(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            frameworks = Path(tmp) / 'a__b/__ASS_SIGN_ATTRIBUTE__/frameworks'
+            project = ci.render_host(Path(tmp) / 'host', frameworks,
+                                     {n: False for n in ci.FRAMEWORKS})
+            content = (project / 'project.pbxproj').read_text()
+            for name in ci.FRAMEWORKS:
+                self.assertIn(f'path = "{frameworks}/{name}.framework";', content)
+            self.assertEqual(content.count('CodeSignOnCopy,'), len(ci.FRAMEWORKS))
+
+    def test_host_rejects_unresolved_template_placeholders(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            host = root / 'template'
+            shutil.copytree(ci.HOST, host)
+            template = host / 'project.pbxproj.in'
+            original = template.read_text()
+            for index, placeholder in enumerate(('__UNKNOWN_ATTRIBUTE__', '__ASS_SIGN_ATTRIBUTE_')):
+                template.write_text(original + '\n' + placeholder)
+                with patch.object(ci, 'HOST', host):
+                    with self.assertRaisesRegex(ValueError, 'host template contains unresolved placeholders'):
+                        ci.render_host(root / f'host-{index}', root / 'a__b/frameworks',
+                                       {n: False for n in ci.FRAMEWORKS})
+                self.assertFalse((root / f'host-{index}/FrameworkSigningHost.xcodeproj/project.pbxproj').exists())
 
     def test_host_explicitly_disables_copy_and_deployment_stripping(self):
         with tempfile.TemporaryDirectory() as tmp:

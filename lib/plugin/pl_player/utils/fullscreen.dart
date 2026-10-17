@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/utils/device_utils.dart';
+import 'package:piliplus/utils/device_utils.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart'
     show SystemChrome, MethodChannel, SystemUiOverlay, DeviceOrientation;

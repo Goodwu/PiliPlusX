@@ -1,0 +1,2165 @@
+{
+  "scope": "INDEPENDENT_STANDALONE_SOURCE_EVIDENCE_ONLY",
+  "status": "PASS_WITH_SCOPE_AND_RECORDED_SKIPS",
+  "runs": [
+    {
+      "repo": "Goodwu/PiliPlusX",
+      "id": 38243549009,
+      "attempt": 1,
+      "head_sha": "6d349a06db9103996274e639c31d7d2a7554540a",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow": ".github/workflows/routing-source-integration.yml",
+      "artifacts": [
+        {
+          "id": 11744820772,
+          "name": "routing-app-source-macos-6d349a06db9103996274e639c31d7d2a7554540a",
+          "API_digest": "sha256:df1558bd7ad0c07c9a5971228f32cf577449126b659b1a868b399551d08ce430",
+          "actual_ZIP_sha256": "df1558bd7ad0c07c9a5971228f32cf577449126b659b1a868b399551d08ce430",
+          "ZIP_size_bytes": 205340,
+          "API_size_bytes": 205340,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "after-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "after-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "after-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "after-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "after-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "after-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "analyze.log",
+              "bytes": 97,
+              "sha256": "789540151b12d85f832f68947d67e36e0fd5f4b24fe74157d9402fbfa2224baf"
+            },
+            {
+              "path": "app-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-tracked-files.log",
+              "bytes": 79457,
+              "sha256": "5613cdb6663643e9319d66689d3789fddc8146914b43134702b278f0823fbebf"
+            },
+            {
+              "path": "app-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "before-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "before-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "before-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "before-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "before-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "before-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "bootstrap.json",
+              "bytes": 392178,
+              "sha256": "2089dd01b105c5dbf98dd2fe96c5390ed34f8f98e74ef144d1fd658255879bb7"
+            },
+            {
+              "path": "final-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "final-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "final-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "final-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "final-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "final-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "flutter-tools-resolve.log",
+              "bytes": 1895,
+              "sha256": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55"
+            },
+            {
+              "path": "kernel-sha256.txt",
+              "bytes": 190,
+              "sha256": "2e576e9160479c55717e7e6110f79d65d151ec79e20487b2e2bde291c1a08fdf"
+            },
+            {
+              "path": "flutter-tests.log",
+              "bytes": 137419,
+              "sha256": "b2b38fc47f5e6b38ef7c2840379b0befa215ab4ab56fc1bfc298a47ddc51d5fe"
+            },
+            {
+              "path": "media-kit-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-tracked-files.log",
+              "bytes": 75814,
+              "sha256": "6bf75f962c83c392c31ff72b08747d33b46ec3e571497786f3d5093a5b090b38"
+            },
+            {
+              "path": "media-kit-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-head.log",
+              "bytes": 41,
+              "sha256": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de"
+            },
+            {
+              "path": "original-sdk-index-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-root.log",
+              "bytes": 38,
+              "sha256": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee"
+            },
+            {
+              "path": "original-sdk-state.json",
+              "bytes": 97,
+              "sha256": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba"
+            },
+            {
+              "path": "original-sdk-status.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-tree.log",
+              "bytes": 41,
+              "sha256": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e"
+            },
+            {
+              "path": "original-sdk-working-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "patch-PackagesOnly.log",
+              "bytes": 5619,
+              "sha256": "56510591b354de8dda373bbef6098eb9d9323d2ddd767fc722da5dd33b59c327"
+            },
+            {
+              "path": "patch-SdkOnly.log",
+              "bytes": 1882,
+              "sha256": "16af120da4690ad39d575e4a78efe4daa64fa1392b190a2728ebd376cb16e24b"
+            },
+            {
+              "path": "patched-sdk-status.log",
+              "bytes": 1936,
+              "sha256": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df"
+            },
+            {
+              "path": "patched-sdk-diff.log",
+              "bytes": 96921,
+              "sha256": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d"
+            },
+            {
+              "path": "private-sdk-root.log",
+              "bytes": 38,
+              "sha256": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee"
+            },
+            {
+              "path": "resolve.log",
+              "bytes": 4682,
+              "sha256": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76"
+            },
+            {
+              "path": "scope.txt",
+              "bytes": 108,
+              "sha256": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc"
+            },
+            {
+              "path": "source-resolution-after.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source-resolution-before.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source-resolution-patched.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 96,
+              "sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12"
+            },
+            {
+              "path": "toolchain-machine.log",
+              "bytes": 618,
+              "sha256": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607"
+            },
+            {
+              "path": "toolchain.log",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            },
+            {
+              "path": "toolchain.txt",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            }
+          ]
+        },
+        {
+          "id": 11744525560,
+          "name": "routing-app-source-windows-6d349a06db9103996274e639c31d7d2a7554540a",
+          "API_digest": "sha256:3abfd51f70f4b14b64162ed35906981a33dcf55568d6828f4c977fc0da897994",
+          "actual_ZIP_sha256": "3abfd51f70f4b14b64162ed35906981a33dcf55568d6828f4c977fc0da897994",
+          "ZIP_size_bytes": 205357,
+          "API_size_bytes": 205357,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "after-app-head.log",
+              "bytes": 42,
+              "sha256": "5ead4db0d027b91d63897dd3de683750025f9ccb58beb7c4500d8ba94e21e051"
+            },
+            {
+              "path": "after-app-remote.log",
+              "bytes": 81,
+              "sha256": "38417cf0f7e292fc8d7449df06322f1c1ce08f42973932145443772f84d8d91e"
+            },
+            {
+              "path": "after-media-kit-head.log",
+              "bytes": 42,
+              "sha256": "d6ae74858d8650e6654f5bae20bef5abfece8c7aeac13a0b302850f7dc843fac"
+            },
+            {
+              "path": "after-app-tree.log",
+              "bytes": 42,
+              "sha256": "c00dc25ea730679014ec102f7b0de5067b08069a7567111b3986086a48918478"
+            },
+            {
+              "path": "after-media-kit-remote.log",
+              "bytes": 81,
+              "sha256": "bd95595c7e8f917e210375f9fdad3285109fdb8cb2adef6a1b89125089bf7825"
+            },
+            {
+              "path": "after-media-kit-tree.log",
+              "bytes": 42,
+              "sha256": "4e0611f8adcadd39fd7a580fee08db0f1fa92ebaa76b729641da89aff1a0800e"
+            },
+            {
+              "path": "app-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "analyze.log",
+              "bytes": 99,
+              "sha256": "069c2cd0b2c3e3e817eb257bda04ebf1ab45e9e8f7ccedcd0d9b92411a10842f"
+            },
+            {
+              "path": "app-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-tracked-files.log",
+              "bytes": 79457,
+              "sha256": "5613cdb6663643e9319d66689d3789fddc8146914b43134702b278f0823fbebf"
+            },
+            {
+              "path": "app-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "before-app-head.log",
+              "bytes": 42,
+              "sha256": "5ead4db0d027b91d63897dd3de683750025f9ccb58beb7c4500d8ba94e21e051"
+            },
+            {
+              "path": "before-app-remote.log",
+              "bytes": 81,
+              "sha256": "38417cf0f7e292fc8d7449df06322f1c1ce08f42973932145443772f84d8d91e"
+            },
+            {
+              "path": "before-app-tree.log",
+              "bytes": 42,
+              "sha256": "c00dc25ea730679014ec102f7b0de5067b08069a7567111b3986086a48918478"
+            },
+            {
+              "path": "before-media-kit-remote.log",
+              "bytes": 81,
+              "sha256": "bd95595c7e8f917e210375f9fdad3285109fdb8cb2adef6a1b89125089bf7825"
+            },
+            {
+              "path": "before-media-kit-head.log",
+              "bytes": 42,
+              "sha256": "d6ae74858d8650e6654f5bae20bef5abfece8c7aeac13a0b302850f7dc843fac"
+            },
+            {
+              "path": "before-media-kit-tree.log",
+              "bytes": 42,
+              "sha256": "4e0611f8adcadd39fd7a580fee08db0f1fa92ebaa76b729641da89aff1a0800e"
+            },
+            {
+              "path": "bootstrap.json",
+              "bytes": 393751,
+              "sha256": "510b323515f41a94a70ab63bfea579cc75ef64affbcca5add4e2bcef77913326"
+            },
+            {
+              "path": "final-app-head.log",
+              "bytes": 42,
+              "sha256": "5ead4db0d027b91d63897dd3de683750025f9ccb58beb7c4500d8ba94e21e051"
+            },
+            {
+              "path": "final-app-remote.log",
+              "bytes": 81,
+              "sha256": "38417cf0f7e292fc8d7449df06322f1c1ce08f42973932145443772f84d8d91e"
+            },
+            {
+              "path": "final-app-tree.log",
+              "bytes": 42,
+              "sha256": "c00dc25ea730679014ec102f7b0de5067b08069a7567111b3986086a48918478"
+            },
+            {
+              "path": "final-media-kit-head.log",
+              "bytes": 42,
+              "sha256": "d6ae74858d8650e6654f5bae20bef5abfece8c7aeac13a0b302850f7dc843fac"
+            },
+            {
+              "path": "final-media-kit-remote.log",
+              "bytes": 81,
+              "sha256": "bd95595c7e8f917e210375f9fdad3285109fdb8cb2adef6a1b89125089bf7825"
+            },
+            {
+              "path": "final-media-kit-tree.log",
+              "bytes": 42,
+              "sha256": "4e0611f8adcadd39fd7a580fee08db0f1fa92ebaa76b729641da89aff1a0800e"
+            },
+            {
+              "path": "flutter-tests.log",
+              "bytes": 127349,
+              "sha256": "87d2058b811de15e947916f84555e10c069fcfa7773c37f76a6698882e177f6b"
+            },
+            {
+              "path": "flutter-tools-resolve.log",
+              "bytes": 1946,
+              "sha256": "1869a172c793bc119e02cffe731a9e14c50cf6026d28d5f5a66c2ce7d5e64ea2"
+            },
+            {
+              "path": "kernel-sha256.txt",
+              "bytes": 181,
+              "sha256": "c145b1c6497978be4b29080ecdea13ba818c9cfe16be7f0430203c4b3a3676db"
+            },
+            {
+              "path": "media-kit-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-tracked-files.log",
+              "bytes": 75814,
+              "sha256": "6bf75f962c83c392c31ff72b08747d33b46ec3e571497786f3d5093a5b090b38"
+            },
+            {
+              "path": "media-kit-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-head.log",
+              "bytes": 42,
+              "sha256": "37f988a523eda44168d93b83124fa56d124d8c143831502e1b87a8203d607730"
+            },
+            {
+              "path": "original-sdk-index-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-root.log",
+              "bytes": 25,
+              "sha256": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111"
+            },
+            {
+              "path": "original-sdk-state.json",
+              "bytes": 93,
+              "sha256": "b83c301f867db52bfa6dd736697ce7e1d5ab24deab89a561f588f974b4551c05"
+            },
+            {
+              "path": "original-sdk-status.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-tree.log",
+              "bytes": 42,
+              "sha256": "319acd314b58c46baf59bc027aba50565f1723e5413d27d1ccef07865373298a"
+            },
+            {
+              "path": "original-sdk-working-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "patch-PackagesOnly.log",
+              "bytes": 5576,
+              "sha256": "21642db090f02678fd881348da115fbe620990ca14761c34525bece3d255cf8c"
+            },
+            {
+              "path": "patch-SdkOnly.log",
+              "bytes": 1611,
+              "sha256": "9e4f4386b072ab1bf7347123b2ab66638ee3eb71d08e07b0be1c75e5bc967535"
+            },
+            {
+              "path": "patched-sdk-diff.log",
+              "bytes": 99513,
+              "sha256": "c1287a940f66d5fdba35cea0d95f5a663ba4273de522e8b9666a1f5edd7ae3b5"
+            },
+            {
+              "path": "patched-sdk-status.log",
+              "bytes": 1971,
+              "sha256": "802d2335610edffeabb60ef2b798dbcda4d209055d5941ff6aacec887612b43e"
+            },
+            {
+              "path": "private-sdk-root.log",
+              "bytes": 25,
+              "sha256": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111"
+            },
+            {
+              "path": "resolve.log",
+              "bytes": 4768,
+              "sha256": "29ee26e086f862ee3d167b83850e1288b1eadfd494c8164c0d6c05da04f7fba3"
+            },
+            {
+              "path": "scope.txt",
+              "bytes": 109,
+              "sha256": "a45e49e5f9aed1c4ab530420ecafea94a72059abc99dcca3e7f8180e796b3172"
+            },
+            {
+              "path": "source-resolution-after.json",
+              "bytes": 24360,
+              "sha256": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9"
+            },
+            {
+              "path": "source-resolution-patched.json",
+              "bytes": 24360,
+              "sha256": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9"
+            },
+            {
+              "path": "source-resolution-before.json",
+              "bytes": 24360,
+              "sha256": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 97,
+              "sha256": "d5c5104d58672779a2cc2dd53bdcb136eed6cc0fe4732d00d9ce5f9c96965b9d"
+            },
+            {
+              "path": "toolchain-machine.log",
+              "bytes": 624,
+              "sha256": "275a91512da53a33dc2652453deb256aecc23a61e36bacee6aafed6ab9f0f879"
+            },
+            {
+              "path": "toolchain.log",
+              "bytes": 447,
+              "sha256": "a9d1161572c7eb746ea58792da8ddcc707dc910d7b4bd58add60d354b6053c3f"
+            },
+            {
+              "path": "toolchain.txt",
+              "bytes": 324,
+              "sha256": "6695424bcb76b101e88042d7ff9cc94cdda54d1b80305048a456ad7ecc805abe"
+            }
+          ]
+        },
+        {
+          "id": 11744525367,
+          "name": "routing-app-source-linux-6d349a06db9103996274e639c31d7d2a7554540a",
+          "API_digest": "sha256:2a1659f2b635f7b66a4d221bd6ceaaf95d470b1fd7cf7f359caf885ee1a45dd6",
+          "actual_ZIP_sha256": "2a1659f2b635f7b66a4d221bd6ceaaf95d470b1fd7cf7f359caf885ee1a45dd6",
+          "ZIP_size_bytes": 205061,
+          "API_size_bytes": 205061,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "after-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "after-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "after-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "after-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "after-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "analyze.log",
+              "bytes": 97,
+              "sha256": "eae371752b929b98d2f59eb7d15665a9414a6ec84d0e5f89ea8ef8cc35ffea61"
+            },
+            {
+              "path": "after-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "app-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-tracked-files.log",
+              "bytes": 79457,
+              "sha256": "5613cdb6663643e9319d66689d3789fddc8146914b43134702b278f0823fbebf"
+            },
+            {
+              "path": "app-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "before-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "before-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "before-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "before-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "before-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "before-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "bootstrap.json",
+              "bytes": 391898,
+              "sha256": "cdcc6649593bf28538a6223ea1521f97458389a739803fc688767e5f8827ce37"
+            },
+            {
+              "path": "final-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "final-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "final-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "final-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "final-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "final-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "flutter-tests.log",
+              "bytes": 135462,
+              "sha256": "5878b7dba678d5e0c80629481bf4d0d633e41cb0881e0aeb6ab73b5411a8ba38"
+            },
+            {
+              "path": "flutter-tools-resolve.log",
+              "bytes": 1895,
+              "sha256": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55"
+            },
+            {
+              "path": "kernel-sha256.txt",
+              "bytes": 189,
+              "sha256": "5161cda252d3a75d9d69fec6bf4dbb76f9454fe1b887dc93f904f6cd05addc96"
+            },
+            {
+              "path": "media-kit-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-tracked-files.log",
+              "bytes": 75814,
+              "sha256": "6bf75f962c83c392c31ff72b08747d33b46ec3e571497786f3d5093a5b090b38"
+            },
+            {
+              "path": "media-kit-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-head.log",
+              "bytes": 41,
+              "sha256": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de"
+            },
+            {
+              "path": "original-sdk-index-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-root.log",
+              "bytes": 37,
+              "sha256": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80"
+            },
+            {
+              "path": "original-sdk-state.json",
+              "bytes": 96,
+              "sha256": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d"
+            },
+            {
+              "path": "original-sdk-status.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-tree.log",
+              "bytes": 41,
+              "sha256": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e"
+            },
+            {
+              "path": "original-sdk-working-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "patch-PackagesOnly.log",
+              "bytes": 5609,
+              "sha256": "2d5833ab1cd705fd09241852f92df69dd2cd0e6baaaa6ccb8a6e680086f59c99"
+            },
+            {
+              "path": "patch-SdkOnly.log",
+              "bytes": 1989,
+              "sha256": "88f2cead9f2f43b9b28b2e96249598667f3b2876dbf618d1009f95afd37be9ee"
+            },
+            {
+              "path": "patched-sdk-diff.log",
+              "bytes": 96921,
+              "sha256": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d"
+            },
+            {
+              "path": "patched-sdk-status.log",
+              "bytes": 1936,
+              "sha256": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df"
+            },
+            {
+              "path": "private-sdk-root.log",
+              "bytes": 37,
+              "sha256": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80"
+            },
+            {
+              "path": "resolve.log",
+              "bytes": 4682,
+              "sha256": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76"
+            },
+            {
+              "path": "scope.txt",
+              "bytes": 108,
+              "sha256": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc"
+            },
+            {
+              "path": "source-resolution-after.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source-resolution-before.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source-resolution-patched.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 96,
+              "sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12"
+            },
+            {
+              "path": "toolchain-machine.log",
+              "bytes": 617,
+              "sha256": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c"
+            },
+            {
+              "path": "toolchain.log",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            },
+            {
+              "path": "toolchain.txt",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            }
+          ]
+        },
+        {
+          "id": 11744501035,
+          "name": "routing-app-python-6d349a06db9103996274e639c31d7d2a7554540a",
+          "API_digest": "sha256:1e7dd8df8716f5be0c1f7e8462f966e1cfea2796c0bab95688387415acb99bd7",
+          "actual_ZIP_sha256": "1e7dd8df8716f5be0c1f7e8462f966e1cfea2796c0bab95688387415acb99bd7",
+          "ZIP_size_bytes": 206930,
+          "API_size_bytes": 206930,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "after-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "after-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "after-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "after-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "after-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "after-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "app-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-ignored-source-input.log",
+              "bytes": 269,
+              "sha256": "663a42f94a71e78365fb977e086e81197e55b815755007b7d1e9681b913e9629"
+            },
+            {
+              "path": "app-tracked-files.log",
+              "bytes": 79457,
+              "sha256": "5613cdb6663643e9319d66689d3789fddc8146914b43134702b278f0823fbebf"
+            },
+            {
+              "path": "app-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "before-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "before-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "before-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "before-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "before-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "before-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "bootstrap.json",
+              "bytes": 392192,
+              "sha256": "9df4a7e60fa9098fccedd73d693d8c3dd392ac18b8d89228b421891842d980da"
+            },
+            {
+              "path": "final-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "final-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "final-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "final-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "final-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "final-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "flutter-tools-resolve.log",
+              "bytes": 1895,
+              "sha256": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55"
+            },
+            {
+              "path": "media-kit-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "manifest-parser-tests.json",
+              "bytes": 24159,
+              "sha256": "f800a4df5f6095fa34230c4b8d3d4e22cd425f64263d397cf413d97be5bcecfe"
+            },
+            {
+              "path": "media-kit-tracked-files.log",
+              "bytes": 75814,
+              "sha256": "6bf75f962c83c392c31ff72b08747d33b46ec3e571497786f3d5093a5b090b38"
+            },
+            {
+              "path": "media-kit-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-head.log",
+              "bytes": 41,
+              "sha256": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de"
+            },
+            {
+              "path": "original-sdk-index-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-root.log",
+              "bytes": 38,
+              "sha256": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee"
+            },
+            {
+              "path": "original-sdk-state.json",
+              "bytes": 97,
+              "sha256": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba"
+            },
+            {
+              "path": "original-sdk-status.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-tree.log",
+              "bytes": 41,
+              "sha256": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e"
+            },
+            {
+              "path": "original-sdk-working-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "patch-PackagesOnly.log",
+              "bytes": 5920,
+              "sha256": "0f15b72d0912dec746d5f0edecf4c635786b914c29dc771574a9a0e3fa52153b"
+            },
+            {
+              "path": "patch-SdkOnly.log",
+              "bytes": 2260,
+              "sha256": "81dd53e6923e9acc79c9970455a13879f93cb51b7d81e677f8c2ae2312e47757"
+            },
+            {
+              "path": "patched-sdk-diff.log",
+              "bytes": 98824,
+              "sha256": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76"
+            },
+            {
+              "path": "patched-sdk-status.log",
+              "bytes": 1987,
+              "sha256": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7"
+            },
+            {
+              "path": "private-sdk-root.log",
+              "bytes": 38,
+              "sha256": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee"
+            },
+            {
+              "path": "resolve.log",
+              "bytes": 4682,
+              "sha256": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76"
+            },
+            {
+              "path": "source-resolution-after.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source-resolution-before.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source-resolution-patched.json",
+              "bytes": 25926,
+              "sha256": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 96,
+              "sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12"
+            },
+            {
+              "path": "tests.log",
+              "bytes": 82877,
+              "sha256": "487d14828e956e61f508db2b0604daeadba85214887c52cfe70c753927bfeb39"
+            },
+            {
+              "path": "toolchain-machine.log",
+              "bytes": 618,
+              "sha256": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607"
+            },
+            {
+              "path": "toolchain.log",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            }
+          ]
+        },
+        {
+          "id": 11743723910,
+          "name": "routing-app-source-6d349a06db9103996274e639c31d7d2a7554540a",
+          "API_digest": "sha256:2e4b003bfe03c86d4601d1fd52c79e783607e9baf25c5f047b4ca3f5749e5c31",
+          "actual_ZIP_sha256": "2e4b003bfe03c86d4601d1fd52c79e783607e9baf25c5f047b4ca3f5749e5c31",
+          "ZIP_size_bytes": 211101,
+          "API_size_bytes": 211101,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "after-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "after-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "after-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "after-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "after-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "after-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "analyze.log",
+              "bytes": 97,
+              "sha256": "724a58c31f49e47aba0348224302d48692f1477c7926b4b7e53256c4a6358fc5"
+            },
+            {
+              "path": "app-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "app-tracked-files.log",
+              "bytes": 79457,
+              "sha256": "5613cdb6663643e9319d66689d3789fddc8146914b43134702b278f0823fbebf"
+            },
+            {
+              "path": "app-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "before-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "before-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "before-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "before-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "before-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "before-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "bootstrap.json",
+              "bytes": 391912,
+              "sha256": "78597b92bd290e17e4bfff0135b8a9e4c8120d08bf921ed4c33d990e377d7248"
+            },
+            {
+              "path": "bundle-build.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "final-app-head.log",
+              "bytes": 41,
+              "sha256": "3cac6644abf590c72ebdd32caec147c2081e356b072845f5557bf36c7873b19f"
+            },
+            {
+              "path": "final-app-remote.log",
+              "bytes": 80,
+              "sha256": "bc9730a52bf1cda9393056464ad24fe6ee397b08eb4b775669e7277ac9d5dca7"
+            },
+            {
+              "path": "final-app-tree.log",
+              "bytes": 41,
+              "sha256": "8edee42500806c91dc282d3c02f90f10cbea2f218b1ea61b0e8688f1c7e269f2"
+            },
+            {
+              "path": "final-media-kit-head.log",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            },
+            {
+              "path": "final-media-kit-remote.log",
+              "bytes": 80,
+              "sha256": "bf1694f6edc32785cc5ffa048390b87dc8c660e915938da185fb47b58c53bb24"
+            },
+            {
+              "path": "final-media-kit-tree.log",
+              "bytes": 41,
+              "sha256": "bbcebff22cc73d00c1d62a0f27c353d3f7e7e7338151cd36123454882e5db673"
+            },
+            {
+              "path": "flutter-tests.log",
+              "bytes": 137773,
+              "sha256": "0defd2f4493e78e4ebf8c8fd60f2c94baff146df4fd675311f1589bc6c33e5e7"
+            },
+            {
+              "path": "flutter-tools-resolve.log",
+              "bytes": 1895,
+              "sha256": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55"
+            },
+            {
+              "path": "kernel-sha256.txt",
+              "bytes": 103,
+              "sha256": "dcf25ecf35a12ceb6afa91297dfc42a6127930e9c1f52a15425f40280801f99c"
+            },
+            {
+              "path": "media-kit-clean-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-tracked-files.log",
+              "bytes": 75814,
+              "sha256": "6bf75f962c83c392c31ff72b08747d33b46ec3e571497786f3d5093a5b090b38"
+            },
+            {
+              "path": "media-kit-ignored-source-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "media-kit-untracked-input.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-head.log",
+              "bytes": 41,
+              "sha256": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de"
+            },
+            {
+              "path": "original-sdk-index-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-root.log",
+              "bytes": 37,
+              "sha256": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80"
+            },
+            {
+              "path": "original-sdk-state.json",
+              "bytes": 96,
+              "sha256": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d"
+            },
+            {
+              "path": "original-sdk-status.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "original-sdk-tree.log",
+              "bytes": 41,
+              "sha256": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e"
+            },
+            {
+              "path": "original-sdk-working-diff.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "patch-SdkOnly.log",
+              "bytes": 2236,
+              "sha256": "2bfb75dd6343e8ced4097e425c72eb5a1a0467a0016b25d30f987b582ff4a1dc"
+            },
+            {
+              "path": "patch-PackagesOnly.log",
+              "bytes": 5908,
+              "sha256": "372c93cd4f18e9d68e35e5ab32395b5bdb94c805ac2c5c0e9efdeb30d75ba318"
+            },
+            {
+              "path": "patched-sdk-diff.log",
+              "bytes": 98824,
+              "sha256": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76"
+            },
+            {
+              "path": "patched-sdk-status.log",
+              "bytes": 1987,
+              "sha256": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7"
+            },
+            {
+              "path": "private-sdk-root.log",
+              "bytes": 37,
+              "sha256": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80"
+            },
+            {
+              "path": "resolve.log",
+              "bytes": 4682,
+              "sha256": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76"
+            },
+            {
+              "path": "scope.txt",
+              "bytes": 90,
+              "sha256": "9443c89f6944e02b86cf4ee87ef7cd1cbef6e21745377c2acadad5f0817e7208"
+            },
+            {
+              "path": "source-resolution-after.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source-resolution-before.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source-resolution-patched.json",
+              "bytes": 25665,
+              "sha256": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 96,
+              "sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12"
+            },
+            {
+              "path": "toolchain-machine.log",
+              "bytes": 617,
+              "sha256": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c"
+            },
+            {
+              "path": "toolchain.log",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            },
+            {
+              "path": "toolchain.txt",
+              "bytes": 320,
+              "sha256": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+            },
+            {
+              "path": "web-build.log",
+              "bytes": 940,
+              "sha256": "1f41f613a7faa72521a43b5691943dfc4fdc628db8ff5ad2d0c97f7db308dde9"
+            },
+            {
+              "path": "web-dom-tests.log",
+              "bytes": 187,
+              "sha256": "ed2bf7db098c77bb853dda8033e841ec108d48435cc94e928eed177c9a102abb"
+            },
+            {
+              "path": "web-sha256.txt",
+              "bytes": 10138,
+              "sha256": "c26a0fb1335dda198b71b375ed8ef69d67b80d7553c7b0f75fddfdd5b7e1f8c9"
+            }
+          ]
+        }
+      ],
+      "run_logs_archive": {
+        "bytes": 428837,
+        "ZIP_sha256": "04c23665df9030ffb4d26c219ef18bf3e740aa2b4f62ac632642211886b55e42",
+        "members": 88
+      }
+    },
+    {
+      "repo": "Goodwu/media-kit",
+      "id": 38243502467,
+      "attempt": 1,
+      "head_sha": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "status": "completed",
+      "conclusion": "success",
+      "workflow": ".github/workflows/routing-source.yml",
+      "artifacts": [
+        {
+          "id": 11744277270,
+          "name": "routing-source-media_kit_hdr_lab-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+          "API_digest": "sha256:85fc5935b208537c0e6eede01d8e6f15a4749d82ff4f94b663e40b48f379be25",
+          "actual_ZIP_sha256": "85fc5935b208537c0e6eede01d8e6f15a4749d82ff4f94b663e40b48f379be25",
+          "ZIP_size_bytes": 11400,
+          "API_size_bytes": 11400,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "analyze.log",
+              "bytes": 97,
+              "sha256": "6ba660c542970d3ef7a38460dd0735b5fac7e97a99e72f225a1d7817a5462768"
+            },
+            {
+              "path": "pub-get.log",
+              "bytes": 3417,
+              "sha256": "b531dbed92a07977e1640dbb71941cf5a2ac5427ee129a1139f0f2718b12757b"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 568,
+              "sha256": "4aed6518c71cd129206818f404e076f6618185214cdfc88fcf5378a138d97924"
+            },
+            {
+              "path": "tests.log",
+              "bytes": 63749,
+              "sha256": "f6656cc563b9acb91d7ba6d75b3b71d43649b50228eeb8398de95f1b428bda4a"
+            }
+          ]
+        },
+        {
+          "id": 11743469077,
+          "name": "routing-source-media_kit_video-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+          "API_digest": "sha256:da68dda2d0887e61244b548395d86c5b00e9660c4d75ad5629ffb1dd40eeeee6",
+          "actual_ZIP_sha256": "da68dda2d0887e61244b548395d86c5b00e9660c4d75ad5629ffb1dd40eeeee6",
+          "ZIP_size_bytes": 33000,
+          "API_size_bytes": 33000,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "analyze.log",
+              "bytes": 97,
+              "sha256": "9f645d5c6fd446413951ddda143578918d00c5edb99fbd933745f8b35982ff70"
+            },
+            {
+              "path": "ohos-js-run.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "ohos-js-compile.log",
+              "bytes": 110,
+              "sha256": "2625fa8dd0ff27beb6c35cb4d13c49badf4f786fb767c5c27709576c5cac53b8"
+            },
+            {
+              "path": "ohos-smoke.js",
+              "bytes": 11664,
+              "sha256": "18115ab0c8f23e6b7ac75e7fcecb56a23d92674b88ab1b8513b7c9b040e64627"
+            },
+            {
+              "path": "ohos-smoke.js.deps",
+              "bytes": 11744,
+              "sha256": "378b8c7bc78082c70796511b8ddfbeec1e879aae87066ecf5c16906d5651ebb0"
+            },
+            {
+              "path": "ohos-smoke.js.map",
+              "bytes": 1359,
+              "sha256": "cd2124870451001dea1b92013ba55e8923af7a9c7c5f1ac41e322b95a4337998"
+            },
+            {
+              "path": "ohos-smoke.mjs",
+              "bytes": 6206,
+              "sha256": "c2db018fcaa8b25d2c832dda752219eb9a972dd32b7b7bf3bcb12b90a25f0bbe"
+            },
+            {
+              "path": "ohos-smoke.support.js",
+              "bytes": 200,
+              "sha256": "9b329fbb5f775a8c37a85ede978db00aa0e9543edbadb520c2f1fb0aac403140"
+            },
+            {
+              "path": "ohos-smoke.wasm",
+              "bytes": 406,
+              "sha256": "8ebaea49bf20e2091781c23dc2a0d2007fe046a98fd26b6da285ccc424100d59"
+            },
+            {
+              "path": "ohos-smoke.wasm.map",
+              "bytes": 2278,
+              "sha256": "89fbb6052eec22659510908062677f6203d01a6449c5bb1f9ab81369fdea7638"
+            },
+            {
+              "path": "ohos-wasm-compile.log",
+              "bytes": 208,
+              "sha256": "ab241587fb00271a91415901385b5c5ad21d35f5daca4d6b00272d1a8d954b22"
+            },
+            {
+              "path": "pub-get.log",
+              "bytes": 1635,
+              "sha256": "eb1f8d2bc84094716b5603e07ab50cb0b7aaaa3e4188e986ef545e5db73d4dc0"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 568,
+              "sha256": "4aed6518c71cd129206818f404e076f6618185214cdfc88fcf5378a138d97924"
+            },
+            {
+              "path": "tests.log",
+              "bytes": 147578,
+              "sha256": "38c205351b385809eb76ea552d6a657f17116180b6a6332ca8a302a5588f9ea7"
+            }
+          ]
+        },
+        {
+          "id": 11743189220,
+          "name": "routing-tools-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+          "API_digest": "sha256:02b0cbc8c2d3bddb2616fbfb4e0ee63b9ee4ac82c3162889c3c50ced59179236",
+          "actual_ZIP_sha256": "02b0cbc8c2d3bddb2616fbfb4e0ee63b9ee4ac82c3162889c3c50ced59179236",
+          "ZIP_size_bytes": 1076,
+          "API_size_bytes": 1076,
+          "digest_matches": true,
+          "members": [
+            {
+              "path": "extractor.log",
+              "bytes": 818,
+              "sha256": "84ed74d0771db41a0760eac21c7a75b0eab2b2db9bf74261a3811b422d54bb5d"
+            },
+            {
+              "path": "repair-tool.log",
+              "bytes": 1785,
+              "sha256": "fe33b4c2f9663206ce1f2f4203699e82e5700108e053b34a2d2a41f61acbd83b"
+            },
+            {
+              "path": "source.txt",
+              "bytes": 41,
+              "sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff"
+            }
+          ]
+        }
+      ],
+      "run_logs_archive": {
+        "bytes": 142997,
+        "ZIP_sha256": "51f7f3efb36e600113d7ec007a95ca03099d63954b51f9e7cfc14a24a4efea19",
+        "members": 38
+      }
+    }
+  ],
+  "source_App_SHA": "6d349a06db9103996274e639c31d7d2a7554540a",
+  "source_library_SHA": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+  "App_artifact_validation": [
+    {
+      "artifact_id": 11744820772,
+      "artifact_name": "routing-app-source-macos-6d349a06db9103996274e639c31d7d2a7554540a",
+      "source_txt": "app=6d349a06db9103996274e639c31d7d2a7554540a\nmedia-kit=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\n",
+      "source_txt_sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12",
+      "API_digest": "sha256:df1558bd7ad0c07c9a5971228f32cf577449126b659b1a868b399551d08ce430",
+      "actual_ZIP_sha256": "df1558bd7ad0c07c9a5971228f32cf577449126b659b1a868b399551d08ce430",
+      "digest_matches": true,
+      "platform": "macos",
+      "bootstrap_status": "fresh-source-only",
+      "bootstrap_step_count": 57,
+      "all_bootstrap_step_exits_zero": true,
+      "vector_before": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_after": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_final": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "source_hashes_count": 2691,
+      "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "toolchain": {
+        "frameworkVersion": "3.47.2",
+        "channel": "stable",
+        "repositoryUrl": "https://github.com/flutter/flutter.git",
+        "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+        "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+        "engineCommitDate": "2026-08-26 18:46:13.000Z",
+        "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+        "engineBuildDate": "2026-08-26 12:23:07.677",
+        "dartSdkVersion": "3.13.2",
+        "devToolsVersion": "2.60.0",
+        "flutterVersion": "3.47.2",
+        "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+      },
+      "media_kit_package_roots": {
+        "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "resolution_before_patched_after_equal": true,
+      "flutter_tests": {
+        "passed": 268,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "01:25 +268: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing app...                                                \nNo issues found! (ran in 60.7s)\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub",
+        "explicit_fatal_flags_not_in_logged_command": true
+      },
+      "kernel_sha_record": "\nAlgorithm : SHA256\nHash      : 6ADCDB267367B6047A46C836B357C106A4C1C049383556900AFF33C38FEA7108\nPath      : /Users/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin\n\n",
+      "kernel_binary_rehashed": false
+    },
+    {
+      "artifact_id": 11744525560,
+      "artifact_name": "routing-app-source-windows-6d349a06db9103996274e639c31d7d2a7554540a",
+      "source_txt": "app=6d349a06db9103996274e639c31d7d2a7554540a\nmedia-kit=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\r\n",
+      "source_txt_sha256": "d5c5104d58672779a2cc2dd53bdcb136eed6cc0fe4732d00d9ce5f9c96965b9d",
+      "API_digest": "sha256:3abfd51f70f4b14b64162ed35906981a33dcf55568d6828f4c977fc0da897994",
+      "actual_ZIP_sha256": "3abfd51f70f4b14b64162ed35906981a33dcf55568d6828f4c977fc0da897994",
+      "digest_matches": true,
+      "platform": "windows",
+      "bootstrap_status": "fresh-source-only",
+      "bootstrap_step_count": 57,
+      "all_bootstrap_step_exits_zero": true,
+      "vector_before": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_after": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_final": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "source_hashes_count": 2691,
+      "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "toolchain": {
+        "frameworkVersion": "3.47.2",
+        "channel": "stable",
+        "repositoryUrl": "https://github.com/flutter/flutter.git",
+        "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+        "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+        "engineCommitDate": "2026-08-26 18:46:13.000Z",
+        "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+        "engineBuildDate": "2026-08-26 19:23:07.677",
+        "dartSdkVersion": "3.13.2",
+        "devToolsVersion": "2.60.0",
+        "flutterVersion": "3.47.2",
+        "flutterRoot": "D:\\a\\_temp\\rb\\s\\flutter"
+      },
+      "media_kit_package_roots": {
+        "media_kit": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit",
+        "media_kit_android_dataspace_vendor": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ios\\media_kit_libs_ios_video",
+        "media_kit_libs_linux": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\linux\\media_kit_libs_linux",
+        "media_kit_libs_macos_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\macos\\media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ohos\\media_kit_libs_ohos",
+        "media_kit_libs_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\universal\\media_kit_libs_video",
+        "media_kit_libs_windows_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\windows\\media_kit_libs_windows_video",
+        "media_kit_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit_video"
+      },
+      "resolution_before_patched_after_equal": true,
+      "flutter_tests": {
+        "passed": 268,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "01:40 +268: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing app...                                                \r\nNo issues found! (ran in 62.2s)\r\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub",
+        "explicit_fatal_flags_not_in_logged_command": true
+      },
+      "kernel_sha_record": "\r\nAlgorithm : SHA256\r\nHash      : 09799B8722A904C9B8D39892D9AA6D772F68FB6637777898712DDBDA9C17F6AE\r\nPath      : D:\\a\\PiliPlusX\\PiliPlusX\\app\\build\\flutter_assets\\kernel_blob.bin\r\n\r\n",
+      "kernel_binary_rehashed": false
+    },
+    {
+      "artifact_id": 11744525367,
+      "artifact_name": "routing-app-source-linux-6d349a06db9103996274e639c31d7d2a7554540a",
+      "source_txt": "app=6d349a06db9103996274e639c31d7d2a7554540a\nmedia-kit=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\n",
+      "source_txt_sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12",
+      "API_digest": "sha256:2a1659f2b635f7b66a4d221bd6ceaaf95d470b1fd7cf7f359caf885ee1a45dd6",
+      "actual_ZIP_sha256": "2a1659f2b635f7b66a4d221bd6ceaaf95d470b1fd7cf7f359caf885ee1a45dd6",
+      "digest_matches": true,
+      "platform": "linux",
+      "bootstrap_status": "fresh-source-only",
+      "bootstrap_step_count": 57,
+      "all_bootstrap_step_exits_zero": true,
+      "vector_before": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_after": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_final": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "source_hashes_count": 2691,
+      "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "toolchain": {
+        "frameworkVersion": "3.47.2",
+        "channel": "stable",
+        "repositoryUrl": "https://github.com/flutter/flutter.git",
+        "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+        "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+        "engineCommitDate": "2026-08-26 18:46:13.000Z",
+        "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+        "engineBuildDate": "2026-08-26 12:23:07.677",
+        "dartSdkVersion": "3.13.2",
+        "devToolsVersion": "2.60.0",
+        "flutterVersion": "3.47.2",
+        "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+      },
+      "media_kit_package_roots": {
+        "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "resolution_before_patched_after_equal": true,
+      "flutter_tests": {
+        "passed": 268,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "01:04 +268: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing app...                                                \nNo issues found! (ran in 44.1s)\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub",
+        "explicit_fatal_flags_not_in_logged_command": true
+      },
+      "kernel_sha_record": "\nAlgorithm : SHA256\nHash      : EC7BB619B1C7EA2DD1FA6653033AEFCBF808ED542C6E073F483F341FC4A9CBE7\nPath      : /home/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin\n\n",
+      "kernel_binary_rehashed": false
+    },
+    {
+      "artifact_id": 11744501035,
+      "artifact_name": "routing-app-python-6d349a06db9103996274e639c31d7d2a7554540a",
+      "source_txt": "app=6d349a06db9103996274e639c31d7d2a7554540a\nmedia-kit=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\n",
+      "source_txt_sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12",
+      "API_digest": "sha256:1e7dd8df8716f5be0c1f7e8462f966e1cfea2796c0bab95688387415acb99bd7",
+      "actual_ZIP_sha256": "1e7dd8df8716f5be0c1f7e8462f966e1cfea2796c0bab95688387415acb99bd7",
+      "digest_matches": true,
+      "platform": "android",
+      "bootstrap_status": "fresh-source-only",
+      "bootstrap_step_count": 57,
+      "all_bootstrap_step_exits_zero": true,
+      "vector_before": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_after": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_final": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "source_hashes_count": 2691,
+      "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "toolchain": {
+        "frameworkVersion": "3.47.2",
+        "channel": "stable",
+        "repositoryUrl": "https://github.com/flutter/flutter.git",
+        "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+        "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+        "engineCommitDate": "2026-08-26 18:46:13.000Z",
+        "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+        "engineBuildDate": "2026-08-26 12:23:07.677",
+        "dartSdkVersion": "3.13.2",
+        "devToolsVersion": "2.60.0",
+        "flutterVersion": "3.47.2",
+        "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+      },
+      "media_kit_package_roots": {
+        "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "resolution_before_patched_after_equal": true,
+      "python_tests": {
+        "discovered_run_count": 499,
+        "passed_excluding_skipped": 497,
+        "skipped": 2,
+        "failed": 0,
+        "summary": "Ran 499 tests in 179.818s",
+        "skip_lines": [
+          "test_real_three_file_ios_chain_passes_and_android_only_chain_fails (prepare_ios_variant_test.IOSPatchSemanticsTests.test_real_three_file_ios_chain_passes_and_android_only_chain_fails) ... skipped 'shared Flutter Git source is not present'",
+          "test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure (prepare_ios_variant_test.IOSPatchSemanticsTests.test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure) ... skipped 'shared Flutter Git source is not present'"
+        ]
+      },
+      "manifest_parser_contract": {
+        "scope": "manifest-parser-tests",
+        "hostedAcceptance": false,
+        "mode": "bootstrap-bound-ci",
+        "status": "identity-stable-semantic-tests",
+        "checks": [
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_absolute_uri_encoded_absolute_query_fragment_rejected",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_decoded_escaped_generated_paths_rejected_by_prebuild_contract",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_invalid_yaml_documents_tags_types_keys_duplicates_aliases_rejected",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_normal_assets_maps_anchors_fonts_shaders_deferred_decode",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_real_current_app_resource_declarations_are_tracked",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_shared_darwin_uses_parsed_boolean_and_lock_yaml_version",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_tool_compiles_against_real_tools_graph",
+            "identityUnchanged": true
+          }
+        ],
+        "vector": {
+          "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+          "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+          "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+          "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+        }
+      }
+    },
+    {
+      "artifact_id": 11743723910,
+      "artifact_name": "routing-app-source-6d349a06db9103996274e639c31d7d2a7554540a",
+      "source_txt": "app=6d349a06db9103996274e639c31d7d2a7554540a\nmedia-kit=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\n",
+      "source_txt_sha256": "a8a57dea1e6a857371751839782dbb5d5dd4a005213c4716eabd5c00fdcc6c12",
+      "API_digest": "sha256:2e4b003bfe03c86d4601d1fd52c79e783607e9baf25c5f047b4ca3f5749e5c31",
+      "actual_ZIP_sha256": "2e4b003bfe03c86d4601d1fd52c79e783607e9baf25c5f047b4ca3f5749e5c31",
+      "digest_matches": true,
+      "platform": "android",
+      "bootstrap_status": "fresh-source-only",
+      "bootstrap_step_count": 57,
+      "all_bootstrap_step_exits_zero": true,
+      "vector_before": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_after": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "vector_final": {
+        "app": "6d349a06db9103996274e639c31d7d2a7554540a",
+        "appTree": "8e5adc56b510a660843061c1d5486f86e092ca42",
+        "media-kit": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+        "media-kitTree": "4f2963aa6efeacc6ee38fad970b4db4787446606"
+      },
+      "source_hashes_count": 2691,
+      "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "toolchain": {
+        "frameworkVersion": "3.47.2",
+        "channel": "stable",
+        "repositoryUrl": "https://github.com/flutter/flutter.git",
+        "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+        "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+        "engineCommitDate": "2026-08-26 18:46:13.000Z",
+        "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+        "engineBuildDate": "2026-08-26 12:23:07.677",
+        "dartSdkVersion": "3.13.2",
+        "devToolsVersion": "2.60.0",
+        "flutterVersion": "3.47.2",
+        "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+      },
+      "media_kit_package_roots": {
+        "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "resolution_before_patched_after_equal": true,
+      "flutter_tests": {
+        "passed": 268,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "01:04 +268: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing app...                                                \nNo issues found! (ran in 41.9s)\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub",
+        "explicit_fatal_flags_not_in_logged_command": true
+      },
+      "kernel_sha_record": "370b03e498f9a6fe2cba2332751eaea49381c8f05a3db4b1e11280cd2f8affe3  build/flutter_assets/kernel_blob.bin\n",
+      "kernel_binary_rehashed": false,
+      "web_DOM_test": {
+        "passed": 1,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "00:00 +1: All tests passed!"
+      }
+    }
+  ],
+  "library_artifact_validation": [
+    {
+      "artifact_id": 11744277270,
+      "artifact_name": "routing-source-media_kit_hdr_lab-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+      "source_txt": "task=MK-ROUTING-20261011\nscope=host-source-tests\nsource_sha=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\nsource_tree=4f2963aa6efeacc6ee38fad970b4db4787446606\nFlutter 3.47.7 \u2022 channel stable \u2022 https://github.com/flutter/flutter.git\nFramework \u2022 revision abaf9c5237 (4 days ago) \u2022 2026-10-08 09:51:21 -0700\nEngine \u2022 hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) \u2022 2026-10-07 17:09:12.000Z\nTools \u2022 Dart 3.13.5 \u2022 DevTools 2.60.0\n\nNo prebuilt libmpv is installed by this job.\nThis job is not native-build or device acceptance.\n",
+      "source_txt_sha256": "4aed6518c71cd129206818f404e076f6618185214cdfc88fcf5378a138d97924",
+      "API_digest": "sha256:85fc5935b208537c0e6eede01d8e6f15a4749d82ff4f94b663e40b48f379be25",
+      "actual_ZIP_sha256": "85fc5935b208537c0e6eede01d8e6f15a4749d82ff4f94b663e40b48f379be25",
+      "digest_matches": true,
+      "flutter_tests": {
+        "passed": 298,
+        "skipped": 0,
+        "failed": 0,
+        "terminal_line": "00:31 +298: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing media_kit_hdr_lab...                                  \nNo issues found! (ran in 10.9s)\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub"
+      }
+    },
+    {
+      "artifact_id": 11743469077,
+      "artifact_name": "routing-source-media_kit_video-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+      "source_txt": "task=MK-ROUTING-20261011\nscope=host-source-tests\nsource_sha=3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\nsource_tree=4f2963aa6efeacc6ee38fad970b4db4787446606\nFlutter 3.47.7 \u2022 channel stable \u2022 https://github.com/flutter/flutter.git\nFramework \u2022 revision abaf9c5237 (4 days ago) \u2022 2026-10-08 09:51:21 -0700\nEngine \u2022 hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) \u2022 2026-10-07 17:09:12.000Z\nTools \u2022 Dart 3.13.5 \u2022 DevTools 2.60.0\n\nNo prebuilt libmpv is installed by this job.\nThis job is not native-build or device acceptance.\n",
+      "source_txt_sha256": "4aed6518c71cd129206818f404e076f6618185214cdfc88fcf5378a138d97924",
+      "API_digest": "sha256:da68dda2d0887e61244b548395d86c5b00e9660c4d75ad5629ffb1dd40eeeee6",
+      "actual_ZIP_sha256": "da68dda2d0887e61244b548395d86c5b00e9660c4d75ad5629ffb1dd40eeeee6",
+      "digest_matches": true,
+      "flutter_tests": {
+        "passed": 772,
+        "skipped": 3,
+        "failed": 0,
+        "terminal_line": "00:49 +772 ~3: All tests passed!"
+      },
+      "analyze": {
+        "raw": "Analyzing media_kit_video...                                    \nNo issues found! (ran in 12.6s)\n",
+        "no_issues": true,
+        "actual_command": "flutter analyze --no-pub"
+      }
+    },
+    {
+      "artifact_id": 11743189220,
+      "artifact_name": "routing-tools-3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+      "source_txt": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251\n",
+      "source_txt_sha256": "443a70644dc8e674a536ae4e07790e4e70a9ff0b32a92c2008ee5118887bd1ff",
+      "API_digest": "sha256:02b0cbc8c2d3bddb2616fbfb4e0ee63b9ee4ac82c3162889c3c50ced59179236",
+      "actual_ZIP_sha256": "02b0cbc8c2d3bddb2616fbfb4e0ee63b9ee4ac82c3162889c3c50ced59179236",
+      "digest_matches": true,
+      "extractor.log": {
+        "discovered_run_count": 6,
+        "passed_excluding_skipped": 6,
+        "skipped": 0,
+        "failed": 0,
+        "summary": "Ran 6 tests in 0.001s",
+        "skip_lines": []
+      },
+      "repair-tool.log": {
+        "discovered_run_count": 12,
+        "passed_excluding_skipped": 12,
+        "skipped": 0,
+        "failed": 0,
+        "summary": "Ran 12 tests in 0.005s",
+        "skip_lines": []
+      }
+    }
+  ],
+  "excluded_cancelled_duplicate_App_run": 38243541172,
+  "excluded_Build_embedded_prelude": "separate NativeRelease review; no results imported",
+  "old_local_iOS_1970_d916_proof": "different source vector; not counted as these hosted runs",
+  "raw_evidence_parts": [
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11744820772.json.gz",
+      "bytes": 197020,
+      "sha256": "64704780f655ddce8f8e282e477439a17aae64fae7475688b49d385220617a08"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11744525560.json.gz",
+      "bytes": 197541,
+      "sha256": "cb4eaeb0cb4fad0546bb93a71eddc25f5cc875fb2cd20924e65067918c8bcbd4"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11744525367.json.gz",
+      "bytes": 196962,
+      "sha256": "e8fff7aeb7d00ce951b54119fe2ecac8244fcca42c0a85abdc0c2a0eec08c3ae"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11744501035.json.gz",
+      "bytes": 199296,
+      "sha256": "caec84ddc97320ddc20760886582c0fa5fef4476fe77c08d9bc0cf439dd5ce0d"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11743723910.json.gz",
+      "bytes": 202714,
+      "sha256": "37a9ecafbd5181198d5a1ffa8f0cdf1a288a74235bbda7e9a537d35d4a13cd13"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-logs-38243549009.json.gz",
+      "bytes": 138099,
+      "sha256": "685b4160b2a5d7bdb2e668687c80066247c9e3df960ba6e5b41d4be8e34dbd31"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11744277270.json.gz",
+      "bytes": 11029,
+      "sha256": "f512175d9481a3fb2c23ccd5b46747779d5d15395d926c30ae237fc712b02d8a"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11743469077.json.gz",
+      "bytes": 23104,
+      "sha256": "caacc2efd529a97fe948cc30ab2bfd6afd1523e41635b4405fba4011c69636d4"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-11743189220.json.gz",
+      "bytes": 704,
+      "sha256": "608329683cac9c6356690054197308d26f6e2215d44fe4f997863c78d42062fe"
+    },
+    {
+      "path": "/tmp/mk-standalone-source-ci-evidence-20261012/raw-logs-38243502467.json.gz",
+      "bytes": 47136,
+      "sha256": "cbad5fa89f928f955b84f7edf465a83a316676dfe527f6ee916d8fa05c55f503"
+    }
+  ],
+  "limitations": [
+    "source analyze/tests plus Dart/assets bundle are not native binary provenance or device/playback acceptance",
+    "kernel hashes are artifact-contained SHA records backed by actual CI bundle step; kernel bytes are absent from these artifacts, so no independent kernel binary rehash",
+    "library artifacts contain library SHA/tree only; no App SHA is synthesized",
+    "App Python has two real skipped iOS semantic cases because shared Flutter Git source is absent; 499 run includes these two skips",
+    "SDK/cache/donors and original source workspaces were not read or modified by this CI evidence task"
+  ],
+  "commands": [
+    "gh api repos/{repo}/actions/runs/{runId}",
+    "gh api repos/{repo}/actions/runs/{runId}/artifacts",
+    "gh api repos/{repo}/actions/artifacts/{artifactId}/zip",
+    "gh api repos/{repo}/actions/runs/{runId}/logs"
+  ],
+  "collected_utc": "2026-10-12T11:59:37Z",
+  "actual_CI_step_command_evidence": {
+    "logs-38243549009": {
+      "Source bootstrap and validation (macos)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+        "2026-10-12T11:45:20.2453290Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+        "2026-10-12T11:45:20.2454570Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+      ],
+      "Source bootstrap and validation (macos)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+        "2026-10-12T11:48:20.0794320Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+        "2026-10-12T11:48:20.0795550Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+      ],
+      "App Python regression tests (macOS)/7_Run all App Python test modules.txt": [
+        "2026-10-12T11:42:48.5127090Z \u001b[36;1mpython3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee \"$ROUTING_RESULTS/tests.log\"\u001b[0m",
+        "2026-10-12T11:42:52.0148250Z test_invalid_pending_rejected_without_output (macos_shared_bootstrap_test.BootstrapTests.test_invalid_pending_rejected_without_output) ... usage: python3 -m unittest [-h] --prepared-source PREPARED_SOURCE",
+        "2026-10-12T11:42:52.0179780Z python3 -m unittest: error: invalid bootstrap pending value; expected true or absent",
+        "2026-10-12T11:42:55.3013870Z test_cli_has_no_url_or_hash_override (macos_shared_ci_inputs_test.AcquisitionTests.test_cli_has_no_url_or_hash_override) ... usage: python3 -m unittest [-h]",
+        "2026-10-12T11:42:55.3015750Z python3 -m unittest: error: unrecognized arguments: --url https://evil.invalid"
+      ],
+      "Source bootstrap and validation (linux)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+        "2026-10-12T11:41:08.3061455Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+        "2026-10-12T11:41:08.3062642Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+      ],
+      "Source bootstrap and validation (linux)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+        "2026-10-12T11:43:13.7583599Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+        "2026-10-12T11:43:13.7584848Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+      ],
+      "App analyze, tests and Dart bundle (latest media-kit source)/8_Analyze the App.txt": [
+        "2026-10-12T11:41:25.8591819Z \u001b[36;1mflutter analyze --no-pub 2>&1 | tee \"$ROUTING_RESULTS/analyze.log\"\u001b[0m"
+      ],
+      "App analyze, tests and Dart bundle (latest media-kit source)/12_Compile the App Dart and assets bundle without historical native binaries.txt": [
+        "2026-10-12T11:44:48.0686848Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | tee \"$ROUTING_RESULTS/bundle-build.log\"\u001b[0m",
+        "2026-10-12T11:44:48.0687339Z \u001b[36;1mtest -s build/flutter_assets/kernel_blob.bin\u001b[0m",
+        "2026-10-12T11:44:48.0688115Z \u001b[36;1msha256sum build/flutter_assets/kernel_blob.bin | tee \"$ROUTING_RESULTS/kernel-sha256.txt\"\u001b[0m",
+        "2026-10-12T11:45:25.7935995Z 370b03e498f9a6fe2cba2332751eaea49381c8f05a3db4b1e11280cd2f8affe3  build/flutter_assets/kernel_blob.bin"
+      ],
+      "Source bootstrap and validation (windows)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+        "2026-10-12T11:41:20.7821671Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+        "2026-10-12T11:41:20.7822775Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+      ],
+      "Source bootstrap and validation (windows)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+        "2026-10-12T11:44:22.5149919Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+        "2026-10-12T11:44:22.5151159Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+      ]
+    },
+    "logs-38243502467": {
+      "Source analyze and tests (media_kit_video)/6_Analyze source.txt": [
+        "2026-10-12T11:38:14.4690200Z \u001b[36;1mflutter analyze --no-pub 2>&1 | tee \"$GITHUB_WORKSPACE/.ci-results/media_kit_video/analyze.log\"\u001b[0m"
+      ],
+      "Source analyze and tests (media_kit_video)/7_Run source tests.txt": [
+        "2026-10-12T11:38:27.4295824Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee \"$GITHUB_WORKSPACE/.ci-results/media_kit_video/tests.log\"\u001b[0m"
+      ],
+      "Routing audit utility tests/3_Run extraction and guarded-repair utility tests.txt": [
+        "2026-10-12T11:36:53.8505713Z \u001b[36;1mpython3 -m unittest discover -s tool/routing_native_audit -v 2>&1 | tee ci-tool-results/extractor.log\u001b[0m",
+        "2026-10-12T11:36:53.8506605Z \u001b[36;1mpython3 -m unittest discover -s tool/routing_ci -v 2>&1 | tee ci-tool-results/repair-tool.log\u001b[0m"
+      ],
+      "Source analyze and tests (media_kit_hdr_lab)/6_Analyze source.txt": [
+        "2026-10-12T11:36:55.9978753Z \u001b[36;1mflutter analyze --no-pub 2>&1 | tee \"$GITHUB_WORKSPACE/.ci-results/media_kit_hdr_lab/analyze.log\"\u001b[0m"
+      ],
+      "Source analyze and tests (media_kit_hdr_lab)/7_Run source tests.txt": [
+        "2026-10-12T11:37:07.1810472Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee \"$GITHUB_WORKSPACE/.ci-results/media_kit_hdr_lab/tests.log\"\u001b[0m"
+      ]
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/pages/video/local_diagnostic/policy.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/pages/video/local_diagnostic/policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

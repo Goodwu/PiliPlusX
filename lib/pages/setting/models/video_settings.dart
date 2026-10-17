@@ -1,20 +1,23 @@
 import 'dart:io';
+import 'dart:async';
 
-import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
-import 'package:PiliPlus/models/common/video/live_quality.dart';
-import 'package:PiliPlus/models/common/video/video_decode_type.dart';
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/pages/setting/models/model.dart';
-import 'package:PiliPlus/pages/setting/widgets/ordered_multi_select_dialog.dart';
-import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
-import 'package:PiliPlus/plugin/pl_player/models/audio_output_type.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hwdec_type.dart';
-import 'package:PiliPlus/utils/filtering_text.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+
+import 'package:piliplus/models/common/video/audio_quality.dart';
+import 'package:piliplus/models/common/video/cdn_type.dart';
+import 'package:piliplus/models/common/video/live_quality.dart';
+import 'package:piliplus/models/common/video/video_decode_type.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/pages/setting/models/model.dart';
+import 'package:piliplus/pages/setting/widgets/ordered_multi_select_dialog.dart';
+import 'package:piliplus/pages/setting/widgets/select_dialog.dart';
+import 'package:piliplus/plugin/pl_player/models/audio_output_type.dart';
+import 'package:piliplus/plugin/pl_player/models/hwdec_type.dart';
+import 'package:piliplus/utils/filtering_text.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/video_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -23,12 +26,18 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get videoSettings => [
-  const SwitchModel(
+  SwitchModel(
     title: '开启硬解',
     subtitle: '以较低功耗播放视频，若异常卡死请关闭',
-    leading: Icon(Icons.flash_on_outlined),
+    leading: const Icon(Icons.flash_on_outlined),
     setKey: SettingBoxKey.enableHA,
     defaultVal: true,
+    onChanged: (_) {
+      unawaited(
+        PlPlayerController.instance?.applyRoutePreferences() ??
+            Future<void>.value(),
+      );
+    },
   ),
   const SwitchModel(
     title: '免登录1080P',
@@ -410,6 +419,7 @@ Future<void> _showAudioOutputDialog(
       SettingBoxKey.audioOutput,
       res.join(','),
     );
+    await PlPlayerController.instance?.applyRoutePreferences();
     setState();
   }
 }
@@ -461,6 +471,7 @@ Future<void> _showHwDecDialog(
       SettingBoxKey.hardwareDecoding,
       res.join(','),
     );
+    await PlPlayerController.instance?.applyRoutePreferences();
     setState();
   }
 }

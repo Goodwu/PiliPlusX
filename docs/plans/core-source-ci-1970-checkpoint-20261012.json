@@ -1,0 +1,92 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "scope": "source-only",
+  "vector": {
+    "app": "1970d440b5b9d9ffc001866064581e4005b26b30",
+    "appTree": "3b2c7634afccfbd1b4a9e4fe5749bf07f219b7a8",
+    "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+  },
+  "sourceRun": {
+    "id": 38172589162,
+    "attempt": 1,
+    "conclusion": "success"
+  },
+  "buildRun": {
+    "id": 38172589627,
+    "conclusion": "failure",
+    "embeddedSourceJobs": "success_API_verified",
+    "nativeReleaseJobsFailed": 6,
+    "parity": "skipped"
+  },
+  "pythonStandalone": {
+    "job": 114568540129,
+    "total": 479,
+    "passed": 477,
+    "skipped": 2,
+    "seconds": 201.015,
+    "skipReason": "shared Flutter Git source is not present",
+    "skippedScope": "iOS actual three-file SDK semantic tests",
+    "realDartParserTests": 7,
+    "nativeVerifierUnitTests": 43
+  },
+  "pythonEmbedded": {
+    "job": 114568886892,
+    "total": 479,
+    "seconds": 216.19,
+    "skipDetails": "not independently artifact-verified; do not infer from standalone"
+  },
+  "platforms": {
+    "main": {
+      "job": 114568540196,
+      "flutterPassed": 268,
+      "chromePassed": 1,
+      "strictAnalyze": "No issues",
+      "artifact": 11714284024,
+      "zipSHA256": "2ad91b12eaf074afdc1976b65b46a81f769794e1ef19e0fa8d61e81618e47b4d",
+      "verified": "source.txt exact pair; job logs; in-memory ZIP"
+    },
+    "macOS": {
+      "job": 114568540219,
+      "artifact": 11714897384,
+      "zipSHA256": "cee4c5a58786d3eb6b0dbccd2267340f341443fe03989a932a56fbe5355bee2e"
+    },
+    "Linux": {
+      "job": 114568540208,
+      "artifact": 11714791293,
+      "zipSHA256": "69932029c4d3b1c239850db9149399dc5af95be70ae1659037f5a34fcf2a8ab6"
+    },
+    "Windows": {
+      "job": 114568540130,
+      "artifact": 11714597702,
+      "zipSHA256": "9af4568777cac2983910367c658c6aa5b91e69c727fda2d3a307ee9767769594"
+    }
+  },
+  "pythonArtifact": {
+    "id": 11715340535,
+    "zipSHA256": "8d8d8ff208128b0eee4c31c54f39bebd1ee5f4fc5338126faac3ea522522b92c"
+  },
+  "independentArchiveVerification": {
+    "reviewer": "/root/native_release_review",
+    "platforms": [
+      "macOS",
+      "Linux",
+      "Windows"
+    ],
+    "flutterEach": 268,
+    "strictAnalyze": "No issues found",
+    "bundleCommand": "flutter build bundle --debug --no-pub",
+    "bundleNamedLogArchived": false,
+    "bundleEvidence": "actual job command + successful step + kernel SHA",
+    "bootstrapStepsEach": 57,
+    "bootstrap": "fresh-source-only",
+    "exactPackageRoots": 10,
+    "sourceIdentity": "before/after/final exact pair and current remotes",
+    "centralComment": 6113706863
+  },
+  "limits": {
+    "nativeBinaryProvenanceVerified": false,
+    "deviceTest": false,
+    "allReleaseGreen": false,
+    "historicalRunRelabelled": false
+  }
+}

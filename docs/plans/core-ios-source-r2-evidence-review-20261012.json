@@ -1,0 +1,127 @@
+{
+  "scope": "PASS_IOS_VARIANT_SOURCE_PREBUILD_ONLY",
+  "checkpoint": "/tmp/mk-ios-current-source-prepare-checkpoint-r2.json",
+  "checkpointSha256": "0aacec76b03f7d807e8961da3776a08da8c845276e994959f167bc962737ad25",
+  "findings": [],
+  "stages": [
+    {
+      "name": "resume-r2-app-remote-before",
+      "exit": 0,
+      "logSha256": "6d34d82b084f76c0570a8a1974201fc6ba690cc4291cbfe59aeb4f97300dfec7"
+    },
+    {
+      "name": "resume-r2-media-kit-remote-before",
+      "exit": 0,
+      "logSha256": "de2fc35c46dba191b7996055d48d87dca4534e37b1b9e19d2d0bc598bbfb393c"
+    },
+    {
+      "name": "resume-r2-variant-help",
+      "exit": 0,
+      "logSha256": "d6dd64588afb128e06e03af139217c839f5305e19c25c0c518e9c3ff42030a6e"
+    },
+    {
+      "name": "resume-r2-variant-prepare",
+      "exit": 0,
+      "logSha256": "172a19189e8e381ed4eae3a57f207000fd09a9cda6a125c287c9645657f6997d"
+    },
+    {
+      "name": "resume-r2-variant-offline-enforced-lock-pubget",
+      "exit": 0,
+      "logSha256": "745af0956603a52198db922150004da5d6e27d959a2cc8e71e6b382e5928382a"
+    },
+    {
+      "name": "resume-r2-variant-check-prebuild",
+      "exit": 0,
+      "logSha256": "172a19189e8e381ed4eae3a57f207000fd09a9cda6a125c287c9645657f6997d"
+    },
+    {
+      "name": "resume-r2-source-verify",
+      "exit": 0,
+      "logSha256": "f637d61277073b09412f522b101a0158f4d9d3bd1e70508ae13d2ccc9b127ff1"
+    },
+    {
+      "name": "resume-r2-lock-help",
+      "exit": 0,
+      "logSha256": "5995013c24f8fdef9732de8f09aa0a4dde17bcd7d575c550ec83ec51e1d10296"
+    },
+    {
+      "name": "resume-r2-variant-source-lock",
+      "exit": 0,
+      "logSha256": "193ba0c8be9cee4f4c597b254b3372c68ecf7f813b250e70d7bb066517980b60"
+    },
+    {
+      "name": "resume-r2-variant-finalize",
+      "exit": 0,
+      "logSha256": "7eeb99113c6ae0c8b38c99da4e2fe70c5852cc9bbd7acc862c17f1c518787242"
+    },
+    {
+      "name": "resume-r2-app-remote-after",
+      "exit": 0,
+      "logSha256": "6d34d82b084f76c0570a8a1974201fc6ba690cc4291cbfe59aeb4f97300dfec7"
+    },
+    {
+      "name": "resume-r2-media-kit-remote-after",
+      "exit": 0,
+      "logSha256": "de2fc35c46dba191b7996055d48d87dca4534e37b1b9e19d2d0bc598bbfb393c"
+    }
+  ],
+  "receiptStatus": "finalized",
+  "receiptSha256": "ff61d5daee1b6201a0e16ef88dc7feb2003489eb38dd0a6ccfe95588953d0c04",
+  "recordedCommandCount": 5745,
+  "actualParserInvocations": 9,
+  "internalOfflineEnforcedPubget": [
+    {
+      "argv": [
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-clean-toolchain-ew_ioaam/f/bin/flutter",
+        "pub",
+        "get",
+        "--offline",
+        "--enforce-lockfile"
+      ],
+      "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-ios-current-source-vubi0p8v/ios-variant-work/app",
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "currentSourceAndVariantTrackedFiles": 1897,
+  "onlyTransformedFiles": [
+    "lib/common/widgets/scaffold/mini_scaffold.dart",
+    "lib/pages/common/slide/common_slide_page.dart"
+  ],
+  "currentVariantInventoryCounts": {
+    "inputs": 1897,
+    "pubGenerated": 31,
+    "buildGenerated": 3,
+    "pubLinks": 86
+  },
+  "resourceDeclarations": 9,
+  "currentPackageRoots": 261,
+  "gitPackagesAllUnderNewCache": true,
+  "actualParserSdkYamlIdentityHashes": "PASS",
+  "historicalSnapshotAuthority": {
+    "canonicalSha256": "b9c805d458226532dc04e46232535e23e8c3508997180a4da21d35ca58a6f287",
+    "serializedSha256": "8e1bd1e6915ab562bdadea1989adc0bfb723fb4ae09b2c88a5edbaa7b5913bfd",
+    "preparedSteps": 43,
+    "freshSteps": 57
+  },
+  "sourceSdkWitnessAndRemoteBeforeAfter": "PASS",
+  "currentDonorsRehashed": 598,
+  "nativeBuild": false,
+  "unverified": [
+    "Xcode",
+    "native build",
+    "bundle/IPA/APK",
+    "native binary provenance",
+    "device/runtime/visible playback",
+    "hosted workflow"
+  ],
+  "bootstrapReprepared": false,
+  "pipelineRerunByReviewer": false,
+  "prebuildChecked": true,
+  "originalSharedSdkDirtyFilesRehashedUnchanged": 36,
+  "evidenceIndex": {
+    "path": "/tmp/mk-ios-current-source-prepare-evidence-index-r2.json",
+    "sha256": "7500319facec68041fcae63bc813fdc2bb4507eaa4a1055912c2dde85d23bb3a"
+  },
+  "driverStdoutSha256": "f0f65c6a0b9d413e2600c2249d8f5c8a4b1e92969a536775e410b582d4f6c5ac"
+}

@@ -1,40 +1,41 @@
 import 'dart:io';
 
-import 'package:PiliPlus/build_config.dart';
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/common/widgets/back_detector.dart';
-import 'package:PiliPlus/common/widgets/custom_toast.dart';
-import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
-import 'package:PiliPlus/common/widgets/scale_app.dart';
-import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
-import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/pages/video/local_diagnostic/local_video_diagnostic.dart';
-import 'package:PiliPlus/pages/video/local_diagnostic/policy.dart';
-import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
-import 'package:PiliPlus/router/app_pages.dart';
-import 'package:PiliPlus/services/account_service.dart';
-import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/services/logger.dart';
-import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/utils/cache_manager.dart';
-import 'package:PiliPlus/utils/calc_window_position.dart';
-import 'package:PiliPlus/utils/danmaku_font.dart';
-import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/core_palettes_ext.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/font_utils.dart';
-import 'package:PiliPlus/utils/json_file_handler.dart';
-import 'package:PiliPlus/utils/max_screen_size.dart';
-import 'package:PiliPlus/utils/path_utils.dart';
-import 'package:PiliPlus/utils/platform_shortcuts.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/theme_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/build_config.dart';
+import 'package:piliplus/common/constants.dart';
+import 'package:piliplus/common/widgets/back_detector.dart';
+import 'package:piliplus/common/widgets/custom_toast.dart';
+import 'package:piliplus/common/widgets/route_aware_mixin.dart';
+import 'package:piliplus/common/widgets/scale_app.dart';
+import 'package:piliplus/common/widgets/scroll_behavior.dart';
+import 'package:piliplus/http/init.dart';
+import 'package:piliplus/pages/video/local_diagnostic/local_video_diagnostic.dart';
+import 'package:piliplus/pages/video/local_diagnostic/policy.dart';
+import 'package:piliplus/models/common/theme/theme_color_type.dart';
+import 'package:piliplus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:piliplus/router/app_pages.dart';
+import 'package:piliplus/services/account_service.dart';
+import 'package:piliplus/services/download/download_service.dart';
+import 'package:piliplus/services/logger.dart';
+import 'package:piliplus/services/service_locator.dart';
+import 'package:piliplus/utils/cache_manager.dart';
+import 'package:piliplus/utils/calc_window_position.dart';
+import 'package:piliplus/utils/danmaku_font.dart';
+import 'package:piliplus/utils/date_utils.dart';
+import 'package:piliplus/utils/extension/core_palettes_ext.dart';
+import 'package:piliplus/utils/extension/theme_ext.dart';
+import 'package:piliplus/utils/font_utils.dart';
+import 'package:piliplus/utils/json_file_handler.dart';
+import 'package:piliplus/utils/max_screen_size.dart';
+import 'package:piliplus/utils/media_kit_compat.dart';
+import 'package:piliplus/utils/path_utils.dart';
+import 'package:piliplus/utils/platform_shortcuts.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/request_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/theme_utils.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:collection/collection.dart';
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
@@ -52,6 +53,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
+import 'package:media_kit_video/media_kit_video.dart' show HdrOutputDiagnostics;
 
 WebViewEnvironment? webViewEnvironment;
 
@@ -117,7 +119,18 @@ void main() async {
   final localDiagnosticOnly =
       localVideoDiagnosticBuildEnabled && Platform.isMacOS;
   ScaledWidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  try {
+    MediaKit.ensureInitialized();
+    // V2 裁决（Q1 取证）：启用库侧有界 HDR 诊断（每次打开复核一条
+    // 单行记录，含等待相位/A/B 快照；不含路径与签名 URL）。仅诊断消
+    // 费，不构成路由/owner/设备判断。
+    HdrOutputDiagnostics.enabled = true;
+  } catch (e) {
+    // 播放内核缺失（如 Android API<28 缺 Vulkan 1.1 符号）不能阻断整个
+    // 应用启动；浏览等功能照常，播放路径按 mediaKitLoadFailed 降级。
+    mediaKitLoadFailed = true;
+    debugPrint('MediaKit.ensureInitialized failed: $e');
+  }
   await initializeDarwinMpvOwnerBroker();
   await _initAppPath();
   try {

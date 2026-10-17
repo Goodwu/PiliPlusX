@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:ui' show Locale;
 
-import 'package:PiliPlus/pages/video/local_diagnostic/local_video_diagnostic.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/utils/path_utils.dart' as app_paths;
-import 'package:PiliPlus/utils/storage.dart';
+import 'package:piliplus/pages/video/local_diagnostic/local_video_diagnostic.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/utils/path_utils.dart' as app_paths;
+import 'package:piliplus/utils/storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -29,9 +29,9 @@ void main() {
     await supportDirectory.delete(recursive: true);
   });
 
-  tearDown(() {
-    Get.reset();
-  });
+  // This App's GetResetExt.reset has a synchronous void contract. Register
+  // that callback directly; do not invent a Future or await a void result.
+  tearDown(Get.reset);
 
   test('Get.put initializes a network-free intro without Bilibili ids', () {
     final intro = Get.put(
@@ -54,6 +54,17 @@ void main() {
     expect(intro.timer, isNull);
     expect(intro.prevPlay(), isFalse);
     expect(intro.nextPlay(), isFalse);
+  });
+
+  test('synchronous reset removes the diagnostic registration before reuse', () {
+    const tag = 'local-diagnostic-reset';
+    Get.put(
+      LocalDiagnosticIntroController(diagnosticHeroTag: tag),
+      tag: tag,
+    );
+    expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isTrue);
+    Get.reset();
+    expect(Get.isRegistered<LocalDiagnosticIntroController>(tag: tag), isFalse);
   });
 
   testWidgets('player page stays inert when the compile flag is off', (

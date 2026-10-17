@@ -3,60 +3,60 @@ import 'dart:convert' show jsonDecode, utf8;
 import 'dart:io' show Platform, File;
 import 'dart:typed_data' show Uint8List;
 
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/custom_icon.dart';
-import 'package:PiliPlus/common/widgets/dialog/report.dart';
-import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
-import 'package:PiliPlus/common/widgets/marquee.dart';
-import 'package:PiliPlus/http/danmaku.dart';
-import 'package:PiliPlus/http/danmaku_block.dart';
-import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/http/live.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/models/common/super_resolution_type.dart';
-import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
-import 'package:PiliPlus/models/common/video/video_decode_type.dart';
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/models/video/play/url.dart';
-import 'package:PiliPlus/models_new/video/video_play_info/subtitle.dart';
-import 'package:PiliPlus/pages/common/common_intro_controller.dart';
-import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
-import 'package:PiliPlus/pages/setting/models/play_settings.dart'
+import 'package:piliplus/common/constants.dart';
+import 'package:piliplus/common/widgets/button/icon_button.dart';
+import 'package:piliplus/common/widgets/custom_icon.dart';
+import 'package:piliplus/common/widgets/dialog/report.dart';
+import 'package:piliplus/common/widgets/dialog/simple_dialog_option.dart';
+import 'package:piliplus/common/widgets/marquee.dart';
+import 'package:piliplus/http/danmaku.dart';
+import 'package:piliplus/http/danmaku_block.dart';
+import 'package:piliplus/http/init.dart';
+import 'package:piliplus/http/live.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/video.dart';
+import 'package:piliplus/models/common/super_resolution_type.dart';
+import 'package:piliplus/models/common/video/audio_quality.dart';
+import 'package:piliplus/models/common/video/cdn_type.dart';
+import 'package:piliplus/models/common/video/video_decode_type.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/models/video/play/url.dart';
+import 'package:piliplus/models_new/video/video_play_info/subtitle.dart';
+import 'package:piliplus/pages/common/common_intro_controller.dart';
+import 'package:piliplus/pages/danmaku/danmaku_model.dart';
+import 'package:piliplus/pages/setting/models/play_settings.dart'
     show showPlayerVolumeDialog;
-import 'package:PiliPlus/pages/setting/widgets/popup_item.dart';
-import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
-import 'package:PiliPlus/pages/video/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/widgets/action_item.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
-import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/services/shutdown_timer_service.dart'
+import 'package:piliplus/pages/setting/widgets/popup_item.dart';
+import 'package:piliplus/pages/setting/widgets/select_dialog.dart';
+import 'package:piliplus/pages/video/controller.dart';
+import 'package:piliplus/pages/video/introduction/local/controller.dart';
+import 'package:piliplus/pages/video/introduction/pgc/controller.dart';
+import 'package:piliplus/pages/video/introduction/ugc/controller.dart';
+import 'package:piliplus/pages/video/introduction/ugc/widgets/action_item.dart';
+import 'package:piliplus/pages/video/introduction/ugc/widgets/menu_row.dart';
+import 'package:piliplus/pages/video/widgets/header_mixin.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/models/play_repeat.dart';
+import 'package:piliplus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
-import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/android/bindings.g.dart';
-import 'package:PiliPlus/utils/connectivity_utils.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/extension/string_ext.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/storage_utils.dart';
-import 'package:PiliPlus/utils/subtitle_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
-import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:piliplus/utils/accounts.dart';
+import 'package:piliplus/utils/accounts/account.dart';
+import 'package:piliplus/utils/android/bindings.g.dart';
+import 'package:piliplus/utils/connectivity_utils.dart';
+import 'package:piliplus/utils/extension/num_ext.dart';
+import 'package:piliplus/utils/extension/string_ext.dart';
+import 'package:piliplus/utils/image_utils.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/request_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/storage_utils.dart';
+import 'package:piliplus/utils/subtitle_utils.dart';
+import 'package:piliplus/utils/utils.dart';
+import 'package:piliplus/utils/video_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -822,6 +822,7 @@ class HeaderControlState extends State<HeaderControl>
     PlPlayerController? plPlayerController,
   }) async {
     final hwdec = await player.getProperty('hwdec-current');
+    if (!context.mounted) return;
     final volume = player.state.volume.toStringAsFixed(0);
     showDialog(
       context: context,
@@ -904,10 +905,16 @@ class HeaderControlState extends State<HeaderControl>
                             plPlayerController.hdrRouteInfo.value;
                         final degrade =
                             plPlayerController.hdrDegradeNotice.value;
-                        if (route == null && degrade == null) {
+                        final candidates =
+                            plPlayerController.hdrCandidateInfo.value;
+                        if (route == null && degrade == null &&
+                            candidates == null) {
                           return const SizedBox.shrink();
                         }
-                        final text = [?route, ?degrade].join(' · ');
+                        final description = [?route, ?degrade].join(' · ');
+                        final text = candidates == null
+                            ? description
+                            : '$description\n候选诊断：$candidates';
                         return ListTile(
                           dense: true,
                           title: const Text('HDR 路由'),

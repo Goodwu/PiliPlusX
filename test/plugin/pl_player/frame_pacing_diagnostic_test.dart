@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:PiliPlus/plugin/pl_player/models/frame_pacing_diagnostic.dart';
+import 'package:piliplus/plugin/pl_player/models/frame_pacing_diagnostic.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

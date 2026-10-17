@@ -11,8 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:piliplus/plugin/pl_player/utils/player_touch_trace.dart';
 
 class MouseInteractiveViewer extends StatefulWidget {
   const MouseInteractiveViewer({

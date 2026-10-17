@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen_request_queue.dart';
+import 'package:piliplus/plugin/pl_player/utils/fullscreen_request_queue.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

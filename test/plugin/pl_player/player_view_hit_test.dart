@@ -1,6 +1,6 @@
-import 'package:PiliPlus/common/widgets/gesture/immediate_tap_gesture_recognizer.dart';
-import 'package:PiliPlus/common/widgets/gesture/mouse_interactive_viewer.dart';
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_recognizer.dart';
+import 'package:piliplus/common/widgets/gesture/immediate_tap_gesture_recognizer.dart';
+import 'package:piliplus/common/widgets/gesture/mouse_interactive_viewer.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_recognizer.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

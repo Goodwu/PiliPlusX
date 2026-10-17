@@ -1,11 +1,11 @@
-import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:PiliPlus/models/common/pgc_review_type.dart';
-import 'package:PiliPlus/pages/pgc_review/child/controller.dart';
-import 'package:PiliPlus/pages/pgc_review/child/view.dart';
-import 'package:PiliPlus/pages/pgc_review/post/view.dart';
-import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:piliplus/common/widgets/dialog/simple_dialog_option.dart';
+import 'package:piliplus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:piliplus/models/common/pgc_review_type.dart';
+import 'package:piliplus/pages/pgc_review/child/controller.dart';
+import 'package:piliplus/pages/pgc_review/child/view.dart';
+import 'package:piliplus/pages/pgc_review/post/view.dart';
+import 'package:piliplus/utils/extension/scroll_controller_ext.dart';
+import 'package:piliplus/utils/extension/theme_ext.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 

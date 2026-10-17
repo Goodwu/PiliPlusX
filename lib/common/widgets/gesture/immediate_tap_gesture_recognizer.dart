@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:PiliPlus/common/widgets/gesture/player_gesture_constants.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/player_touch_trace.dart';
+import 'package:piliplus/common/widgets/gesture/player_gesture_constants.dart';
+import 'package:piliplus/plugin/pl_player/utils/player_touch_trace.dart';
 
 class ImmediateTapGestureRecognizer extends OneSequenceGestureRecognizer {
   ImmediateTapGestureRecognizer({

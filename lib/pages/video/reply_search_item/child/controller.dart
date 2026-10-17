@@ -1,10 +1,10 @@
-import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
+import 'package:piliplus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show SearchItemReply, SearchItem, SearchItemType;
-import 'package:PiliPlus/grpc/reply.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/common/reply/reply_search_type.dart';
-import 'package:PiliPlus/pages/common/common_list_controller.dart';
-import 'package:PiliPlus/pages/video/reply_search_item/controller.dart';
+import 'package:piliplus/grpc/reply.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/models/common/reply/reply_search_type.dart';
+import 'package:piliplus/pages/common/common_list_controller.dart';
+import 'package:piliplus/pages/video/reply_search_item/controller.dart';
 
 class ReplySearchChildController
     extends CommonListController<SearchItemReply, SearchItem> {

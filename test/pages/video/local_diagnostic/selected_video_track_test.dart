@@ -1,4 +1,4 @@
-import 'package:PiliPlus/pages/video/local_diagnostic/selected_video_track.dart';
+import 'package:piliplus/pages/video/local_diagnostic/selected_video_track.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

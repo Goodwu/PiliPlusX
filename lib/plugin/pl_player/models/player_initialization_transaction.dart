@@ -1,4 +1,4 @@
-import 'package:PiliPlus/plugin/pl_player/models/player_resource_lease.dart';
+import 'package:piliplus/plugin/pl_player/models/player_resource_lease.dart';
 
 /// A Player plus an output candidate that is still owned by its initialization
 /// transaction. The caller must transfer the lease only after publishing the

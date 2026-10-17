@@ -1,0 +1,1457 @@
+{
+  "snapshot_utc": "2026-10-12T13:17:26Z",
+  "run": {
+    "id": 38253419649,
+    "event": "workflow_dispatch",
+    "head_sha": "36053e801b0803268b351aab80cdec20b6f46ac2",
+    "head_branch": "routing/MK-ROUTING-20261011",
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "name": "Routing App source integration",
+    "path": ".github/workflows/routing-source-integration.yml",
+    "updated_at": "2026-10-12T13:15:00Z"
+  },
+  "jobs": [
+    {
+      "id": 114825228055,
+      "name": "Capture one current routing source vector",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:06:54Z",
+          "completed_at": "2026-10-12T13:06:54Z"
+        },
+        {
+          "name": "Capture exact media-kit HEAD once for all source jobs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:06:54Z",
+          "completed_at": "2026-10-12T13:06:55Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:06:55Z",
+          "completed_at": "2026-10-12T13:06:55Z"
+        }
+      ]
+    },
+    {
+      "id": 114825264480,
+      "name": "Source bootstrap and validation (windows)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:07:00Z",
+          "completed_at": "2026-10-12T13:07:01Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:07:01Z",
+          "completed_at": "2026-10-12T13:07:03Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:07:03Z",
+          "completed_at": "2026-10-12T13:07:15Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:07:15Z",
+          "completed_at": "2026-10-12T13:07:21Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:07:21Z",
+          "completed_at": "2026-10-12T13:07:21Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:07:21Z",
+          "completed_at": "2026-10-12T13:09:59Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:09:59Z",
+          "completed_at": "2026-10-12T13:12:35Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:12:35Z",
+          "completed_at": "2026-10-12T13:13:09Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:13:09Z",
+          "completed_at": "2026-10-12T13:13:12Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:13:12Z",
+          "completed_at": "2026-10-12T13:13:13Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:13:13Z",
+          "completed_at": "2026-10-12T13:13:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:13:14Z",
+          "completed_at": "2026-10-12T13:13:15Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:13:15Z",
+          "completed_at": "2026-10-12T13:13:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:13:17Z",
+          "completed_at": "2026-10-12T13:13:17Z"
+        }
+      ]
+    },
+    {
+      "id": 114825264510,
+      "name": "App analyze, tests and Dart bundle (latest media-kit source)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:07:00Z",
+          "completed_at": "2026-10-12T13:07:01Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:07:01Z",
+          "completed_at": "2026-10-12T13:07:01Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:07:01Z",
+          "completed_at": "2026-10-12T13:07:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:07:06Z",
+          "completed_at": "2026-10-12T13:07:07Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:07:07Z",
+          "completed_at": "2026-10-12T13:07:07Z"
+        },
+        {
+          "name": "Bootstrap real Android patches against current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:07:07Z",
+          "completed_at": "2026-10-12T13:08:41Z"
+        },
+        {
+          "name": "Record prepared toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:08:41Z",
+          "completed_at": "2026-10-12T13:08:41Z"
+        },
+        {
+          "name": "Analyze the App",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:08:41Z",
+          "completed_at": "2026-10-12T13:09:17Z"
+        },
+        {
+          "name": "Run all Flutter App tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:09:17Z",
+          "completed_at": "2026-10-12T13:10:46Z"
+        },
+        {
+          "name": "Run Web player DOM tests in Chrome",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:10:46Z",
+          "completed_at": "2026-10-12T13:11:20Z"
+        },
+        {
+          "name": "Compile the Web player entry point",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T13:11:20Z",
+          "completed_at": "2026-10-12T13:11:54Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-12T13:11:54Z",
+          "completed_at": "2026-10-12T13:12:26Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-12T13:12:26Z",
+          "completed_at": "2026-10-12T13:12:28Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-12T13:12:28Z",
+          "completed_at": "2026-10-12T13:12:29Z"
+        },
+        {
+          "name": "Post Bootstrap real Android patches against current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-10-12T13:12:29Z",
+          "completed_at": "2026-10-12T13:12:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-10-12T13:12:29Z",
+          "completed_at": "2026-10-12T13:12:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-12T13:12:29Z",
+          "completed_at": "2026-10-12T13:12:30Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-12T13:12:30Z",
+          "completed_at": "2026-10-12T13:12:30Z"
+        }
+      ]
+    },
+    {
+      "id": 114825264600,
+      "name": "Source bootstrap and validation (macos)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:07:08Z",
+          "completed_at": "2026-10-12T13:07:10Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:07:10Z",
+          "completed_at": "2026-10-12T13:07:11Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:07:11Z",
+          "completed_at": "2026-10-12T13:07:19Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:07:19Z",
+          "completed_at": "2026-10-12T13:07:22Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:07:22Z",
+          "completed_at": "2026-10-12T13:07:24Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:07:24Z",
+          "completed_at": "2026-10-12T13:09:59Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:09:59Z",
+          "completed_at": "2026-10-12T13:13:37Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:13:37Z",
+          "completed_at": "2026-10-12T13:14:34Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:14:34Z",
+          "completed_at": "2026-10-12T13:14:39Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:14:39Z",
+          "completed_at": "2026-10-12T13:14:41Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:14:41Z",
+          "completed_at": "2026-10-12T13:14:42Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:14:42Z",
+          "completed_at": "2026-10-12T13:14:42Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:14:42Z",
+          "completed_at": "2026-10-12T13:14:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:14:43Z",
+          "completed_at": "2026-10-12T13:14:48Z"
+        }
+      ]
+    },
+    {
+      "id": 114825264618,
+      "name": "App Python regression tests (macOS)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:07:14Z",
+          "completed_at": "2026-10-12T13:07:15Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:07:15Z",
+          "completed_at": "2026-10-12T13:07:15Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:07:15Z",
+          "completed_at": "2026-10-12T13:07:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:07:21Z",
+          "completed_at": "2026-10-12T13:07:23Z"
+        },
+        {
+          "name": "Verify exact Python test source vector and App base",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:07:23Z",
+          "completed_at": "2026-10-12T13:07:24Z"
+        },
+        {
+          "name": "Bootstrap private parser SDK and current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:07:24Z",
+          "completed_at": "2026-10-12T13:09:18Z"
+        },
+        {
+          "name": "Run all App Python test modules",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-10-12T13:09:18Z",
+          "completed_at": "2026-10-12T13:11:36Z"
+        },
+        {
+          "name": "Finalize Python test source freshness and package roots",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:11:36Z",
+          "completed_at": "2026-10-12T13:11:37Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:11:37Z",
+          "completed_at": "2026-10-12T13:11:39Z"
+        },
+        {
+          "name": "Post Bootstrap private parser SDK and current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-12T13:11:39Z",
+          "completed_at": "2026-10-12T13:11:39Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-12T13:11:39Z",
+          "completed_at": "2026-10-12T13:11:40Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:11:40Z",
+          "completed_at": "2026-10-12T13:11:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:11:40Z",
+          "completed_at": "2026-10-12T13:11:43Z"
+        }
+      ]
+    },
+    {
+      "id": 114825264639,
+      "name": "Source bootstrap and validation (linux)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:07:00Z",
+          "completed_at": "2026-10-12T13:07:00Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:07:00Z",
+          "completed_at": "2026-10-12T13:07:05Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:07:05Z",
+          "completed_at": "2026-10-12T13:07:10Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:07:10Z",
+          "completed_at": "2026-10-12T13:07:11Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:07:11Z",
+          "completed_at": "2026-10-12T13:07:12Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:07:12Z",
+          "completed_at": "2026-10-12T13:08:55Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:08:55Z",
+          "completed_at": "2026-10-12T13:10:56Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:10:56Z",
+          "completed_at": "2026-10-12T13:11:27Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:11:27Z",
+          "completed_at": "2026-10-12T13:11:28Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:11:28Z",
+          "completed_at": "2026-10-12T13:11:29Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:11:29Z",
+          "completed_at": "2026-10-12T13:11:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:11:29Z",
+          "completed_at": "2026-10-12T13:11:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:11:29Z",
+          "completed_at": "2026-10-12T13:11:30Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:11:30Z",
+          "completed_at": "2026-10-12T13:11:30Z"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11749223379,
+      "name": "routing-app-source-36053e801b0803268b351aab80cdec20b6f46ac2",
+      "API_digest": "sha256:1246adf63a65407bfe8357d3450ecd7b9684e935415997648db18025c35bf31f",
+      "actual_ZIP_sha256": "1246adf63a65407bfe8357d3450ecd7b9684e935415997648db18025c35bf31f",
+      "ZIP_bytes": 211481,
+      "digest_matches": true,
+      "raw_text_members": {
+        "path": "/tmp/mk-current-ci-36053-4824/11749223379.members.json.gz",
+        "sha256": "43f1811b2498471943ee40b4b0f2a82fe7a1fcc3b0e3c0a90dc35d049f751e8b",
+        "bytes": 203065
+      },
+      "member_hashes": {
+        "after-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "after-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "after-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "after-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "after-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "after-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "analyze.log": "03af4d76212bdb5c07532241a06bb9d8e1b521f11b1e950371d58d14c35880a9",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "6a073b008a8caf4e580aa6380342ae82693f9ec9f54bab89ab51abb822361de6",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "before-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "before-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "before-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "before-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "before-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "bootstrap.json": "987586deeb48cff436216c8845f81e29597ea418f1ef3122f3ab8400fc6ad6f3",
+        "bundle-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "final-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "final-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "final-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "final-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "final-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "final-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "flutter-tests.log": "24329fddb30b2a0846d0bbb0b5f1086b95bb9ed8cd2af9137db9192b3afa448a",
+        "kernel-sha256.txt": "dcf25ecf35a12ceb6afa91297dfc42a6127930e9c1f52a15425f40280801f99c",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "4d8710c4c2397dd28178e96ce6a20691150701cd5207195898ee37233f9c0217",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-state.json": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "372c93cd4f18e9d68e35e5ab32395b5bdb94c805ac2c5c0e9efdeb30d75ba318",
+        "patch-SdkOnly.log": "2bfb75dd6343e8ced4097e425c72eb5a1a0467a0016b25d30f987b582ff4a1dc",
+        "patched-sdk-diff.log": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "patched-sdk-status.log": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7",
+        "private-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "9443c89f6944e02b86cf4ee87ef7cd1cbef6e21745377c2acadad5f0817e7208",
+        "source-resolution-after.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-before.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-patched.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source.txt": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "toolchain-machine.log": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "web-dom-tests.log": "ed2bf7db098c77bb853dda8033e841ec108d48435cc94e928eed177c9a102abb",
+        "web-build.log": "47e5bcc4f13a72bf4f1c88f43e3cc19d81460f31d0d1e9b331b4379ebb926799",
+        "web-sha256.txt": "e0870a4a8e92c55f2434290556711b8d4b3b7674e90c325812df82086bdcc5b0"
+      },
+      "actual_validation": {
+        "source_txt": "app=36053e801b0803268b351aab80cdec20b6f46ac2\nmedia-kit=4824db1e92d947d8528e986dc1665c57b796ff75\n",
+        "source_txt_sha256": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "platform": "android",
+        "bootstrap_status": "fresh-source-only",
+        "bootstrap_steps": 57,
+        "bootstrap_all_exits_zero": true,
+        "vectors_equal": true,
+        "before_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "after_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "final_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+        },
+        "media_kit_package_roots": {
+          "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+          "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+          "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+          "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+          "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+          "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+          "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+          "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+          "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+          "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+        },
+        "resolution_before_patched_after_equal": true,
+        "analyzer_raw_lines": [
+          "Analyzing app...                                                ",
+          "No issues found! (ran in 34.9s)"
+        ],
+        "analyzer_no_issues": true,
+        "flutter-tests.log": {
+          "passed": 268,
+          "skipped": 0,
+          "failed": 0,
+          "terminal": "01:16 +268: All tests passed!"
+        },
+        "web-dom-tests.log": {
+          "passed": 1,
+          "skipped": 0,
+          "failed": 0,
+          "terminal": "00:00 +1: All tests passed!"
+        },
+        "kernel_hash_record_raw": "370b03e498f9a6fe2cba2332751eaea49381c8f05a3db4b1e11280cd2f8affe3  build/flutter_assets/kernel_blob.bin\n",
+        "kernel_binary_independently_rehashed": false,
+        "bundle_log_tail": "",
+        "web_build_log_tail": "Compiling lib/main_web.dart for the Web...                      \nWasm dry run succeeded. Consider building and testing your application with the `--wasm` flag. See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm\nUse --no-wasm-dry-run to disable these warnings.\nExpected to find fonts for (MaterialIcons, packages/cupertino_icons/CupertinoIcons), but found (MaterialIcons). This usually means you are referring to font families in an IconData class but not including them in the assets section of your pubspec.yaml, are missing the package that would include them, or are missing \"uses-material-design: true\".\nFont asset \"MaterialIcons-Regular.otf\" was tree-shaken, reducing it from 1645184 to 8100 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.\nCompiling lib/main_web.dart for the Web...                         34.1s\n\u2713 Built build/web\n"
+      }
+    },
+    {
+      "id": 11748978362,
+      "name": "routing-app-python-36053e801b0803268b351aab80cdec20b6f46ac2",
+      "API_digest": "sha256:71f43f0c85d85a9ea3646d128442bcbd40ec5dbf204e257ac97790086a80d459",
+      "actual_ZIP_sha256": "71f43f0c85d85a9ea3646d128442bcbd40ec5dbf204e257ac97790086a80d459",
+      "ZIP_bytes": 210964,
+      "digest_matches": true,
+      "raw_text_members": {
+        "path": "/tmp/mk-current-ci-36053-4824/11748978362.members.json.gz",
+        "sha256": "8082351608115f090381c22c7ff89e339a1b82af57d480412fa5fc44466eb604",
+        "bytes": 203239
+      },
+      "member_hashes": {
+        "after-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "after-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "after-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "after-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "after-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "after-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "663a42f94a71e78365fb977e086e81197e55b815755007b7d1e9681b913e9629",
+        "app-tracked-files.log": "6a073b008a8caf4e580aa6380342ae82693f9ec9f54bab89ab51abb822361de6",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "before-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "before-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "before-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "before-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "before-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "bootstrap.json": "9d2cfa5fcb868fc884abb7c929b2eb5975a209887400fc9f743d8933948b3b53",
+        "final-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "final-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "final-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "final-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "final-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "manifest-parser-tests.json": "71698f3d7a594ffedaab0d99d864d80d70bb1f100d6bf1b5bca28833c264cee9",
+        "final-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "4d8710c4c2397dd28178e96ce6a20691150701cd5207195898ee37233f9c0217",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "original-sdk-state.json": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "0f15b72d0912dec746d5f0edecf4c635786b914c29dc771574a9a0e3fa52153b",
+        "patch-SdkOnly.log": "81dd53e6923e9acc79c9970455a13879f93cb51b7d81e677f8c2ae2312e47757",
+        "patched-sdk-diff.log": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "patched-sdk-status.log": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7",
+        "private-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "source-resolution-after.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-before.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-patched.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "tests.log": "3f74c2bed0ac1ae05921cd172f3782d41eac4b2a858a3f7acc2b6a95e2967d08",
+        "source.txt": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "toolchain-machine.log": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+      },
+      "actual_validation": {
+        "source_txt": "app=36053e801b0803268b351aab80cdec20b6f46ac2\nmedia-kit=4824db1e92d947d8528e986dc1665c57b796ff75\n",
+        "source_txt_sha256": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "platform": "android",
+        "bootstrap_status": "fresh-source-only",
+        "bootstrap_steps": 57,
+        "bootstrap_all_exits_zero": true,
+        "vectors_equal": true,
+        "before_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "after_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "final_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+        },
+        "media_kit_package_roots": {
+          "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+          "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+          "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+          "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+          "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+          "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+          "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+          "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+          "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+          "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+        },
+        "resolution_before_patched_after_equal": true,
+        "python": {
+          "tests_run_total_including_failure_and_skips": 505,
+          "passed_derived": 502,
+          "failed": 1,
+          "skipped": 2,
+          "terminal_run": "Ran 505 tests in 137.399s",
+          "terminal_status": "FAILED (failures=1, skipped=2)",
+          "failure_test": "FAIL: test_private_release_workflow_has_early_gate_and_success_only_upload (macos_shared_release_test.SharedReleaseTests.test_private_release_workflow_has_early_gate_and_success_only_upload)",
+          "trace_file_line": "  File \"/Users/runner/work/PiliPlusX/PiliPlusX/app/test/macos_shared_release_test.py\", line 486, in test_private_release_workflow_has_early_gate_and_success_only_upload",
+          "failing_assertion": "self.assertIn(\"if: success()\", workflow)",
+          "expected_literal": "if: success()",
+          "actual_success_upload_condition": "if: ${{ !inputs.routing-mode && success() }}",
+          "interpretation": "literal stale assertion no longer matches routing-mode guarded upload expression; report does not modify or rerun tests",
+          "skipped_case_lines": [
+            "test_real_three_file_ios_chain_passes_and_android_only_chain_fails (prepare_ios_variant_test.IOSPatchSemanticsTests.test_real_three_file_ios_chain_passes_and_android_only_chain_fails) ... skipped 'shared Flutter Git source is not present'",
+            "test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure (prepare_ios_variant_test.IOSPatchSemanticsTests.test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure) ... skipped 'shared Flutter Git source is not present'"
+          ]
+        }
+      }
+    },
+    {
+      "id": 11748779888,
+      "name": "routing-app-source-macos-36053e801b0803268b351aab80cdec20b6f46ac2",
+      "API_digest": "sha256:73e5ec3d2dbfab579b874087246d909205c008163e60ecfccc89468c4e973926",
+      "actual_ZIP_sha256": "73e5ec3d2dbfab579b874087246d909205c008163e60ecfccc89468c4e973926",
+      "ZIP_bytes": 205832,
+      "digest_matches": true,
+      "raw_text_members": {
+        "path": "/tmp/mk-current-ci-36053-4824/11748779888.members.json.gz",
+        "sha256": "4d57e54785aca744f251db84fcb83e87df6e2e84f0feab6698f203b351399007",
+        "bytes": 197617
+      },
+      "member_hashes": {
+        "after-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "after-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "after-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "after-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "after-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "after-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "analyze.log": "edaacee8ac3051c649308be11f087fc44f3268e337132d9c4e125f36fdf0a40d",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "6a073b008a8caf4e580aa6380342ae82693f9ec9f54bab89ab51abb822361de6",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "before-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "before-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "before-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "before-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "before-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "bootstrap.json": "576c3179a7a674a68f405ab2049a639048b124e730e843edd4b9c66d3f0b1778",
+        "final-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "final-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "final-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "final-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "final-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "final-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "flutter-tests.log": "d5c70e41a3681a80e596c67e4af31491aeb518273fbc5c84929583a6dac4723d",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kernel-sha256.txt": "2e576e9160479c55717e7e6110f79d65d151ec79e20487b2e2bde291c1a08fdf",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "4d8710c4c2397dd28178e96ce6a20691150701cd5207195898ee37233f9c0217",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "original-sdk-state.json": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "56510591b354de8dda373bbef6098eb9d9323d2ddd767fc722da5dd33b59c327",
+        "patch-SdkOnly.log": "16af120da4690ad39d575e4a78efe4daa64fa1392b190a2728ebd376cb16e24b",
+        "patched-sdk-diff.log": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "patched-sdk-status.log": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df",
+        "private-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc",
+        "source-resolution-after.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-before.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-patched.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source.txt": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "toolchain-machine.log": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+      },
+      "actual_validation": {
+        "source_txt": "app=36053e801b0803268b351aab80cdec20b6f46ac2\nmedia-kit=4824db1e92d947d8528e986dc1665c57b796ff75\n",
+        "source_txt_sha256": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "platform": "macos",
+        "bootstrap_status": "fresh-source-only",
+        "bootstrap_steps": 57,
+        "bootstrap_all_exits_zero": true,
+        "vectors_equal": true,
+        "before_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "after_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "final_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+        },
+        "media_kit_package_roots": {
+          "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+          "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+          "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+          "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+          "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+          "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+          "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+          "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+          "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+          "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+        },
+        "resolution_before_patched_after_equal": true,
+        "analyzer_raw_lines": [
+          "Analyzing app...                                                ",
+          "No issues found! (ran in 73.4s)"
+        ],
+        "analyzer_no_issues": true,
+        "flutter-tests.log": {
+          "passed": 268,
+          "skipped": 0,
+          "failed": 0,
+          "terminal": "01:42 +268: All tests passed!"
+        },
+        "kernel_hash_record_raw": "\nAlgorithm : SHA256\nHash      : 6ADCDB267367B6047A46C836B357C106A4C1C049383556900AFF33C38FEA7108\nPath      : /Users/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin\n\n",
+        "kernel_binary_independently_rehashed": false
+      }
+    },
+    {
+      "id": 11748394136,
+      "name": "routing-app-source-linux-36053e801b0803268b351aab80cdec20b6f46ac2",
+      "API_digest": "sha256:58f9972479a83b2e819288f8d03b5290188b5d70932a77daef67f2658178a771",
+      "actual_ZIP_sha256": "58f9972479a83b2e819288f8d03b5290188b5d70932a77daef67f2658178a771",
+      "ZIP_bytes": 205542,
+      "digest_matches": true,
+      "raw_text_members": {
+        "path": "/tmp/mk-current-ci-36053-4824/11748394136.members.json.gz",
+        "sha256": "fd5d7f503ecf3562efbde1622f0f5bc794451d328da777368fbaa94151b4463b",
+        "bytes": 197410
+      },
+      "member_hashes": {
+        "after-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "after-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "after-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "after-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "after-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "after-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "analyze.log": "10de108718552353af40c8847e5c1b5ff3420f91ceea80516f7926df5db6576b",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "6a073b008a8caf4e580aa6380342ae82693f9ec9f54bab89ab51abb822361de6",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "before-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "before-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "before-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "before-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "bootstrap.json": "ae804aa723561f7cba669582aa34d00d3902208205c821cf0ea13e4940b7a4df",
+        "final-app-head.log": "71f87cbe33eb3023f65f3fbc33b16869f948127c945d58b59c551b023c377ce6",
+        "final-app-remote.log": "b948c4342d92a1e314c0dc3725646df6856342d267779c0db030e8ca10d21dbc",
+        "before-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "final-app-tree.log": "5b21f3288f47dd5da251f222c3c079a440a282a2386dd5cc8a984448335a57d0",
+        "final-media-kit-head.log": "7e22a55b4a5e7e7f094b97c5fd38a8a89b1240f0ac97fc76fecc9643d886a201",
+        "final-media-kit-remote.log": "38ba96ac3ae4874c270a607e1307593ec214257c74032bea57826c6701434c37",
+        "final-media-kit-tree.log": "7b9e8b551734892beacc4e1df323ec632cc18fffa938ca1630c4802eb8d16923",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "flutter-tests.log": "e1ca01c2c4db6c5585f6504bf9bb1a2e01cd274fb9a3a55916b6b01854a103f5",
+        "kernel-sha256.txt": "5161cda252d3a75d9d69fec6bf4dbb76f9454fe1b887dc93f904f6cd05addc96",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "4d8710c4c2397dd28178e96ce6a20691150701cd5207195898ee37233f9c0217",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-state.json": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "2d5833ab1cd705fd09241852f92df69dd2cd0e6baaaa6ccb8a6e680086f59c99",
+        "patch-SdkOnly.log": "88f2cead9f2f43b9b28b2e96249598667f3b2876dbf618d1009f95afd37be9ee",
+        "patched-sdk-diff.log": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "patched-sdk-status.log": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df",
+        "private-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc",
+        "source-resolution-after.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-patched.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source.txt": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "source-resolution-before.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "toolchain-machine.log": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+      },
+      "actual_validation": {
+        "source_txt": "app=36053e801b0803268b351aab80cdec20b6f46ac2\nmedia-kit=4824db1e92d947d8528e986dc1665c57b796ff75\n",
+        "source_txt_sha256": "1984581c3b5936b6f4b8d6f4cd393f25d6943bf759b555399f0147ced21cf23f",
+        "platform": "linux",
+        "bootstrap_status": "fresh-source-only",
+        "bootstrap_steps": 57,
+        "bootstrap_all_exits_zero": true,
+        "vectors_equal": true,
+        "before_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "after_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "final_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+        },
+        "media_kit_package_roots": {
+          "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+          "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+          "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+          "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+          "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+          "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+          "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+          "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+          "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+          "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+        },
+        "resolution_before_patched_after_equal": true,
+        "analyzer_raw_lines": [
+          "Analyzing app...                                                ",
+          "No issues found! (ran in 32.6s)"
+        ],
+        "analyzer_no_issues": true,
+        "flutter-tests.log": {
+          "passed": 268,
+          "skipped": 0,
+          "failed": 0,
+          "terminal": "01:15 +268: All tests passed!"
+        },
+        "kernel_hash_record_raw": "\nAlgorithm : SHA256\nHash      : EC7BB619B1C7EA2DD1FA6653033AEFCBF808ED542C6E073F483F341FC4A9CBE7\nPath      : /home/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin\n\n",
+        "kernel_binary_independently_rehashed": false
+      }
+    },
+    {
+      "id": 11748249525,
+      "name": "routing-app-source-windows-36053e801b0803268b351aab80cdec20b6f46ac2",
+      "API_digest": "sha256:aa10b490ae169a14396e5d339ef23d2ec589cc7ea30109e4414e98b1b844b469",
+      "actual_ZIP_sha256": "aa10b490ae169a14396e5d339ef23d2ec589cc7ea30109e4414e98b1b844b469",
+      "ZIP_bytes": 205832,
+      "digest_matches": true,
+      "raw_text_members": {
+        "path": "/tmp/mk-current-ci-36053-4824/11748249525.members.json.gz",
+        "sha256": "25ac40016542d98beb88b909fde1ba41deab1798d5e3dbc96dfba571d2ddc1cc",
+        "bytes": 198055
+      },
+      "member_hashes": {
+        "after-app-head.log": "6a8c34aa0c9ab24eadada253cff300930778f540287c3d907e2a06262da2ec65",
+        "after-app-tree.log": "7b04bd69cab31092332613540c39fa7f3c36cb7c8048444e3a4af6b7dc0ee5f9",
+        "after-app-remote.log": "99c7c076d01786b613840fd4567ed12580cbec0c33b2f32cb952e9c3ee2dc931",
+        "after-media-kit-head.log": "0e4a551bf50146729421b1aa9101ba550ec4cd68f1afbc5fff2d1be242c619c0",
+        "after-media-kit-remote.log": "807e40ce2ef584d19d4422f4f6cca1a01593b44b4bb03307a063f5b1bf623399",
+        "after-media-kit-tree.log": "a2be017b30b314a13fb41c18414ac80f1223280c9e877d652145178aa5e4a6d8",
+        "analyze.log": "119a827ae9264713ea4d91c554bc61c481be40da14ea3d483f0b873ced835a07",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "6a073b008a8caf4e580aa6380342ae82693f9ec9f54bab89ab51abb822361de6",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "6a8c34aa0c9ab24eadada253cff300930778f540287c3d907e2a06262da2ec65",
+        "before-app-remote.log": "99c7c076d01786b613840fd4567ed12580cbec0c33b2f32cb952e9c3ee2dc931",
+        "before-app-tree.log": "7b04bd69cab31092332613540c39fa7f3c36cb7c8048444e3a4af6b7dc0ee5f9",
+        "before-media-kit-head.log": "0e4a551bf50146729421b1aa9101ba550ec4cd68f1afbc5fff2d1be242c619c0",
+        "before-media-kit-remote.log": "807e40ce2ef584d19d4422f4f6cca1a01593b44b4bb03307a063f5b1bf623399",
+        "before-media-kit-tree.log": "a2be017b30b314a13fb41c18414ac80f1223280c9e877d652145178aa5e4a6d8",
+        "bootstrap.json": "1be8f289ff922fbd5918a1843fab740692b0667b7847a302060e39f5ccd14a2c",
+        "final-app-head.log": "6a8c34aa0c9ab24eadada253cff300930778f540287c3d907e2a06262da2ec65",
+        "final-app-remote.log": "99c7c076d01786b613840fd4567ed12580cbec0c33b2f32cb952e9c3ee2dc931",
+        "final-app-tree.log": "7b04bd69cab31092332613540c39fa7f3c36cb7c8048444e3a4af6b7dc0ee5f9",
+        "final-media-kit-head.log": "0e4a551bf50146729421b1aa9101ba550ec4cd68f1afbc5fff2d1be242c619c0",
+        "final-media-kit-remote.log": "807e40ce2ef584d19d4422f4f6cca1a01593b44b4bb03307a063f5b1bf623399",
+        "final-media-kit-tree.log": "a2be017b30b314a13fb41c18414ac80f1223280c9e877d652145178aa5e4a6d8",
+        "flutter-tests.log": "e0bd992c7bd2e238fc77cc07bbf4140a809b81d1c24354b0a70b7d813ca3a0f4",
+        "flutter-tools-resolve.log": "1869a172c793bc119e02cffe731a9e14c50cf6026d28d5f5a66c2ce7d5e64ea2",
+        "kernel-sha256.txt": "c145b1c6497978be4b29080ecdea13ba818c9cfe16be7f0430203c4b3a3676db",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "4d8710c4c2397dd28178e96ce6a20691150701cd5207195898ee37233f9c0217",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "37f988a523eda44168d93b83124fa56d124d8c143831502e1b87a8203d607730",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111",
+        "original-sdk-state.json": "b83c301f867db52bfa6dd736697ce7e1d5ab24deab89a561f588f974b4551c05",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "319acd314b58c46baf59bc027aba50565f1723e5413d27d1ccef07865373298a",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "21642db090f02678fd881348da115fbe620990ca14761c34525bece3d255cf8c",
+        "patch-SdkOnly.log": "9e4f4386b072ab1bf7347123b2ab66638ee3eb71d08e07b0be1c75e5bc967535",
+        "patched-sdk-diff.log": "c1287a940f66d5fdba35cea0d95f5a663ba4273de522e8b9666a1f5edd7ae3b5",
+        "patched-sdk-status.log": "802d2335610edffeabb60ef2b798dbcda4d209055d5941ff6aacec887612b43e",
+        "private-sdk-root.log": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111",
+        "resolve.log": "29ee26e086f862ee3d167b83850e1288b1eadfd494c8164c0d6c05da04f7fba3",
+        "scope.txt": "a45e49e5f9aed1c4ab530420ecafea94a72059abc99dcca3e7f8180e796b3172",
+        "source-resolution-after.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source-resolution-before.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source-resolution-patched.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source.txt": "2845c0ba201fd0d6c2d4ec0685092e62328a69083ce59ef09a9e3096f5d65bbb",
+        "toolchain-machine.log": "275a91512da53a33dc2652453deb256aecc23a61e36bacee6aafed6ab9f0f879",
+        "toolchain.log": "a9d1161572c7eb746ea58792da8ddcc707dc910d7b4bd58add60d354b6053c3f",
+        "toolchain.txt": "6695424bcb76b101e88042d7ff9cc94cdda54d1b80305048a456ad7ecc805abe"
+      },
+      "actual_validation": {
+        "source_txt": "app=36053e801b0803268b351aab80cdec20b6f46ac2\nmedia-kit=4824db1e92d947d8528e986dc1665c57b796ff75\r\n",
+        "source_txt_sha256": "2845c0ba201fd0d6c2d4ec0685092e62328a69083ce59ef09a9e3096f5d65bbb",
+        "platform": "windows",
+        "bootstrap_status": "fresh-source-only",
+        "bootstrap_steps": 57,
+        "bootstrap_all_exits_zero": true,
+        "vectors_equal": true,
+        "before_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "after_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "final_vector": {
+          "app": "36053e801b0803268b351aab80cdec20b6f46ac2",
+          "appTree": "1516df34268086a55d2d9eef06f1dce7d2be2022",
+          "media-kit": "4824db1e92d947d8528e986dc1665c57b796ff75",
+          "media-kitTree": "3173b7127f74b7e9b3453a2a8de6fdd703f7e722"
+        },
+        "SDK_commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "SDK_tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 19:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "D:\\a\\_temp\\rb\\s\\flutter"
+        },
+        "media_kit_package_roots": {
+          "media_kit": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit",
+          "media_kit_android_dataspace_vendor": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_android_dataspace_vendor",
+          "media_kit_libs_android_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_libs_android_video",
+          "media_kit_libs_ios_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ios\\media_kit_libs_ios_video",
+          "media_kit_libs_linux": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\linux\\media_kit_libs_linux",
+          "media_kit_libs_macos_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\macos\\media_kit_libs_macos_video",
+          "media_kit_libs_ohos": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ohos\\media_kit_libs_ohos",
+          "media_kit_libs_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\universal\\media_kit_libs_video",
+          "media_kit_libs_windows_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\windows\\media_kit_libs_windows_video",
+          "media_kit_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit_video"
+        },
+        "resolution_before_patched_after_equal": true,
+        "analyzer_raw_lines": [
+          "Analyzing app...                                                ",
+          "No issues found! (ran in 41.1s)"
+        ],
+        "analyzer_no_issues": true,
+        "flutter-tests.log": {
+          "passed": 268,
+          "skipped": 0,
+          "failed": 0,
+          "terminal": "01:38 +268: All tests passed!"
+        },
+        "kernel_hash_record_raw": "\r\nAlgorithm : SHA256\r\nHash      : 09799B8722A904C9B8D39892D9AA6D772F68FB6637777898712DDBDA9C17F6AE\r\nPath      : D:\\a\\PiliPlusX\\PiliPlusX\\app\\build\\flutter_assets\\kernel_blob.bin\r\n\r\n",
+        "kernel_binary_independently_rehashed": false
+      }
+    }
+  ],
+  "excluded_drift_failed_push_run": 38253029997,
+  "raw_step_logs": {
+    "path": "/tmp/mk-current-ci-36053-4824/run-step-logs.json.gz",
+    "sha256": "f5b18ebda05e458b9e704a500f91528e5b43c7da51a4b1e8f795bf3a009a59b3",
+    "bytes": 139910,
+    "actual_logs_ZIP_sha256": "dfc17545335b9beb45d473ae8f29f0d8ce61b2b9706b8092f5061575ed6d32b9"
+  },
+  "verdict": "WHOLE_RUN_FAILURE_PYTHON_ASSERTION_SOURCE_PORTIONS_PASS",
+  "not_whole_run_success": true,
+  "App_SHA": "36053e801b0803268b351aab80cdec20b6f46ac2",
+  "library_SHA": "4824db1e92d947d8528e986dc1665c57b796ff75",
+  "collected_utc": "2026-10-12T13:20:13Z",
+  "limitations": [
+    "Read-only hosted evidence; no local code edit/push/build/cache activity",
+    "No native/device acceptance from source jobs or kernel hash records",
+    "Kernel binary bytes absent from source artifact, so hash availability is an actual CI record not an independent binary rehash",
+    "Do not substitute drift-failed push38253029997 or prior source vectors",
+    "Whole workflow remains failure; a stale literal test assertion is the only failed test logged, not evidence that corrected suite has run successfully"
+  ],
+  "actual_command_evidence": {
+    "Source bootstrap and validation (windows)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+      "2026-10-12T13:09:59.2578001Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+      "2026-10-12T13:09:59.2579021Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+    ],
+    "Source bootstrap and validation (windows)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+      "2026-10-12T13:12:35.2131773Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+      "2026-10-12T13:12:35.2132681Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+    ],
+    "App Python regression tests (macOS)/7_Run all App Python test modules.txt": [
+      "2026-10-12T13:09:18.2545840Z \u001b[36;1mpython3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee \"$ROUTING_RESULTS/tests.log\"\u001b[0m",
+      "2026-10-12T13:09:20.5372590Z test_invalid_pending_rejected_without_output (macos_shared_bootstrap_test.BootstrapTests.test_invalid_pending_rejected_without_output) ... usage: python3 -m unittest [-h] --prepared-source PREPARED_SOURCE",
+      "2026-10-12T13:09:20.5374540Z python3 -m unittest: error: invalid bootstrap pending value; expected true or absent",
+      "2026-10-12T13:09:22.4245580Z test_cli_has_no_url_or_hash_override (macos_shared_ci_inputs_test.AcquisitionTests.test_cli_has_no_url_or_hash_override) ... usage: python3 -m unittest [-h]",
+      "2026-10-12T13:09:22.4246970Z python3 -m unittest: error: unrecognized arguments: --url https://evil.invalid",
+      "2026-10-12T13:11:36.0270370Z AssertionError: 'if: success()' not found in 'name: Build for Mac\\n\\non:\\n  workflow_call:\\n    inputs:\\n      tag:\\n        description: Release tag\\n        required: true\\n        type: string\\n      ref:\\n        description: Immutable source commit; must equal the peeled release tag commit\\n        required: true\\n        type: string\\n      routing-mode:\\n        description: Prepare the captured App/library source vector and stop before native consumption.\\n        required: false\\n        default: false\\n        type: boolean\\n      app-sha:\\n        description: Exact App commit from the shared routing-vector job.\\n        required: false\\n        default: \\'\\'\\n        type: string\\n      media-kit-sha:\\n        description: Exact media-kit commit from the shared routing-vector job.\\n        required: false\\n        default: \\'\\'\\n        type: string\\n  workflow_dispatch:\\n    inputs:\\n      tag:\\n        description: Release tag to build\\n        required: true\\n        type: string\\n      routing-mode:\\n        description: Direct dispatch cannot capture the shared routing source vector.\\n        required: false\\n        default: false\\n        type: boolean\\n\\njobs:\\n  build-mac-app:\\n    name: macOS workflow (ARM64 hosted)\\n    runs-on: macos-26\\n    permissions:\\n      contents: read\\n    env:\\n      PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}\\n      PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}\\n      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: ${{ !inputs.routing-mode && \\'1\\' || \\'\\' }}\\n    steps:\\n      - name: Reject uncaptured routing dispatch before any production step\\n        shell: bash\\n        env:\\n          ROUTING_MODE: ${{ inputs.routing-mode }}\\n          APP_SHA: ${{ inputs.app-sha }}\\n          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}\\n          APP_REF: ${{ inputs.ref }}\\n          HEAD_NAME: ${{ github.head_ref || github.ref_name }}\\n        run: |\\n          set -euo pipefail\\n          if [[ \"$ROUTING_MODE\" == \"true\" ]]; then\\n            mkdir -p \"$RUNNER_TEMP/rb/r\"\\n            printf \\'routing-mode=%s\\\\napp=%s\\\\nmedia-kit=%s\\\\nref=%s\\\\n\\' \\\\\\n              \"$ROUTING_MODE\" \"$APP_SHA\" \"$MEDIA_KIT_SHA\" \"$APP_REF\" > \"$RUNNER_TEMP/rb/r/dispatch-preflight.txt\"\\n            [[ \"$APP_SHA\" =~ ^[0-9a-f]{40}$ ]] || { echo \\'Routing macOS requires a captured 40-character App SHA.\\' >&2; exit 1; }\\n            [[ \"$MEDIA_KIT_SHA\" =~ ^[0-9a-f]{40}$ ]] || { echo \\'Routing macOS requires a captured 40-character media-kit SHA.\\' >&2; exit 1; }\\n            [[ \"$APP_REF\" == \"$APP_SHA\" ]] || { echo \\'Routing macOS ref must equal the captured App SHA.\\' >&2; exit 1; }\\n          else\\n            [[ -z \"$MEDIA_KIT_SHA\" ]] || { echo \\'A media-kit SHA requires routing mode.\\' >&2; exit 1; }\\n            [[ \"$HEAD_NAME\" != \\'routing/MK-ROUTING-20261011\\' ]] || { echo \\'Direct routing-branch builds are refused; invoke build.yml with its captured source vector.\\' >&2; exit 1; }\\n          fi\\n\\n      - name: Prepare routing receipts directory\\n        if: ${{ inputs.routing-mode }}\\n        shell: bash\\n        env:\\n          APP_SHA: ${{ inputs.app-sha }}\\n          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}\\n        run: |\\n          set -euo pipefail\\n          git config --global core.autocrlf false\\n          git config --global core.eol lf\\n          mkdir -p \"$RUNNER_TEMP/rb/r\"\\n          printf \\'ROUTING_RESULTS=%s\\\\nEXPECTED_APP_SHA=%s\\\\nEXPECTED_MEDIA_KIT_SHA=%s\\\\n\\' \\\\\\n            \"$RUNNER_TEMP/rb/r\" \"$APP_SHA\" \"$MEDIA_KIT_SHA\" >> \"$GITHUB_ENV\"\\n\\n      - name: Checkout exact routing App source\\n        if: ${{ inputs.routing-mode }}\\n        uses: actions/checkout@v7\\n        with:\\n          repository: Goodwu/PiliPlusX\\n          ref: ${{ inputs.app-sha }}\\n          path: app\\n          fetch-depth: 0\\n          persist-credentials: false\\n\\n      - name: Checkout exact routing media-kit source\\n        if: ${{ inputs.routing-mode }}\\n        uses: actions/checkout@v7\\n        with:\\n          repository: Goodwu/media-kit\\n          ref: ${{ inputs.media-kit-sha }}\\n          path: media-kit\\n          fetch-depth: 0\\n          persist-credentials: false\\n\\n      - name: Verify routing App base\\n        if: ${{ inputs.routing-mode }}\\n        working-directory: app\\n        shell: bash\\n        run: |\\n          set -euo pipefail\\n          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_APP_SHA\"\\n          test \"$(git -C ../media-kit rev-parse HEAD)\" = \"$EXPECTED_MEDIA_KIT_SHA\"\\n          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier\\n          git merge-base --is-ancestor FETCH_HEAD HEAD\\n          printf \\'app=%s\\\\nmedia-kit=%s\\\\n\\' \"$EXPECTED_APP_SHA\" \"$EXPECTED_MEDIA_KIT_SHA\" | tee \"$ROUTING_RESULTS/source.txt\"\\n\\n      - name: Bootstrap private current macOS sources\\n        if: ${{ inputs.routing-mode }}\\n        id: prepare\\n        uses: ./app/.github/actions/routing-bootstrap\\n        with:\\n          app-root: app\\n          media-kit-root: media-kit\\n          app-sha: ${{ inputs.app-sha }}\\n          media-kit-sha: ${{ inputs.media-kit-sha }}\\n          platform: macos\\n\\n      - name: Verify current media-kit source resolution before bundle\\n        if: ${{ inputs.routing-mode && steps.prepare.outcome == \\'success\\' }}\\n        id: source_verify_before\\n        working-directory: app\\n        shell: bash\\n        run: |\\n          set -euo pipefail\\n          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output \"$ROUTING_RESULTS/routing-sources-before.json\" 2>&1 | tee \"$ROUTING_RESULTS/source-verify-before.log\"\\n\\n      - name: Build current routing macOS Flutter bundle\\n        if: ${{ inputs.routing-mode && steps.prepare.outcome == \\'success\\' && steps.source_verify_before.outcome == \\'success\\' }}\\n        id: routing_bundle\\n        working-directory: app\\n        shell: bash\\n        run: |\\n          set -euo pipefail\\n          flutter build bundle --debug --no-pub 2>&1 | tee \"$ROUTING_RESULTS/bundle-build.log\"\\n\\n      - name: Verify current media-kit source resolution after bundle\\n        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == \\'success\\' && steps.routing_bundle.outcome == \\'success\\' }}\\n        id: source_verify_after\\n        working-directory: app\\n        shell: bash\\n        run: |\\n          set -euo pipefail\\n          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output \"$ROUTING_RESULTS/routing-sources-after.json\" 2>&1 | tee \"$ROUTING_RESULTS/source-verify-after.log\"\\n\\n      - name: Finalize current routing sources and freshness\\n        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == \\'success\\' && steps.routing_bundle.outcome == \\'success\\' && steps.source_verify_after.outcome == \\'success\\' }}\\n        id: finalize\\n        working-directory: app\\n        shell: bash\\n        env:\\n          PRIVATE_ROOT: ${{ steps.prepare.outputs.private-root }}\\n        run: |\\n          set -euo pipefail\\n          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root \"$FLUTTER_ROOT\" --private-root \"$PRIVATE_ROOT\" --output \"$ROUTING_RESULTS\" --expected-app-sha \"$EXPECTED_APP_SHA\" --expected-media-kit-sha \"$EXPECTED_MEDIA_KIT_SHA\" --platform macos --finalize 2>&1 | tee \"$ROUTING_RESULTS/source-finalize.log\"\\n\\n      - name: Fail closed because no current macOS native producer input is available\\n        if: ${{ inputs.routing-mode && steps.routing_bundle.outcome == \\'success\\' && steps.source_verify_after.outcome == \\'success\\' && steps.finalize.outcome == \\'success\\' }}\\n        id: native_block\\n        shell: bash\\n        env:\\n          APP_SHA: ${{ inputs.app-sha }}\\n          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}\\n          ROUTING_RESULTS: ${{ runner.temp }}/rb/r\\n          NATIVE_ROOT: ${{ runner.temp }}/routing-native-macos\\n        run: |\\n          set -euo pipefail\\n          python3 - \"$ROUTING_RESULTS/macos-native-blocked.json\" <<\\'PY\\'\\n          import json\\n          import os\\n          import sys\\n          from pathlib import Path\\n\\n          diagnostic = {\\n              \\'taskId\\': \\'MK-ROUTING-20261011\\',\\n              \\'stage\\': \\'SOURCE_PREPARED_NATIVE_BLOCKED\\',\\n              \\'status\\': \\'mac-current-native-input-unavailable\\',\\n              \\'platform\\': \\'macos\\',\\n              \\'appCommit\\': os.environ[\\'APP_SHA\\'],\\n              \\'mediaKitCommit\\': os.environ[\\'MEDIA_KIT_SHA\\'],\\n              \\'bootstrapReceipt\\': str(Path(os.environ[\\'ROUTING_RESULTS\\']) / \\'bootstrap.json\\'),\\n              \\'bootstrapStatus\\': \\'fresh-source-only\\',\\n              \\'currentConsumer\\': \\'macOS shared output consumer requires a current accepted native producer receipt\\',\\n              \\'currentProducerReceipt\\': None,\\n              \\'currentProducerReceiptStatus\\': \\'not-provided-to-this-workflow\\',\\n              \\'nativeInputRoot\\': os.environ[\\'NATIVE_ROOT\\'],\\n              \\'nativeInputRootExists\\': Path(os.environ[\\'NATIVE_ROOT\\']).exists(),\\n              \\'nativeBinaryProvenanceVerified\\': False,\\n              \\'nativeBuildStarted\\': False,\\n              \\'deviceTest\\': False,\\n          }\\n          Path(sys.argv[1]).write_text(json.dumps(diagnostic, indent=2) + \\'\\\\n\\', encoding=\\'utf-8\\')\\n          print(\\'SOURCE_PREPARED_NATIVE_BLOCKED: current macOS native producer receipt and accepted local input are unavailable.\\', file=sys.stderr)\\n          raise SystemExit(1)\\n          PY\\n\\n      - name: Upload routing macOS source and native availability diagnostics\\n        if: ${{ always() && inputs.routing-mode }}\\n        uses: actions/upload-artifact@v7\\n        with:\\n          name: routing-macos-source-native-diagnostics-${{ inputs.app-sha }}\\n          path: ${{ runner.temp }}/rb/r\\n          if-no-files-found: error\\n          retention-days: 14\\n\\n      - name: Checkout exact release source\\n        if: ${{ !inputs.routing-mode }}\\n        uses: actions/checkout@v7\\n        with:\\n          fetch-depth: 0\\n          ref: ${{ inputs.ref || inputs.tag }}\\n\\n      # This legacy gate remains limited to the nonrouting release path.\\n      - name: Validate source and approved shared inputs\\n        if: ${{ !inputs.routing-mode }}\\n        run: python3.11 scripts/run_macos_shared_release.py --preflight\\n\\n      - name: Setup Flutter\\n        if: ${{ !inputs.routing-mode }}\\n        uses: subosito/flutter-action@v2\\n        with:\\n          channel: stable\\n          flutter-version-file: pubspec.yaml\\n\\n      - name: Build and verify shared release distribution\\n        if: ${{ !inputs.routing-mode }}\\n        run: python3.11 scripts/run_macos_shared_release.py\\n\\n      - name: Generate and verify release metadata\\n        if: ${{ !inputs.routing-mode && success() }}\\n        shell: bash\\n        run: |\\n          set -euo pipefail\\n          distribution_dir=\"$(find \"$RUNNER_TEMP/piliplusx-shared-candidate\" -mindepth 2 -maxdepth 2 -type d -name distribution -print -quit)\"\\n          test -n \"$distribution_dir\"\\n          source_sha=\"${PILIPLUSX_SOURCE_SHA:-$(git rev-parse HEAD)}\"\\n          mkdir -p release-metadata/macos\\n          cp \"$distribution_dir\"/* release-metadata/macos/\\n          media_kit_commit=\"$(python3.11 -c \\'import json,sys; print(json.load(open(sys.argv[1], encoding=\"utf-8\"))[\"approved_media_kit_revision\"])\\' release-metadata/macos/*.shared-distribution.json)\"\\n          python3.11 scripts/release_manifest.py release-metadata/macos \\\\\\n            --platform macos --abi universal-arm64+x86_64 \\\\\\n            --git-commit \"$source_sha\" \\\\\\n            --media-kit-commit \"$media_kit_commit\" \\\\\\n            --hdr-backend shared-gpu-next \\\\\\n            --native-library-version mpv@0.41.0+shared-gpu-next\\n          python3.11 scripts/verify_release_manifest.py release-metadata/macos \\\\\\n            --expected-source \"$source_sha\" \\\\\\n            --source-checkout \"$GITHUB_WORKSPACE\"\\n          dmg_path=\"$(find \"$distribution_dir\" -maxdepth 1 -type f -name \\'*.dmg\\' -print -quit)\"\\n          prefix=\"${dmg_path%.dmg}\"\\n          cp release-metadata/macos/manifest.json \"$prefix.manifest.json\"\\n          cp release-metadata/macos/SHA256SUMS \"$prefix.SHA256SUMS\"\\n\\n      - name: Upload successful shared release payloads\\n        if: ${{ !inputs.routing-mode && success() }}\\n        uses: actions/upload-artifact@v7\\n        with:\\n          if-no-files-found: error\\n          name: release-macos-arm64\\n          path: ${{ runner.temp }}/piliplusx-shared-candidate/*/distribution/*\\n\\n      - name: Upload failure diagnostics\\n        if: ${{ !inputs.routing-mode && failure() }}\\n        uses: actions/upload-artifact@v7\\n        with:\\n          if-no-files-found: ignore\\n          name: macos-shared-release-failure-${{ github.run_id }}-${{ github.run_attempt }}\\n          path: ${{ runner.temp }}/piliplusx-shared-candidate-diagnostics/result.json\\n'"
+    ],
+    "Source bootstrap and validation (linux)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+      "2026-10-12T13:08:55.9800084Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+      "2026-10-12T13:08:55.9801070Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+    ],
+    "Source bootstrap and validation (linux)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+      "2026-10-12T13:10:56.5792061Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+      "2026-10-12T13:10:56.5793045Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+    ],
+    "Source bootstrap and validation (macos)/7_Analyze and run all Flutter App tests against prepared sources.txt": [
+      "2026-10-12T13:09:59.6345400Z \u001b[36;1mflutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')\u001b[0m",
+      "2026-10-12T13:09:59.6347380Z \u001b[36;1mflutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')\u001b[0m"
+    ],
+    "Source bootstrap and validation (macos)/8_Compile the App Dart and assets bundle without historical native binaries.txt": [
+      "2026-10-12T13:13:37.2257400Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')\u001b[0m",
+      "2026-10-12T13:13:37.2258540Z \u001b[36;1m$kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'\u001b[0m"
+    ],
+    "App analyze, tests and Dart bundle (latest media-kit source)/8_Analyze the App.txt": [
+      "2026-10-12T13:08:41.9263679Z \u001b[36;1mflutter analyze --no-pub 2>&1 | tee \"$ROUTING_RESULTS/analyze.log\"\u001b[0m"
+    ],
+    "App analyze, tests and Dart bundle (latest media-kit source)/12_Compile the App Dart and assets bundle without historical native binaries.txt": [
+      "2026-10-12T13:11:54.8577196Z \u001b[36;1mflutter build bundle --debug --no-pub 2>&1 | tee \"$ROUTING_RESULTS/bundle-build.log\"\u001b[0m",
+      "2026-10-12T13:11:54.8577580Z \u001b[36;1mtest -s build/flutter_assets/kernel_blob.bin\u001b[0m",
+      "2026-10-12T13:11:54.8577980Z \u001b[36;1msha256sum build/flutter_assets/kernel_blob.bin | tee \"$ROUTING_RESULTS/kernel-sha256.txt\"\u001b[0m",
+      "2026-10-12T13:12:26.8937508Z 370b03e498f9a6fe2cba2332751eaea49381c8f05a3db4b1e11280cd2f8affe3  build/flutter_assets/kernel_blob.bin"
+    ]
+  },
+  "python_failure_exact": {
+    "tests_run_total_including_failure_and_skips": 505,
+    "passed_derived": 502,
+    "failed": 1,
+    "skipped": 2,
+    "terminal_run": "Ran 505 tests in 137.399s",
+    "terminal_status": "FAILED (failures=1, skipped=2)",
+    "failure_test": "FAIL: test_private_release_workflow_has_early_gate_and_success_only_upload (macos_shared_release_test.SharedReleaseTests.test_private_release_workflow_has_early_gate_and_success_only_upload)",
+    "trace_file_line": "  File \"/Users/runner/work/PiliPlusX/PiliPlusX/app/test/macos_shared_release_test.py\", line 486, in test_private_release_workflow_has_early_gate_and_success_only_upload",
+    "failing_assertion": "self.assertIn(\"if: success()\", workflow)",
+    "expected_literal": "if: success()",
+    "actual_success_upload_condition": "if: ${{ !inputs.routing-mode && success() }}",
+    "interpretation": "literal stale assertion no longer matches routing-mode guarded upload expression; report does not modify or rerun tests",
+    "skipped_case_lines": [
+      "test_real_three_file_ios_chain_passes_and_android_only_chain_fails (prepare_ios_variant_test.IOSPatchSemanticsTests.test_real_three_file_ios_chain_passes_and_android_only_chain_fails) ... skipped 'shared Flutter Git source is not present'",
+      "test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure (prepare_ios_variant_test.IOSPatchSemanticsTests.test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure) ... skipped 'shared Flutter Git source is not present'"
+    ]
+  },
+  "only_failed_job": [
+    "App Python regression tests (macOS)"
+  ]
+}

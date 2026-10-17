@@ -1,5 +1,5 @@
-import 'package:PiliPlus/models/horizontal_video_model.dart';
-import 'package:PiliPlus/models/model_video.dart';
+import 'package:piliplus/models/horizontal_video_model.dart';
+import 'package:piliplus/models/model_video.dart';
 
 class SeasonArchive extends HorizontalVideoModel {
   SeasonArchive.fromJson(Map<String, dynamic> json) {

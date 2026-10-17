@@ -1,0 +1,458 @@
+{
+  "scope": "Linux/Windows Release source prelude; native stage remains blocked",
+  "baseApp": "b5606ee527eb9cccd7bc2911d1fd74b3c1bccc0d",
+  "verdict": "PASS_WITH_PENDING_HOSTED",
+  "files": {
+    ".github/workflows/build.yml": "089f9cf39da8f8ee89cef0a26c6b01634de446aecaefe9f0179aaf4e575ead23",
+    ".github/workflows/linux_x64.yml": "38f4146b80968dac846743dd9fc2383807c97aae960684daaf749a0a67e020b9",
+    ".github/workflows/win_x64.yml": "efa3a3613ec1fb0b59260e7665da62919dff9592e2abfb49cb66eaecaa43ddb5",
+    "test/reusable_workflow_contract_test.py": "5fccd9109e26ca82370f8916263adbcf03afb37f6f38745e5d37cf3da8ad6569"
+  },
+  "review": {
+    "verdict": "PASS_WITH_PENDING_HOSTED",
+    "scope": "Linux/Windows A-stage second repair, four frozen files",
+    "hashes": {
+      ".github/workflows/build.yml": "089f9cf39da8f8ee89cef0a26c6b01634de446aecaefe9f0179aaf4e575ead23",
+      ".github/workflows/linux_x64.yml": "38f4146b80968dac846743dd9fc2383807c97aae960684daaf749a0a67e020b9",
+      ".github/workflows/win_x64.yml": "efa3a3613ec1fb0b59260e7665da62919dff9592e2abfb49cb66eaecaa43ddb5",
+      "test/reusable_workflow_contract_test.py": "5fccd9109e26ca82370f8916263adbcf03afb37f6f38745e5d37cf3da8ad6569"
+    },
+    "all4BeforeAfterMatch": true,
+    "tests": {
+      "contracts": 43,
+      "actionlintExitCode": 0,
+      "actualExpressionTruthCases": 20
+    },
+    "truthCases": [
+      {
+        "platform": "linux",
+        "case": "direct-routing-default",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "direct-routing-enabled",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "main-enabled-without-vector",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "captured-routing-dispatch",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": false,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "captured-routing-PR",
+        "callerEvent": "pull_request",
+        "ref": "1/merge",
+        "rejected": false,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "main-production-dispatch",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": false,
+        "productionEligible": true
+      },
+      {
+        "platform": "linux",
+        "case": "main-production-caller",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": false,
+        "productionEligible": true
+      },
+      {
+        "platform": "linux",
+        "case": "missing-app",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "missing-media",
+        "callerEvent": "pull_request",
+        "ref": "1/merge",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "linux",
+        "case": "false-mode-with-media",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "direct-routing-default",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "direct-routing-enabled",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "main-enabled-without-vector",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "captured-routing-dispatch",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": false,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "captured-routing-PR",
+        "callerEvent": "pull_request",
+        "ref": "1/merge",
+        "rejected": false,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "main-production-dispatch",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": false,
+        "productionEligible": true
+      },
+      {
+        "platform": "windows",
+        "case": "main-production-caller",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": false,
+        "productionEligible": true
+      },
+      {
+        "platform": "windows",
+        "case": "missing-app",
+        "callerEvent": "workflow_dispatch",
+        "ref": "routing/MK-ROUTING-20261011",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "missing-media",
+        "callerEvent": "pull_request",
+        "ref": "1/merge",
+        "rejected": true,
+        "productionEligible": false
+      },
+      {
+        "platform": "windows",
+        "case": "false-mode-with-media",
+        "callerEvent": "workflow_dispatch",
+        "ref": "main",
+        "rejected": true,
+        "productionEligible": false
+      }
+    ],
+    "allLegacyStepsGuarded": {
+      "linux": 21,
+      "windows": 18
+    },
+    "shellRejectChecks": [
+      {
+        "platform": "linux",
+        "exitCode": 1,
+        "continued": false,
+        "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r2-critical-h4lo5083/linux-reject.log"
+      },
+      {
+        "platform": "windows",
+        "exitCode": 1,
+        "continued": false,
+        "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r2-critical-h4lo5083/windows-reject.log"
+      }
+    ],
+    "blockers": [],
+    "nonBlocking": [],
+    "verified": [
+      "Captured routing dispatch and PR accepted independent of inherited caller event",
+      "Missing vector and direct routing dispatch rejected before production",
+      "Production main without routing remains eligible",
+      "Neutral job names retained",
+      "Vector SHA exactness remains enforced by existing shared bootstrap"
+    ],
+    "priorFailurePropagationEvidence": "/tmp/mk-linux-win-a-critical-review.json",
+    "unverified": [
+      "Hosted exact-vector Linux/Windows prepare bundle finalize",
+      "Native producer input/build/runtime/Release acceptance"
+    ],
+    "reviewTriggers": [
+      "Any reviewed frozen file change",
+      "Shared bootstrap/verify/finalize interface changes",
+      "Replacing intentional native block with consumer or producer"
+    ],
+    "sourceMutations": false,
+    "processesTerminal": true,
+    "evidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r2-critical-h4lo5083"
+  },
+  "priorReviewReceipts": [
+    {
+      "path": "/tmp/mk-linux-win-a-critical-review.json",
+      "sha256": "5f2973e4e6c82b3593ee2d1e8de0f15a7886a08a4f4f139cea026a2a7ce0246e",
+      "review": {
+        "verdict": "REQUEST_CHANGES",
+        "scope": "four-file Linux/Windows A source-only workflow review",
+        "evidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-critical-nhtfg_z0",
+        "all4FrozenHashesMatch": true,
+        "hashes": {
+          ".github/workflows/build.yml": "089f9cf39da8f8ee89cef0a26c6b01634de446aecaefe9f0179aaf4e575ead23",
+          ".github/workflows/linux_x64.yml": "fbbbbf0d5397d260a966b52ca7e104adbee2f187e371a78957e727c3e7ce3153",
+          ".github/workflows/win_x64.yml": "56dd6594cbd698b6fbb8498d27635adb528a0ad01e4e614cdd493a68a215195c",
+          "test/reusable_workflow_contract_test.py": "14f98d47d094bc8e004c0114dd143c5a3e8fd359034a6cbd66a4df6c2f7a908d"
+        },
+        "tests": {
+          "workflowContracts": 41,
+          "actionlintExitCode": 0
+        },
+        "actualPwshFailureChecks": [
+          {
+            "platform": "linux",
+            "case": "verify actual script failure",
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-critical-nhtfg_z0/linux-verify.log"
+          },
+          {
+            "platform": "linux",
+            "case": "finalize actual script failure",
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-critical-nhtfg_z0/linux-finalize.log"
+          },
+          {
+            "platform": "windows",
+            "case": "verify actual script failure",
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-critical-nhtfg_z0/windows-verify.log"
+          },
+          {
+            "platform": "windows",
+            "case": "finalize actual script failure",
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-critical-nhtfg_z0/windows-finalize.log"
+          }
+        ],
+        "findings": [
+          {
+            "severity": "P1",
+            "files": [
+              ".github/workflows/linux_x64.yml",
+              ".github/workflows/win_x64.yml"
+            ],
+            "issue": "uncaptured routing workflow_dispatch selects default false mode and executes guarded legacy production steps",
+            "failurePath": [
+              "workflow_dispatch on routing/MK-ROUTING-20261011",
+              "no dispatch routing-mode input",
+              "routing-mode false/empty",
+              "new routing steps skipped",
+              "!inputs.routing-mode legacy native preparation executes"
+            ]
+          },
+          {
+            "severity": "P2",
+            "files": [
+              ".github/workflows/linux_x64.yml",
+              ".github/workflows/win_x64.yml"
+            ],
+            "issue": "job display name claims SOURCE_PREPARED_NATIVE_BLOCKED solely from input before checkout/bootstrap/verify succeeds",
+            "receiptBoundary": "native_block step itself requires success and finalize success, so earlier verification failure does not produce the blocked receipt"
+          }
+        ],
+        "verified": [
+          "single caller source vector forwarded",
+          "both exact checkouts without persisted credentials",
+          "LF and longpaths precede checkout",
+          "existing correct-platform bootstrap interface and finalize CLI",
+          "legacy command bodies preserved with guards",
+          "source/finalize command failures propagate and stop continuation",
+          "always diagnostic upload"
+        ],
+        "unverified": [
+          "actual hosted Linux and Windows bootstrap/bundle/freshness",
+          "native producer/consumer build or runtime",
+          "Release completion"
+        ],
+        "mutations": "no repository modifications",
+        "processesTerminal": true
+      }
+    },
+    {
+      "path": "/tmp/mk-linux-win-a-critical-review-r1.json",
+      "sha256": "96165b8493fb64799f99a556ff8ab0c28442d431ee8527817b5e7f6a5e66c2ab",
+      "review": {
+        "verdict": "REQUEST_CHANGES",
+        "scope": "Linux/Windows A first repair four frozen files",
+        "evidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r1-critical-2i0xrjoy",
+        "frozenHashes": {
+          ".github/workflows/build.yml": "089f9cf39da8f8ee89cef0a26c6b01634de446aecaefe9f0179aaf4e575ead23",
+          ".github/workflows/linux_x64.yml": "4744c7d52ed85f77466a6314e61f28e47458bbe67eb4914308d405f5bfa06fdc",
+          ".github/workflows/win_x64.yml": "32aa933d49d8c151626e87bdd2ae96e5a7b7c44e4d097b963a25f45ab445973f",
+          "test/reusable_workflow_contract_test.py": "ead0f929547319cdedd913c4de09a4242b22d983940b5f7899d2653d8349d7bb"
+        },
+        "all4HashesBeforeAfterMatch": true,
+        "tests": {
+          "contracts": 43,
+          "actionlintExitCode": 0
+        },
+        "cases": [
+          {
+            "platform": "linux",
+            "case": "direct-routing",
+            "eventName": "workflow_dispatch",
+            "refName": "routing/MK-ROUTING-20261011",
+            "routingMode": false,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": true,
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r1-critical-2i0xrjoy/linux-direct-routing.log"
+          },
+          {
+            "platform": "linux",
+            "case": "captured-vector-via-build-dispatch",
+            "eventName": "workflow_dispatch",
+            "refName": "routing/MK-ROUTING-20261011",
+            "routingMode": true,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": true,
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r1-critical-2i0xrjoy/linux-captured-vector-via-build-dispatch.log"
+          },
+          {
+            "platform": "linux",
+            "case": "captured-vector-via-build-pr",
+            "eventName": "pull_request",
+            "refName": "123/merge",
+            "routingMode": true,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": false
+          },
+          {
+            "platform": "linux",
+            "case": "main-production-dispatch",
+            "eventName": "workflow_dispatch",
+            "refName": "main",
+            "routingMode": false,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": false
+          },
+          {
+            "platform": "windows",
+            "case": "direct-routing",
+            "eventName": "workflow_dispatch",
+            "refName": "routing/MK-ROUTING-20261011",
+            "routingMode": false,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": true,
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r1-critical-2i0xrjoy/windows-direct-routing.log"
+          },
+          {
+            "platform": "windows",
+            "case": "captured-vector-via-build-dispatch",
+            "eventName": "workflow_dispatch",
+            "refName": "routing/MK-ROUTING-20261011",
+            "routingMode": true,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": true,
+            "exitCode": 1,
+            "continued": false,
+            "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/linux-win-a-r1-critical-2i0xrjoy/windows-captured-vector-via-build-dispatch.log"
+          },
+          {
+            "platform": "windows",
+            "case": "captured-vector-via-build-pr",
+            "eventName": "pull_request",
+            "refName": "123/merge",
+            "routingMode": true,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": false
+          },
+          {
+            "platform": "windows",
+            "case": "main-production-dispatch",
+            "eventName": "workflow_dispatch",
+            "refName": "main",
+            "routingMode": false,
+            "actualExpression": "github.event_name == 'workflow_dispatch' && (inputs.routing-mode || github.ref_name == 'routing/MK-ROUTING-20261011')",
+            "rejected": false
+          }
+        ],
+        "blockers": [
+          {
+            "severity": "P1",
+            "issue": "Legitimate captured-vector calls from manually dispatched build.yml inherit workflow_dispatch github event and are rejected before preparation",
+            "locations": [
+              ".github/workflows/linux_x64.yml:43",
+              ".github/workflows/win_x64.yml:43",
+              "test/reusable_workflow_contract_test.py:592"
+            ],
+            "officialSemantics": "https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations",
+            "reason": "Called reusable github context is always associated with caller. The test substitutes workflow_call and therefore does not exercise this invocation."
+          }
+        ],
+        "resolved": [
+          "Direct routing dispatch cannot reach legacy lane",
+          "Neutral job display names avoid claiming successful source preparation"
+        ],
+        "priorEvidence": "/tmp/mk-linux-win-a-critical-review.json (unchanged verify/finalize failure checks)",
+        "unverified": [
+          "No hosted run performed",
+          "No native/build/Release acceptance"
+        ],
+        "sourceMutations": false,
+        "processesTerminal": true
+      }
+    }
+  ],
+  "limits": [
+    "No hosted acceptance yet",
+    "No accepted native input",
+    "No native build/Release/device acceptance"
+  ]
+}
