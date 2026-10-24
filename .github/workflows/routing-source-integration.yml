@@ -1,0 +1,322 @@
+name: Routing App source integration
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+  pull_request:
+    branches: [fix/darwin-video-output-rebuild-barrier]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      app-sha:
+        type: string
+        default: ''
+      media-kit-sha:
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-source-checks-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  source-vector:
+    name: Capture one current routing source vector
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      media-kit-sha: ${{ steps.vector.outputs.media-kit-sha }}
+    steps:
+      - name: Capture exact media-kit HEAD once for all source jobs
+        id: vector
+        shell: bash
+        env:
+          SUPPLIED_MEDIA_SHA: ${{ inputs.media-kit-sha }}
+          EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          test "$app_head" = "$EXPECTED_APP_SHA"
+          if [ -n "$SUPPLIED_MEDIA_SHA" ]; then
+            library_head="$SUPPLIED_MEDIA_SHA"
+          else
+            library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          fi
+          [[ "$library_head" =~ ^[0-9a-f]{40}$ ]]
+          printf 'media-kit-sha=%s\n' "$library_head" >> "$GITHUB_OUTPUT"
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$library_head"
+
+  python-tests:
+    name: App Python regression tests (macOS)
+    # Existing signing/publication tests deliberately require real macOS APIs.
+    needs: source-vector
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    steps:
+      - name: Keep App checkout inputs in LF form
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          git config --global core.longpaths true
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/rb/r" >> "$GITHUB_ENV"
+          printf 'ROUTING_BOOTSTRAP_RECEIPT=%s\n' "$RUNNER_TEMP/rb/r/bootstrap.json" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ needs.source-vector.outputs.media-kit-sha }}
+          path: media-kit
+          persist-credentials: false
+      - name: Verify exact Python test source vector and App base
+        run: |
+          set -euo pipefail
+          mkdir -p "$ROUTING_RESULTS"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$EXPECTED_MEDIA_KIT_SHA"
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" | tee "$ROUTING_RESULTS/source.txt"
+      - name: Bootstrap private parser SDK and current sources
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ env.EXPECTED_APP_SHA }}
+          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}
+          platform: android
+      - name: Run all App Python test modules
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          test -f "$ROUTING_BOOTSTRAP_RECEIPT"
+          test -n "$FLUTTER_ROOT"
+          test -n "$PUB_CACHE"
+          python3 -m unittest discover -s test -p '*_test.py' -v 2>&1 | tee "$ROUTING_RESULTS/tests.log"
+          python3 scripts/verify_hdr_channel.py
+          git diff --exit-code
+      - name: Finalize Python test source freshness and package roots
+        # A failed test remains a failed job, but prepared sources are still checked.
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "${{ steps.prepare.outputs.private-root }}" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform android --finalize
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-app-python-${{ env.EXPECTED_APP_SHA }}
+          path: ${{ env.ROUTING_RESULTS }}
+          if-no-files-found: error
+
+  app-source:
+    name: App analyze, tests and Dart bundle (latest media-kit source)
+    needs: source-vector
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    steps:
+      - name: Keep App checkout inputs in LF form
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          git config --global core.longpaths true
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          printf 'ROUTING_RESULTS=%s\n' "$RUNNER_TEMP/rb/r" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ needs.source-vector.outputs.media-kit-sha }}
+          path: media-kit
+          persist-credentials: false
+      - name: Verify App base and record source scope
+        run: |
+          set -euo pipefail
+          mkdir -p "$ROUTING_RESULTS"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$EXPECTED_MEDIA_KIT_SHA"
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" | tee "$ROUTING_RESULTS/source.txt"
+          printf '%s\n' 'Scope: source analyze/tests and Dart/assets bundle, NOT APK or native-library acceptance.' | tee "$ROUTING_RESULTS/scope.txt"
+      - name: Bootstrap real Android patches against current sources
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ env.EXPECTED_APP_SHA }}
+          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}
+          platform: android
+      - name: Record prepared toolchain
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter --version | tee "$ROUTING_RESULTS/toolchain.txt"
+      - name: Analyze the App
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub 2>&1 | tee "$ROUTING_RESULTS/analyze.log"
+      - name: Run all Flutter App tests
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee "$ROUTING_RESULTS/flutter-tests.log"
+      - name: Run Web player DOM tests in Chrome
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --platform chrome --reporter expanded test/web/player_dom_test.dart 2>&1 | tee "$ROUTING_RESULTS/web-dom-tests.log"
+      - name: Compile the Web player entry point
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter build web --target lib/main_web.dart --no-pub 2>&1 | tee "$ROUTING_RESULTS/web-build.log"
+          test -s build/web/main.dart.js
+          find build/web -type f -print0 | sort -z | xargs -0 sha256sum | tee "$ROUTING_RESULTS/web-sha256.txt"
+      - name: Compile the App Dart and assets bundle without historical native binaries
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter build bundle --debug --no-pub 2>&1 | tee "$ROUTING_RESULTS/bundle-build.log"
+          test -s build/flutter_assets/kernel_blob.bin
+          sha256sum build/flutter_assets/kernel_blob.bin | tee "$ROUTING_RESULTS/kernel-sha256.txt"
+      - name: Finalize source freshness and all package roots after testing
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "${{ steps.prepare.outputs.private-root }}" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform android --finalize
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-app-source-${{ env.EXPECTED_APP_SHA }}
+          path: ${{ env.ROUTING_RESULTS }}
+          if-no-files-found: error
+
+  platform-source:
+    name: Source bootstrap and validation (${{ matrix.platform }})
+    needs: source-vector
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+          - os: windows-latest
+            platform: windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_MEDIA_KIT_SHA: ${{ needs.source-vector.outputs.media-kit-sha }}
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: app
+    steps:
+      - name: Keep App checkout inputs in LF form
+        working-directory: ${{ github.workspace }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git config --global core.longpaths true
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App long-path support' }
+          git config --global core.autocrlf false
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App checkout line endings' }
+          git config --global core.eol lf
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to configure App checkout line endings' }
+          "ROUTING_RESULTS=$env:RUNNER_TEMP/rb/r" >> $env:GITHUB_ENV
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ needs.source-vector.outputs.media-kit-sha }}
+          path: media-kit
+          persist-credentials: false
+      - name: Verify App base and record source scope
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force $env:ROUTING_RESULTS | Out-Null
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to fetch App base' }
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'App does not include the required base' }
+          "app=$env:EXPECTED_APP_SHA`nmedia-kit=$env:EXPECTED_MEDIA_KIT_SHA" | Set-Content (Join-Path $env:ROUTING_RESULTS 'source.txt')
+          'Scope: source analyze/tests and Dart/assets bundle; nativeBinaryProvenanceVerified=false; deviceTest=false.' | Set-Content (Join-Path $env:ROUTING_RESULTS 'scope.txt')
+      - name: Bootstrap actual platform SDK and package patches
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ env.EXPECTED_APP_SHA }}
+          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}
+          platform: ${{ matrix.platform }}
+      - name: Analyze and run all Flutter App tests against prepared sources
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          flutter --version 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'toolchain.txt')
+          if ($LASTEXITCODE -ne 0) { throw 'Flutter toolchain inspection failed' }
+          flutter analyze --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'analyze.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Strict App analysis failed' }
+          flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'flutter-tests.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Flutter App tests failed' }
+      - name: Compile the App Dart and assets bundle without historical native binaries
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          flutter build bundle --debug --no-pub 2>&1 | Tee-Object (Join-Path $env:ROUTING_RESULTS 'bundle-build.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Dart/assets bundle compilation failed' }
+          $kernel = Join-Path (Get-Location) 'build/flutter_assets/kernel_blob.bin'
+          if (!(Test-Path $kernel -PathType Leaf) -or (Get-Item $kernel).Length -eq 0) { throw 'Missing compiled kernel' }
+          Get-FileHash -Algorithm SHA256 $kernel | Format-List | Out-File (Join-Path $env:ROUTING_RESULTS 'kernel-sha256.txt')
+      - name: Finalize source freshness and all package roots after testing
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root $env:FLUTTER_ROOT --private-root '${{ steps.prepare.outputs.private-root }}' --output $env:ROUTING_RESULTS --expected-app-sha $env:EXPECTED_APP_SHA --expected-media-kit-sha $env:EXPECTED_MEDIA_KIT_SHA --platform '${{ matrix.platform }}' --finalize
+          if ($LASTEXITCODE -ne 0) { throw 'Final source freshness/package binding verification failed' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-app-source-${{ matrix.platform }}-${{ env.EXPECTED_APP_SHA }}
+          path: ${{ env.ROUTING_RESULTS }}
+          if-no-files-found: error

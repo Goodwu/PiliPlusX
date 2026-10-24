@@ -27,7 +27,10 @@ try {
 
     $buildTime = [int]([DateTimeOffset]::Now.ToUnixTimeSeconds())
 
-    $tag = $env:GITHUB_REF_NAME
+    $tag = $env:PILIPLUSX_RELEASE_TAG
+    if ($null -eq $tag -or $tag -eq '') {
+        $tag = $env:GITHUB_REF_NAME
+    }
     if ($null -eq $tag) {
         $tag = $env:GITHUB_EVENT_INPUTS_TAG
     }

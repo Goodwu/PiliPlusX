@@ -42,4 +42,12 @@ enum HwDecType {
     HwDecType.mediacodec.hwdec,
     HwDecType.autoSafe.hwdec,
   ].join(',');
+
+  /// Android 9 and earlier devices commonly expose fragile direct-rendering
+  /// MediaCodec paths. Prefer the copy-back path while retaining a safe
+  /// automatic fallback for first-run defaults on those releases.
+  static final String androidLegacyDefault = [
+    HwDecType.mediacodecCopy.hwdec,
+    HwDecType.autoSafe.hwdec,
+  ].join(',');
 }

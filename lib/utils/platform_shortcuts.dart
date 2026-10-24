@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:PiliPlus/models/common/nav_bar_config.dart';
-import 'package:PiliPlus/pages/common/common_controller.dart';
-import 'package:PiliPlus/pages/dynamics/controller.dart';
-import 'package:PiliPlus/pages/home/controller.dart';
-import 'package:PiliPlus/pages/main/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/models/common/nav_bar_config.dart';
+import 'package:piliplus/pages/common/common_controller.dart';
+import 'package:piliplus/pages/dynamics/controller.dart';
+import 'package:piliplus/pages/home/controller.dart';
+import 'package:piliplus/pages/main/controller.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';

@@ -1,0 +1,110 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "Read-only Critical V2: existing DEVICE DV003 PR3; no repo edits, approval, merge, commit or external messaging",
+  "pr": "https://github.com/Goodwu/PiliPlusX/pull/3",
+  "reviewedHead": "8f06fcdf4aaaeb7f115d03a30fc1b257a17fcb57",
+  "prReportedBaseSha": "1970d440b5b9d9ffc001866064581e4005b26b30",
+  "currentSharedApp": "36053e801b0803268b351aab80cdec20b6f46ac2",
+  "sourceHashes": {
+    "lib/plugin/pl_player/dovi_sniff.dart": "bd871b299d8cae8fd8c81b8ec1e5868e42cda2fb61f246e358dca2fb78995e3b",
+    "lib/plugin/pl_player/hdr_output.dart": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+    "lib/plugin/pl_player/source_selection.dart": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+    "lib/pages/video/controller.dart": "a8d9807dbc4fac4a4b2fb6c4e952b3c304b4c14eee51a69bc9cb5b23db946bce",
+    "test/plugin/pl_player/dovi_sniff_test.dart": "761682d12f32223f5c4286c5330c982f27f440fa30c1dddfe4d5fa73ba78db61"
+  },
+  "blockers": [
+    {
+      "id": "DV003-V2-01",
+      "priority": "P1",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:102-117",
+      "finding": "64 KiB / 4 s bounds are not enforced on actual HTTP transport",
+      "failurePath": "Server ignores Range and returns 200/full video: fold accumulates complete body before caller truncation. getUrl has no timeout; non-200/206 response drain has no timeout. Request.close and fold each get independent timeouts, multiplied by an unbounded backup list. One slow/error response can stall initial source selection indefinitely.",
+      "evidence": "Executed exact committed _rangeGet against local Dart HttpServer: requested bytes=0-63; returned 262144 bytes. A 403 stream delayed 600ms completed after 619ms despite timeout=100ms.",
+      "required": "One total deadline including DNS/connect/headers/body/backups, enforce byte bound while streaming and cancel transport immediately, bounded candidates/concurrency, reject inconsistent Content-Range/status. Tests must exercise actual client, oversized 200/206 and slow error/connect/body."
+    },
+    {
+      "id": "DV003-V2-02",
+      "priority": "P1",
+      "location": "lib/pages/video/controller.dart:139-146,323-350,1285-1287; lib/plugin/pl_player/source_selection.dart:40-50",
+      "finding": "Source facts cached by decoder specification, not rendition identity or playurl generation",
+      "failurePath": "A and B have identical codec/size/fps/bitrate but different URL or initialization bytes. A P8.4 fills cache; replacement B is not fetched and inherits P8.4. Old pending A also writes unconditionally after revision change or disposal and can poison newer queries. Publication guard after await does not undo the cache write. Concurrent same-spec entries race to overwrite one fact.",
+      "evidence": "VideoSourceSpec.key explicitly excludes URL/cache token. No cache clear occurs at data=response/_playbackDataRevision++; no generation/closed guard around cache writes.",
+      "required": "Keep capability spec keys separate from immutable source identity including playurl generation/URL/init range, guarded writes and cancellation, bounded cache/pending/negative state. Add same-spec different-URL, late completion after new revision/dispose and concurrent differing-facts tests."
+    },
+    {
+      "id": "DV003-V2-03",
+      "priority": "P1",
+      "location": "lib/plugin/pl_player/source_selection.dart:110-145; lib/pages/video/controller.dart:1140-1160; lib/plugin/pl_player/controller.dart:2396-2404,2438-2446",
+      "finding": "Resolved DV facts stop at menu selection; actual Session still receives unresolved hint",
+      "failurePath": "126+hvc1+sniffed P8.4 becomes allows=true. NetworkSource transports spec/options but no resolved descriptor. Both Session.open calls recompute descriptorFromDash from only quality+codec, yielding unknown DV. Current library _prepare plans before backend open and throws HdrPlaybackBlocked when all candidates are sourceMetadataUnknown, so later container review cannot repair this pre-open failure.",
+      "evidence": "Current shared App three existing changed files have no intervening diff from PR parent; DataSource has no source-facts field. Library hdr_video_session.dart:717-736 and hdr_route_planner.dart:287 reject unresolved before open.",
+      "required": "Carry one immutable source-bound declaration through initial selection, switch/reopen, NetworkSource, Session and report, retaining raw evidence/origins and subsequent container conflict checks. Add actual Session integration tests with true/false and auto/prefer/require; do not relax unknown-DV guard."
+    },
+    {
+      "id": "DV003-V2-04",
+      "priority": "P1",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:138-179; lib/plugin/pl_player/hdr_output.dart:93-121",
+      "finding": "Any first DOVI box is accepted as this rendition video sample declaration, including unrelated/top-level boxes; contradictory fields are discarded",
+      "failurePath": "Top-level dvvC or first unrelated track wins without proving stsd/video sample binding or checking multiple conflicting records. Parsed BL=false/RPU=false still yields usable P8.4; P5 overrides compatibility to 0; P10 is hard-coded as HEVC. This manufactures stronger color/codec facts from inconsistent input.",
+      "evidence": "Exact committed parser probe accepted standalone top-level dvvC body profile8/compat4 with BL=false/RPU=false. descriptor consumes only profile/compat/EL and never BL/RPU/version or sample-entry codec.",
+      "required": "Bind record to validated video sample entry, reject ambiguous/conflicting/truncated trees and unsupported combinations, preserve codec/compat/layer evidence rather than overwrite. Narrow initial support to defensible P5/P8.4 if P10 cannot be proven. Add decoy/multi-track/conflicting/invalid-layer/codec tests."
+    }
+  ],
+  "nonBlocking": [
+    {
+      "priority": "P2",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:89-90",
+      "finding": "Raw exception interpolation may expose signed CDN URL in logs; redact URI/query and retain error type or sanitized code."
+    },
+    {
+      "priority": "P2",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:123-130",
+      "finding": "Initialization start is ignored and malformed range falls back to 0..65535; define and validate start/end semantics explicitly."
+    },
+    {
+      "priority": "P2",
+      "location": "TASKS.md and DV003 archive",
+      "finding": "context= is empty; broad host/device acceptance statements are not evidence for current integrated vector. Correct bound claims, cross-link original evidence, and distinguish menu observation from Session/HDR/performance."
+    }
+  ],
+  "verifiedFacts": [
+    "Actual _rangeGet now writes User-Agent and Referer using same BrowserUa.pc/HttpString.baseUrl constants as player; original omitted-header bug is fixed in committed source.",
+    "13 committed tests exist, with real-capture hex fixture and one mocked capability admission case. HTTP tests use injected fetch; no real transport, cache lifecycle, controller-to-Session path or report tests.",
+    "Existing unresolved guard is preserved for absent facts and unknown profile/compat0; EL bit is carried into descriptor. Effective route options still flow into query/prediction.",
+    "PR code-only modification scope is app-level source resolution, relevant to task; no native recipe change needed. Safe integration requires repairs of this existing proposal, not a second implementation line.",
+    "No production source changed during review. Temporary local standalone Dart harness was removed after run; only /tmp report retained."
+  ],
+  "ciEvidence": {
+    "run": 38240903886,
+    "attempt": 1,
+    "result": "failure",
+    "sourceVectorJob": 114783020148,
+    "observedFailure": "test app_head == EXPECTED_APP_SHA fails because PR head differs from unique routing branch head",
+    "flutterPythonJobs": "skipped",
+    "claim281Tests": "PR and archive self-report only; not independently verified by CI; never counted as current vector pass"
+  },
+  "probeScope": "Exact committed dovi_sniff.dart logic transplanted to isolated standalone Dart file; package imports removed and VideoItem/debugPrint/constants stubbed. Actual Dart HttpClient/HttpServer, no CDN/network secrets. This verifies transport/parser counterexamples only, not Flutter integration.",
+  "probeResults": {
+    "exit": 0,
+    "requestedBytes": 64,
+    "returnedBytes": 262144,
+    "timeoutMs": 100,
+    "errorDrainElapsedMs": 619,
+    "topLevelAccepted": true,
+    "BL": false,
+    "RPU": false
+  },
+  "notVerified": [
+    "Full 281 Flutter run or analyze0 from this PR",
+    "Original device screenshots/log bytes or APK/source/native vector",
+    "Latest integrated LG/LYA Session/HDR/performance",
+    "New full current source CI"
+  ],
+  "reReviewTriggers": [
+    "Revised existing PR head or exact rebased slice on latest App/library",
+    "Bounded actual transport regressions and revision/source isolation regressions pass",
+    "Same descriptor reaches menu/planner/Session/report with unknown/conflict fail-closed intact",
+    "Artifact-bound full source CI plus separately identified current DEVICE native/runtime evidence"
+  ],
+  "integrationRecommendation": "Do not cherry-pick this production slice as-is. Fixture and hypothesis are useful references; approving the parser/network/controller subset independently would leave known correctness blockers."
+}

@@ -1,0 +1,25 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "status": "partial-stopped",
+  "userAuthorized": "only original 38513 identical old-cache files",
+  "executedBatch": 100,
+  "deleted": 4,
+  "remainingPresent": 96,
+  "stopReason": "old hardlinked pack: previous unlink changed remaining old inode nlink 2 to 1 and ctime; bytes unchanged",
+  "measuredFreeDeltaBytes": 85913600,
+  "laterSystemFreeIncreaseAttributedToCleanup": false,
+  "newCacheUnchanged": true,
+  "frozenDonorsPreserved": true,
+  "protectedSDKAppLibraryUnchanged": true,
+  "continuedDeletion": false,
+  "remotePrepare": 6116072490,
+  "remoteCompletion": 6116651070,
+  "completionDoubleReadback": true,
+  "approvedCodeSHA256": "483b4a5460a1c917af52edd3884c8492865d898e4ed8dc935851a9f50a3845a5",
+  "rawCheckpoint": {
+    "path": "/tmp/mk-ios-cache-delete-partial-checkpoint.json",
+    "sha256": "8f3495fe54b0632aacae3d05f562c52d477bc6e29d628da768a926a5cbaef9ef"
+  },
+  "runtimeLogFailurePreserved": true,
+  "scope": "storage recovery only; no SDK source/native acceptance claim"
+}

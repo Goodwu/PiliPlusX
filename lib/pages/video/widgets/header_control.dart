@@ -3,60 +3,60 @@ import 'dart:convert' show jsonDecode, utf8;
 import 'dart:io' show Platform, File;
 import 'dart:typed_data' show Uint8List;
 
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/custom_icon.dart';
-import 'package:PiliPlus/common/widgets/dialog/report.dart';
-import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
-import 'package:PiliPlus/common/widgets/marquee.dart';
-import 'package:PiliPlus/http/danmaku.dart';
-import 'package:PiliPlus/http/danmaku_block.dart';
-import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/http/live.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/models/common/super_resolution_type.dart';
-import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
-import 'package:PiliPlus/models/common/video/video_decode_type.dart';
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/models/video/play/url.dart';
-import 'package:PiliPlus/models_new/video/video_play_info/subtitle.dart';
-import 'package:PiliPlus/pages/common/common_intro_controller.dart';
-import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
-import 'package:PiliPlus/pages/setting/models/play_settings.dart'
+import 'package:piliplus/common/constants.dart';
+import 'package:piliplus/common/widgets/button/icon_button.dart';
+import 'package:piliplus/common/widgets/custom_icon.dart';
+import 'package:piliplus/common/widgets/dialog/report.dart';
+import 'package:piliplus/common/widgets/dialog/simple_dialog_option.dart';
+import 'package:piliplus/common/widgets/marquee.dart';
+import 'package:piliplus/http/danmaku.dart';
+import 'package:piliplus/http/danmaku_block.dart';
+import 'package:piliplus/http/init.dart';
+import 'package:piliplus/http/live.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/video.dart';
+import 'package:piliplus/models/common/super_resolution_type.dart';
+import 'package:piliplus/models/common/video/audio_quality.dart';
+import 'package:piliplus/models/common/video/cdn_type.dart';
+import 'package:piliplus/models/common/video/video_decode_type.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/models/video/play/url.dart';
+import 'package:piliplus/models_new/video/video_play_info/subtitle.dart';
+import 'package:piliplus/pages/common/common_intro_controller.dart';
+import 'package:piliplus/pages/danmaku/danmaku_model.dart';
+import 'package:piliplus/pages/setting/models/play_settings.dart'
     show showPlayerVolumeDialog;
-import 'package:PiliPlus/pages/setting/widgets/popup_item.dart';
-import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
-import 'package:PiliPlus/pages/video/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/widgets/action_item.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
-import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/services/shutdown_timer_service.dart'
+import 'package:piliplus/pages/setting/widgets/popup_item.dart';
+import 'package:piliplus/pages/setting/widgets/select_dialog.dart';
+import 'package:piliplus/pages/video/controller.dart';
+import 'package:piliplus/pages/video/introduction/local/controller.dart';
+import 'package:piliplus/pages/video/introduction/pgc/controller.dart';
+import 'package:piliplus/pages/video/introduction/ugc/controller.dart';
+import 'package:piliplus/pages/video/introduction/ugc/widgets/action_item.dart';
+import 'package:piliplus/pages/video/introduction/ugc/widgets/menu_row.dart';
+import 'package:piliplus/pages/video/widgets/header_mixin.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/models/play_repeat.dart';
+import 'package:piliplus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
-import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/android/bindings.g.dart';
-import 'package:PiliPlus/utils/connectivity_utils.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/extension/string_ext.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/storage_utils.dart';
-import 'package:PiliPlus/utils/subtitle_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
-import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:piliplus/utils/accounts.dart';
+import 'package:piliplus/utils/accounts/account.dart';
+import 'package:piliplus/utils/android/bindings.g.dart';
+import 'package:piliplus/utils/connectivity_utils.dart';
+import 'package:piliplus/utils/extension/num_ext.dart';
+import 'package:piliplus/utils/extension/string_ext.dart';
+import 'package:piliplus/utils/image_utils.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/request_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/storage_utils.dart';
+import 'package:piliplus/utils/subtitle_utils.dart';
+import 'package:piliplus/utils/utils.dart';
+import 'package:piliplus/utils/video_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -774,7 +774,26 @@ class HeaderControlState extends State<HeaderControl>
                     dense: true,
                     title: const Text('播放信息', style: titleStyle),
                     leading: const Icon(Icons.info_outline, size: 20),
-                    onTap: () => showPlayerInfo(context, player: player),
+                    onTap: () => showPlayerInfo(
+                      context,
+                      player: player,
+                      plPlayerController: plPlayerController,
+                    ),
+                    // A7 实机轮 seek 不变量调试钩子的浅层备选入口：「播放
+                    // 信息」对话框需两次跳转且行条件渲染，长按路径过深。
+                    // 行为与对话框内「HDR 路由」行的长按完全一致（+60s
+                    // seek），仅当存在 HDR 路由报告时生效；播放信息入口
+                    // 本身不变。
+                    onLongPress: () {
+                      if (plPlayerController.hdrRouteInfo.value == null &&
+                          plPlayerController.hdrDegradeNotice.value == null) {
+                        return;
+                      }
+                      PlPlayerController.seekToIfExists(
+                        player.state.position + const Duration(seconds: 60),
+                      );
+                      SmartDialog.showToast('调试：seek +60s');
+                    },
                   ),
                 ListTile(
                   dense: true,
@@ -797,12 +816,14 @@ class HeaderControlState extends State<HeaderControl>
     );
   }
 
-  static void showPlayerInfo(
+  static Future<void> showPlayerInfo(
     BuildContext context, {
     required NativePlayer player,
-  }) {
-    final hwdec = player.getProperty('hwdec-current');
-    final volume = player.getProperty('volume');
+    PlPlayerController? plPlayerController,
+  }) async {
+    final hwdec = await player.getProperty('hwdec-current');
+    if (!context.mounted) return;
+    final volume = player.state.volume.toStringAsFixed(0);
     showDialog(
       context: context,
       builder: (context) {
@@ -878,6 +899,38 @@ class HeaderControlState extends State<HeaderControl>
                       subtitle: Text(hwdec),
                       onTap: () => Utils.copyText('hwdec\n$hwdec'),
                     ),
+                    if (plPlayerController != null)
+                      Obx(() {
+                        final route =
+                            plPlayerController.hdrRouteInfo.value;
+                        final degrade =
+                            plPlayerController.hdrDegradeNotice.value;
+                        final candidates =
+                            plPlayerController.hdrCandidateInfo.value;
+                        if (route == null && degrade == null &&
+                            candidates == null) {
+                          return const SizedBox.shrink();
+                        }
+                        final description = [?route, ?degrade].join(' · ');
+                        final text = candidates == null
+                            ? description
+                            : '$description\n候选诊断：$candidates';
+                        return ListTile(
+                          dense: true,
+                          title: const Text('HDR 路由'),
+                          subtitle: Text(text),
+                          onTap: () => Utils.copyText('HDR route\n$text'),
+                          // A7 实机轮 seek 不变量调试钩子：长按触发 +60s
+                          // seek，用于验证 seek 后会话报告与输出正确。
+                          onLongPress: () {
+                            PlPlayerController.seekToIfExists(
+                              player.state.position +
+                                  const Duration(seconds: 60),
+                            );
+                            SmartDialog.showToast('调试：seek +60s');
+                          },
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -905,23 +958,6 @@ class HeaderControlState extends State<HeaderControl>
     }
     final VideoQuality? currentVideoQa = videoDetailCtr.currentVideoQa.value;
     if (currentVideoQa == null) return;
-
-    final List<FormatItem> videoFormat = videoInfo.supportFormats!;
-
-    /// 总质量分类
-    final int totalQaSam = videoFormat.length;
-
-    /// 可用的质量分类
-    int usefulQaSam = 0;
-    final List<VideoItem> video = videoInfo.dash!.video!;
-    final Set<int> idSet = {};
-    for (final VideoItem item in video) {
-      final int id = item.id!;
-      if (!idSet.contains(id)) {
-        idSet.add(id);
-        usefulQaSam++;
-      }
-    }
 
     showBottomSheet(
       (context, setState) {
@@ -956,55 +992,75 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                   ),
                 ),
-                SliverList.builder(
-                  itemCount: totalQaSam,
-                  itemBuilder: (context, index) {
-                    final item = videoFormat[index];
-                    final isCurr = currentVideoQa.code == item.quality;
-                    return ListTile(
-                      dense: true,
-                      onTap: () async {
-                        if (isCurr) {
-                          return;
-                        }
-                        Get.back();
-                        final int quality = item.quality!;
-                        final newQa = VideoQuality.fromCode(quality);
-                        videoDetailCtr
-                          ..plPlayerController.cacheVideoQa = newQa.code
-                          ..currentVideoQa.value = newQa
-                          ..updatePlayer();
-
-                        SmartDialog.showToast("画质已变为：${newQa.desc}");
-
-                        // update
-                        if (!plPlayerController.tempPlayerConf) {
-                          setting.put(
-                            await ConnectivityUtils.isWiFi
-                                ? SettingBoxKey.defaultVideoQa
-                                : SettingBoxKey.defaultVideoQaCellular,
+                Obx(() {
+                  videoDetailCtr.videoQualityMenuRevision.value;
+                  final activeQuality = videoDetailCtr.currentVideoQa.value;
+                  if (activeQuality == null) {
+                    return const SliverToBoxAdapter();
+                  }
+                  final videoFormat = videoDetailCtr.currentDashQualityFormats;
+                  return SliverList.builder(
+                    itemCount: videoFormat.length,
+                    itemBuilder: (context, index) {
+                      final item = videoFormat[index];
+                      final isCurr = activeQuality.code == item.quality;
+                      final eligibility = videoDetailCtr.qualityEligibility(
+                        item.quality!,
+                      );
+                      final enabled = eligibility.enabled;
+                      return ListTile(
+                        dense: true,
+                        onTap: () async {
+                          if (isCurr) {
+                            return;
+                          }
+                          final int quality = item.quality!;
+                          if (!await videoDetailCtr.changeVideoQuality(
                             quality,
-                          );
-                        }
-                      },
-                      // 可能包含会员解锁画质
-                      enabled: index >= totalQaSam - usefulQaSam,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                      ),
-                      title: Text(item.newDesc!),
-                      trailing: isCurr
-                          ? Icon(
-                              Icons.done,
-                              color: theme.colorScheme.primary,
-                            )
-                          : Text(
-                              item.format!,
-                              style: subTitleStyle,
-                            ),
-                    );
-                  },
-                ),
+                          )) {
+                            return;
+                          }
+                          Get.back();
+                          final newQa = VideoQuality.fromCode(quality);
+                          SmartDialog.showToast("画质已变为：${newQa.desc}");
+
+                          // update
+                          if (!plPlayerController.tempPlayerConf) {
+                            setting.put(
+                              await ConnectivityUtils.isWiFi
+                                  ? SettingBoxKey.defaultVideoQa
+                                  : SettingBoxKey.defaultVideoQaCellular,
+                              quality,
+                            );
+                          }
+                        },
+                        // Do not use Material's disabled state: users need a
+                        // precise HDR/8K capability explanation on tap.
+                        enabled: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
+                        title: Text(
+                          item.newDesc!,
+                          style: enabled
+                              ? null
+                              : TextStyle(
+                                  color: theme.colorScheme.outline,
+                                ),
+                        ),
+                        trailing: isCurr
+                            ? Icon(
+                                Icons.done,
+                                color: theme.colorScheme.primary,
+                              )
+                            : Text(
+                                item.format!,
+                                style: subTitleStyle,
+                              ),
+                      );
+                    },
+                  );
+                }),
               ],
             ),
           ),

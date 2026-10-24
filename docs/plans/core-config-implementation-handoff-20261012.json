@@ -1,0 +1,1117 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "stage": "CORE-CONFIG actual implementation",
+  "status": "PASS for frozen library and App CONFIG host scope; preparing integration commit; native/device/final PR integration incomplete",
+  "sourceHeadsBeforeDocs": {
+    "library": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+    "app": "abc149dcf7e89cf0ea1f08ba133bf1047c36138d"
+  },
+  "documentationCheckpointHeads": {
+    "library": "adde2b5b543c099843bee357f63559ce12488def",
+    "app": "b9d6d623f79a44232e3aff535b88e41ba1634d28"
+  },
+  "libraryIndependentReview": {
+    "result": "REQUEST_CHANGES",
+    "scope": "Frozen library CONFIG + disposal, host only",
+    "manifest": "/tmp/mk-config-library-freeze.json",
+    "manifestSha256": "9ebeafd0579815e3cad6b9a5d73a0f068d56491754ea2714a9acd9312b402a90",
+    "snapshotRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-package",
+    "snapshotHashesUnchanged": true,
+    "originalFilesPrePostTestsMatched": true,
+    "tests": {
+      "authorTargetedIndependentPass": 69,
+      "frozenLifecycleIndependentPass": 104,
+      "independentCounterexamplesFailed": 2
+    },
+    "environmentFailures": [
+      "Initial independent runner missing own package root then package_graph; repaired only temporary runner",
+      "Initial isolated lifecycle run 103 pass / 1 relative lib path fixture missing; temporary lib link to frozen snapshot fixes fixture"
+    ],
+    "findings": [
+      {
+        "severity": "P1",
+        "file": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "function": "setOptions",
+        "line": 1335,
+        "problem": "Settings during initial capability preparation return without invalidating or changing the pending request; obsolete auto hardware request still opens after require software was accepted",
+        "evidence": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-boundary.log",
+        "observedModes": [
+          "mediacodec"
+        ],
+        "observedOptionsDecode": "auto",
+        "requiredOptionsDecode": "require software"
+      },
+      {
+        "severity": "P1",
+        "file": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "function": "handleCapabilitiesChanged",
+        "line": 1429,
+        "problem": "Same feasible route early return preserves verified hardware fulfillment after refreshed source census no longer includes the actual configured decoder",
+        "evidence": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-boundary.log",
+        "oldReviews": 1,
+        "newReviews": 1,
+        "verifiedAfterCensusChanged": true
+      }
+    ],
+    "logs": {
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/boundary.log": "3ed1ecdb17140416e4364e64da7d19e8f653175b3ce45eafc9bf59d1ed3f1866",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/boundary-r2.log": "d2648541ab6cd45ce9cf0576f490989b347f771ba6e506bf8f1b68a45de8108e",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/boundary-r3.log": "a495962390e5a22f86bef074a4db87c876b991e53aee18d07c49180ebf42af5e",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-boundary.log": "74a5fdc65d2f70aec24baa42d870025aabc42958bf031277549c320ebbac505e",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/author-targets-independent.log": "e9836308b4e0b966538fc562d300cb5ce35a08429361e137e9bb9319ab163e12",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-lifecycle-independent.log": "06921a2f74f56b3f81b000590a265b5532a5c1c6920346cf05cb190e7c1e7104",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen-lifecycle-independent-r2.log": "83570991f20ef3b5156928e5be986955bb0331b6260a9ba062edb8d5420cb3cd"
+    },
+    "independentTest": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2-6uzduc9r/frozen_boundary_test.dart",
+    "nativeVerified": false,
+    "deviceVerified": false
+  },
+  "appAuthorReceipt": {
+    "status": "worker implemented; ready for independent V2; not final acceptance",
+    "recorded_at": "2026-10-11T18:50:18.690556+00:00",
+    "appHead": "abc149dcf7e89cf0ea1f08ba133bf1047c36138d",
+    "libraryHead": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+    "libraryFreezeReceipt": "/tmp/mk-config-library-freeze.json",
+    "libraryFreezeReceiptSHA256": "9ebeafd0579815e3cad6b9a5d73a0f068d56491754ea2714a9acd9312b402a90",
+    "ownedFiles": {
+      "lib/plugin/pl_player/route_options.dart": "919a4dab764e757830109da98adbc4bcf613250c09af0285f87dd1be42b9657f",
+      "lib/plugin/pl_player/hdr_output.dart": "2d97cf8043a5bb5908cb3c53e805a8e2ccc8a5f51186069022423b1aeffd4228",
+      "lib/plugin/pl_player/source_selection.dart": "3162fd478858497aa6b593986d2bb291e01c59acee17a3a3da741ec64afdbeea",
+      "lib/plugin/pl_player/controller.dart": "1e509e365e0ea8eb08bc10226ff82c14b2554b7d55e4529328f55ba1ed2f68ff",
+      "lib/plugin/pl_player/models/data_source.dart": "21ba412e9c240b11709c9fcd1b2df9e87684d48c9d6723e690cdefb11dd1ed45",
+      "lib/plugin/pl_player/models/player_lifecycle_ports.dart": "db9af7ead1139bfe66f6e7e869eaaf7c81a3db0bacc90fae86ff5e5bb2226be0",
+      "lib/pages/video/controller.dart": "7074b8743bee45967c6fc1a76f1dcbd681af62c0b6b51aea6ce1361e6e38c1ea",
+      "lib/pages/setting/models/play_settings.dart": "f4bdaf5f168995b3a8010aea08119a8ce8468e3c26d645d4c5b57df4b39314aa",
+      "lib/pages/setting/models/video_settings.dart": "04e90fd4debf14b50d725c140159645316d9234b53ffe4d863aec8a2c5681a03",
+      "scripts/verify_hdr_channel.py": "09da4457f756fbfa9e66ad0747c30ed957c768c97eaff3fba76080e7b0dcabfa",
+      "test/hdr_channel_contract_test.py": "6722079ebb7ad4d400c806f378ac5d9323530900e26c7eb7c51f31eebb36404b",
+      "test/route_options_test.dart": "e15437caa748e8a73691fec7a01bb402216e076709bd8996c7a21dc86e2e05de",
+      "test/plugin/pl_player/source_selection_test.dart": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+      "test/plugin/pl_player/player_controller_lifecycle_test.dart": "8f43e45a05f059948a0ca105da6aacc198cedc87dc5cfece0ee9b5e213f62e25",
+      "test/pages/video/route_options_lifecycle_test.dart": "962581c2bb2d6e922e76d37c4258d0cab14f06a4c1c0787420efa7fe0031a2b1",
+      "test/plugin/pl_player/player_source_publication_contract_test.dart": "487d85bf950a69d83d5f44a1f038ebd9123e924ba1dc27dbe8f682c5223617e5"
+    },
+    "ownedVectorSHA256": "292c6034fb746a78b44603e1cf5872f6e59fcb498f38fda1fd87602e1e32b5ac",
+    "beforeAfterSourceEvidence": "/tmp/mk-app-config-freeze-before2.json",
+    "checkedAppDartCount": 1367,
+    "sourceDrift": [],
+    "results": {
+      "fullFlutter": {
+        "passed": 258,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-full-flutter-frozen2.log"
+      },
+      "strict": {
+        "result": "No issues found",
+        "exit": 0,
+        "log": "/tmp/mk-app-config-full-strict-frozen2.log"
+      },
+      "bundle": {
+        "exit": 0,
+        "log": "/tmp/mk-app-config-bundle-frozen2.log",
+        "kernelSHA256": "4f3756b64d10346e6a27032d7c52b4667985036441c9566c5d42d4bc60c1fbd6"
+      },
+      "channelChecker": {
+        "passed": 11,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-channel-frozen2.log"
+      },
+      "diffCheck": "pass"
+    },
+    "preservedFailures": [
+      "/tmp/mk-app-config-first-tests.log",
+      "/tmp/mk-app-config-second-tests.log",
+      "/tmp/mk-app-config-ha-setting-tests.log",
+      "/tmp/mk-app-config-ha-setting-tests2.log",
+      "/tmp/mk-app-config-ha-setting-tests3.log",
+      "/tmp/mk-app-config-ha-setting-tests4.log",
+      "/tmp/mk-app-config-slow-page-tests.log",
+      "/tmp/mk-app-config-full-flutter-frozen.log"
+    ],
+    "limits": [
+      "HEAD plus dirty source hashes, not a committed SHA pass",
+      "Results prove library 20-file frozen combination only; later CONFIG V2 fixes need fresh tests",
+      "Native build, APK, visible device HDR and sustained performance not verified",
+      "No Git, TASKS, conversation or other writer files changed by this worker"
+    ]
+  },
+  "acceptanceLimits": [
+    "Author green tests do not supersede two independently reproduced library P1 defects",
+    "No production candidate committed; new fixes need fresh freeze, V2 and combined tests",
+    "DV001 and PR5 only historical Markdown imported; recipe/scripts/current native/device integration incomplete",
+    "Main PRs not merged, closed or published"
+  ],
+  "appIndependentReview": {
+    "status": "REQUEST_CHANGES",
+    "scope": "App actual CONFIG 16 frozen files; independent read-only V2",
+    "timestamp": "2026-10-11T18:54:46.919595+00:00",
+    "appHeadObservedNow": "b9d6d623f79a44232e3aff535b88e41ba1634d28",
+    "appSourceFreeze": "292c6034fb746a78b44603e1cf5872f6e59fcb498f38fda1fd87602e1e32b5ac",
+    "appFrozenFiles": {
+      "lib/plugin/pl_player/route_options.dart": "919a4dab764e757830109da98adbc4bcf613250c09af0285f87dd1be42b9657f",
+      "lib/plugin/pl_player/hdr_output.dart": "2d97cf8043a5bb5908cb3c53e805a8e2ccc8a5f51186069022423b1aeffd4228",
+      "lib/plugin/pl_player/source_selection.dart": "3162fd478858497aa6b593986d2bb291e01c59acee17a3a3da741ec64afdbeea",
+      "lib/plugin/pl_player/controller.dart": "1e509e365e0ea8eb08bc10226ff82c14b2554b7d55e4529328f55ba1ed2f68ff",
+      "lib/plugin/pl_player/models/data_source.dart": "21ba412e9c240b11709c9fcd1b2df9e87684d48c9d6723e690cdefb11dd1ed45",
+      "lib/plugin/pl_player/models/player_lifecycle_ports.dart": "db9af7ead1139bfe66f6e7e869eaaf7c81a3db0bacc90fae86ff5e5bb2226be0",
+      "lib/pages/video/controller.dart": "7074b8743bee45967c6fc1a76f1dcbd681af62c0b6b51aea6ce1361e6e38c1ea",
+      "lib/pages/setting/models/play_settings.dart": "f4bdaf5f168995b3a8010aea08119a8ce8468e3c26d645d4c5b57df4b39314aa",
+      "lib/pages/setting/models/video_settings.dart": "04e90fd4debf14b50d725c140159645316d9234b53ffe4d863aec8a2c5681a03",
+      "scripts/verify_hdr_channel.py": "09da4457f756fbfa9e66ad0747c30ed957c768c97eaff3fba76080e7b0dcabfa",
+      "test/hdr_channel_contract_test.py": "6722079ebb7ad4d400c806f378ac5d9323530900e26c7eb7c51f31eebb36404b",
+      "test/route_options_test.dart": "e15437caa748e8a73691fec7a01bb402216e076709bd8996c7a21dc86e2e05de",
+      "test/plugin/pl_player/source_selection_test.dart": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+      "test/plugin/pl_player/player_controller_lifecycle_test.dart": "8f43e45a05f059948a0ca105da6aacc198cedc87dc5cfece0ee9b5e213f62e25",
+      "test/pages/video/route_options_lifecycle_test.dart": "962581c2bb2d6e922e76d37c4258d0cab14f06a4c1c0787420efa7fe0031a2b1",
+      "test/plugin/pl_player/player_source_publication_contract_test.dart": "487d85bf950a69d83d5f44a1f038ebd9123e924ba1dc27dbe8f682c5223617e5"
+    },
+    "appAfterHashesMatch": true,
+    "libraryOld20FrozenSnapshotMatches": true,
+    "snapshotRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-app-config-v2-urf64o5c",
+    "independentExistingTargets": {
+      "passed": 78,
+      "exitCode": 0,
+      "log": "/tmp/mk-app-config-v2-baseline.log",
+      "scope": "player lifecycle, route options, per-source selection, page stale query, source publication"
+    },
+    "independentNewBoundaryTests": {
+      "negative": "V2 local first-open settings retain a runnable source",
+      "negativeResult": "FAIL: valid capability response; DataStatus.error, null Player, 0 configure plans, setDataSource line1062 null check",
+      "positive": "V2 baseline local first-open remains playable",
+      "positiveResult": "PASS: same local source/held query/valid capability response, no configuration change, loaded/1 plan/verified",
+      "log": "/tmp/mk-app-config-v2-local-first4.log",
+      "testFile": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-app-config-v2-urf64o5c/test/plugin/pl_player/player_controller_lifecycle_test.dart"
+    },
+    "blockingFindings": [
+      {
+        "priority": "P1",
+        "file": "lib/plugin/pl_player/controller.dart",
+        "lines": [
+          472,
+          477
+        ],
+        "relatedFile": "lib/pages/video/controller.dart",
+        "relatedLines": [
+          153,
+          157
+        ],
+        "problem": "Persisted valid configuration during initial local-source capability query strands playback. _sourceRouteOptions changes before Player/Session publication; dataSource not updated and setOptions sees null Session. Local page returns assuming live Session consumed options. Old init rejects options identity then setDataSource dereferences absent Player at 1062. No replacement source exists.",
+        "requiredFix": "Keep latest valid source/configuration transaction alive through initial publication, await real configured open, requireSoftware actual CPU fulfillment; stale generation must not act on released Player. Preserve local-source semantics and stale-source ownership gates."
+      }
+    ],
+    "nonblocking": [
+      "Some page Android gates still directly use Platform.isAndroid while test ports override usesAndroidSession; host override tests do not exercise every Android menu predicate. This does not itself prove a runtime defect."
+    ],
+    "verifiedFacts": [
+      "Default production lifecycle ports use actual Platform.isAndroid and instantiate real HdrVideoSession when no testing factory supplied.",
+      "Adapter keeps experimental=false default and separates persisted request from actual Session fulfillment.",
+      "Unknown DV descriptor remains rejected before allowUnknown fallback.",
+      "Existing 78 target tests independently passed on exact old library snapshot, including actual Session settings/report identity, cleanup-stage failure retention/retry, stale query, and slow source transaction waiting."
+    ],
+    "unverified": [
+      "Updated library repair combination; old snapshot results are not current library validation.",
+      "Full App tests/strict/bundle independently rerun in this review; author258/strict0/bundle remain author evidence only.",
+      "Native artifact/device HDR/panel/performance, DV001 recipe/PR5 final integration."
+    ],
+    "rereviewTriggers": [
+      "App fix frozen with exact new hashes, initial local-file held-query regression and no-change positive pass; actual latest requirement resolves CPU/fulfilled.",
+      "Latest library freeze passes its separate V2; rerun integrated App relevant tests/full suite/strict/bundle on accurate new combination."
+    ],
+    "environmentFailuresRetained": [
+      "/tmp/mk-app-config-v2-local-first.log: temporary runner canonical package URI mismatch",
+      "/tmp/mk-app-config-v2-local-first2.log: temporary runner missing package_graph",
+      "/tmp/mk-app-config-v2-local-first3.log: first behavioral red with null capability response, superseded by valid response red/control pair"
+    ],
+    "sharedMutations": false
+  },
+  "ciReadOnlySnapshot": {
+    "captured_at": "2026-10-12",
+    "repository": "Goodwu/media-kit",
+    "topic": "MK-ROUTING-20261011",
+    "reference_heads": {
+      "docs_head": "adde2b5b543c099843bee357f63559ce12488def",
+      "source_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef"
+    },
+    "runs": [
+      {
+        "id": 38164066846,
+        "workflow": "Github Actions",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "updated_at": "2026-10-11T18:52:32Z",
+        "jobs": [],
+        "failure_step": null,
+        "log_summary": "No jobs returned by Actions API. Cancellation actor/reason not exposed in run metadata or job list; do not reinterpret as failure or success.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38164066846"
+      },
+      {
+        "id": 38162912132,
+        "workflow": "Github Actions",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "5c8e54dc92e3d87071cc3882740ba700bcf4994c",
+        "status": "in_progress",
+        "conclusion": null,
+        "updated_at": "2026-10-11T18:17:21Z",
+        "jobs": {
+          "still_in_progress": [
+            "package:media_kit tests (Windows): Run dart test -j 1 --reporter expanded (job 114539453493)",
+            "package:media_kit tests (macOS): Run dart test (job 114539453567)",
+            "package:media_kit tests (Linux): Run dart test (job 114539453624)"
+          ],
+          "failure": [
+            "package:media_kit tests (Web): Run dart test --platform chrome (job 114539453574)"
+          ],
+          "completed_success": 20,
+          "skipped": [
+            "Release manifest and checksums"
+          ]
+        },
+        "failure_step": "package:media_kit tests (Web) / Run dart test --platform chrome",
+        "log_summary": "CLI reports logs unavailable while run remains in progress; live Windows/macOS/Linux test jobs also have logs unavailable. Run metadata/jobs API has not advanced since 2026-10-11T18:17:21Z. Three jobs have been in progress since 18:13:52Z (Windows step began 18:16:35Z; macOS step 18:15:50Z; Linux step 18:13:52Z). Evidence supports a stale/stuck-looking Actions run but does not establish runner hang cause or final conclusion. Web test failure details unavailable before run completion.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38162912132"
+      },
+      {
+        "id": 38164066851,
+        "workflow": "Routing source checks",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+        "status": "completed",
+        "conclusion": "success",
+        "summary": "Source analyze and tests for media_kit_hdr_lab and media_kit_video, routing utility tests succeeded. For hdr_lab, JS/WASM facade steps were skipped; video JS/WASM steps succeeded.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38164066851"
+      },
+      {
+        "id": 38164066876,
+        "workflow": "Routing target and source query checks",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+        "status": "completed",
+        "conclusion": "success",
+        "summary": "android-query completed; fixture query and current lab resolution/actual Android plugin Java compile steps succeeded.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38164066876"
+      },
+      {
+        "id": 38164066873,
+        "workflow": "Routing Darwin viewport checks",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+        "status": "completed",
+        "conclusion": "success",
+        "summary": "Darwin viewport widget tests succeeded.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38164066873"
+      },
+      {
+        "id": 38164067069,
+        "workflow": "Build OHOS unsigned HAP",
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+        "status": "completed",
+        "conclusion": "success",
+        "actual_source_commit": "e332efe87628bec4b3b36604eeaa518ae0fda3f9",
+        "summary": "Unsigned arm64 HAP built and verified. Workflow release metadata explicitly records SOURCE_COMMIT=e332efe87628bec4b3b36604eeaa518ae0fda3f9, so this is not a pure a31269... source build despite the Actions run head being a31269... .",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38164067069"
+      },
+      {
+        "id": 38165638207,
+        "workflow_id": 380697954,
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "in_progress",
+        "conclusion": null,
+        "summary": "Current docs-head source checks snapshot: routing utility tests succeeded; hdr_lab and video source test jobs in progress.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165638207"
+      },
+      {
+        "id": 38165638112,
+        "workflow_id": 381025576,
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "in_progress",
+        "conclusion": null,
+        "summary": "Current docs-head android-query job in progress at Resolve current lab and compile actual Android plugin Java.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165638112"
+      },
+      {
+        "id": 38165638145,
+        "workflow_id": 347640126,
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "in_progress",
+        "conclusion": null,
+        "summary": "Current docs-head OHOS job in progress at Verify Flutter OHOS toolchain.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165638145"
+      },
+      {
+        "id": 38165638101,
+        "workflow_id": 347309048,
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "pending",
+        "conclusion": null,
+        "summary": "Current docs-head general workflow pending; no jobs created at snapshot time.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165638101"
+      },
+      {
+        "id": 38165638122,
+        "workflow_id": 380711147,
+        "attempt": 1,
+        "trigger": "pull_request",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "in_progress",
+        "conclusion": null,
+        "summary": "Current docs-head Darwin viewport job in progress at Exercise cases skipped by Linux host tests.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165638122"
+      },
+      {
+        "id": 38165634561,
+        "workflow_id": 381025576,
+        "attempt": 1,
+        "trigger": "push",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "summary": "Push-triggered duplicate cancelled shortly after docs commit; PR-triggered run 38165638112 is the relevant active run.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165634561"
+      },
+      {
+        "id": 38165634570,
+        "workflow_id": 380711147,
+        "attempt": 1,
+        "trigger": "push",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "summary": "Push-triggered duplicate cancelled shortly after docs commit; PR-triggered run 38165638122 is the relevant active run.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165634570"
+      },
+      {
+        "id": 38165634578,
+        "workflow_id": 380697954,
+        "attempt": 1,
+        "trigger": "push",
+        "exact_head": "adde2b5b543c099843bee357f63559ce12488def",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "summary": "Push-triggered duplicate cancelled shortly after docs commit; PR-triggered run 38165638207 is the relevant active run.",
+        "url": "https://github.com/Goodwu/media-kit/actions/runs/38165634578"
+      }
+    ],
+    "interpretation_limits": [
+      "Source workflow success is not native/runtime acceptance.",
+      "OHOS job success indicates an unsigned arm64 HAP build; its artifact source commit is e332efe..., not a31269... .",
+      "Old run 38162912132 is stale by updated_at and has long-running jobs, but API/CLI did not provide current step logs, runner diagnostics, or a terminal result; root cause of apparent hang is unproven."
+    ]
+  },
+  "libraryFirstRepairAuthorFreeze": {
+    "head": "adde2b5b543c099843bee357f63559ce12488def",
+    "source_baseline": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+    "frozen_at": "2026-10-11T18:58:23.562635+00:00",
+    "files": {
+      "media_kit_video/lib/media_kit_video.dart": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+      "media_kit_video/lib/src/hdr/hdr_capabilities.dart": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+      "media_kit_video/lib/src/hdr/hdr_disposal.dart": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+      "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+      "media_kit_video/lib/src/hdr/hdr_open_plan.dart": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+      "media_kit_video/lib/src/hdr/hdr_output_report.dart": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+      "media_kit_video/lib/src/hdr/hdr_route.dart": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+      "media_kit_video/lib/src/hdr/hdr_route_planner.dart": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+      "media_kit_video/lib/src/hdr/hdr_video_session.dart": "3153ca4bf535c2c9d8d8982fb643994185eee0598292fab2f406958fccc3c220",
+      "media_kit_video/lib/src/routing/video_route_capabilities.dart": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+      "media_kit_video/lib/src/routing/video_route_option_review.dart": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+      "media_kit_video/lib/src/routing/video_route_options.dart": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+      "media_kit_video/test/hdr_backend_disposal_retry_test.dart": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+      "media_kit_video/test/hdr_open_coordinator_test.dart": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+      "media_kit_video/test/hdr_session_native_dv_policy_test.dart": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+      "media_kit_video/test/hdr_session_route_options_test.dart": "86a9234635a0d288a736b0c96d26f3faf0f582acd10637003019f659c233170e",
+      "media_kit_video/test/hdr_video_session_test.dart": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+      "media_kit_video/test/hdr_video_widget_test.dart": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+      "media_kit_video/test/video_route_option_review_test.dart": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+      "media_kit_video/test/video_route_options_test.dart": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133"
+    },
+    "package_config_sha256": "b85ec5eb39c0a7d80884d3f8c8cce12c9b72e125c21c7a5e2d9b7dded2a3defc",
+    "author_full_log": "/tmp/mk-config-v2-full-library-final.log",
+    "author_full_pass": 754,
+    "author_strict_log": "/tmp/mk-config-v2-strict-final.log",
+    "author_red_log": "/tmp/mk-config-v2-fix-baseline-red.log"
+  },
+  "libraryFirstRepairAuthorEvidence": {
+    "fullTests": 754,
+    "strict": "No issues",
+    "logs": [
+      "/tmp/mk-config-v2-full-library-final.log",
+      "/tmp/mk-config-v2-strict-final.log"
+    ],
+    "acceptance": "not accepted; independent refreshCapabilities/latest pending options race reproduced"
+  },
+  "librarySecondReviewEvidence": {
+    "directory": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo",
+    "independentBoundaryPassed": 5,
+    "independentBoundaryFailed": 1,
+    "failure": "public capability refresh reopens old require hardware report while new require software intent is pending; newest settings lost",
+    "status": "REQUEST_CHANGES"
+  },
+  "libraryFirstRepairIndependentReview": {
+    "result": "REQUEST_CHANGES",
+    "scope": "Library CONFIG first repair frozen v2; host only",
+    "manifest": "/tmp/mk-config-library-freeze-v2.json",
+    "manifestSha256": "3f75fe64694e5d90665d5a9c5742ff76d99f580cb136002db8a90345a4a7e536",
+    "head": "adde2b5b543c099843bee357f63559ce12488def",
+    "snapshotRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/frozen-package",
+    "originalFilesBeforeCopyMatched": true,
+    "snapshotFilesAfterTests": [
+      {
+        "path": "media_kit_video/lib/media_kit_video.dart",
+        "sha256": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_capabilities.dart",
+        "sha256": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_disposal.dart",
+        "sha256": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart",
+        "sha256": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_open_plan.dart",
+        "sha256": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+        "sha256": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route.dart",
+        "sha256": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route_planner.dart",
+        "sha256": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "sha256": "3153ca4bf535c2c9d8d8982fb643994185eee0598292fab2f406958fccc3c220",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_capabilities.dart",
+        "sha256": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_option_review.dart",
+        "sha256": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_options.dart",
+        "sha256": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_backend_disposal_retry_test.dart",
+        "sha256": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_open_coordinator_test.dart",
+        "sha256": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_native_dv_policy_test.dart",
+        "sha256": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_route_options_test.dart",
+        "sha256": "86a9234635a0d288a736b0c96d26f3faf0f582acd10637003019f659c233170e",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_video_session_test.dart",
+        "sha256": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_video_widget_test.dart",
+        "sha256": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/video_route_option_review_test.dart",
+        "sha256": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+        "matches": true
+      },
+      {
+        "path": "media_kit_video/test/video_route_options_test.dart",
+        "sha256": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133",
+        "matches": true
+      }
+    ],
+    "tests": {
+      "oldFrozenOriginalP1s": {
+        "passed": 0,
+        "failed": 2,
+        "exit": 1,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/old-boundary-r2.log"
+      },
+      "newFrozenIndependentBoundaries": {
+        "passed": 5,
+        "failed": 1,
+        "exit": 1,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-boundary.log"
+      },
+      "independentTargetedLifecycleSourceBudgetSuite": {
+        "passed": 227,
+        "failed": 0,
+        "exit": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-targets-final.log"
+      },
+      "strictFrozenLibAndAllTests": {
+        "exit": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-strict.log"
+      }
+    },
+    "blockingFindings": [
+      {
+        "severity": "P1",
+        "file": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "line": 1494,
+        "function": "handleCapabilitiesChanged / refreshCapabilities",
+        "problem": "Capability refresh during pending newer setting rebuilds with old report.options and supersedes newer request",
+        "reproduction": [
+          "Open require hardware to verified",
+          "setOptions(require software) starts second capability query and remains pending",
+          "Public refreshCapabilities starts third query which returns first",
+          "Handler sees old applied report with require hardware and forces same-route review using old media/options",
+          "Release second query; software-setting request is superseded and old hardware options remain verified"
+        ],
+        "actual": {
+          "opened": [
+            "mediacodec",
+            "mediacodec"
+          ],
+          "finalDecodeTarget": "hardware",
+          "verified": true
+        },
+        "expected": "Latest software requirement remains authoritative; old applied-report intent cannot replace pending request",
+        "independentTest": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired_boundary_test.dart",
+        "additionalRepairBoundary": "Protect pending new source as well as pending same-source settings; no stale census may be applied to another source."
+      }
+    ],
+    "resolvedOriginalFindings": [
+      "Pending first-open options now reach require software and only hwdec=no opens",
+      "Fresh census removing observed named hardware decoder causes a second review and verified=false"
+    ],
+    "otherVerified": [
+      "Same actual decoder in refreshed census remains verified after new review",
+      "Three rapid settings admit only final software request",
+      "Failed cleanup prevents replacement configure and verified output; disposal succeeds only after clearing injected debt"
+    ],
+    "nonBlockingFindings": [],
+    "notVerified": [
+      "Native/device execution and visible HDR or performance",
+      "App configuration wiring",
+      "DV001 and PR5 final integration"
+    ],
+    "reviewTriggers": [
+      "Fresh author repair freeze plus old two P1s and new public-refresh crossing test",
+      "Pending source replacement and capability refresh crossing",
+      "Frozen-file edits or altered source/owner/cleanup budgets"
+    ],
+    "environmentFailures": [
+      "Initial independent runner used noncanonical /var root causing Flutter native-assets project lookup failure; corrected temporary root to /private only.",
+      "Initial broad suite included nonexistent hdr_native_dv_review_evidence_test.dart (227 pass plus one load failure); corrected actual 9-file suite passed 227."
+    ],
+    "nativeVerified": false,
+    "deviceVerified": false,
+    "logsSha256": {
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/old-boundary-r2.log": "f8a675ce838bd39076cb87da74f47b91cb29718ceac261ade1137a5b4adcfde8",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-boundary.log": "369a0705c85c5f1e31a64005882e847dc475249bb73e0fd640fdcab111062361",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-targets-final.log": "fd973f45b0c71f57ca859d01673ee2c627fdfd905d8e3430189f87d8c0da868d",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-strict.log": "95a28819c918db92d8f3f7dfadfc18f1248f79ab8313759391ad318fe94cf093"
+    }
+  },
+  "librarySecondRepairFreeze": {
+    "head": "adde2b5b543c099843bee357f63559ce12488def",
+    "source_baseline": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+    "frozen_at": "2026-10-11T19:04:06.008944+00:00",
+    "files": {
+      "media_kit_video/lib/media_kit_video.dart": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+      "media_kit_video/lib/src/hdr/hdr_capabilities.dart": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+      "media_kit_video/lib/src/hdr/hdr_disposal.dart": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+      "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+      "media_kit_video/lib/src/hdr/hdr_open_plan.dart": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+      "media_kit_video/lib/src/hdr/hdr_output_report.dart": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+      "media_kit_video/lib/src/hdr/hdr_route.dart": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+      "media_kit_video/lib/src/hdr/hdr_route_planner.dart": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+      "media_kit_video/lib/src/hdr/hdr_video_session.dart": "462af50b26fcf2ca2bc3169c3424dc9f23f79e7662808a2c74bf17e52ec56aa9",
+      "media_kit_video/lib/src/routing/video_route_capabilities.dart": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+      "media_kit_video/lib/src/routing/video_route_option_review.dart": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+      "media_kit_video/lib/src/routing/video_route_options.dart": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+      "media_kit_video/test/hdr_backend_disposal_retry_test.dart": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+      "media_kit_video/test/hdr_open_coordinator_test.dart": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+      "media_kit_video/test/hdr_session_native_dv_policy_test.dart": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+      "media_kit_video/test/hdr_session_route_options_test.dart": "c23deb49438167a11c7e7f12cdabaebc1affb01beaa302631a5ff6b270c645d1",
+      "media_kit_video/test/hdr_video_session_test.dart": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+      "media_kit_video/test/hdr_video_widget_test.dart": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+      "media_kit_video/test/video_route_option_review_test.dart": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+      "media_kit_video/test/video_route_options_test.dart": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133"
+    },
+    "package_config_sha256": "b85ec5eb39c0a7d80884d3f8c8cce12c9b72e125c21c7a5e2d9b7dded2a3defc",
+    "author_full_log": "/tmp/mk-config-v3-full-library-frozen.log",
+    "author_full_pass": 762,
+    "author_strict_log": "/tmp/mk-config-v3-strict-frozen.log",
+    "author_red_log": "/tmp/mk-config-v3-refresh-baseline-red.log",
+    "author_rebound_review_case_log": "/tmp/mk-config-v3-reviewer-boundary.log"
+  },
+  "librarySecondRepairAuthorEvidence": {
+    "fullTests": 762,
+    "strict": "No issues",
+    "prePostHashReceipt": "/tmp/mk-config-library-freeze-v3-post-test.json",
+    "logs": [
+      "/tmp/mk-config-v3-full-library-frozen.log",
+      "/tmp/mk-config-v3-strict-frozen.log"
+    ],
+    "acceptance": "awaiting independent V2; not committed"
+  },
+  "libraryFinalIndependentReview": {
+    "result": "PASS_FOR_FROZEN_LIBRARY_CONFIG_V3_HOST_SCOPE",
+    "blockingFindings": [],
+    "nonBlockingFindings": [],
+    "head": "adde2b5b543c099843bee357f63559ce12488def",
+    "currentHead": "adde2b5b543c099843bee357f63559ce12488def",
+    "manifest": "/tmp/mk-config-library-freeze-v3.json",
+    "manifestSha256": "af984d012605bebff90a5c549d583aa2018aa2c574549fecd2156e9ccdedbafa",
+    "snapshotRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/frozen-package",
+    "files": [
+      {
+        "path": "media_kit_video/lib/media_kit_video.dart",
+        "expected": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+        "originalAfter": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+        "snapshotAfter": "bd45ea5295fc844e729689fcd07e1ecd177f8567ee3116a279bf71160ca3b88d",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_capabilities.dart",
+        "expected": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+        "originalAfter": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+        "snapshotAfter": "2fc145ff649c43a4e89ab72596aa66ebab15628daaf23918ef6c266ab29872b7",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_disposal.dart",
+        "expected": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+        "originalAfter": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+        "snapshotAfter": "f5841a9ff915ba57167a0502c36029d71c79be7d0346bf48984414ad3c1cbb3d",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart",
+        "expected": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+        "originalAfter": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+        "snapshotAfter": "5f772bedee034aa65905986cce73bcee94b330b7bd6478b676643e8b12703569",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_open_plan.dart",
+        "expected": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+        "originalAfter": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+        "snapshotAfter": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+        "expected": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+        "originalAfter": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+        "snapshotAfter": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route.dart",
+        "expected": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+        "originalAfter": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+        "snapshotAfter": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route_planner.dart",
+        "expected": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+        "originalAfter": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+        "snapshotAfter": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "expected": "462af50b26fcf2ca2bc3169c3424dc9f23f79e7662808a2c74bf17e52ec56aa9",
+        "originalAfter": "462af50b26fcf2ca2bc3169c3424dc9f23f79e7662808a2c74bf17e52ec56aa9",
+        "snapshotAfter": "462af50b26fcf2ca2bc3169c3424dc9f23f79e7662808a2c74bf17e52ec56aa9",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_capabilities.dart",
+        "expected": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+        "originalAfter": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+        "snapshotAfter": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_option_review.dart",
+        "expected": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+        "originalAfter": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+        "snapshotAfter": "d05bb3a3d33f337287eeb3fd365387017b50094b92f8c360a4dd9ae3685eb92b",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_options.dart",
+        "expected": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+        "originalAfter": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+        "snapshotAfter": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_backend_disposal_retry_test.dart",
+        "expected": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+        "originalAfter": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+        "snapshotAfter": "327a52093a0cac2269290cdea1c75c7e5fd658e482fd315db430069a5c77feae",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_open_coordinator_test.dart",
+        "expected": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+        "originalAfter": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+        "snapshotAfter": "12997e840f7b0434eac0a4909a1c6a1b2b87a966b03ba88756f436c1a357582e",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_native_dv_policy_test.dart",
+        "expected": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+        "originalAfter": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+        "snapshotAfter": "c32ce4ac474d780e6b5de795b7b65c174f8e39e553cb60063b123ff8b61b3e09",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_route_options_test.dart",
+        "expected": "c23deb49438167a11c7e7f12cdabaebc1affb01beaa302631a5ff6b270c645d1",
+        "originalAfter": "c23deb49438167a11c7e7f12cdabaebc1affb01beaa302631a5ff6b270c645d1",
+        "snapshotAfter": "c23deb49438167a11c7e7f12cdabaebc1affb01beaa302631a5ff6b270c645d1",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_video_session_test.dart",
+        "expected": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+        "originalAfter": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+        "snapshotAfter": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_video_widget_test.dart",
+        "expected": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+        "originalAfter": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+        "snapshotAfter": "02ab0e3c8c2d5d28c28a094f2b8c6515033cd70a3d2cbdd85a46d15ff9926972",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/video_route_option_review_test.dart",
+        "expected": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+        "originalAfter": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+        "snapshotAfter": "9133824bfa0bf0b4602fecf87e09aaa8c45ff0016a061a43f4b5b8162ea67b04",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/video_route_options_test.dart",
+        "expected": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133",
+        "originalAfter": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133",
+        "snapshotAfter": "c4db5cded01684a308788d2fc82a757b5bcbfaedebeab40985266989bb85b133",
+        "match": true
+      }
+    ],
+    "allOriginalAndFrozenFilesMatch": true,
+    "sharedPackageConfigUnchanged": true,
+    "tests": [
+      {
+        "name": "full package plus original independent six counterexamples",
+        "count": 768,
+        "packageCount": 762,
+        "independentCount": 6,
+        "exit": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/full-independent-final.log"
+      },
+      {
+        "name": "independent real MethodChannel source and target race cases",
+        "count": 6,
+        "exit": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/query-independent-final.log",
+        "experimental": [
+          true,
+          false
+        ]
+      },
+      {
+        "name": "all frozen lib and test strict analysis --fatal-infos",
+        "exit": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/strict-independent.log"
+      }
+    ],
+    "totalDistinctPassingTests": 774,
+    "verifiedFacts": [
+      "Original pending-first-query P1: corrected options remain identical through final report; only software is opened",
+      "Original disappeared hardware decoder P1: new actual review and rejection against refreshed source census",
+      "First-repair overlapping public refresh P1: pending software intent wins, observed modes are mediacodec then no",
+      "Three rapid settings admit only final immutable intent; same census re-review remains positive",
+      "Cleanup failure leaves no verified/actual replacement and prevents configure; disposal retry and owner/source regressions pass",
+      "Real MethodChannel refresh requests pending B encoded source specification and display target 52, not applied A; pending request media/options/start=51/play=false survive",
+      "Late A public query cannot replace already-completed B source/settings/generation",
+      "During B actual decoder review, fresh B census excluding configured hardware causes unverified blocked B report; same media/spec/options/start=53/play=false retained",
+      "F01 unknown DV and conflicts, nativeDV owner/ACK/source tests, bounded attempts, software CPU and exact named hardware/mime/source census tests pass in independent full package"
+    ],
+    "notVerified": [
+      "Actual native decoder/import/output execution or visible rendering",
+      "Device HDR/SDR color, sustained performance or native lifecycle acceptance",
+      "App configuration integration; reviewed separately",
+      "DV001 recipe repair and PR5 final integration",
+      "Future committed vector CI acceptance"
+    ],
+    "reviewTriggers": [
+      "Any change to the 20 frozen implementation/test files",
+      "Changes to request generation, capability query precedence, ownership/cleanup, exact source census checks or budgets",
+      "App/native integration changes requiring combined exact-vector acceptance"
+    ],
+    "priorEvidence": {
+      "originalTwoP1IndependentRed": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/old-boundary-r2.log",
+      "firstRepairNewP1IndependentRed": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/repaired-boundary.log",
+      "firstRepairRequestChanges": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r2-ujgu8ajo/review-v2.json"
+    },
+    "environmentFailures": [
+      "First isolated full run: 766 passed plus 5 missing-relative-fixture failures. Copied 135 tracked native/library/docs files into temporary snapshot and ran complete suite from frozen package; final 768 pass. Original log retained full-independent.log."
+    ],
+    "sourceChangesMadeByReviewer": false,
+    "sharedPackageConfigOrSdkChangesMadeByReviewer": false,
+    "nativeVerified": false,
+    "deviceVerified": false,
+    "evidenceSha256": {
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/full-independent-final.log": "7178dba513d91b6bf8a670f015721e4e0532f58e361552fb3a13177e4e5cf56b",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/strict-independent.log": "95a28819c918db92d8f3f7dfadfc18f1248f79ab8313759391ad318fe94cf093",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/query-independent-final.log": "6fa736b5026f2cf4605826d9974bb03834a55b0be91619eafb61bf748e097b57",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/boundary_test.dart": "6ea5a392d33ffe88d6f1ab6afc84815f5439aca9ce3c0fa95da8ea5fa63cb9f9",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-config-v2r3-jzuwuo1f/query_boundary_test.dart": "1940aadf86d939a2e9bedbc628474b80c9577fdba313e370955378b8174cb03c"
+    }
+  },
+  "appFinalAuthorReceipt": {
+    "status": "App first V2 repair implemented; independent re-review pending",
+    "recorded_at": "2026-10-11T19:08:03.322381+00:00",
+    "appHead": "b9d6d623f79a44232e3aff535b88e41ba1634d28",
+    "libraryHead": "adde2b5b543c099843bee357f63559ce12488def",
+    "libraryManifest": "/tmp/mk-config-library-freeze-v3.json",
+    "libraryManifestSHA256": "af984d012605bebff90a5c549d583aa2018aa2c574549fecd2156e9ccdedbafa",
+    "ownedFiles": {
+      "lib/plugin/pl_player/route_options.dart": "919a4dab764e757830109da98adbc4bcf613250c09af0285f87dd1be42b9657f",
+      "lib/plugin/pl_player/hdr_output.dart": "2d97cf8043a5bb5908cb3c53e805a8e2ccc8a5f51186069022423b1aeffd4228",
+      "lib/plugin/pl_player/source_selection.dart": "3162fd478858497aa6b593986d2bb291e01c59acee17a3a3da741ec64afdbeea",
+      "lib/plugin/pl_player/controller.dart": "f7a8b2be9697f3e9e8f720d23f6670f6040d4074b9d906d82cbc2305a5091d3e",
+      "lib/plugin/pl_player/models/data_source.dart": "21ba412e9c240b11709c9fcd1b2df9e87684d48c9d6723e690cdefb11dd1ed45",
+      "lib/plugin/pl_player/models/player_lifecycle_ports.dart": "e182e21acc14cf77259306d8b92869abaecfc500020461672ce0434cba424d33",
+      "lib/pages/video/controller.dart": "8d3bec24d48e9cb92df74cc767af2324a643612415a4f738630e343450acf2cd",
+      "lib/pages/setting/models/play_settings.dart": "f4bdaf5f168995b3a8010aea08119a8ce8468e3c26d645d4c5b57df4b39314aa",
+      "lib/pages/setting/models/video_settings.dart": "04e90fd4debf14b50d725c140159645316d9234b53ffe4d863aec8a2c5681a03",
+      "scripts/verify_hdr_channel.py": "09da4457f756fbfa9e66ad0747c30ed957c768c97eaff3fba76080e7b0dcabfa",
+      "test/hdr_channel_contract_test.py": "6722079ebb7ad4d400c806f378ac5d9323530900e26c7eb7c51f31eebb36404b",
+      "test/route_options_test.dart": "e15437caa748e8a73691fec7a01bb402216e076709bd8996c7a21dc86e2e05de",
+      "test/plugin/pl_player/source_selection_test.dart": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+      "test/plugin/pl_player/player_controller_lifecycle_test.dart": "528693c2eba392669ed416837e80e110c9482227b77bfaebffb935b67ce4fb1e",
+      "test/pages/video/route_options_lifecycle_test.dart": "962581c2bb2d6e922e76d37c4258d0cab14f06a4c1c0787420efa7fe0031a2b1",
+      "test/plugin/pl_player/player_source_publication_contract_test.dart": "487d85bf950a69d83d5f44a1f038ebd9123e924ba1dc27dbe8f682c5223617e5"
+    },
+    "ownedVectorSHA256": "47d60f9e472f7cc623332b98019b8026c1828a2ad821ead3536f1fe723448869",
+    "R1ChangedOwnedFiles": [
+      "lib/plugin/pl_player/controller.dart",
+      "lib/plugin/pl_player/models/player_lifecycle_ports.dart",
+      "lib/pages/video/controller.dart",
+      "test/plugin/pl_player/player_controller_lifecycle_test.dart"
+    ],
+    "beforeAfterSourceEvidence": "/tmp/mk-app-config-r1-freeze-before.json",
+    "checkedAppDartCount": 1367,
+    "sourceDrift": [],
+    "results": {
+      "fullFlutter": {
+        "passed": 268,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-r1-full-flutter-v3.log"
+      },
+      "strict": {
+        "result": "No issues found",
+        "exit": 0,
+        "log": "/tmp/mk-app-config-r1-strict-v3.log"
+      },
+      "bundle": {
+        "exit": 0,
+        "log": "/tmp/mk-app-config-r1-bundle-v3.log",
+        "kernelSHA256": "d1c4d3b2ec2f463dd31cc3a3c7036246b21557b8e2b1a59da13e7d0bd581d4f0"
+      },
+      "channelChecker": {
+        "passed": 11,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-r1-channel-v3.log"
+      },
+      "diffCheck": "pass"
+    },
+    "R1Cause": "settings changed effective options during unpublished first capability query; old private init released while same generation continued into null Player; file callback skipped replacement and returned early",
+    "R1Behavior": "immutable source intent captures original open args and completion; settings synchronously invalidate unpublished generation; await exact old init and real cleanup; file or no callback uses one ensure/reopen path with latest options identity; network reselects; revision/intent/options guards prevent old settings overwriting a newer public source",
+    "observer": "nullable owned PlayerLifecyclePorts.onHdrTeardownRetainedForTesting; production factory does not supply; failed Session catch registers retained owner/blocked before notifying; tests wait actual event, no time-based owner registration allowance",
+    "actualCases": [
+      "original valid-query local first-open failure preserved + unchanged hardware positive control",
+      "DirectFileSource and FileSource preserve original parameters and seek while software actual hwdec=no + CPU fulfillment",
+      "file callback and no callback await new runnable source",
+      "two settings retain only latest snapshot; new public B beats pending old settings A without second open",
+      "dispose during held private query creates no replacement and releases old Player",
+      "output/backend private cleanup failure blocks replacement until clean retry",
+      "accepted software coordinator cleanup failure retains Player and blocks recovery until clean retry"
+    ],
+    "preservedFailureEvidence": [
+      "/tmp/mk-app-config-first-tests.log",
+      "/tmp/mk-app-config-second-tests.log",
+      "/tmp/mk-app-config-ha-setting-tests.log",
+      "/tmp/mk-app-config-ha-setting-tests2.log",
+      "/tmp/mk-app-config-ha-setting-tests3.log",
+      "/tmp/mk-app-config-ha-setting-tests4.log",
+      "/tmp/mk-app-config-slow-page-tests.log",
+      "/tmp/mk-app-config-full-flutter-frozen.log",
+      "/tmp/mk-app-config-v2-local-first4.log",
+      "/tmp/mk-app-config-r1-local-variants.log",
+      "/tmp/mk-app-config-r1-local-variants2.log",
+      "/tmp/mk-app-config-r1-strict-interim.log",
+      "/tmp/mk-app-config-r1-strict-interim2.log"
+    ],
+    "limits": [
+      "results bind library v3 owned20 source hashes plus App dirty16; not HEAD-only proof",
+      "old 258/App and 754/library v2 not relabeled",
+      "native build/device HDR/sustained performance not verified",
+      "no Git/TASKS/conversation or other writer changes by worker",
+      "independent V2 decision belongs to Lead/reviewer"
+    ]
+  },
+  "appFinalIndependentReview": {
+    "status": "PASS_APP_HOST_SCOPE",
+    "timestamp": "2026-10-11T19:09:14.882450+00:00",
+    "reviewedAppVector": "47d60f9e472f7cc623332b98019b8026c1828a2ad821ead3536f1fe723448869",
+    "appHead": "b9d6d623f79a44232e3aff535b88e41ba1634d28",
+    "app16Hashes": {
+      "lib/plugin/pl_player/route_options.dart": "919a4dab764e757830109da98adbc4bcf613250c09af0285f87dd1be42b9657f",
+      "lib/plugin/pl_player/hdr_output.dart": "2d97cf8043a5bb5908cb3c53e805a8e2ccc8a5f51186069022423b1aeffd4228",
+      "lib/plugin/pl_player/source_selection.dart": "3162fd478858497aa6b593986d2bb291e01c59acee17a3a3da741ec64afdbeea",
+      "lib/plugin/pl_player/controller.dart": "f7a8b2be9697f3e9e8f720d23f6670f6040d4074b9d906d82cbc2305a5091d3e",
+      "lib/plugin/pl_player/models/data_source.dart": "21ba412e9c240b11709c9fcd1b2df9e87684d48c9d6723e690cdefb11dd1ed45",
+      "lib/plugin/pl_player/models/player_lifecycle_ports.dart": "e182e21acc14cf77259306d8b92869abaecfc500020461672ce0434cba424d33",
+      "lib/pages/video/controller.dart": "8d3bec24d48e9cb92df74cc767af2324a643612415a4f738630e343450acf2cd",
+      "lib/pages/setting/models/play_settings.dart": "f4bdaf5f168995b3a8010aea08119a8ce8468e3c26d645d4c5b57df4b39314aa",
+      "lib/pages/setting/models/video_settings.dart": "04e90fd4debf14b50d725c140159645316d9234b53ffe4d863aec8a2c5681a03",
+      "scripts/verify_hdr_channel.py": "09da4457f756fbfa9e66ad0747c30ed957c768c97eaff3fba76080e7b0dcabfa",
+      "test/hdr_channel_contract_test.py": "6722079ebb7ad4d400c806f378ac5d9323530900e26c7eb7c51f31eebb36404b",
+      "test/route_options_test.dart": "e15437caa748e8a73691fec7a01bb402216e076709bd8996c7a21dc86e2e05de",
+      "test/plugin/pl_player/source_selection_test.dart": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+      "test/plugin/pl_player/player_controller_lifecycle_test.dart": "528693c2eba392669ed416837e80e110c9482227b77bfaebffb935b67ce4fb1e",
+      "test/pages/video/route_options_lifecycle_test.dart": "962581c2bb2d6e922e76d37c4258d0cab14f06a4c1c0787420efa7fe0031a2b1",
+      "test/plugin/pl_player/player_source_publication_contract_test.dart": "487d85bf950a69d83d5f44a1f038ebd9123e924ba1dc27dbe8f682c5223617e5"
+    },
+    "appBeforeAfterMatch": true,
+    "libraryFreeze": "/tmp/mk-config-library-freeze-v3.json",
+    "libraryFreezeSHA256": "af984d012605bebff90a5c549d583aa2018aa2c574549fecd2156e9ccdedbafa",
+    "library20SnapshotMatch": true,
+    "snapshot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-app-config-v2-r1-r3ohicv8",
+    "independentTests": [
+      {
+        "passed": 90,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-v2-r1-tests.log",
+        "scope": "5 App targets including old P1 red/control plus 10 new author cases independently run, published first-open/setting boundary and immutable DataSource facts independent extra cases"
+      },
+      {
+        "passed": 1,
+        "exit": 0,
+        "log": "/tmp/mk-app-config-v2-r1-unsupported.log",
+        "scope": "Independent initial private-query unsupported config followed by latest valid software config"
+      }
+    ],
+    "closedFindings": [
+      {
+        "id": "App CONFIG first local-source query settings strand playback",
+        "priority": "P1",
+        "evidence": "Original actual source/query counterexample now waits for initial owner release, opens latest FileSource/DirectFileSource config exactly once; actual hwdec=no and decode fulfilled, exact same source/config/report identity; unchanged-setting positive remains pass."
+      }
+    ],
+    "blockingFindings": [],
+    "nonBlocking": [
+      {
+        "item": "Host Android menu coverage limit",
+        "detail": "Some page guards still use Platform.isAndroid directly; testing Android Session override does not cover every native Android page/menu predicate. Existing runtime Android guard remains unchanged."
+      }
+    ],
+    "verifiedFacts": [
+      "Full original source reopen kwargs forwarded identically; explicit scope list retained below.",
+      "App 16 shared frozen files unchanged before/after; library isolated snapshot matches all 20 v3 hashes.",
+      "Initial source config updates wait for private creation and cleanup, latest settings wins; replacement public source B remains owner and is not overwritten by late A.",
+      "FileSource with paired DASH audio and NetworkSource copy preserve video/audio/spec/target and same effective options identity; original options immutable.",
+      "Cleanup coordinator/output/backend failures retain exact Player and block replacement until clean; disposal prevents late source publication.",
+      "Published but first native open still pending is handled through actual Session software reopen, one Player and two necessary configure attempts; report actual CPU/no plus fulfilled.",
+      "Temporary fake Player rejects open after disposed; tested matrix triggers no such use.",
+      "Production lifecycle factory does not supply testing Session override or teardown observer; experimental remains false by default; unknown DV color rejection and failure/owner gates retained."
+    ],
+    "forwardedKwargs": [
+      "isLive",
+      "autoplay",
+      "seekTo",
+      "speed",
+      "width",
+      "height",
+      "duration",
+      "isVertical",
+      "aid",
+      "bvid",
+      "cid",
+      "epid",
+      "seasonId",
+      "pgcType",
+      "videoType",
+      "onInit",
+      "volume",
+      "autoFullScreenFlag",
+      "initialVideoQuality",
+      "initialVideoCodec"
+    ],
+    "unverified": [
+      "Independent whole App strict/bundle/full suite; author final result not borrowed as reviewer result.",
+      "Library v3 standalone Critical decision is separate and still needed for integrated acceptance.",
+      "Native APK/JAR actual source closure, physical HDR/sustained performance, final DV001/PR5 integration."
+    ],
+    "rereviewTriggers": [
+      "Any change to reviewed App16 or library20 snapshot affecting shared API/lifecycle semantics.",
+      "Failure in latest exact committed combination full App tests/strict/bundle/source CI.",
+      "Native evidence showing output ownership, actual decoder or source/config identity differs from host model."
+    ],
+    "sharedMutations": false
+  }
+}

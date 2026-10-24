@@ -1,0 +1,11 @@
+diff --git a/lib/src/scaffold.dart b/lib/src/scaffold.dart
+--- a/lib/src/scaffold.dart
++++ b/lib/src/scaffold.dart
+@@ -2611,6 +2611,5 @@
+     final LocalHistoryEntry? entry = isPersistent
+         ? null
+         : LocalHistoryEntry(
+-            popGestureEnabled: true,
+             onRemove: () {
+               if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
+                 removeCurrentBottomSheet();

@@ -1,0 +1,122 @@
+{
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "artifacts": {
+    "Ass": {
+      "binary": "Versions/A/Ass",
+      "filename": "Ass.zip",
+      "framework": "Ass.framework",
+      "library_identifier": "macos-arm64_x86_64",
+      "max_bytes": 67108864,
+      "max_expanded_bytes": 268435456,
+      "role": "framework",
+      "sha256": "349cc791690222de522ccfc54a6cf6cf67221834a33f53e7beef947f6375e106",
+      "url": "https://github.com/Predidit/libmpv-darwin-build/releases/download/0.6.8/libmpv-xcframeworks_0.6.8_macos-universal-video-default_Ass.zip",
+      "xcframework": "Ass.xcframework"
+    },
+    "Freetype": {
+      "binary": "Versions/A/Freetype",
+      "filename": "Freetype.zip",
+      "framework": "Freetype.framework",
+      "library_identifier": "macos-arm64_x86_64",
+      "max_bytes": 67108864,
+      "max_expanded_bytes": 268435456,
+      "role": "framework",
+      "sha256": "ea4204874ad7993c4ff0a04c258768e70c0349bc722f335be5e2187b1750dbc3",
+      "url": "https://github.com/Predidit/libmpv-darwin-build/releases/download/0.6.8/libmpv-xcframeworks_0.6.8_macos-universal-video-default_Freetype.zip",
+      "xcframework": "Freetype.xcframework"
+    },
+    "Fribidi": {
+      "binary": "Versions/A/Fribidi",
+      "filename": "Fribidi.zip",
+      "framework": "Fribidi.framework",
+      "library_identifier": "macos-arm64_x86_64",
+      "max_bytes": 67108864,
+      "max_expanded_bytes": 268435456,
+      "role": "framework",
+      "sha256": "a42fcb59cb12a11469a6e201cab3ba60fb7c216455cb34ff30bb18ce5c1a8be9",
+      "url": "https://github.com/Predidit/libmpv-darwin-build/releases/download/0.6.8/libmpv-xcframeworks_0.6.8_macos-universal-video-default_Fribidi.zip",
+      "xcframework": "Fribidi.xcframework"
+    },
+    "Harfbuzz": {
+      "binary": "Versions/A/Harfbuzz",
+      "filename": "Harfbuzz.zip",
+      "framework": "Harfbuzz.framework",
+      "library_identifier": "macos-arm64_x86_64",
+      "max_bytes": 67108864,
+      "max_expanded_bytes": 268435456,
+      "role": "framework",
+      "sha256": "0e50fb9dedd625215725234c637cde497717dae4b7837e3a599ac6997e6a19a4",
+      "url": "https://github.com/Predidit/libmpv-darwin-build/releases/download/0.6.8/libmpv-xcframeworks_0.6.8_macos-universal-video-default_Harfbuzz.zip",
+      "xcframework": "Harfbuzz.xcframework"
+    },
+    "Png16": {
+      "binary": "Versions/A/Png16",
+      "filename": "Png16.zip",
+      "framework": "Png16.framework",
+      "library_identifier": "macos-arm64_x86_64",
+      "max_bytes": 67108864,
+      "max_expanded_bytes": 268435456,
+      "role": "framework",
+      "sha256": "db4a5ba9618c4342694431b83fdc7b2fcb705daf2f28377f28567c7d4d6653d9",
+      "url": "https://github.com/Predidit/libmpv-darwin-build/releases/download/0.6.8/libmpv-xcframeworks_0.6.8_macos-universal-video-default_Png16.zip",
+      "xcframework": "Png16.xcframework"
+    },
+    "ffmpeg": {
+      "filename": "ffmpeg.tar.xz",
+      "max_bytes": 67108864,
+      "sha256": "cf38e0e28c7e5605942c4a77755349b0145804a397af37eb1fb4c77cb237f635",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.xz"
+    },
+    "goodwu": {
+      "filename": "libmpv-macos.tar.gz",
+      "max_bytes": 536870912,
+      "sha256": "2965439e9d239a441263288140b2d8b09ee877478084916f63575a1775de97a4",
+      "url": "https://github.com/Goodwu/libmpv-darwin-build/releases/download/v0.41.0-piliplusx.1/libmpv-libs_develop_macos-universal-video-default.tar.gz"
+    },
+    "libass": {
+      "filename": "libass.tar.gz",
+      "max_bytes": 67108864,
+      "sha256": "5ba42655d7e8c5e87bba3ffc8a2b1bc19c29904240126bb0d4b924f39429219f",
+      "url": "https://github.com/libass/libass/archive/refs/tags/0.17.1.tar.gz"
+    },
+    "mpv": {
+      "filename": "mpv.tar.gz",
+      "max_bytes": 67108864,
+      "sha256": "ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209",
+      "url": "https://github.com/mpv-player/mpv/archive/refs/tags/v0.41.0.tar.gz"
+    },
+    "uchardet": {
+      "filename": "uchardet.tar.xz",
+      "max_bytes": 1048576,
+      "sha256": "e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0",
+      "url": "https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz"
+    }
+  },
+  "framework_source_signature_policy": "valid-complete-preserved-or-verified-linker-code-bundle-sign-v1",
+  "header": {
+    "artifact": "uchardet",
+    "max_bytes": 65536,
+    "member": "uchardet-0.0.8/src/uchardet.h",
+    "sha256": "3322493803399ae88a24608d2844e57933cc15f33c529d8d4cce92e0b19f56cb"
+  },
+  "host_files": {
+    "Info.plist": "8e0dfa25d8b851e986f099d1655869964e4f64761d7e15db1e453c570d55aaa1",
+    "main.c": "84acb3e02a839fe9c890e977a76b87a60eed810d74a2a6498f07e128f8f8196a",
+    "project.pbxproj.in": "23ea7464eedd214fb2785f16e96fa52b28451d8c4a46aeed14f94a7714101cdb"
+  },
+  "max_minimum_os": "12.0",
+  "purpose": "fixed dependency acquisition; not a sealed shared build or product acceptance",
+  "redirect_hosts": [
+    "github.com",
+    "codeload.github.com",
+    "release-assets.githubusercontent.com",
+    "objects.githubusercontent.com",
+    "www.freedesktop.org",
+    "ffmpeg.org"
+  ],
+  "reviewed_media_kit_revision": "252c5851e2ebbcb0876f3bb819303c21fbfe29cd",
+  "schema_version": 1
+}

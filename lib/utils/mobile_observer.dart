@@ -1,4 +1,4 @@
-import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
 import 'package:flutter/widgets.dart'
     show WidgetsBinding, WidgetsBindingObserver;
 

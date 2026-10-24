@@ -1,0 +1,430 @@
+{
+  "observedAt": "2026-10-11T20:07:48.168174+00:00",
+  "sourceVector": {
+    "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+    "appTree": "c3bb9cb08694059e8406cfdae369faf59e42b872",
+    "media-kit": "d91639401862d84c68406aae3b2029400a4cfbd6",
+    "media-kitTree": "de92eec61379f7b652ac828bb516a6005164e1b3"
+  },
+  "finalRemoteHeads": {
+    "PiliPlusX": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+    "media-kit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+  },
+  "runs": {
+    "38169536268": {
+      "head_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38169536268"
+    },
+    "38169989974": {
+      "head_sha": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38169989974"
+    },
+    "38169536195": {
+      "head_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38169536195"
+    },
+    "38169989794": {
+      "head_sha": "e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38169989794"
+    },
+    "38169536239": {
+      "head_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38169536239"
+    },
+    "38169536177": {
+      "head_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38169536177"
+    }
+  },
+  "counts": {
+    "library": {
+      "video": 772,
+      "skipped": 3,
+      "lab": 298,
+      "strict": "No issues found",
+      "Darwin": 9,
+      "queryHostAssertions": 34,
+      "actualPluginJava": "BUILD SUCCESSFUL"
+    },
+    "independentAppSource": {
+      "run": 38169989794,
+      "eachFourPlatformsFlutter": 268,
+      "strict": "No issues found",
+      "bundle": "success on all four platforms; hashes in full summary",
+      "Python": {
+        "artifactID": 11713097959,
+        "passed": 451,
+        "seconds": 177.586
+      }
+    },
+    "embeddedBuildSource": {
+      "run": 38169989974,
+      "eachFourPlatformsFlutter": 268,
+      "strict": "No issues found",
+      "bundle": "success on all four platforms; hashes in full summary",
+      "Python": {
+        "artifactID": 11713209354,
+        "passed": 451,
+        "seconds": 182.022
+      }
+    }
+  },
+  "artifactReceipts": [
+    {
+      "run": 38169536268,
+      "id": 11713667085,
+      "name": "routing-source-media_kit_video-d91639401862d84c68406aae3b2029400a4cfbd6",
+      "zipSHA256": "cc42c36e15f86bbf8a47699bd83c2bd22758cd3631ec2bf73fa1b3100d849771"
+    },
+    {
+      "run": 38169536268,
+      "id": 11713546289,
+      "name": "routing-source-media_kit_hdr_lab-d91639401862d84c68406aae3b2029400a4cfbd6",
+      "zipSHA256": "f2c4f91e18d873ae49010f9d4a154bcb31d1a15390be7b115ef963f21b478e6b"
+    },
+    {
+      "run": 38169536268,
+      "id": 11713292683,
+      "name": "routing-tools-d91639401862d84c68406aae3b2029400a4cfbd6",
+      "zipSHA256": "e3853dabbc05a955fbd6d6e72866eb9f4353ba2da00f600c621cc9fddd04d0ab"
+    },
+    {
+      "run": 38169536195,
+      "id": 11713542398,
+      "name": "routing-query-d91639401862d84c68406aae3b2029400a4cfbd6",
+      "zipSHA256": "021765db1331c9165faf1213fbeef7c5a25de2c484e4fbb77a38d5cbb97679f3"
+    },
+    {
+      "run": 38169536177,
+      "id": 11713662283,
+      "name": "routing-darwin-d91639401862d84c68406aae3b2029400a4cfbd6",
+      "zipSHA256": "d20ef5bb6c42dd575c8b2f082ad3db81ae0de1d0b9fed9fbee7a1b0bb28565cf"
+    },
+    {
+      "run": 38169536239,
+      "id": 11713856793,
+      "name": "ohos-pubspec-lock",
+      "zipSHA256": "d2f077114ce98d053cc01dce2cefa5d8977d6e719e3fb8a3f94e24ab8f21d3b8"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713792294,
+      "name": "routing-android-diagnostics-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "8ec51a58e4a7179a681b37130fb272b0685be474c19a1c36d30b2dbe69a29bd1"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713431772,
+      "name": "routing-pink-diagnostics-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "285f8fe04fec9e2ac59425e56fc1655d374d9b79bf94b1951a4700693b1d713b"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713167231,
+      "name": "macos-shared-release-failure-38169989974-1",
+      "zipSHA256": "d61772f2514e0e58fe6085c710daf74dfe943e0d6873e81fed961c67a3fd36d9"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713952189,
+      "name": "routing-linux-source-native-diagnostics-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "eeb6b109b66ec88b5e1f329e83ec4dfdae2d9be6d329940c6a2febbdc53f4b15"
+    },
+    {
+      "run": 38169989794,
+      "id": 11714036316,
+      "name": "routing-app-source-macos-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "45d6d304235056d2f5da8367c389a591661d2deef1c2ccf7be39ae722f3df476"
+    },
+    {
+      "run": 38169989794,
+      "id": 11713902362,
+      "name": "routing-app-source-linux-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "072c571cdf615c001c25f39a43ffcf3e7e2cae94902338ad833f055189156284"
+    },
+    {
+      "run": 38169989974,
+      "id": 11714201466,
+      "name": "routing-windows-source-native-diagnostics-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "1f5ee1d28b2acc8b96e47770b75ca20e45393120482bc4cf6075e64fe9b87766"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713357148,
+      "name": "routing-app-source-linux-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "a9f4a6212c4451c8b76eb5c8b27f6f794d7e9b35e662e654ae500e3517e57118"
+    },
+    {
+      "run": 38169989794,
+      "id": 11714082329,
+      "name": "routing-app-source-windows-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "50e58dde1c1111e95023f0d8a24cbca88607bd7d34d296676598a441a726b36c"
+    },
+    {
+      "run": 38169989794,
+      "id": 11713308492,
+      "name": "routing-app-source-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "5f1e6a152fd6b5b9b084a7f791b3f418a7cb3994ea1aca99c7e7a40303cf4039"
+    },
+    {
+      "run": 38169989794,
+      "id": 11713097959,
+      "name": "routing-app-python-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "c60f76b88b8b3b8545fa116d7d6f22cbe90aa91e5f50821f9d640a6c715a0d33"
+    },
+    {
+      "run": 38169989974,
+      "id": 11714231338,
+      "name": "routing-app-source-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "561e2a5dc6d82f1928dcc924485ae9b8f71210c438587f567acea4946fe4d315"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713313639,
+      "name": "routing-app-source-windows-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "c1e8e28e9413488be22e6529447533e28524e3df6c0ed4be21d58082968ff44f"
+    },
+    {
+      "run": 38169989974,
+      "id": 11714250914,
+      "name": "routing-app-source-macos-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "36c4ab8878fa3fea6f740ac77844c36a5d6b570ac209af5336b3b233fa6352e2"
+    },
+    {
+      "run": 38169989974,
+      "id": 11713209354,
+      "name": "routing-app-python-e31aee1b09d6658dadd79a58a19bb1c097a57161",
+      "zipSHA256": "abfe8adbe5490e09a0db993f70b0744e09557fb4d9fdd1697bf71aa4f0b76e87"
+    }
+  ],
+  "releaseFailures": {
+    "Linux": {
+      "job": 114560490516,
+      "artifact": 11713952189,
+      "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
+      "prepareVerifyFinalize": "each success; fresh-source-only;57steps exit0; exact before/after/final vector",
+      "bundle": "actual bundle command passed inside Verify current media-kit package resolution; no separately archived bundle digest; native remains blocked",
+      "reason": "current producer receipt null; native input root absent"
+    },
+    "Windows": {
+      "job": 114560490505,
+      "artifact": 11714201466,
+      "stage": "SOURCE_PREPARED_NATIVE_BLOCKED",
+      "prepareVerifyFinalize": "each success; fresh-source-only;57steps exit0; exact before/after/final vector",
+      "bundle": "actual bundle command passed inside Verify current media-kit package resolution; no separately archived bundle digest; native remains blocked",
+      "reason": "current producer receipt null; native input root absent"
+    },
+    "AndroidPink": {
+      "jobs": [
+        114560490293,
+        114560490458
+      ],
+      "artifacts": [
+        11713792294,
+        11713431772
+      ],
+      "stage": "selection",
+      "reason": "missing-accepted-native-input: explicit selected manifest is empty",
+      "commands": []
+    },
+    "iOS": {
+      "job": 114560470625,
+      "reason": "three package resolved-ref mismatches against expected0fa6afe9cd9af8d8437919257d81a27c643f2f63"
+    },
+    "macOS": {
+      "job": 114560470770,
+      "reason": "accepted release version tag missing; preflight exit2"
+    }
+  },
+  "parserProofs": [
+    {
+      "run": 38169989794,
+      "artifactID": 11713097959,
+      "checks": 7,
+      "allIdentityUnchanged": true,
+      "commands": 30,
+      "allCommandsZero": true,
+      "mode": "bootstrap-bound-ci",
+      "status": "identity-stable-semantic-tests",
+      "hostedAcceptance": false,
+      "preparedBootstrapHashMatches": true,
+      "preparedBootstrapSHA256": "660672e65667042a0a796ae42e4dd8f4cd9975bd917102294ced3fc1bf5be6f3",
+      "kernel": "real Dart compile kernel semantic test in hosted suite; temporary kernel not retained"
+    },
+    {
+      "run": 38169989974,
+      "artifactID": 11713209354,
+      "checks": 7,
+      "allIdentityUnchanged": true,
+      "commands": 30,
+      "allCommandsZero": true,
+      "mode": "bootstrap-bound-ci",
+      "status": "identity-stable-semantic-tests",
+      "hostedAcceptance": false,
+      "preparedBootstrapHashMatches": true,
+      "preparedBootstrapSHA256": "660672e65667042a0a796ae42e4dd8f4cd9975bd917102294ced3fc1bf5be6f3",
+      "kernel": "real Dart compile kernel semantic test in hosted suite; temporary kernel not retained"
+    }
+  ],
+  "sourceReceipts": {
+    "trackedSourceHashes": 2680,
+    "routingPackages": 10,
+    "allRoots": 261,
+    "toolsRoots": 102,
+    "originalSDK": "clean state, no collection errors",
+    "SDK": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "beforeAfterFinalVector": "stable exact vector",
+    "rawEnvironmentChecks": [
+      {
+        "run": 38169989794,
+        "job": 114560499327,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989794,
+        "job": 114560499390,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989794,
+        "job": 114560499414,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989794,
+        "job": 114560499468,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989794,
+        "job": 114560499365,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989974,
+        "job": 114560505545,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989974,
+        "job": 114560505573,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989974,
+        "job": 114560505534,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989974,
+        "job": 114560505598,
+        "inheritedSkipPatchVariablePresent": false
+      },
+      {
+        "run": 38169989974,
+        "job": 114560505611,
+        "inheritedSkipPatchVariablePresent": false
+      }
+    ]
+  },
+  "OHOS": {
+    "actualPRMerge": "eaee10dd9491592c5b13c1bcd2e544c8c7495154",
+    "mergeHead": "d91639401862d84c68406aae3b2029400a4cfbd6",
+    "mergeBase": "d761922721ad8da6bb186abd270bb096100944ea",
+    "unsignedHAPArtifactID": 11713811982,
+    "HAPSHA256Reported": "40e1d6167a96b70c016082610efdf2c7607758858c8d8170e8f8ab74a1037a37",
+    "HAPDownloaded": false
+  },
+  "historicalAndGeneralSnapshot": [
+    {
+      "repo": "media-kit",
+      "id": 38169536192,
+      "head_sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+      "run_attempt": 1,
+      "status": "pending",
+      "conclusion": null,
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38169536192"
+    },
+    {
+      "repo": "PiliPlusX",
+      "id": 38169572189,
+      "head_sha": "b5606ee527eb9cccd7bc2911d1fd74b3c1bccc0d",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "cancelled",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38169572189"
+    },
+    {
+      "repo": "PiliPlusX",
+      "id": 38169572461,
+      "head_sha": "b5606ee527eb9cccd7bc2911d1fd74b3c1bccc0d",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "cancelled",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38169572461"
+    }
+  ],
+  "verdict": "Exact e31a+d916 source validation successful in independent and embedded runs; Build failed on six Release jobs; current Linux/Windows source prelude verified and native input blocked, no native/device acceptance.",
+  "limits": [
+    "No native/device acceptance",
+    "Linux/Windows Release prelude runs bundle inside resolution verification; source jobs separately provide archived bundle evidence; native remains blocked",
+    "General pending snapshot only; not reported as success",
+    "Earlier cancelled/failed vectors retained; no borrowed counts"
+  ],
+  "workspaceChanges": {
+    "verifierWrites": "Only this /tmp evidence directory",
+    "baselineAndEndStatuses": "Saved; concurrent writer differences detected and preserved; no source mutation by verifier"
+  },
+  "rawIndex": {
+    "full": "summary.json",
+    "files": "evidence-index.json",
+    "rawLogs": 25
+  },
+  "sourcePreludeBundleCorrection": {
+    "originalRawSummarySha256": "ac15feb95da3a40de52084c5789d435615dc7b8503ae18136bd227e07597a9cd",
+    "evidence": {
+      "linux": {
+        "job": 114560490516,
+        "log": "/tmp/mk-linux-source-prelude-job.log",
+        "sha256": "b1ab9adcaf83f51ecbc5b849a882c3afec9ea1fe95d08d92b34de73473227e2f",
+        "step": "Verify current media-kit package resolution",
+        "stepConclusion": "success",
+        "actualCommand": "flutter build bundle --debug --no-pub",
+        "proof": "Exact command followed by explicit nonzero throw guard; successful step proceeds to finalize",
+        "bundleArtifactHash": "not independently archived in Release prelude artifact",
+        "nativeVerified": false
+      },
+      "windows": {
+        "job": 114560490505,
+        "log": "/tmp/mk-win-source-prelude-job.log",
+        "sha256": "4c45c27468fbbaca708e015f63e163dcd23971cd892f63d07357aeeeb8dbebf2",
+        "step": "Verify current media-kit package resolution",
+        "stepConclusion": "success",
+        "actualCommand": "flutter build bundle --debug --no-pub",
+        "proof": "Exact command followed by explicit nonzero throw guard; successful step proceeds to finalize",
+        "bundleArtifactHash": "not independently archived in Release prelude artifact",
+        "nativeVerified": false
+      }
+    },
+    "reason": "Previous summary searched separate step name and missed bundle command embedded in successful verification step",
+    "scope": "Historical e31a + d916 only; not current 1970 acceptance"
+  }
+}

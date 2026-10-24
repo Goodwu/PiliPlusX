@@ -1,14 +1,14 @@
-import 'package:PiliPlus/common/widgets/avatars.dart';
-import 'package:PiliPlus/common/widgets/image/image_save.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/dynamics/result.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/action_panel.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/dyn_content.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/interaction.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:piliplus/common/widgets/avatars.dart';
+import 'package:piliplus/common/widgets/image/image_save.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/models/dynamics/result.dart';
+import 'package:piliplus/pages/dynamics/widgets/action_panel.dart';
+import 'package:piliplus/pages/dynamics/widgets/author_panel.dart';
+import 'package:piliplus/pages/dynamics/widgets/dyn_content.dart';
+import 'package:piliplus/pages/dynamics/widgets/interaction.dart';
+import 'package:piliplus/utils/extension/theme_ext.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
 import 'package:material_ui/material_ui.dart';
 
 class DynamicPanel extends StatelessWidget {

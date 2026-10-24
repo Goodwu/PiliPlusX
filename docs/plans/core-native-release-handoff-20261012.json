@@ -1,0 +1,997 @@
+{
+  "scope": "native_input_worker FINAL FROZEN; uncommitted owned release integration slice; no candidate/native approval",
+  "repository": "/Users/wuweiwei1/src/mk-core-routing-20261011/app",
+  "observedAppHead": "abc149dcf7e89cf0ea1f08ba133bf1047c36138d",
+  "observedMediaHead": "5c8e54dc92e3d87071cc3882740ba700bcf4994c",
+  "files": {
+    ".github/workflows/build.yml": "b41383fd2ce60765ed41a0f102837edc701bf14490194996b1ce95bc1a7f402c",
+    ".github/workflows/pink.yml": "2e1ae25de1ac493f57acd3d2e2a650b1ee112e8d31ef9a6a837a1e0f5e69a2ef",
+    ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+    "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+    "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+    "scripts/prepare_android_variant.py": "10e6e2b60631860898d8b776b9129cd107bdfb260c9dd0d7bf2d09cf510fe359",
+    "test/prepare_android_variant_test.py": "1a1a97a20d4808e91f31e3a92e529a03711623367e8c63a637679a39aa6d0770",
+    "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+    "scripts/verify_workflow_media_kit_refs.py": "0c6356993ad4a768f9931f9b88cbc4433d507a7132d9bc2b8b789c9926e7ee2c",
+    "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+    "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+    "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+    "docs/plans/routing-native-input-contract-20261012.md": "46dbe275444beb00abe0ff52c7ea26214f0ecb9dad8873efa9aef8fe9fea6e72",
+    "test/reusable_workflow_contract_test.py": "3b088764d8943fb8bf4294029c0cecb5f709a0a02c50710d936f19bc67a73b6f"
+  },
+  "authorTests": "/tmp/mk-routing-native-final-author-tests.json",
+  "actionlint": "/tmp/mk-routing-native-actionlint-final.log",
+  "actualEmptyWorkflowShell": "/tmp/mk-routing-native-empty-workflow-final.json",
+  "actualNdkParser": "/tmp/mk-routing-native-real-llvm-final-receipt.json",
+  "fullPython": "/tmp/mk-routing-native-full-python-final.log",
+  "fullPythonStatus": "PASS: 412 tests in30.594s, exit0; current CONFIG checker included, local Python only",
+  "acceptedSelector": null,
+  "acceptedEntries": 0,
+  "allFrozenFileHashesStillMatch": true,
+  "task": "MK-ROUTING-20261011",
+  "status": "PASS_WITH_PENDING_HOSTED source and CI checkpoint; full prepare/native/device unverified",
+  "validationBoundary": "114 owned tests + local full Python412 over current working tree (includes uncommitted CONFIG checker); not an exact committed App source/Flutter/native acceptance",
+  "notAccepted": [
+    "Latest committed hosted bootstrap-bound parser positive pending",
+    "Latest complete Android/Pink prepare pending",
+    "Accepted native ledger empty: no producer inputs approved",
+    "Native build/APK/signature/parity/device/final DV001 PR5 integration unverified"
+  ],
+  "remainingContracts": [
+    "accepted native selector null and entries empty",
+    "all-SO parity includes libapp.so: legitimate Pink AOT differences unresolved; gate retained"
+  ],
+  "reviewBlockers": [
+    {
+      "evidence": "/tmp/mk-native-release-review-extra-source.json",
+      "finding": "variant finalize accepts new Android resource XML, assets JSON and precompiled jniLibs SO not represented in source manifest",
+      "requiredRepair": "cover actual build inputs and reject unexpected untracked inputs; explicit generated-output boundary; independent injection regressions"
+    }
+  ],
+  "reviewRound1": {
+    "scope": "independent V2 frozen Release review; not native approval",
+    "checks": [
+      {
+        "test": "actual GitHub metadata positive (source artifact only)",
+        "result": "PASS",
+        "artifactId": 11710571535,
+        "uploadJobId": 114532779500
+      },
+      {
+        "test": "wrong attempt",
+        "result": "rejected",
+        "reason": "upload job attempt/run/HEAD/success mismatch"
+      },
+      {
+        "test": "out of upload window",
+        "result": "rejected",
+        "reason": "artifact creation outside approved upload-job time window"
+      },
+      {
+        "test": "wrong API digest",
+        "result": "rejected",
+        "reason": "artifact API ZIP digest mismatch/missing"
+      },
+      {
+        "test": "build.yml actual acquisition step empty CLI",
+        "exitCode": 1,
+        "result": "PASS fail closed before Gradle/API/staging",
+        "gate": {
+          "task": "MK-ROUTING-20261011",
+          "stage": "selection",
+          "status": "failed",
+          "nativeVerified": false,
+          "deviceVerified": false,
+          "commands": [],
+          "scope": "routing-native-acquisition",
+          "consumer": {
+            "appCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "mediaKitCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "reason": "missing-accepted-native-input: explicit selected manifest is empty"
+        }
+      },
+      {
+        "test": "pink.yml actual acquisition step empty CLI",
+        "exitCode": 1,
+        "result": "PASS fail closed before Gradle/API/staging",
+        "gate": {
+          "task": "MK-ROUTING-20261011",
+          "stage": "selection",
+          "status": "failed",
+          "nativeVerified": false,
+          "deviceVerified": false,
+          "commands": [],
+          "scope": "routing-native-acquisition",
+          "consumer": {
+            "appCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "mediaKitCommit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "reason": "missing-accepted-native-input: explicit selected manifest is empty"
+        }
+      }
+    ],
+    "frozenHashes": {
+      ".github/workflows/build.yml": "b41383fd2ce60765ed41a0f102837edc701bf14490194996b1ce95bc1a7f402c",
+      ".github/workflows/pink.yml": "2e1ae25de1ac493f57acd3d2e2a650b1ee112e8d31ef9a6a837a1e0f5e69a2ef",
+      ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "10e6e2b60631860898d8b776b9129cd107bdfb260c9dd0d7bf2d09cf510fe359",
+      "test/prepare_android_variant_test.py": "1a1a97a20d4808e91f31e3a92e529a03711623367e8c63a637679a39aa6d0770",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "0c6356993ad4a768f9931f9b88cbc4433d507a7132d9bc2b8b789c9926e7ee2c",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "46dbe275444beb00abe0ff52c7ea26214f0ecb9dad8873efa9aef8fe9fea6e72",
+      "test/reusable_workflow_contract_test.py": "3b088764d8943fb8bf4294029c0cecb5f709a0a02c50710d936f19bc67a73b6f"
+    },
+    "hashesMatch": true,
+    "blockerReproduction": [
+      {
+        "injection": "android/app/src/main/res/values/injected.xml",
+        "outcome": "finalized"
+      },
+      {
+        "injection": "assets/injected.json",
+        "outcome": "finalized"
+      },
+      {
+        "injection": "android/app/src/main/jniLibs/arm64-v8a/libinjected.so",
+        "outcome": "finalized"
+      },
+      {
+        "hashesMatch": true
+      }
+    ],
+    "independentSuites": {
+      "gateAndAcquisition": 66,
+      "variant": 16,
+      "workflow": 30,
+      "allExit0": true,
+      "actionlintExit0": true,
+      "abi": 2
+    },
+    "extraDeclaredInputs": [
+      {
+        "injection": "assets/shaders/unreviewed.glsl",
+        "status": "finalized",
+        "actualElf": false,
+        "size": 21
+      },
+      {
+        "injection": "android/app/src/main/jniLibs/arm64-v8a/libinjected.so",
+        "status": "finalized",
+        "actualElf": true,
+        "size": 5288
+      }
+    ]
+  },
+  "repairRound1": {
+    "scope": "native_input_worker source closure r1 FINAL FROZEN; uncommitted current dirty integration slice; not native approval",
+    "repository": "/Users/wuweiwei1/src/mk-core-routing-20261011/app",
+    "observedAppHead": "abc149dcf7e89cf0ea1f08ba133bf1047c36138d",
+    "observedMediaHead": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+    "files": {
+      ".github/workflows/build.yml": "606f5d62225e7414ad0aebc64276ca13a6edd6d92ce559f14113cbf2d04bad74",
+      ".github/workflows/pink.yml": "bc4f7e65953846a859fe6ff02d4be7d69a6cacdacb99a21789092ea9e630fbb4",
+      ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "bed12047ccff128176d72ee1f83bf4989986b1487ff33b661ef70ea1b21d5317",
+      "test/prepare_android_variant_test.py": "1b7c3525e3759e384709f2ca3f55601bc075c3842457c8f2d8bbc1fe052948bf",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "b536190c0bb82eb1830ad435f5bdccd71f006c05df00bcd01e9b943abb1a2d06",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "eb33ae0760d9eed912e5aef79aa9ad19bb3e6203b07066a6208c5df143402d13",
+      "test/reusable_workflow_contract_test.py": "fea68e568f2492467bc5fc68bb748d158492534b64987b34158d3f3386cae57b"
+    },
+    "authorTests": "/tmp/mk-routing-native-r1-final-author-tests.json",
+    "authorTestCount": 125,
+    "fullPython": "/tmp/mk-routing-native-r1-full-python-final.log",
+    "fullPythonCount": 423,
+    "fullPythonStatus": "PASS exit0; current dirty App including concurrent CONFIG changes; not proof of committed native input",
+    "actionlint": "/tmp/mk-routing-native-actionlint-r1.log",
+    "actualInputInjections": "/tmp/mk-routing-variant-r1-real-injections.json",
+    "acceptedSelector": null,
+    "acceptedEntries": 0,
+    "hostedNativeOrApkVerified": false,
+    "deviceVerified": false,
+    "openContractGap": "existing all-SO parity includes libapp.so; retained and not claimed passed"
+  },
+  "repairInjections": {
+    "scope": "replay V2 source-input blocker using synthetic exact-HEAD App with tracked assets/fonts/shaders declarations and real NDK compiled ELF; not native candidate evidence",
+    "helperSha256": "bed12047ccff128176d72ee1f83bf4989986b1487ff33b661ef70ea1b21d5317",
+    "tests": [
+      {
+        "phase": "prebuild",
+        "injection": "android/app/src/main/res/values/injected.xml",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: android/app/src/main/res/values/injected.xml",
+        "actualElf": false,
+        "inputSha256": "9c80274490fbb46514b5b4f0f180e2374f31e6045287906fe9dc0c231114af9d",
+        "size": 64,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "prebuild",
+        "injection": "assets/injected.json",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: assets/injected.json",
+        "actualElf": false,
+        "inputSha256": "1871bcdfd519d2c80eb344f0acedce8460ea15b412fbb4b83836d5712d9466ec",
+        "size": 17,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "prebuild",
+        "injection": "assets/shaders/unreviewed.glsl",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: assets/shaders/unreviewed.glsl",
+        "actualElf": false,
+        "inputSha256": "4a2230b0d5f3683c711868ff880acff7c26e6500362ae9b92e5fb88831a0a83b",
+        "size": 13,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "prebuild",
+        "injection": "android/app/src/main/jniLibs/arm64-v8a/libinjected.so",
+        "outcome": "rejected",
+        "reason": "unknown source/build input directory: android/app/src/main/jniLibs",
+        "actualElf": true,
+        "inputSha256": "c11f4a09ae936a980cc2ac62db088e449964d25d2728701f88493314f9e1eaad",
+        "size": 5272,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "finalize",
+        "injection": "android/app/src/main/res/values/injected.xml",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: android/app/src/main/res/values/injected.xml",
+        "actualElf": false,
+        "inputSha256": "9c80274490fbb46514b5b4f0f180e2374f31e6045287906fe9dc0c231114af9d",
+        "size": 64,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "finalize",
+        "injection": "assets/injected.json",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: assets/injected.json",
+        "actualElf": false,
+        "inputSha256": "1871bcdfd519d2c80eb344f0acedce8460ea15b412fbb4b83836d5712d9466ec",
+        "size": 17,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "finalize",
+        "injection": "assets/shaders/unreviewed.glsl",
+        "outcome": "rejected",
+        "reason": "unknown source/build input: assets/shaders/unreviewed.glsl",
+        "actualElf": false,
+        "inputSha256": "4a2230b0d5f3683c711868ff880acff7c26e6500362ae9b92e5fb88831a0a83b",
+        "size": 13,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      },
+      {
+        "phase": "finalize",
+        "injection": "android/app/src/main/jniLibs/arm64-v8a/libinjected.so",
+        "outcome": "rejected",
+        "reason": "unknown source/build input directory: android/app/src/main/jniLibs",
+        "actualElf": true,
+        "inputSha256": "c11f4a09ae936a980cc2ac62db088e449964d25d2728701f88493314f9e1eaad",
+        "size": 5272,
+        "declaredInputs": "name: piliplus\nflutter:\n  assets:\n    - assets/\n    - path: assets/shaders/\n  shaders:\n    - assets/shaders/known.frag\n  fonts:\n    - family: Fixture\n      fonts:\n        - asset: assets/fonts/known.ttf\n"
+      }
+    ]
+  },
+  "reviewBlockerStatus": "original injected-input miss fixed; actual pubget generated-input rejection and YAML escaped resource hash bypass remain",
+  "independentReviewRound2": {
+    "verdict": "REQUEST_CHANGES",
+    "originalP1Closed": true,
+    "independentNegativeReplay": "/tmp/mk-native-release-review-r2-negative.json",
+    "independentTests": {
+      "variant": 27,
+      "workflow": 30,
+      "actionlint": 0
+    },
+    "realEvidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo",
+    "realAppPubget": {
+      "argv": [
+        "flutter",
+        "pub",
+        "get",
+        "--offline",
+        "--enforce-lockfile"
+      ],
+      "exitCode": 0,
+      "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/pubget.log"
+    },
+    "normalSourceScan": [
+      {
+        "phase": "source",
+        "outcome": "unknown source/build input directory: macos/Flutter/ephemeral"
+      },
+      {
+        "phase": "prebuild",
+        "outcome": "unknown source/build input directory: macos/Flutter/ephemeral"
+      }
+    ],
+    "escapedAssetActualBundle": {
+      "exitCode": 0,
+      "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/asset-escaped-build.log",
+      "output": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/asset-proof/build/flutter_assets/build/generated.json",
+      "outputExists": true,
+      "outputBytes": "{\"unreviewed\":\"generated-output\"}\n",
+      "pubspec": "name: asset_proof\nenvironment:\n  sdk: \">=3.0.0 <4.0.0\"\ndependencies:\n  flutter:\n    sdk: flutter\nflutter:\n  assets:\n    - \"\\u0062uild/generated.json\"\n"
+    },
+    "escapedAssetLifecycle": {
+      "prebuildChecked": true,
+      "finalStatus": "finalized",
+      "outputWasHashedAsInput": false
+    },
+    "absolutePathBoundary": "helper accepted; Flutter actual build rejected absolute asset; not counted as runtime bypass",
+    "all14HashesMatch": true,
+    "hashes": {
+      ".github/workflows/build.yml": "606f5d62225e7414ad0aebc64276ca13a6edd6d92ce559f14113cbf2d04bad74",
+      ".github/workflows/pink.yml": "bc4f7e65953846a859fe6ff02d4be7d69a6cacdacb99a21789092ea9e630fbb4",
+      ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "bed12047ccff128176d72ee1f83bf4989986b1487ff33b661ef70ea1b21d5317",
+      "test/prepare_android_variant_test.py": "1b7c3525e3759e384709f2ca3f55601bc075c3842457c8f2d8bbc1fe052948bf",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "b536190c0bb82eb1830ad435f5bdccd71f006c05df00bcd01e9b943abb1a2d06",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "eb33ae0760d9eed912e5aef79aa9ad19bb3e6203b07066a6208c5df143402d13",
+      "test/reusable_workflow_contract_test.py": "fea68e568f2492467bc5fc68bb748d158492534b64987b34158d3f3386cae57b"
+    },
+    "nativeApproved": false
+  },
+  "repairRound2AuthorFreeze": {
+    "scope": "second correction author freeze, sole writer owned16; no terminal review approval",
+    "frozen": true,
+    "files": {
+      ".github/workflows/build.yml": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+      ".github/workflows/pink.yml": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+      ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+      "test/prepare_android_variant_test.py": "36eb57e0778ae45f43835111f8d5fa50739a4480f5ca2d4492ee99861e7af22c",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "40c5206e5debbd78e779feca1e94ae4b2849af6d7f1c45e66cb491d6833ba578",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "e9bea218de5768c7f9484b606e54bd0a9c44e24f4ae06d77360ed0c870bcfcb1",
+      "test/reusable_workflow_contract_test.py": "73296010fa62da9e90e531405398da42d210df790ee241c5e8e842ae1d45e59c",
+      "android/tool/parse_routing_manifest.dart": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+      "test/parse_routing_manifest_test.py": "1573369997636272aead16b513f9fac6466c84a73ca1758ddc71afbd7fd707fb"
+    },
+    "sourceObserved": {
+      "appHEAD": "b9d6d623f79a44232e3aff535b88e41ba1634d28",
+      "mediaKitHEAD": "adde2b5b543c099843bee357f63559ce12488def",
+      "appSourceBaseline": "abc149dcf7e89cf0ea1f08ba133bf1047c36138d",
+      "mediaKitSourceBaseline": "a31269badbf8ecc9ec286a1b0c4bf4f6639708ef",
+      "validationScope": "current dirty working tree, exact commits differ by documentation; CONFIG uncommitted"
+    },
+    "authorValidationReceipt": "/tmp/mk-routing-native-r2-final-author-tests.json",
+    "nativeApproved": false,
+    "acceptedLedger": {
+      "schemaVersion": 1,
+      "task": "MK-ROUTING-20261011",
+      "selectedManifestSha256": null,
+      "entries": []
+    },
+    "pending": "independent V2; full latest clean candidate prepare awaits approved CONFIG/parser/helper commits; hosted native/DEVICE/ all-SO App AOT parity remains open"
+  },
+  "repairRound2AuthorTests": {
+    "scope": "author validation of owned native Release slice; not V2 terminal approval",
+    "ownedTestsWithinCurrentDirtyFullPython": {
+      "verify_routing_native_inputs_test.py": 43,
+      "acquire_routing_native_inputs_test.py": 23,
+      "prepare_android_variant_test.py": 35,
+      "reusable_workflow_contract_test.py": 30,
+      "verify_artifact_test.py": 2,
+      "parse_routing_manifest_test.py": 7
+    },
+    "ownedCount": 140,
+    "fullPython": {
+      "count": 438,
+      "seconds": 138.006,
+      "exitCode": 0,
+      "log": "/tmp/mk-routing-r2-full-python.log",
+      "scope": "current dirty App+CONFIG sources, not committed candidate/native/APK evidence"
+    },
+    "variantStandalone": {
+      "count": 35,
+      "seconds": 57.324,
+      "exitCode": 0,
+      "log": "/tmp/mk-routing-r2-variant-final3.log"
+    },
+    "workflowStandalone": {
+      "count": 30,
+      "exitCode": 0,
+      "log": "/tmp/mk-routing-r2-workflow-final.log"
+    },
+    "parserStandalone": {
+      "count": 7,
+      "exitCode": 0,
+      "log": "/tmp/mk-routing-r2-parser-tests-second.log",
+      "includesActualKernelCompilation": true
+    },
+    "parserAnalysis": {
+      "exitCode": 0,
+      "issues": 0,
+      "log": "/tmp/mk-routing-r2-parser-analysis.log",
+      "graph": "actual isolated Flutter tools"
+    },
+    "actionlint": {
+      "exitCode": 0,
+      "files": [
+        "build.yml",
+        "pink.yml",
+        "routing-source-integration.yml"
+      ],
+      "log": "/tmp/mk-routing-r2-actionlint.log"
+    },
+    "realEvidence": {
+      "SDK101Rebinding": "/tmp/mk-routing-r2-private-sdk-rebinding.json",
+      "SDKToolsClosure": "/tmp/mk-routing-r2-real-tools-closure.json",
+      "readOnlyAppGeneratedInventory": "/tmp/mk-routing-r2-real-pubgen-inventory.json",
+      "cleanAppAndroidPinkOfflinePubget": "/tmp/mk-routing-r2-real-pubget-variants.json",
+      "actualTrackedAssetBundleEscapedPrebuildRejection": "/tmp/mk-routing-r2-resource-bundle.json",
+      "actualInputAndWrongPackageLink10Rejections": "/tmp/mk-routing-r2-real-injections.json",
+      "emptySelector2WorkflowBodies": "/tmp/mk-routing-r2-empty-workflow.json"
+    },
+    "notVerified": [
+      "complete new candidate source→prepare→offline-pubget→prebuild pending reviewed CONFIG/tool commits",
+      "hosted A/B acquisition/native/JAR/APK success",
+      "all-SO parity legal App AOT contract",
+      "DEVICE DV001/PR5 producer corrections and device acceptance"
+    ],
+    "nativeAcceptedLedgerEmpty": true
+  },
+  "independentReviewRound3": {
+    "verdict": "REQUEST_CHANGES_CI_PROVISIONING",
+    "sourceBoundaryVerdict": "PASS_WITH_SCOPE",
+    "frozenReceipt": "/tmp/mk-routing-native-release-worker-freeze-r2.json",
+    "frozenHashes": {
+      "hashes": {
+        ".github/workflows/build.yml": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+        ".github/workflows/pink.yml": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+        ".github/workflows/routing-source-integration.yml": "2dcdd345428a7d5afdd231ca5bf73a0d3e1cff99760413e7d0bc71ba936cece3",
+        "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+        "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+        "scripts/prepare_android_variant.py": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+        "test/prepare_android_variant_test.py": "36eb57e0778ae45f43835111f8d5fa50739a4480f5ca2d4492ee99861e7af22c",
+        "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+        "scripts/verify_workflow_media_kit_refs.py": "40c5206e5debbd78e779feca1e94ae4b2849af6d7f1c45e66cb491d6833ba578",
+        "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+        "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+        "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+        "docs/plans/routing-native-input-contract-20261012.md": "e9bea218de5768c7f9484b606e54bd0a9c44e24f4ae06d77360ed0c870bcfcb1",
+        "test/reusable_workflow_contract_test.py": "73296010fa62da9e90e531405398da42d210df790ee241c5e8e842ae1d45e59c",
+        "android/tool/parse_routing_manifest.dart": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+        "test/parse_routing_manifest_test.py": "1573369997636272aead16b513f9fac6466c84a73ca1758ddc71afbd7fd707fb"
+      },
+      "all16Match": true,
+      "emptyAcquisition": [
+        {
+          "workflow": "build.yml",
+          "exit": 1,
+          "gradleReached": false,
+          "commands": [],
+          "nativeVerified": false
+        },
+        {
+          "workflow": "pink.yml",
+          "exit": 1,
+          "gradleReached": false,
+          "commands": [],
+          "nativeVerified": false
+        }
+      ]
+    },
+    "tests": {
+      "variant": 35,
+      "acquisitionAndNativeGate": 66,
+      "workflow": 30,
+      "actualParser": 7,
+      "ABI": 2,
+      "total": 140,
+      "actionlintExit": 0
+    },
+    "independentActualCases": [
+      {
+        "case": "real source injection android/app/src/main/res/values/injected.xml",
+        "outcome": "unknown source/build input: android/app/src/main/res/values/injected.xml"
+      },
+      {
+        "case": "real source injection assets/shaders/unreviewed.glsl",
+        "outcome": "unknown source/build input: assets/shaders/unreviewed.glsl"
+      },
+      {
+        "case": "real source injection android/app/src/main/jniLibs/arm64-v8a/libinjected.so",
+        "outcome": "unknown source/build input directory: android/app/src/main/jniLibs"
+      },
+      {
+        "case": "plugin symlink outside its package",
+        "outcome": "unapproved input symlink: linux/flutter/ephemeral/.plugin_symlinks/app_links_linux"
+      },
+      {
+        "case": "known generated parent symlink",
+        "outcome": "unapproved input symlink: linux/flutter/ephemeral"
+      },
+      {
+        "case": "plugin metadata wrong path",
+        "outcome": "plugin metadata differs from package_config/pubspec: app_links_linux"
+      },
+      {
+        "case": "plugin metadata wrong name",
+        "outcome": "plugin metadata differs from package_config/pubspec: flutter"
+      },
+      {
+        "case": "restored actual inventory",
+        "outcome": "passed"
+      },
+      {
+        "case": "actual YAML escaped",
+        "outcome": "declared input overlaps reserved generated location: build/generated.json"
+      },
+      {
+        "case": "actual YAML uri_encoded",
+        "outcome": "declared input overlaps reserved generated location: %62uild/generated.json"
+      },
+      {
+        "case": "actual YAML escaped_parent",
+        "outcome": "declared input escapes App root"
+      },
+      {
+        "case": "actual YAML anchor_generated",
+        "outcome": "declared input overlaps reserved generated location: build/generated.json"
+      },
+      {
+        "case": "actual YAML multidoc",
+        "outcome": "variant command failed (1): /var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/bin/cache/dart-sdk/bin/dart"
+      },
+      {
+        "case": "actual YAML custom_tag",
+        "outcome": "variant command failed (1): /var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/bin/cache/dart-sdk/bin/dart"
+      },
+      {
+        "case": "actual YAML cyclic_alias",
+        "outcome": "variant command failed (1): /var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/bin/cache/dart-sdk/bin/dart"
+      },
+      {
+        "case": "actual YAML standard_tag",
+        "outcome": "passed"
+      },
+      {
+        "case": "actual YAML ordinary_anchor",
+        "outcome": "passed"
+      }
+    ],
+    "realCurrentAppDiagnostic": {
+      "appHead": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+      "pubgetExit": 0,
+      "inputCount": 1881,
+      "pubGeneratedCount": 31,
+      "pluginLinkCount": 86,
+      "evidence": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-v2-r3-kl7agdvl/inventory.json",
+      "notFullPrepare": true
+    },
+    "blockers": [
+      {
+        "severity": "P1",
+        "file": ".github/workflows/routing-source-integration.yml",
+        "job": "python-tests",
+        "issue": "all-Python discover now includes mandatory Dart/Flutter parser suite, but job provisions only Python and no SDK/tools package_config",
+        "reproductionExit": 1,
+        "log": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-v2-r3-kl7agdvl/hosted-missing-sdk.log",
+        "testsActuallyRun": 0
+      }
+    ],
+    "unverified": [
+      "full latest committed source prepare and manifest identity integration",
+      "accepted A/B hosted acquisition",
+      "Gradle APK member preservation and signatures",
+      "Android Pink all-SO parity including legal libapp AOT",
+      "native DEVICE HDR performance"
+    ],
+    "allProcessesTerminal": true,
+    "repositoryMutations": false
+  },
+  "ciProvisioningFixFreeze": {
+    "scope": "native-ci-sdk-wiring-local-candidate",
+    "status": "implementation-ready-for-independent-V2",
+    "sourceBasis": {
+      "app": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+      "media-kit": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+      "dirtyWorktreeCandidate": true,
+      "hostedAccepted": false
+    },
+    "ownedHashes": {
+      ".github/workflows/routing-source-integration.yml": "bb52e20bb03b068ca095c57ced7fdbbcfdcec9e59aff5c6346767ea6270aeb4c",
+      "test/parse_routing_manifest_test.py": "6ee6a424b257d7d7594398daa90ba7bb6bfac49cdcd18251e0e5264567b9e564",
+      "test/reusable_workflow_contract_test.py": "8fa9a0cf4541e17a51053eda554c80502bf3847301adf806d79906ea4f2cbcc4"
+    },
+    "native16Hashes": {
+      ".github/workflows/build.yml": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+      ".github/workflows/pink.yml": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+      ".github/workflows/routing-source-integration.yml": "bb52e20bb03b068ca095c57ced7fdbbcfdcec9e59aff5c6346767ea6270aeb4c",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+      "test/prepare_android_variant_test.py": "36eb57e0778ae45f43835111f8d5fa50739a4480f5ca2d4492ee99861e7af22c",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "40c5206e5debbd78e779feca1e94ae4b2849af6d7f1c45e66cb491d6833ba578",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "e9bea218de5768c7f9484b606e54bd0a9c44e24f4ae06d77360ed0c870bcfcb1",
+      "test/reusable_workflow_contract_test.py": "8fa9a0cf4541e17a51053eda554c80502bf3847301adf806d79906ea4f2cbcc4",
+      "android/tool/parse_routing_manifest.dart": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+      "test/parse_routing_manifest_test.py": "6ee6a424b257d7d7594398daa90ba7bb6bfac49cdcd18251e0e5264567b9e564"
+    },
+    "changedSinceSourceBoundaryR3": [
+      ".github/workflows/routing-source-integration.yml",
+      "test/reusable_workflow_contract_test.py",
+      "test/parse_routing_manifest_test.py"
+    ],
+    "unchangedSourceBoundaryFiles": 13,
+    "sourceBoundaryPriorReview": "/tmp/mk-native-release-review-r3.json",
+    "tests": {
+      "allPython": {
+        "count": 444,
+        "seconds": 78.131,
+        "exitCode": 0,
+        "log": "/tmp/mk-native-ci-sdk-wiring/all-python.log"
+      },
+      "workflowContracts": {
+        "count": 36,
+        "exitCode": 0,
+        "log": "/tmp/mk-native-ci-sdk-wiring/workflow-contract-tests.log"
+      },
+      "realDartParser": {
+        "count": 7,
+        "kernelCompile": true,
+        "identityChecks": 7,
+        "log": "/tmp/mk-native-ci-sdk-wiring/parser-tests.log",
+        "proof": "/tmp/mk-native-ci-sdk-wiring/manifest-parser-tests.json",
+        "fullSuiteSameCurrentCandidate": true
+      },
+      "actionlint": {
+        "exitCode": 0,
+        "log": "/tmp/mk-native-ci-sdk-wiring/actionlint.log"
+      },
+      "HDRChannel": {
+        "endpoints": 7,
+        "exitCode": 0
+      },
+      "ciNegativeInvocations": "/tmp/mk-native-ci-sdk-wiring/ci-rejections.json"
+    },
+    "invariants": [
+      "all Python modules retained on macOS",
+      "exact shared App/library vector",
+      "existing android bootstrap before discover",
+      "receipt/env/tool blob bound with existing manifest_identity",
+      "per-test pre/post identity recheck",
+      "finalize after failed tests without clearing job failure",
+      "always upload private logs/receipts/source",
+      "no source-boundary/CONFIG code changed"
+    ],
+    "unverified": [
+      "actual clean committed App HEAD containing native16 tool with prepared CI receipt positive",
+      "hosted latest joint vector",
+      "native build/device/DV001 integration"
+    ],
+    "processesTerminal": true,
+    "mutations": "Only three owned files; no main Git mutations, SDK/pubget/toolchain changes or docs writes."
+  },
+  "latestCommittedConfigCI": {
+    "observedAt": "2026-10-11T19:21:20.223861+00:00",
+    "scope": "read-only committed CONFIG CI; no dirty native helper/scripts used; no project/Git/pubget/rerun/cancel/dispatch",
+    "verifiedCounts": {
+      "libraryVideo": {
+        "passed": 759,
+        "skipped": 3,
+        "strict": "No issues found"
+      },
+      "libraryLab": {
+        "passed": 267,
+        "failed": 2,
+        "strict": "1 error invalid_override"
+      },
+      "AppEachPlatformFlutter": 268,
+      "AppPythonSource": {
+        "passed": 362,
+        "seconds": 31.293
+      },
+      "AppPythonBuild": {
+        "passed": 362,
+        "seconds": 34.451
+      },
+      "AndroidChrome": 1,
+      "DarwinWidgets": 9,
+      "queryAssertions": 34
+    },
+    "knownFailures": [
+      {
+        "path": "media_kit_hdr_lab/test/android_native_dv_session_foreign_ownership_test.dart:1175",
+        "failure": "FakeSession.open missing EffectiveVideoRouteOptions? options, invalid_override and compilation failure"
+      },
+      {
+        "path": "media_kit_hdr_lab/test/android_hdr_convert_experiment_test.dart",
+        "test": "real lab single-open wrapper failure permanently consumes claim",
+        "failure": "expected throws StateError, actual Future completes null"
+      }
+    ],
+    "limits": [
+      "general initialpending snapshot only; no hang claim",
+      "source does not prove native/device",
+      "results only exact captured vector; future remoteadvance does not relabel them"
+    ],
+    "OHOSActualInputs": {
+      "lines": [
+        "2026-10-11T19:11:02.8659464Z HEAD is now at 9e5577d5 Merge b5c5067089dd19a3271feff3e38aefc43b9f075f into d761922721ad8da6bb186abd270bb096100944ea",
+        "2026-10-11T19:12:21.9326121Z HEAD is now at 2ece1aae docs+test: HCPP input block 设计契约文档与静态契约测试脚本",
+        "2026-10-11T19:13:36.0850802Z Artifact ohos-pubspec-lock has been successfully uploaded! Final size is 4896 bytes. Artifact ID is 11712019766",
+        "2026-10-11T19:14:47.1940512Z ✓ Built build/ohos/hap/entry-default-unsigned.hap (61.1MB).",
+        "2026-10-11T19:14:47.5179124Z       \"sha256\": \"7f321d22b16d48876b5bddc8490d15586221d77e94dfc1fd55b405f83631e44f\"",
+        "2026-10-11T19:14:47.5183382Z   \"source_commit\": \"9e5577d51a90fad935c946984d6994d951cef9f5\",",
+        "2026-10-11T19:14:50.9870122Z Artifact media-kit-ohos-arm64-unsigned has been successfully uploaded! Final size is 27336135 bytes. Artifact ID is 11712373158"
+      ],
+      "checkout": "9e5577d51a90fad935c946984d6994d951cef9f5",
+      "kind": "PR merge b5c506 into d7619227",
+      "HAPDownloaded": false,
+      "scope": "unsigned HAP build only, no native/device acceptance"
+    },
+    "verdict": "App source38166934942 success and Build38166935298 source matrix success at b7d3+b5c. Library source38166919509 failure due two lab failures; video clean. Build overall fails six Release jobs; no joint all-green claim.",
+    "rawLogSHA256": {
+      "38166919509/114551295241-raw.log": "799d28c12346b6f34f597342f7dc4d23bb802c5423cb6c9c6b1a914314fb75f2",
+      "38166919509/114551295429-raw.log": "69a2258518fcbd40c7bc161397b7141516940735fcda34cc1387ca4d5a1e5af7",
+      "38166919509/114551295488-raw.log": "325efc3e41c5be182f2ef1c3535c0a758e3cd63aac4d3e1b7fc9e667b7cd1fe8",
+      "38166919514/114551285460-raw.log": "b8c5c3b057a60a07d9722cc6d37e822cfd78daadfa0ff6da6019f3706d350d88",
+      "38166919512/114551292490-raw.log": "895455e316d9da8b6d9710681e62754ffede69af00eba7817182bddcb8b9423b",
+      "38166934942/114551358563-raw.log": "d1e6e12c43f1eed548e656640ac58601cd988fe2e24c109a15612fa4c3fcd45e",
+      "38166934942/114551358543-raw.log": "cbcd6914865d32c46dee06c95ec7346496d297ed41b8980cbd7b787f6b421fd2",
+      "38166934942/114551358558-raw.log": "06cc1df612eba8c754eadab738a7f770933e191c336a721e1689cc4d14356c3f",
+      "38166934942/114551358514-raw.log": "2afb6b484f05c37134c3d7126dcfe41b4297209f67b84ac5355299e56618e394",
+      "38166934942/114551339424-raw.log": "818319b608391fe10b730750ec41e04df12da165cf39012c2e9119d3ed36d27f",
+      "38166935298/114551330120-raw.log": "617f496d18789664fda35f6e6f239995652620e7c62eea2c1a353d74f830497b",
+      "38166935298/114551350401-raw.log": "87bf322cc0314ca731b1e3439af6f1cf1be4d56d497050c6aca00c1d38bdc4f7",
+      "38166935298/114551330037-raw.log": "414cb4c09aed3d421ac961c914722ef1ba1e3e349b90d739c9590be5c9979d26",
+      "38166935298/114551330170-raw.log": "871330939ba31a55478773784f5a949a7305ff47cea645112b38ca04cbd6a0ac",
+      "38166935298/114551350389-raw.log": "dcc0069b50cbdba6f43e866b432a413faa1cc1fa7e2b85fd2952d013bc271ae1",
+      "38166935298/114551350477-raw.log": "6f2e536db765f1b59eb2501a889eab2c73603e68ea408aa590938c1419772e42",
+      "38166935298/114551350453-raw.log": "e5e841b4c58056a70663950a91d946e3fdcf13c624b2e0ea29ff4d44d501c619",
+      "38166935298/114551329948-raw.log": "b6fcc31a15d1d513017aaa50ef82b2274bbcbc42dbec2bb35cb422f5c5f3bcf7",
+      "38166935298/114551329904-raw.log": "0fecaf4435daed9d75ddc771a71ddec48ade3896086f8f4dd1b381196f917483",
+      "38166935298/114551330110-raw.log": "6e2a0b2c48555cfa647ec8922157ccd896e292afc0157286033bfe95350dabd9",
+      "38166935298/114551330109-raw.log": "1c3a096ff5b80ea26a6fbdbe88068c1e564257b81fe46163960cfa0eafb483c4",
+      "38166919543/114551284199-raw.log": "49dc156e144fdc4bf27e0d26c2e433897d4c1990dc9b527e3eab0cd395643d2a"
+    },
+    "summarySHA256": "874a15e2609c38d80cd9e415a78a826790f17c451a99afa8fe99de515d5915ad",
+    "summaryPath": "/tmp/mk-routing-config-ci-20261012/summary.json",
+    "runs": {
+      "38166919509": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919509"
+      },
+      "38166919514": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919514"
+      },
+      "38166919512": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919512"
+      },
+      "38166934942": {
+        "head_sha": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38166934942"
+      },
+      "38166935298": {
+        "head_sha": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38166935298"
+      },
+      "38166919543": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919543"
+      },
+      "38166919527": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "pending",
+        "conclusion": null,
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919527"
+      }
+    },
+    "artifacts": [
+      {
+        "id": 11712058090,
+        "zipSHA256": "265482439b2b6cb090cf62534973d52f3eaae0da63a818f4a7b6e400e791743c",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712058090"
+      },
+      {
+        "id": 11712227650,
+        "zipSHA256": "44e9f81f5f4e1a86a3eb1ac9dae623f00bf0f4cce435e6cf80784237279fdbe8",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712227650"
+      },
+      {
+        "id": 11712422854,
+        "zipSHA256": "eac1067b4af6c79e18703ffad1c507f9b70cda41280982522892e8536d6ceb61",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712422854"
+      },
+      {
+        "id": 11712038071,
+        "zipSHA256": "6bbca99ff6924190c191bbb4ea6f2165048d7b5d72a2a1fd43ca5dde53fd3472",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919514/11712038071"
+      },
+      {
+        "id": 11712123201,
+        "zipSHA256": "f6e973646a1d3d6309ebaa220400d7d6b26dfcbc308ca7bce9c1e2e00a32d462",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919512/11712123201"
+      },
+      {
+        "id": 11712687722,
+        "zipSHA256": "0339aff8664178007e229a7a46232b815674198d313207d0616fd5c10a10d920",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712687722"
+      },
+      {
+        "id": 11712318453,
+        "zipSHA256": "b25b0df4e8ce40950c5b2f99107be4ad3b58f5ea983fd84832aeac549c7b5a44",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712318453"
+      },
+      {
+        "id": 11712827095,
+        "zipSHA256": "b7f06a4ce0f84f60cdec8610b4090a2da16f315561565f4426063513247e9cfa",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712827095"
+      },
+      {
+        "id": 11711968673,
+        "zipSHA256": "be31f8858439b5c590ba2a2fe7c19d0d529db9a2e4b6fabde744ed3de9735268",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11711968673"
+      },
+      {
+        "id": 11712453477,
+        "zipSHA256": "68c50d58dc9f456175ce9cd61c98e7edebd7e4801f8d412e983e36ed84adaa8e",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712453477"
+      },
+      {
+        "id": 11712781379,
+        "zipSHA256": "f8b1a838db9e97445bfea7f859ce456ab68f8f2be23cdafe12633b7199791779",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712781379"
+      },
+      {
+        "id": 11712252712,
+        "zipSHA256": "0c96b6e6a1d18997f32fbbc55259a76bfd0300dad6e43cda3310556c80659e63",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712252712"
+      },
+      {
+        "id": 11712706822,
+        "zipSHA256": "eb4a26aecb57244a79c32c2d636d1f8677308c668091565fd49749bbf1fac125",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712706822"
+      },
+      {
+        "id": 11712912216,
+        "zipSHA256": "4a5322562e873d2538384cca32839422b9fd75ea641712776111a706b127d53f",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712912216"
+      },
+      {
+        "id": 11712981155,
+        "zipSHA256": "420a14c0c0b2bc30f60625e5e695d0d54cd0d23c030a02d179b62206484fd487",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712981155"
+      },
+      {
+        "id": 11711978316,
+        "zipSHA256": "3d1b2876bb678dd9e253fdeccde473c54e509c44be2269decbc99f5858dce126",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11711978316"
+      }
+    ]
+  },
+  "ciProvisioningCriticalReview": {
+    "verdict": "PASS_WITH_PENDING_HOSTED",
+    "scope": "three-file Python CI SDK provisioning integration; prior source-boundary scope retained",
+    "frozenHashesMatch": true,
+    "otherSourceBoundaryFilesUnchanged": true,
+    "hashes": {
+      ".github/workflows/build.yml": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+      ".github/workflows/pink.yml": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+      ".github/workflows/routing-source-integration.yml": "bb52e20bb03b068ca095c57ced7fdbbcfdcec9e59aff5c6346767ea6270aeb4c",
+      "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+      "scripts/prepare_android_variant.py": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+      "test/prepare_android_variant_test.py": "36eb57e0778ae45f43835111f8d5fa50739a4480f5ca2d4492ee99861e7af22c",
+      "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+      "scripts/verify_workflow_media_kit_refs.py": "40c5206e5debbd78e779feca1e94ae4b2849af6d7f1c45e66cb491d6833ba578",
+      "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+      "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+      "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "docs/plans/routing-native-input-contract-20261012.md": "e9bea218de5768c7f9484b606e54bd0a9c44e24f4ae06d77360ed0c870bcfcb1",
+      "test/reusable_workflow_contract_test.py": "8fa9a0cf4541e17a51053eda554c80502bf3847301adf806d79906ea4f2cbcc4",
+      "android/tool/parse_routing_manifest.dart": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+      "test/parse_routing_manifest_test.py": "6ee6a424b257d7d7594398daa90ba7bb6bfac49cdcd18251e0e5264567b9e564"
+    },
+    "independentChecks": {
+      "workflowTests": 36,
+      "realDartParserTests": 7,
+      "actualKernelCompilation": true,
+      "stableIdentityChecks": 7,
+      "actionlintExit": 0,
+      "diffCheckExit": 0
+    },
+    "ciNegatives": [
+      {
+        "case": "CI missing SDK",
+        "exit": 1,
+        "rejected": true
+      },
+      {
+        "case": "authentic historical bootstrap receipt",
+        "exit": 1,
+        "rejected": true,
+        "sourceUnchanged": true,
+        "receiptCopyUnchanged": true
+      }
+    ],
+    "evidenceRoot": "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-ci-critical-yt97dk60",
+    "reviewedInterfaces": [
+      "routing-bootstrap outputs private-root and receipt-directory",
+      "prepare_routing_ci prepared receipt scope/status/platform/vector/afterVector/tool roots",
+      "GITHUB_ENV SDK/cache export and RUNNER_TEMP rb/r receipt path",
+      "exact App and media checkouts and git parser/helper blobs",
+      "test failure retained while !cancelled prepare-success finalization executes",
+      "always private diagnostics upload"
+    ],
+    "pending": [
+      "committed exact candidate containing parser/helper with authentic bootstrap-bound CI positive",
+      "hosted latest joint source vector tests and finalize",
+      "full native accepted input/build/signature/parity/device gates"
+    ],
+    "sourceEdits": false,
+    "processesTerminal": true
+  },
+  "currentFrozenFiles": {
+    ".github/workflows/build.yml": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+    ".github/workflows/pink.yml": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+    ".github/workflows/routing-source-integration.yml": "bb52e20bb03b068ca095c57ced7fdbbcfdcec9e59aff5c6346767ea6270aeb4c",
+    "scripts/acquire_routing_native_inputs.py": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+    "test/acquire_routing_native_inputs_test.py": "0100385dc02e510800597a19fecea8700d880c0c44ea9909eb6199a65efa55b5",
+    "scripts/prepare_android_variant.py": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+    "test/prepare_android_variant_test.py": "36eb57e0778ae45f43835111f8d5fa50739a4480f5ca2d4492ee99861e7af22c",
+    "scripts/verify_media_kit_lock.py": "1d955ce99eff3220dd5a117176b1a5b2151218374c6beb41570f7eac5081e8ec",
+    "scripts/verify_workflow_media_kit_refs.py": "40c5206e5debbd78e779feca1e94ae4b2849af6d7f1c45e66cb491d6833ba578",
+    "scripts/verify_routing_native_inputs.py": "b4d1686fe3541bb6487dde91ed957fd16fe19c7a0a3edcae0c9742ce1fd13371",
+    "test/verify_routing_native_inputs_test.py": "2aecfb80869b457a7471ca7c7f1e394719ca5998ec3ea263bea8f375d44ffb74",
+    "docs/plans/routing-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+    "docs/plans/routing-native-input-contract-20261012.md": "e9bea218de5768c7f9484b606e54bd0a9c44e24f4ae06d77360ed0c870bcfcb1",
+    "test/reusable_workflow_contract_test.py": "8fa9a0cf4541e17a51053eda554c80502bf3847301adf806d79906ea4f2cbcc4",
+    "android/tool/parse_routing_manifest.dart": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+    "test/parse_routing_manifest_test.py": "6ee6a424b257d7d7594398daa90ba7bb6bfac49cdcd18251e0e5264567b9e564"
+  }
+}

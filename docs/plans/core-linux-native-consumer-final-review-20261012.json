@@ -1,0 +1,36 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "stage": "Linux-B-final-R2-independent-V2",
+  "conclusion": "PASS_WITH_SCOPE",
+  "sourceVector": {
+    "app": "1970d440b5b9d9ffc001866064581e4005b26b30",
+    "mediaKit": "d91639401862d84c68406aae3b2029400a4cfbd6"
+  },
+  "independentEvidence": {
+    "existingTestsPassed": 19,
+    "additionalMicroFixturesPassed": 14,
+    "fullAcquireCMakeR2Rerun": false,
+    "mockBoundary": "verify_local replaced only in incremental probes; inspect_elf/verify_plugin/verify_bundle executed",
+    "reviewer": "/root/linux_native_review",
+    "centralComment": 6113663924
+  },
+  "remaining": {
+    "realProducer": false,
+    "realLinuxCompileLink": false,
+    "generatedBuildSourceBinding": false,
+    "fullBundleProvenanceVerified": false,
+    "releaseVerified": false,
+    "deviceTest": false
+  },
+  "files": {
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/scripts/verify_routing_linux_native.py": "d2ac95d45774908ee305b98eb6637b78d36fb2f480381cd79f9e7914f99ea4ce",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/scripts/acquire_routing_linux_native.py": "df9bda562706ec01189063db2099b356d9f2ae58cb934f884d6a82214ee7656c",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/test/verify_routing_linux_native_test.py": "abca513d0fe4f2dee88e8cc5897fa2e1e2e1563e57b78d857fd3b431e7e21519",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/test/acquire_routing_linux_native_test.py": "40dca384c147e0fbf179350aad5ff391dd405bce8b5149c14ae9c2a92f76a6e0",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/docs/plans/routing-linux-native-accepted-inputs.json": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/app/docs/plans/routing-linux-native-contract-20261011.md": "741de55596ecb03a0acda6b7470cbcab829ee1b211c5ef528d461fd584c1ac43",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/media-kit/media_kit_video/linux/CMakeLists.txt": "0e608a7b37c3957baf529317665765368596bd7d418402046d7d13eb2d4688ab",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/media-kit/media_kit_video/linux/verify_routing_linux_native_local.py": "c41b178b8995141f68f4a47f9b1368474ab5692521aab24e10d2f83d0a7cda96",
+    "/Users/wuweiwei1/src/mk-core-routing-20261011/media-kit/media_kit_video/linux/test_verify_routing_linux_native_local.py": "63e61c4b87c8ed479a3f1b810c30f4fd3364be93a09c5c426a582e718241f38a"
+  }
+}

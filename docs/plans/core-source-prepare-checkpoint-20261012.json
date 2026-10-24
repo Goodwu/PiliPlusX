@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "scope": "actual local latest clean source bootstrap and Android/Pink source variants; no native candidate or device acceptance",
+  "status": "source-prepared-prebuild-and-freshness-verified",
+  "verifiedAt": "2026-10-12T03:47:46+0800",
+  "vector": {
+    "app": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+    "appTree": "3cd578c3d6e135539b77ac9a7d6696710a410ea9",
+    "media-kit": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+    "media-kitTree": "8ba73d04994a0ccc8af30613e0569dfe608e91d6"
+  },
+  "afterVector": {
+    "app": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+    "appTree": "3cd578c3d6e135539b77ac9a7d6696710a410ea9",
+    "media-kit": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+    "media-kitTree": "8ba73d04994a0ccc8af30613e0569dfe608e91d6"
+  },
+  "finalVector": {
+    "app": "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+    "appTree": "3cd578c3d6e135539b77ac9a7d6696710a410ea9",
+    "media-kit": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+    "media-kitTree": "8ba73d04994a0ccc8af30613e0569dfe608e91d6"
+  },
+  "sdk": {
+    "commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "tree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+    "frameworkVersion": "3.47.2",
+    "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+    "dartSdkVersion": "3.13.2",
+    "flutterRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/f",
+    "pubCache": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/p",
+    "originalTrackedDirtyCount": 0,
+    "flutterToolsPackageRootCount": 102,
+    "bootstrapStatus": "fresh-source-only"
+  },
+  "variants": {
+    "android": {
+      "status": "prepared",
+      "prebuildChecked": true,
+      "receipt": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android.json",
+      "receiptSha256": "2804d6c8b786d618fb8a534a2cc22edec568a18eac38c6a9b829a920eee13646",
+      "sourceCounts": {
+        "inputs": 1888,
+        "pubGenerated": 31,
+        "buildGenerated": 3,
+        "pubLinks": 86
+      },
+      "packageRootCount": 261,
+      "beforeAfterRootStable": true,
+      "trackedParserSha256": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+      "helperSha256": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+      "yamlVersion": "3.1.3",
+      "toolsConfigSha256": "41e83681d1e603bdeb7f887fe9e9359ffb01a068519e8f2d5137ebab181281b7",
+      "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+      "offlinePubGetCommands": [
+        {
+          "argv": [
+            "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/f/bin/flutter",
+            "pub",
+            "get",
+            "--offline",
+            "--enforce-lockfile"
+          ],
+          "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android/app",
+          "exitCode": 0,
+          "stderr": ""
+        }
+      ]
+    },
+    "pink": {
+      "status": "prepared",
+      "prebuildChecked": true,
+      "receipt": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink.json",
+      "receiptSha256": "33eeeebc751ddfa48f1ef4db4f0ed20e5c29577b6e529ff2f62948f0b116d58d",
+      "sourceCounts": {
+        "inputs": 1888,
+        "pubGenerated": 31,
+        "buildGenerated": 3,
+        "pubLinks": 86
+      },
+      "packageRootCount": 261,
+      "beforeAfterRootStable": true,
+      "trackedParserSha256": "0c7da339a613ed7d5ccedea50bf063140c3684d24691dea3de2f6fc1ea9a3809",
+      "helperSha256": "ae19f4159e1e61fb2af984048b290ead6d69dd0fd7361a3a9096c1e4f8b90b51",
+      "yamlVersion": "3.1.3",
+      "toolsConfigSha256": "41e83681d1e603bdeb7f887fe9e9359ffb01a068519e8f2d5137ebab181281b7",
+      "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+      "offlinePubGetCommands": [
+        {
+          "argv": [
+            "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/f/bin/flutter",
+            "pub",
+            "get",
+            "--offline",
+            "--enforce-lockfile"
+          ],
+          "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink/app",
+          "exitCode": 0,
+          "stderr": ""
+        }
+      ]
+    }
+  },
+  "actualCommands": [
+    {
+      "label": "formal-bootstrap",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_routing_ci.py",
+        "--app-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--flutter-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/f",
+        "--private-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi",
+        "--output",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r",
+        "--expected-app-sha",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--expected-media-kit-sha",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--platform",
+        "android"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "android-prepare",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_android_variant.py",
+        "--source",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android/app",
+        "--receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android.json",
+        "--bootstrap",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r/bootstrap.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--media-kit-commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--flavor",
+        "android",
+        "--manifest-parser",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/android/tool/parse_routing_manifest.dart"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "android-prebuild",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_android_variant.py",
+        "--source",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android/app",
+        "--receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android.json",
+        "--bootstrap",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r/bootstrap.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--media-kit-commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--flavor",
+        "android",
+        "--manifest-parser",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/android/tool/parse_routing_manifest.dart",
+        "--check-prebuild"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "android-routing-lock-correct",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/verify_media_kit_lock.py",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android/app/pubspec.lock",
+        "--mode",
+        "routing",
+        "--commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--source-app-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--variant-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant-receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "pink-prepare",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_android_variant.py",
+        "--source",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink/app",
+        "--receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink.json",
+        "--bootstrap",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r/bootstrap.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--media-kit-commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--flavor",
+        "pink",
+        "--manifest-parser",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/android/tool/parse_routing_manifest.dart"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "pink-prebuild",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_android_variant.py",
+        "--source",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink/app",
+        "--receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink.json",
+        "--bootstrap",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r/bootstrap.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--media-kit-commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--flavor",
+        "pink",
+        "--manifest-parser",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/android/tool/parse_routing_manifest.dart",
+        "--check-prebuild"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "pink-routing-lock-correct",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/verify_media_kit_lock.py",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink/app/pubspec.lock",
+        "--mode",
+        "routing",
+        "--commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--source-app-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--variant-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--variant-receipt",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink.json",
+        "--app-commit",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "routing-workflow-refs",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/verify_workflow_media_kit_refs.py",
+        "--mode",
+        "routing",
+        "--commit",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--workflow-dir",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/.github/workflows"
+      ],
+      "exitCode": 0
+    },
+    {
+      "label": "formal-finalize",
+      "argv": [
+        "python3",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app/scripts/prepare_routing_ci.py",
+        "--app-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "--media-kit-root",
+        "/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "--flutter-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/f",
+        "--private-root",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi",
+        "--output",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r",
+        "--expected-app-sha",
+        "6c4c1b4787fe2ce5459ee1d775279192fe432416",
+        "--expected-media-kit-sha",
+        "751d0cdd69c26374d452fbf672c5600ce59f2387",
+        "--platform",
+        "android",
+        "--finalize"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "finalFreshness": {
+    "exitCode": 0,
+    "bootstrapSha256": "6b261eff9516a60d1933e617770c3eaae017e2cef9babb4753c5bbba2fc05117",
+    "sourceVectorIdentical": true,
+    "actualRemoteQueries": [
+      {
+        "name": "final-app-remote",
+        "command": [
+          "git",
+          "ls-remote",
+          "--exit-code",
+          "origin",
+          "refs/heads/routing/MK-ROUTING-20261011"
+        ],
+        "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/app",
+        "exitCode": 0
+      },
+      {
+        "name": "final-media-kit-remote",
+        "command": [
+          "git",
+          "ls-remote",
+          "--exit-code",
+          "origin",
+          "refs/heads/routing/MK-ROUTING-20261011"
+        ],
+        "cwd": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-clean-candidate-6c_susor/media-kit",
+        "exitCode": 0
+      }
+    ]
+  },
+  "emptyNativeSelector": [
+    {
+      "workflow": "build.yml",
+      "workflowSha256": "914d7ccd898fad5b237a2f963c74b402b448eb7b959105d83ac4a7fea1988739",
+      "exitCode": 1,
+      "stage": "selection",
+      "reason": "missing-accepted-native-input: explicit selected manifest is empty",
+      "apiCommandCount": 0,
+      "gradleReached": false,
+      "nativeStagingExists": false
+    },
+    {
+      "workflow": "pink.yml",
+      "workflowSha256": "b1840a603d0c4517074edf263bfd3de192231e9e30e455307ecb903fc1888842",
+      "exitCode": 1,
+      "stage": "selection",
+      "reason": "missing-accepted-native-input: explicit selected manifest is empty",
+      "apiCommandCount": 0,
+      "gradleReached": false,
+      "nativeStagingExists": false
+    }
+  ],
+  "preservedFailures": [
+    {
+      "kind": "original SDK had 36 tracked modifications; bootstrap refused without modifying source SDK",
+      "index": "/tmp/mk-routing-latest-original-sdk-block.json"
+    },
+    {
+      "kind": "APFS pubcache clone rejected two stale OHOS links; preserved p-rejected; successful bootstrap used fresh empty private p",
+      "index": "/tmp/mk-routing-latest-clean-sdk-input.json"
+    },
+    {
+      "kind": "local validation driver wrong routing-lock arguments exit2; not a production code failure; exact failure preserved then corrected same vector passed",
+      "index": "/tmp/mk-routing-latest-full-variants.json"
+    }
+  ],
+  "evidenceIndex": [
+    {
+      "path": "/tmp/mk-routing-latest-clean-sources-ready.json",
+      "sha256": "80a02d6796eafcd73d72ffc7b1bb0c8310ee952f5510b7269ed26e2fae224d07"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-original-sdk-block.json",
+      "sha256": "651b61ab3bc1ddb116a2622936e38c700b1d17f26c41246f112e499642412969"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-clean-sdk-input.json",
+      "sha256": "aae430f9827971542f57e878a594a4ddf5a5185e7b2cf998ef19a81cd183bbbb"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-empty-cache-input.json",
+      "sha256": "2a5bf2193dac77eef3dd43c9282cdebd159665521d83a356ff644f4c770b0872"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-positive-bootstrap-command.json",
+      "sha256": "80933cfbb21a2f544c354ab34d12563e4a09a77cdcf4b4ad82dd6562230dc81d"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-full-variants.json",
+      "sha256": "ea8fe443e06280c41bdff46b071a7abb6627c4a43d1a893f1d761f8c47cb6279"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-full-variants-corrected.json",
+      "sha256": "f5455551f091145b91c5c8b2bf50a46e9150501340a1791264edb1dde7108bfb"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-finalize-command.json",
+      "sha256": "b60d915095bff3a66d5dad8d2886512106c0369ae9299f1795c86cf1d1c2e8f7"
+    },
+    {
+      "path": "/tmp/mk-routing-latest-empty-selector.json",
+      "sha256": "d34e65351027309f082329d018e22e4558966e3da734ccda273bcc0fb8e276f5"
+    },
+    {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-new-clean-sdk-f22m9wbi/r/bootstrap.json",
+      "sha256": "6b261eff9516a60d1933e617770c3eaae017e2cef9babb4753c5bbba2fc05117"
+    },
+    {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/android.json",
+      "sha256": "2804d6c8b786d618fb8a534a2cc22edec568a18eac38c6a9b829a920eee13646"
+    },
+    {
+      "path": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-routing-latest-variants-mlw408fa/pink.json",
+      "sha256": "33eeeebc751ddfa48f1ef4db4f0ed20e5c29577b6e529ff2f62948f0b116d58d"
+    }
+  ],
+  "capacity": {
+    "availableBytesAtEnd": 1501585408,
+    "policy": "no extra bundle/native build or material cleanup due approximately 1.4GiB remaining"
+  },
+  "acceptanceBoundary": {
+    "localSourcePreparation": true,
+    "hostedRunExecutedHere": false,
+    "bundleExecutedHere": false,
+    "apkBuilt": false,
+    "nativeBinaryProvenanceVerified": false,
+    "deviceTest": false,
+    "realAcceptedNativeEntryAdded": false,
+    "variantPostBuildFinalizeExecuted": false,
+    "independentFinalReview": "Lead-owned"
+  }
+}

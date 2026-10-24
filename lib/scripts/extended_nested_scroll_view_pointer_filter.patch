@@ -1,0 +1,38 @@
+diff --git a/lib/src/extended_nested_scroll_view.dart b/lib/src/extended_nested_scroll_view.dart
+index 970f913..8b98210 100644
+--- a/lib/src/extended_nested_scroll_view.dart
++++ b/lib/src/extended_nested_scroll_view.dart
+@@ -168,6 +168,7 @@ class ExtendedNestedScrollView extends StatefulWidget {
+     this.floatHeaderSlivers = false,
+     this.clipBehavior = Clip.hardEdge,
+     this.hitTestBehavior = HitTestBehavior.opaque,
++    this.pointerDownFilter,
+     this.restorationId,
+     this.scrollBehavior,
+     this.pinnedHeaderSliverHeightBuilder,
+@@ -296,6 +297,8 @@ class ExtendedNestedScrollView extends StatefulWidget {
+   /// Defaults to [HitTestBehavior.opaque].
+   final HitTestBehavior hitTestBehavior;
+ 
++  final bool Function(PointerDownEvent event)? pointerDownFilter;
++
+   /// {@macro flutter.widgets.scrollable.restorationId}
+   final String? restorationId;
+ 
+@@ -510,6 +513,7 @@ class ExtendedNestedScrollViewState extends State<ExtendedNestedScrollView> {
+             clipBehavior: widget.clipBehavior,
+             restorationId: widget.restorationId,
+             hitTestBehavior: widget.hitTestBehavior,
++            pointerDownFilter: widget.pointerDownFilter,
+           );
+         },
+       ),
+@@ -530,6 +534,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
+     super.hitTestBehavior,
+     super.dragStartBehavior,
+     super.restorationId,
++    super.pointerDownFilter,
+   });
+ 
+   final SliverOverlapAbsorberHandle handle;
+

@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
-import 'package:PiliPlus/common/widgets/view_safe_area.dart';
-import 'package:PiliPlus/http/live.dart';
-import 'package:PiliPlus/models/common/publish_panel_type.dart';
-import 'package:PiliPlus/pages/common/publish/common_rich_text_pub_page.dart';
-import 'package:PiliPlus/pages/live_emote/controller.dart';
-import 'package:PiliPlus/pages/live_emote/view.dart';
-import 'package:PiliPlus/pages/live_room/controller.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/text_field.dart';
+import 'package:piliplus/common/widgets/view_safe_area.dart';
+import 'package:piliplus/http/live.dart';
+import 'package:piliplus/models/common/publish_panel_type.dart';
+import 'package:piliplus/pages/common/publish/common_rich_text_pub_page.dart';
+import 'package:piliplus/pages/live_emote/controller.dart';
+import 'package:piliplus/pages/live_emote/view.dart';
+import 'package:piliplus/pages/live_room/controller.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart' hide TextField;

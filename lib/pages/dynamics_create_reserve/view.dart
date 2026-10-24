@@ -1,8 +1,8 @@
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:PiliPlus/common/widgets/time_picker.dart';
-import 'package:PiliPlus/pages/dynamics_create_reserve/controller.dart';
-import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:piliplus/common/widgets/time_picker.dart';
+import 'package:piliplus/pages/dynamics_create_reserve/controller.dart';
+import 'package:piliplus/utils/date_utils.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:flutter/services.dart'
     show TextInputFormatter, LengthLimitingTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';

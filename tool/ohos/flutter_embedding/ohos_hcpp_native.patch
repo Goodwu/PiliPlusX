@@ -1,0 +1,50 @@
+diff --git a/engine/src/flutter/shell/platform/ohos/napi/platform_view_ohos_napi.cpp b/engine/src/flutter/shell/platform/ohos/napi/platform_view_ohos_napi.cpp
+index c56bd670..55352508 100644
+--- a/engine/src/flutter/shell/platform/ohos/napi/platform_view_ohos_napi.cpp
++++ b/engine/src/flutter/shell/platform/ohos/napi/platform_view_ohos_napi.cpp
+@@ -53,7 +53,6 @@ double PlatformViewOHOSNapi::display_density_pixels = 1.0;
+ 
+ constexpr int TOUCH_UP_PERFORMANCE_SECTION = 3000;  // 3s
+ 
+-constexpr int64_t kInjectedDeviceBias = 1LL << 40;
+ 
+ napi_env PlatformViewOHOSNapi::env_;
+ std::vector<std::string> PlatformViewOHOSNapi::system_languages;
+@@ -900,9 +899,14 @@ napi_value PlatformViewOHOSNapi::nativeDispatchTouchToEngine(
+     napi_get_element(env, args[1], i, &item);
+     PointerData pd;
+     pd.Clear();
++    const int64_t trace_seq = TouchGetInt64(env, item, "trace_seq");
++    const int64_t attachment_epoch =
++        TouchGetInt64(env, item, "attachment_epoch");
+     pd.change =
+         static_cast<PointerData::Change>(TouchGetInt(env, item, "change"));
+-    pd.device = TouchGetInt(env, item, "device") + kInjectedDeviceBias;
++    // The ArkTS embedding owns the injected-device namespace. Keep this bridge
++    // byte-for-byte neutral so old and rebuilt libflutter.so use one contract.
++    pd.device = TouchGetInt64(env, item, "device");
+     pd.embedder_id = TouchGetInt64(env, item, "embedder_id");
+     pd.physical_x = TouchGetDouble(env, item, "physical_x");
+     pd.physical_y = TouchGetDouble(env, item, "physical_y");
+@@ -939,6 +943,13 @@ napi_value PlatformViewOHOSNapi::nativeDispatchTouchToEngine(
+     pd.size = TouchGetDouble(env, item, "size");
+     pd.scale = 1.0;
+     pd.rotation = 0.0;
++    FML_LOG(INFO) << "HCPP_POINTER stage=napi-item seq=" << trace_seq
++                  << " epoch=" << attachment_epoch
++                  << " change=" << static_cast<int>(pd.change)
++                  << " device=" << pd.device
++                  << " embedder_id=" << pd.embedder_id
++                  << " timestamp_us=" << pd.time_stamp
++                  << " x=" << pd.physical_x << " y=" << pd.physical_y;
+     packet->SetPointerData(i, pd);
+   }
+ 
+@@ -948,6 +959,7 @@ napi_value PlatformViewOHOSNapi::nativeDispatchTouchToEngine(
+     return nullptr;
+   }
+   platform_view->DispatchPointerDataPacket(std::move(packet));
++  FML_LOG(INFO) << "HCPP_POINTER stage=flutter-dispatch count=" << count;
+   return nullptr;
+ }
+ 

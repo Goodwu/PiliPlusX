@@ -1,6 +1,6 @@
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:piliplus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart' show PlatformException;

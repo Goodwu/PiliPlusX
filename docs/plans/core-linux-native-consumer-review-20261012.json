@@ -1,0 +1,99 @@
+{
+  "scope": "CORE Linux native B consumer frozen candidate",
+  "status": "REQUEST_CHANGES-first-correction-review",
+  "sourceHeads": {
+    "media-kit": "d91639401862d84c68406aae3b2029400a4cfbd6",
+    "app": "e31aee1b09d6658dadd79a58a19bb1c097a57161"
+  },
+  "files": [
+    {
+      "repository": "media-kit",
+      "path": "media_kit_video/linux/CMakeLists.txt",
+      "sha256": "d8a53bc9269889384c86ce98e4da80aa227451984a6a00c6789bd040b77938a4"
+    },
+    {
+      "repository": "media-kit",
+      "path": "media_kit_video/linux/verify_routing_linux_native_local.py",
+      "sha256": "d7b253f713407bfc7be6e8e2fa5f9e0236346630e5eb69b599f4ba6a6d19e851"
+    },
+    {
+      "repository": "media-kit",
+      "path": "media_kit_video/linux/test_verify_routing_linux_native_local.py",
+      "sha256": "5afb5075e1b0fcaa7672c3a1cab39906c7073dd7240d1a6eaad60b2ab115eca0"
+    },
+    {
+      "repository": "app",
+      "path": "scripts/verify_routing_linux_native.py",
+      "sha256": "dc8fdb358ecd05377e61f7656b3b9a3729dac48b40fddf601f61412cefff254f"
+    },
+    {
+      "repository": "app",
+      "path": "scripts/acquire_routing_linux_native.py",
+      "sha256": "df9bda562706ec01189063db2099b356d9f2ae58cb934f884d6a82214ee7656c"
+    },
+    {
+      "repository": "app",
+      "path": "test/verify_routing_linux_native_test.py",
+      "sha256": "f21348767e342278641fcf3b5607cab50a380b1bbe69e488b5797331ffa40edd"
+    },
+    {
+      "repository": "app",
+      "path": "test/acquire_routing_linux_native_test.py",
+      "sha256": "40dca384c147e0fbf179350aad5ff391dd405bce8b5149c14ae9c2a92f76a6e0"
+    },
+    {
+      "repository": "app",
+      "path": "docs/plans/routing-linux-native-accepted-inputs.json",
+      "sha256": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8"
+    },
+    {
+      "repository": "app",
+      "path": "docs/plans/routing-linux-native-contract-20261011.md",
+      "sha256": "55e6aaf65c2629df4864e903b2c480484d7e4d1bef34451f514cb79bdf0dc70b"
+    }
+  ],
+  "authorTests": {
+    "library": 5,
+    "appVerifier": 7,
+    "appAcquirer": 3,
+    "py_compile": "passed per author",
+    "diffCheck": "passed per author"
+  },
+  "evidenceLimits": [
+    "Synthetic approved entries and ELF/readelf fixtures are not real native acceptance",
+    "Production accepted ledger remains empty",
+    "CMake negative refused dirty App checkout before legacy download; actual native/link/bundle still pending"
+  ],
+  "ownership": "Frozen by linux_native_consumer; CORE sole integrator; DEVICE original native producer ownership retained",
+  "independentReview": {
+    "path": "/tmp/mk-linux-native-critical-review.json",
+    "sha256": "1f9c4b8439fdec3b4d80eaa2955e68e46c6b8bc5509d15ae8e860724a0b2f5bd",
+    "existingTests": 15,
+    "independentProbes": 38,
+    "blockingFindings": [
+      "Postbuild CLI incompatibility",
+      "Incorrect CMake plugin basename",
+      "Unbounded/absolute plugin RPATH",
+      "Unreachable bundle DSO layout accepted",
+      "App linux/ and shared gate missing from fixed consumer source closure"
+    ],
+    "action": "Original writer correction 1 authorized; same nine-file ownership; new freeze and V2 required"
+  },
+  "firstCorrectionReview": {
+    "sha256": "118ff41edf72816614f7a9534638e6a3f996870bb561d7a22806cdabdcb8cf73",
+    "path": "/tmp/mk-linux-native-critical-review-r1.json",
+    "existingTests": 18,
+    "independentProbes": 49,
+    "blockingFindings": [
+      "All-bundle-DSO ABI gate deleted; ARM64 Flutter engine accepted",
+      "Requester RPATH/RUNPATH not used; unreachable dependency accepted"
+    ],
+    "closedWithinSyntheticScope": [
+      "CLI modes",
+      "Plugin basename",
+      "Absolute RPATH injection",
+      "App linux and shared gate source closure"
+    ],
+    "nextAction": "Second and final original-writer correction authorized; new freeze and V2 required"
+  }
+}

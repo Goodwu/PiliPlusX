@@ -1,0 +1,52 @@
+{
+  "taskId": "MK-ROUTING-20261011",
+  "role": "CORE",
+  "workItem": "CORE-F01",
+  "branch": "routing/MK-ROUTING-20261011",
+  "primaryPR": 1,
+  "centralClaim": 6109670062,
+  "coreIntegrationScope": 6109798715,
+  "status": "implemented_host_and_App_bundle_validated",
+  "mediaKitModel": "a3cdbda2ab1e872e9f3b0d381fc5737e9c819d88",
+  "mediaKitSessionIntegration": "867ffd28d34244ef43f188c15f18ab5182fedeab",
+  "appBaseline": "8bed4a4f60bc7c7b3aaf9aa52fcda04e83648e03",
+  "changes": [
+    "Four tests exercise exported source evidence in actual App route labels/statistics",
+    "Original P8.4 labels survive PQ decoder observations and omitted later metadata",
+    "Hint provenance remains provisional despite completed decoder review",
+    "Blocked contradictory track evidence produces no success route label"
+  ],
+  "productionAppChanged": false,
+  "sourceAndNativeScopes": "Do not alter or repeat App source-filter/controller, Session owner/native proofs, LG recipe or DEVICE build work. The new report evidence comes from media-kit; all existing App query/selection behavior remains.",
+  "priorValidation": {
+    "run": 38142585709,
+    "app": "8bed4a4f60bc7c7b3aaf9aa52fcda04e83648e03",
+    "mediaKit": "d68871f7bad52264955500ad8dde8adb34f0a100",
+    "pythonPassed": 244,
+    "flutterPassed": 188,
+    "bundle": "success",
+    "freshness": "success",
+    "analyzerInfos": 34,
+    "analyzerErrors": 0,
+    "analyzerWarnings": 0,
+    "terminalComment": 6109486294
+  },
+  "next": "CORE-R01 and remaining34infos/Release CI; no repeat of delivered phase.",
+  "handoff": "This is incremental testing of an already implemented library model and Session connection. Do not restart original B2b/unknown classification/FFmpeg fixes. Latest terminal PR comments supplement this record. Candidate SHAs are provenance, not instructions to build historical sources.",
+  "terminalComment": 6110417510,
+  "validationNote": "Terminal comment supersedes pending state; preserve failed intermediate evidence and exact source vectors.",
+  "mediaKitTestCorrection": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+  "finalValidation": {
+    "appSha": "569138fa8d55eb2686578fc834c19aba8093c411",
+    "librarySha": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+    "run": 38146940852,
+    "job": 114499858358,
+    "flutterPassed": 192,
+    "pythonPassed": 244,
+    "pythonNote": "Same-App-SHA prior successful Python job retained, not rerun.",
+    "bundle": "success",
+    "freshness": "success",
+    "analyzerInfos": 34,
+    "sourceArtifact": 11705617556
+  }
+}

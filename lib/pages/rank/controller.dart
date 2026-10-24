@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:PiliPlus/models/common/rank_type.dart';
-import 'package:PiliPlus/pages/common/common_controller.dart';
-import 'package:PiliPlus/pages/rank/zone/controller.dart';
+import 'package:piliplus/models/common/rank_type.dart';
+import 'package:piliplus/pages/common/common_controller.dart';
+import 'package:piliplus/pages/rank/zone/controller.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 

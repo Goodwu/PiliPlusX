@@ -1,0 +1,158 @@
+{
+  "verdict": "PASS_WITH_SCOPE",
+  "scope": "Independent V2 increment review of PR5 final second narrow repair: implicit Flutter resource variants, membership add/remove, source boundary, and normal generated-output compatibility. Code review acceptance only, not eight-APK/native/runtime acceptance.",
+  "hashes": {
+    "tool/routing_matrix.py": "62ca4703be69a69f7addd8b347f9fe43a582c5ed12459a5a0b9237f4d6f6894e",
+    "tool/test_routing_matrix.py": "680beffc23d9c856a8713e174c509f1d4fa2410d55b167e55a65af6a47a19a4b",
+    "tool/README.md": "1cf1dc291fd94afd0f0d0a74f4562bc2ed54886acd485f3b07d652f225a3643d",
+    "tool/matrix-build.sh": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b"
+  },
+  "allFourHashesBeforeAfterMatch": true,
+  "libraryHead": "3817b8f3cbda43ec5efbb3bffeae8e9f7812d251",
+  "appHead": "6d349a06db9103996274e639c31d7d2a7554540a",
+  "blocking": [],
+  "nonblocking": [],
+  "priorFindings": {
+    "SDK-linked-engine-target-P1": "Closed by r3 independent evidence; unchanged behavior not redundantly retested here.",
+    "dependency-resource-implicit-variants-P1": "Closed by this independent full-state mutation/set-change reproduction plus direct real SDK asset-bundler member parity."
+  },
+  "independentVerification": [
+    {
+      "case": "all author tests independently executed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B tool/test_routing_matrix.py",
+      "exitCode": 0,
+      "tests": 27,
+      "seconds": 7.982
+    },
+    {
+      "case": "normal-92-package-real-parser",
+      "passed": true,
+      "generatedCount": 37
+    },
+    {
+      "case": "full-state-variant-add-byte-delete",
+      "addDetected": true,
+      "byteDetected": true,
+      "deleteDetected": true,
+      "literalBaselineRestored": false
+    },
+    {
+      "case": "generated-build-subtree-not-resource",
+      "stateUnchanged": true
+    },
+    {
+      "case": "one-level-hasMatch-member-set",
+      "members": [
+        "build/2.0x/review.bin",
+        "build/prefix3x/review.bin",
+        "build/review.bin"
+      ]
+    },
+    {
+      "case": "actual-Flutter-asset-bundle-member-parity",
+      "processExit": 0,
+      "bundle": {
+        "exitCode": 0,
+        "entries": [
+          "packages/collection/build/review.bin",
+          "packages/collection/build/2.0x/review.bin",
+          "packages/collection/build/prefix3x/review.bin",
+          "shaders/ink_sparkle.frag",
+          "shaders/stretch_effect.frag",
+          "AssetManifest.bin",
+          "FontManifest.json",
+          "NOTICES.Z"
+        ],
+        "stderr": "",
+        "status": ""
+      },
+      "expected": [
+        "packages/collection/build/2.0x/review.bin",
+        "packages/collection/build/prefix3x/review.bin",
+        "packages/collection/build/review.bin"
+      ],
+      "actual": [
+        "packages/collection/build/2.0x/review.bin",
+        "packages/collection/build/prefix3x/review.bin",
+        "packages/collection/build/review.bin"
+      ],
+      "match": true,
+      "argv": [
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/bin/cache/dart-sdk/bin/dart",
+        "--packages=/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/packages/flutter_tools/.dart_tool/package_config.json",
+        "/tmp/pr5-r3-asset-bundle.dart",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/pr5-r4-independent-7rsrvtmd/bundle-app",
+        "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk"
+      ]
+    },
+    {
+      "case": "font-literal-only",
+      "members": [
+        "build/review.bin"
+      ]
+    },
+    {
+      "case": "variant-file-escape",
+      "rejected": true,
+      "error": "declared package resource escapes exact package root"
+    },
+    {
+      "case": "variant-parent-escape",
+      "rejected": true,
+      "error": "declared package resource escapes exact package root"
+    },
+    {
+      "case": "full-state-add-byte-remove-from-confirmed-no-variant-baseline",
+      "addDetected": true,
+      "byteDetected": true,
+      "deleteDetected": true,
+      "literalBaselineRestored": true,
+      "note": "First copied donor already had 2.0x/review.bin, so its first case tested replacement/deletion rather than a new addition. This corrected independent run establishes absent baseline explicitly, only within our own /tmp copy."
+    },
+    {
+      "case": "scoped git diff check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "normalRealParserPackageCount": 92,
+  "parserCommandsSuccessful": true,
+  "variantContract": {
+    "sourcePath": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/native-release-review-real-0yy6aayo/sdk/packages/flutter_tools/lib/src/asset.dart",
+    "sourceSha256": "6c768531943dea313153795e1520881ca6325a0b15e924e3f5c3c3d5dff839db",
+    "directoryPattern": "/?([0-9]+(\\.[0-9]*)?)x$",
+    "recursiveVariants": false
+  },
+  "reviewedLocations": [
+    "tool/routing_matrix.py:219",
+    "tool/routing_matrix.py:235",
+    "tool/routing_matrix.py:263",
+    "tool/routing_matrix.py:1108"
+  ],
+  "commandsAndEvidence": {
+    "harness": "/tmp/pr5-r4-independent.py",
+    "actualFlutterBundleHarness": "/tmp/pr5-r3-asset-bundle.dart",
+    "independentResult": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/pr5-r4-independent-7rsrvtmd/results.json",
+    "authorEvidence": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/matrix-variant-proof-691oift4/implicit-variant-repair-evidence.json",
+    "authorEvidenceSha256": "889d5ae5dd8947bf6cf035408a695b3e82377a181213c41b099f46f68f8d75a5",
+    "authorEvidenceUsedInsteadOfIndependentTests": false
+  },
+  "fixtureCorrection": "Initial copied donor already contained 2.0x/review.bin, so first baseline test exercised replacement/deletion and correctly did not restore initial bytes. A separate corrected run in our own temporary copy starts with that member absent: addition, byte mutation, deletion are all detected, and baseline restores exactly. Both actual results retained.",
+  "sourceGitRecordsModified": false,
+  "authorAndEarlierReviewerEvidenceModified": false,
+  "notRun": [
+    "New Flutter pub get",
+    "Android precache/download",
+    "Actual native or Gradle compilation",
+    "Full eight-row APK matrix",
+    "Device install/runtime/HDR acceptance",
+    "Remote CI cannot establish these formerly uncommitted candidate bytes"
+  ],
+  "reReviewTriggers": [
+    "Any change to the four frozen candidate files",
+    "SDK asset.dart variant semantics or packageUri rules change",
+    "Real matrix execution reveals different source/asset/native paths"
+  ],
+  "limitations": "Normal path check uses copied resolved 92-package metadata/resource skeleton and actual Dart parser. Direct ManifestAssetBundle call uses a tiny manually supplied 2-package graph; it proves asset member semantics, not package resolution or APK production."
+}

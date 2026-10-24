@@ -1,18 +1,18 @@
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/common/widgets/route_aware_mixin.dart'
+import 'package:piliplus/common/widgets/route_aware_mixin.dart'
     show routeObserver;
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:PiliPlus/common/widgets/selection_text.dart';
-import 'package:PiliPlus/http/browser_ua.dart';
-import 'package:PiliPlus/main.dart' show webViewEnvironment;
-import 'package:PiliPlus/models/common/webview_menu_type.dart';
-import 'package:PiliPlus/utils/app_scheme.dart';
-import 'package:PiliPlus/utils/cache_manager.dart';
-import 'package:PiliPlus/utils/extension/string_ext.dart';
-import 'package:PiliPlus/utils/login_utils.dart';
-import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:piliplus/common/widgets/selection_text.dart';
+import 'package:piliplus/http/browser_ua.dart';
+import 'package:piliplus/main.dart' show webViewEnvironment;
+import 'package:piliplus/models/common/webview_menu_type.dart';
+import 'package:piliplus/utils/app_scheme.dart';
+import 'package:piliplus/utils/cache_manager.dart';
+import 'package:piliplus/utils/extension/string_ext.dart';
+import 'package:piliplus/utils/login_utils.dart';
+import 'package:piliplus/utils/page_utils.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';

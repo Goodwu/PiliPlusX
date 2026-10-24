@@ -4,59 +4,328 @@ on:
   workflow_call:
     inputs:
       tag:
-        description: "tag"
+        description: Asset label for a sideload IPA build
+        required: true
+        type: string
+      ref:
+        description: Exact App source commit
+        required: true
+        type: string
+      routing-mode:
+        description: Prepare the captured App/library vector and stop before native consumption.
         required: false
-        default: ""
+        default: false
+        type: boolean
+      app-sha:
+        description: Exact App commit from the shared routing-vector job.
+        required: false
+        default: ''
+        type: string
+      media-kit-sha:
+        description: Exact media-kit commit from the shared routing-vector job.
+        required: false
+        default: ''
         type: string
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Asset label for a sideload IPA build
+        required: true
+        type: string
+      routing-mode:
+        description: Direct dispatch cannot capture the shared routing source vector.
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build-macos-app:
-    name: Release IOS
+    name: iOS workflow
     runs-on: macos-26
+    permissions:
+      contents: read
+    env:
+      PILIPLUSX_RELEASE_TAG: ${{ inputs.tag }}
+      PILIPLUSX_SOURCE_SHA: ${{ inputs.ref }}
+      PILIPLUSX_SKIP_POINTER_FILTER_PATCH: ${{ !inputs.routing-mode && '1' || '' }}
+      PILIPLUSX_SKIP_GEETEST_IOS_PATCH: ${{ !inputs.routing-mode && '1' || '' }}
     steps:
+      - name: Reject uncaptured routing dispatch before any production step
+        shell: bash
+        env:
+          ROUTING_MODE: ${{ inputs.routing-mode }}
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+          APP_REF: ${{ inputs.ref }}
+          HEAD_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$ROUTING_MODE" == "true" ]]; then
+            mkdir -p "$RUNNER_TEMP/rb/r"
+            printf 'routing-mode=%s\napp=%s\nmedia-kit=%s\nref=%s\n' \
+              "$ROUTING_MODE" "$APP_SHA" "$MEDIA_KIT_SHA" "$APP_REF" > "$RUNNER_TEMP/rb/r/dispatch-preflight.txt"
+          fi
+          if [[ "$ROUTING_MODE" == "true" ]]; then
+            [[ "$APP_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Routing iOS requires a captured 40-character App SHA.' >&2; exit 1; }
+            [[ "$MEDIA_KIT_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Routing iOS requires a captured 40-character media-kit SHA.' >&2; exit 1; }
+            [[ "$APP_REF" == "$APP_SHA" ]] || { echo 'Routing iOS ref must equal the captured App SHA.' >&2; exit 1; }
+          else
+            [[ -z "$MEDIA_KIT_SHA" ]] || { echo 'A media-kit SHA requires routing mode.' >&2; exit 1; }
+            [[ "$HEAD_NAME" != 'routing/MK-ROUTING-20261011' ]] || { echo 'Direct routing-branch builds are refused; invoke build.yml with its captured source vector.' >&2; exit 1; }
+          fi
+
+      - name: Prepare routing receipts directory
+        if: ${{ inputs.routing-mode }}
+        shell: bash
+        env:
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+        run: |
+          set -euo pipefail
+          git config --global core.longpaths true
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          mkdir -p "$RUNNER_TEMP/rb/r"
+          printf 'ROUTING_RESULTS=%s\nEXPECTED_APP_SHA=%s\nEXPECTED_MEDIA_KIT_SHA=%s\nROUTING_VARIANT=%s\n' \
+            "$RUNNER_TEMP/rb/r" "$APP_SHA" "$MEDIA_KIT_SHA" "$RUNNER_TEMP/av/ios/app" >> "$GITHUB_ENV"
+
+      - name: Checkout exact routing App source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v7
+        with:
+          repository: Goodwu/PiliPlusX
+          ref: ${{ inputs.app-sha }}
+          path: app
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact routing media-kit source
+        if: ${{ inputs.routing-mode }}
+        uses: actions/checkout@v7
+        with:
+          repository: Goodwu/media-kit
+          ref: ${{ inputs.media-kit-sha }}
+          path: media-kit
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify routing App base
+        if: ${{ inputs.routing-mode }}
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_APP_SHA"
+          test "$(git -C ../media-kit rev-parse HEAD)" = "$EXPECTED_MEDIA_KIT_SHA"
+          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier
+          git merge-base --is-ancestor FETCH_HEAD HEAD
+          printf 'app=%s\nmedia-kit=%s\n' "$EXPECTED_APP_SHA" "$EXPECTED_MEDIA_KIT_SHA" | tee "$ROUTING_RESULTS/source.txt"
+
+      - name: Bootstrap private current iOS sources
+        if: ${{ inputs.routing-mode }}
+        id: prepare
+        uses: ./app/.github/actions/routing-bootstrap
+        with:
+          app-root: app
+          media-kit-root: media-kit
+          app-sha: ${{ inputs.app-sha }}
+          media-kit-sha: ${{ inputs.media-kit-sha }}
+          platform: ios
+
+      - name: Verify current media-kit source resolution
+        if: ${{ inputs.routing-mode && steps.prepare.outcome == 'success' }}
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output "$ROUTING_RESULTS/routing-sources-before.json" 2>&1 | tee "$ROUTING_RESULTS/source-verify-before.log"
+
+      - name: Prepare isolated routing iOS App variant
+        if: ${{ inputs.routing-mode && steps.prepare.outcome == 'success' }}
+        id: variant_prepare
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_ios_variant.py --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$ROUTING_VARIANT" --receipt "$ROUTING_RESULTS/ios-variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart" 2>&1 | tee "$ROUTING_RESULTS/ios-variant-prepare.log"
+
+      - name: Verify routing iOS variant inputs before bundle
+        if: ${{ inputs.routing-mode && steps.variant_prepare.outcome == 'success' }}
+        id: variant_prebuild
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_ios_variant.py --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$ROUTING_VARIANT" --receipt "$ROUTING_RESULTS/ios-variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart" --check-prebuild 2>&1 | tee "$ROUTING_RESULTS/ios-variant-prebuild.log"
+
+      - name: Build current routing iOS Flutter bundle
+        if: ${{ inputs.routing-mode && steps.variant_prepare.outcome == 'success' && steps.variant_prebuild.outcome == 'success' }}
+        id: routing_bundle
+        working-directory: ${{ runner.temp }}/av/ios/app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build bundle --debug --no-pub 2>&1 | tee "$ROUTING_RESULTS/bundle-build.log"
+
+      - name: Verify current media-kit source resolution after bundle
+        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == 'success' && steps.variant_prebuild.outcome == 'success' && steps.routing_bundle.outcome == 'success' }}
+        id: source_verify_after
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_routing_sources.py --app-root . --media-kit-root ../media-kit --output "$ROUTING_RESULTS/routing-sources-after.json" 2>&1 | tee "$ROUTING_RESULTS/source-verify-after.log"
+
+      - name: Finalize original routing sources and freshness
+        if: ${{ !cancelled() && inputs.routing-mode && steps.prepare.outcome == 'success' && steps.variant_prebuild.outcome == 'success' && steps.routing_bundle.outcome == 'success' && steps.source_verify_after.outcome == 'success' }}
+        id: finalize
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_routing_ci.py --app-root . --media-kit-root ../media-kit --flutter-root "$FLUTTER_ROOT" --private-root "${{ steps.prepare.outputs.private-root }}" --output "$ROUTING_RESULTS" --expected-app-sha "$EXPECTED_APP_SHA" --expected-media-kit-sha "$EXPECTED_MEDIA_KIT_SHA" --platform ios --finalize 2>&1 | tee "$ROUTING_RESULTS/source-finalize.log"
+
+      - name: Finalize routing iOS variant against fresh sources
+        if: ${{ !cancelled() && inputs.routing-mode && steps.variant_prepare.outcome == 'success' && steps.variant_prebuild.outcome == 'success' && steps.routing_bundle.outcome == 'success' && steps.source_verify_after.outcome == 'success' && steps.finalize.outcome == 'success' }}
+        id: variant_finalize
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/prepare_ios_variant.py --source "$GITHUB_WORKSPACE/app" --media-kit-root "$GITHUB_WORKSPACE/media-kit" --variant "$ROUTING_VARIANT" --receipt "$ROUTING_RESULTS/ios-variant.json" --bootstrap "$ROUTING_RESULTS/bootstrap.json" --app-commit "$EXPECTED_APP_SHA" --media-kit-commit "$EXPECTED_MEDIA_KIT_SHA" --manifest-parser "$GITHUB_WORKSPACE/app/android/tool/parse_routing_manifest.dart" --finalize 2>&1 | tee "$ROUTING_RESULTS/ios-variant-finalize.log"
+
+      - name: Fail closed because no current iOS native producer input is available
+        if: ${{ inputs.routing-mode && steps.routing_bundle.outcome == 'success' && steps.variant_finalize.outcome == 'success' && steps.source_verify_after.outcome == 'success' && steps.finalize.outcome == 'success' }}
+        id: native_block
+        shell: bash
+        env:
+          APP_SHA: ${{ inputs.app-sha }}
+          MEDIA_KIT_SHA: ${{ inputs.media-kit-sha }}
+          ROUTING_RESULTS: ${{ runner.temp }}/rb/r
+          NATIVE_ROOT: ${{ runner.temp }}/routing-native-ios
+        run: |
+          set -euo pipefail
+          python3 - "$ROUTING_RESULTS/ios-native-blocked.json" <<'PY'
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          diagnostic = {
+              'taskId': 'MK-ROUTING-20261011',
+              'stage': 'SOURCE_PREPARED_NATIVE_BLOCKED',
+              'status': 'ios-current-native-input-unavailable',
+              'platform': 'ios',
+              'appCommit': os.environ['APP_SHA'],
+              'mediaKitCommit': os.environ['MEDIA_KIT_SHA'],
+              'bootstrapReceipt': str(Path(os.environ['ROUTING_RESULTS']) / 'bootstrap.json'),
+              'bootstrapStatus': 'fresh-source-only',
+              'variantReceipt': str(Path(os.environ['ROUTING_RESULTS']) / 'ios-variant.json'),
+              'currentConsumer': 'iOS Xcode consumer requires a current accepted native producer receipt',
+              'currentProducerReceipt': None,
+              'currentProducerReceiptStatus': 'not-provided-to-this-workflow',
+              'nativeInputRoot': os.environ['NATIVE_ROOT'],
+              'nativeInputRootExists': Path(os.environ['NATIVE_ROOT']).exists(),
+              'nativeBinaryProvenanceVerified': False,
+              'xcodeBuildStarted': False,
+              'deviceTest': False,
+          }
+          Path(sys.argv[1]).write_text(json.dumps(diagnostic, indent=2) + '\n', encoding='utf-8')
+          print('SOURCE_PREPARED_NATIVE_BLOCKED: current iOS native producer receipt and accepted local input are unavailable.', file=sys.stderr)
+          raise SystemExit(1)
+          PY
+
+      - name: Upload routing iOS source and native availability diagnostics
+        if: ${{ always() && inputs.routing-mode }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: routing-ios-source-native-diagnostics-${{ inputs.app-sha }}
+          path: ${{ runner.temp }}/rb/r
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Checkout code
+        if: ${{ !inputs.routing-mode }}
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref }}
 
       - name: Setup flutter
+        if: ${{ !inputs.routing-mode }}
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version-file: pubspec.yaml
 
       - name: Set and Extract version
+        if: ${{ !inputs.routing-mode }}
         shell: pwsh
         run: lib/scripts/build.ps1
 
+      - name: Use reproducible dependencies
+        if: ${{ !inputs.routing-mode }}
+        run: scripts/prepare_ci_dependencies.sh
+
+      - name: Resolve release dependencies before SDK patch
+        if: ${{ !inputs.routing-mode }}
+        run: scripts/flutter_pub_get_with_retry.sh
+
       - name: Apply Patch
+        if: ${{ !inputs.routing-mode }}
         shell: pwsh
         run: lib/scripts/patch.ps1 iOS
-        continue-on-error: true
+
+      - name: Resolve pinned dependencies
+        if: ${{ !inputs.routing-mode }}
+        run: scripts/flutter_pub_get_with_retry.sh
+
+      - name: Remove OHOS-only package platform cases
+        if: ${{ !inputs.routing-mode }}
+        run: python3 scripts/prepare_standard_flutter_package_compat.py --workspace "$GITHUB_WORKSPACE"
+
+      - name: Verify media-kit lock
+        if: ${{ !inputs.routing-mode }}
+        run: python3 scripts/verify_media_kit_lock.py pubspec.lock --commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63
 
       - name: Build iOS
+        if: ${{ !inputs.routing-mode }}
         run: |
-          flutter build ios --release --no-codesign --dart-define-from-file=pili_release.json --no-pub
-          ln -sf ./build/ios/iphoneos Payload
+          flutter build ios --release --no-codesign --config-only --dart-define-from-file=pili_release.json --no-pub
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos \
+            -derivedDataPath build/ios/release-derived \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir -p Payload
+          cp -R build/ios/release-derived/Build/Products/Release-iphoneos/Runner.app Payload/
           # make AltSign happy...
           find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \;
           zip -r9 PiliPlusX_ios_${{ inputs.tag }}.ipa Payload/Runner.app
 
-      - name: Release
-        if: ${{ inputs.tag != '' && !contains(inputs.tag, 'test') }}
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ inputs.tag }}
-          name: ${{ inputs.tag }}
-          draft: true
-          prerelease: true
-          files: |
-            PiliPlusX_ios_*.ipa
+      - name: Verify iOS architecture
+        if: ${{ !inputs.routing-mode }}
+        run: python3 scripts/verify_binary_arch.py Payload/Runner.app/Runner --platform ios --arch arm64
+
+      - name: Generate iOS release manifest
+        if: ${{ !inputs.routing-mode }}
+        run: |
+          mkdir -p release-metadata/ios
+          cp PiliPlusX_ios_*.ipa release-metadata/ios/
+          python3 scripts/release_manifest.py release-metadata/ios \
+            --platform ios --abi arm64 \
+            --media-kit-commit 0fa6afe9cd9af8d8437919257d81a27c643f2f63 \
+            --hdr-backend texture-tone-map \
+            --native-library-version media_kit_libs_ios_video@1.1.4
+          python3 scripts/verify_release_manifest.py release-metadata/ios
+          mv release-metadata/ios/manifest.json PiliPlusX_ios_${{ inputs.tag }}.manifest.json
+          mv release-metadata/ios/SHA256SUMS PiliPlusX_ios_${{ inputs.tag }}.SHA256SUMS
 
       - name: Upload ios release
+        if: ${{ !inputs.routing-mode }}
         uses: actions/upload-artifact@v7
         with:
-          archive: false
-          name: iOS-release
-          path: PiliPlusX_ios_*.ipa
+          if-no-files-found: error
+          name: release-ios-arm64-sideload
+          path: |
+            PiliPlusX_ios_*.ipa
+            PiliPlusX_ios_*.manifest.json
+            PiliPlusX_ios_*.SHA256SUMS

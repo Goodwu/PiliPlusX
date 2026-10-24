@@ -6,12 +6,12 @@
 
 import 'dart:async' show Completer;
 
-import 'package:PiliPlus/common/widgets/refresh_layout.dart';
-import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart'
+import 'package:piliplus/common/widgets/refresh_layout.dart';
+import 'package:piliplus/common/widgets/scroll_behavior.dart';
+import 'package:piliplus/common/widgets/scroll_physics.dart'
     show BouncingScrollPhysicsExt;
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:extended_nested_scroll_view/refresh.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:material_ui/material_ui.dart' hide RefreshIndicator;

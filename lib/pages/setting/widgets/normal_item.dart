@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
+import 'package:piliplus/common/widgets/flutter/list_tile.dart';
 import 'package:material_ui/material_ui.dart' hide ListTile;
 
 class NormalItem extends StatefulWidget {

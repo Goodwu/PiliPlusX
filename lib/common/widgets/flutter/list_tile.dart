@@ -770,8 +770,11 @@ class ListTile extends StatelessWidget {
     final effectiveTileColor = selected
         ? selectedBackgroundColor
         : backgroundColor;
+    final int backgroundAlpha8Bit = backgroundColor.toARGB32() >> 24;
+    final int selectedBackgroundAlpha8Bit =
+        selectedBackgroundColor.toARGB32() >> 24;
     final bool hasOpaqueBackground =
-        backgroundColor.alpha > 0 || selectedBackgroundColor.alpha > 0;
+        backgroundAlpha8Bit > 0 || selectedBackgroundAlpha8Bit > 0;
     if (onTap != null || onLongPress != null || hasOpaqueBackground) {
       assert(_debugCheckBackgroundIsHidden(context));
     }
@@ -1610,8 +1613,7 @@ class _RenderListTile extends RenderBox
   );
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData! as BoxParentData;
-    parentData.offset = offset;
+    (box.parentData! as BoxParentData).offset = offset;
   }
 
   // Implements _RenderListTile's layout algorithm. If `positionChild` is not null,

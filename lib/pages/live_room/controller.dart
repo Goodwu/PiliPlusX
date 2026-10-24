@@ -2,43 +2,43 @@ import 'dart:async' show Timer, StreamSubscription;
 import 'dart:convert' show jsonDecode;
 import 'dart:math' as math;
 
-import 'package:PiliPlus/common/widgets/dialog/report.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
-import 'package:PiliPlus/http/live.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/models/common/super_chat_type.dart';
-import 'package:PiliPlus/models/common/video/live_quality.dart';
-import 'package:PiliPlus/models/model_owner.dart';
-import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
-import 'package:PiliPlus/models_new/live/live_danmaku/live_emote.dart';
-import 'package:PiliPlus/models_new/live/live_dm_info/data.dart';
-import 'package:PiliPlus/models_new/live/live_medal_wall/uinfo_medal.dart';
-import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
-import 'package:PiliPlus/models_new/live/live_room_play_info/codec.dart';
-import 'package:PiliPlus/models_new/live/live_room_play_info/stream.dart';
-import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
-import 'package:PiliPlus/pages/common/publish/publish_route.dart';
-import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
-import 'package:PiliPlus/pages/live_room/send_danmaku/view.dart';
-import 'package:PiliPlus/pages/video/widgets/header_control.dart';
-import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
-import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/tcp/live.dart';
-import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/connectivity_utils.dart';
-import 'package:PiliPlus/utils/danmaku_utils.dart';
-import 'package:PiliPlus/utils/duration_utils.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
-import 'package:PiliPlus/utils/global_data.dart';
-import 'package:PiliPlus/utils/num_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/theme_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
-import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:piliplus/common/widgets/dialog/report.dart';
+import 'package:piliplus/common/widgets/flutter/text_field/controller.dart';
+import 'package:piliplus/http/live.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/video.dart';
+import 'package:piliplus/models/common/super_chat_type.dart';
+import 'package:piliplus/models/common/video/live_quality.dart';
+import 'package:piliplus/models/model_owner.dart';
+import 'package:piliplus/models_new/live/live_danmaku/danmaku_msg.dart';
+import 'package:piliplus/models_new/live/live_danmaku/live_emote.dart';
+import 'package:piliplus/models_new/live/live_dm_info/data.dart';
+import 'package:piliplus/models_new/live/live_medal_wall/uinfo_medal.dart';
+import 'package:piliplus/models_new/live/live_room_info_h5/data.dart';
+import 'package:piliplus/models_new/live/live_room_play_info/codec.dart';
+import 'package:piliplus/models_new/live/live_room_play_info/stream.dart';
+import 'package:piliplus/models_new/live/live_superchat/item.dart';
+import 'package:piliplus/pages/common/publish/publish_route.dart';
+import 'package:piliplus/pages/danmaku/danmaku_model.dart';
+import 'package:piliplus/pages/live_room/send_danmaku/view.dart';
+import 'package:piliplus/pages/video/widgets/header_control.dart';
+import 'package:piliplus/plugin/pl_player/controller.dart';
+import 'package:piliplus/plugin/pl_player/models/data_source.dart';
+import 'package:piliplus/plugin/pl_player/utils/danmaku_options.dart';
+import 'package:piliplus/services/service_locator.dart';
+import 'package:piliplus/tcp/live.dart';
+import 'package:piliplus/utils/accounts.dart';
+import 'package:piliplus/utils/connectivity_utils.dart';
+import 'package:piliplus/utils/danmaku_utils.dart';
+import 'package:piliplus/utils/duration_utils.dart';
+import 'package:piliplus/utils/extension/iterable_ext.dart';
+import 'package:piliplus/utils/global_data.dart';
+import 'package:piliplus/utils/num_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage_pref.dart';
+import 'package:piliplus/utils/theme_utils.dart';
+import 'package:piliplus/utils/utils.dart';
+import 'package:piliplus/utils/video_utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kReleaseMode;
@@ -160,9 +160,12 @@ class LiveRoomController extends GetxController {
   void _startSizeSub() {
     if (isPortrait.value) return;
     _stopSizeSub();
-    _sizeSub = plPlayerController.videoPlayerController?.stream.size.listen(
-      _onSizeChanged,
-    );
+    _sizeSub = plPlayerController.videoPlayerController?.stream.videoParams
+        .listen((params) {
+      final w = params.w;
+      final h = params.h;
+      if (w != null && h != null) _onSizeChanged((w, h));
+    });
   }
 
   void _stopSizeSub() {

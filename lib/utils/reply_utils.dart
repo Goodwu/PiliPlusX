@@ -1,19 +1,19 @@
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/common/widgets/selection_text.dart';
-import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
+import 'package:piliplus/common/widgets/selection_text.dart';
+import 'package:piliplus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/reply.dart';
-import 'package:PiliPlus/models/common/reply/reply_sort_type.dart';
-import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/android/android_helper.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/id_utils.dart';
-import 'package:PiliPlus/utils/theme_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/http/loading_state.dart';
+import 'package:piliplus/http/reply.dart';
+import 'package:piliplus/models/common/reply/reply_sort_type.dart';
+import 'package:piliplus/utils/accounts.dart';
+import 'package:piliplus/utils/accounts/account.dart';
+import 'package:piliplus/utils/android/android_helper.dart';
+import 'package:piliplus/utils/extension/iterable_ext.dart';
+import 'package:piliplus/utils/extension/theme_ext.dart';
+import 'package:piliplus/utils/id_utils.dart';
+import 'package:piliplus/utils/theme_utils.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';

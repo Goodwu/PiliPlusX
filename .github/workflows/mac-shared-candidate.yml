@@ -1,0 +1,72 @@
+name: macOS shared core candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-shared-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  shared-candidate:
+    name: Fresh macOS shared candidate (arm64 + Rosetta)
+    runs-on: macos-26
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    env:
+      SOURCE_REF: ${{ github.sha }}
+    steps:
+      - name: Checkout exact workflow source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Fail closed on unapproved sources
+        run: python3 scripts/run_macos_shared_ci_candidate.py --preflight
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install shared-core build tools
+        run: brew install cmake meson ninja pkg-config
+
+      - name: Build isolated candidate
+        run: python3 scripts/run_macos_shared_ci_candidate.py
+
+      - name: Upload final candidate and sidecars
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: error
+          include-hidden-files: true
+          name: macos-shared-candidate-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/piliplusx-shared-candidate/*/artifact/PiliPlusX-shared-candidate.zip
+            ${{ runner.temp }}/piliplusx-shared-candidate/*/artifact/PiliPlusX-shared-candidate.shared-core.json
+            ${{ runner.temp }}/piliplusx-shared-candidate/*/artifact/PiliPlusX-shared-candidate.shared-backend.json
+            ${{ runner.temp }}/piliplusx-shared-candidate/*/artifact/receipts/
+            ${{ runner.temp }}/piliplusx-shared-candidate-diagnostics/result.json
+
+      - name: Upload failure diagnostics only
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: warn
+          include-hidden-files: true
+          name: macos-shared-candidate-failure-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/piliplusx-shared-candidate-diagnostics/
+            ${{ runner.temp }}/piliplusx-shared-candidate/*/logs/

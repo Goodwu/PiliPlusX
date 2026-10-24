@@ -1,47 +1,48 @@
 import 'dart:io';
 
-import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart'
+import 'package:piliplus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart'
     show deviceTouchSlop;
-import 'package:PiliPlus/common/widgets/pair.dart';
-import 'package:PiliPlus/http/constants.dart';
-import 'package:PiliPlus/models/common/bar_hide_type.dart';
-import 'package:PiliPlus/models/common/danmaku/danmaku_font_sync_mode.dart';
-import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
-import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
-import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
-import 'package:PiliPlus/models/common/follow_order_type.dart';
-import 'package:PiliPlus/models/common/member/tab_type.dart';
-import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
-import 'package:PiliPlus/models/common/nav_bar_config.dart';
-import 'package:PiliPlus/models/common/reply/reply_sort_type.dart';
-import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
-import 'package:PiliPlus/models/common/sponsor_block/skip_type.dart';
-import 'package:PiliPlus/models/common/super_chat_type.dart';
-import 'package:PiliPlus/models/common/super_resolution_type.dart';
-import 'package:PiliPlus/models/common/theme/theme_type.dart';
-import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
-import 'package:PiliPlus/models/common/video/live_quality.dart';
-import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
-import 'package:PiliPlus/models/common/video/video_decode_type.dart';
-import 'package:PiliPlus/models/common/video/video_quality.dart';
-import 'package:PiliPlus/models/user/danmaku_rule.dart';
-import 'package:PiliPlus/models/user/info.dart';
-import 'package:PiliPlus/pages/setting/pages/fullscreen_sc_size.dart'
+import 'package:piliplus/common/widgets/pair.dart';
+import 'package:piliplus/http/constants.dart';
+import 'package:piliplus/models/common/bar_hide_type.dart';
+import 'package:piliplus/models/common/danmaku/danmaku_font_sync_mode.dart';
+import 'package:piliplus/models/common/dynamic/dynamic_badge_mode.dart';
+import 'package:piliplus/models/common/dynamic/dynamics_type.dart';
+import 'package:piliplus/models/common/dynamic/up_panel_position.dart';
+import 'package:piliplus/models/common/follow_order_type.dart';
+import 'package:piliplus/models/common/member/tab_type.dart';
+import 'package:piliplus/models/common/msg/msg_unread_type.dart';
+import 'package:piliplus/models/common/nav_bar_config.dart';
+import 'package:piliplus/models/common/reply/reply_sort_type.dart';
+import 'package:piliplus/models/common/sponsor_block/segment_type.dart';
+import 'package:piliplus/models/common/sponsor_block/skip_type.dart';
+import 'package:piliplus/models/common/super_chat_type.dart';
+import 'package:piliplus/models/common/super_resolution_type.dart';
+import 'package:piliplus/models/common/theme/theme_type.dart';
+import 'package:piliplus/models/common/video/audio_quality.dart';
+import 'package:piliplus/models/common/video/cdn_type.dart';
+import 'package:piliplus/models/common/video/live_quality.dart';
+import 'package:piliplus/models/common/video/subtitle_pref_type.dart';
+import 'package:piliplus/models/common/video/video_decode_type.dart';
+import 'package:piliplus/models/common/video/video_quality.dart';
+import 'package:piliplus/models/user/danmaku_rule.dart';
+import 'package:piliplus/models/user/info.dart';
+import 'package:piliplus/pages/setting/pages/fullscreen_sc_size.dart'
     show kFullScreenSCWidth;
-import 'package:PiliPlus/plugin/pl_player/models/audio_output_type.dart';
-import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
-import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
-import 'package:PiliPlus/plugin/pl_player/models/hwdec_type.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/utils/device_utils.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
-import 'package:PiliPlus/utils/global_data.dart';
-import 'package:PiliPlus/utils/login_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:piliplus/plugin/pl_player/models/audio_output_type.dart';
+import 'package:piliplus/plugin/pl_player/models/bottom_progress_behavior.dart';
+import 'package:piliplus/plugin/pl_player/models/fullscreen_mode.dart';
+import 'package:piliplus/plugin/pl_player/models/hwdec_type.dart';
+import 'package:piliplus/plugin/pl_player/models/hdr.dart';
+import 'package:piliplus/plugin/pl_player/models/play_repeat.dart';
+import 'package:piliplus/utils/device_utils.dart';
+import 'package:piliplus/utils/extension/iterable_ext.dart';
+import 'package:piliplus/utils/global_data.dart';
+import 'package:piliplus/utils/login_utils.dart';
+import 'package:piliplus/utils/platform_utils.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_key.dart';
+import 'package:piliplus/utils/utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart' show FlexSchemeVariant;
 import 'package:flutter/foundation.dart';
@@ -265,9 +266,23 @@ abstract final class Pref {
   static String get hardwareDecoding => _setting.get(
     SettingBoxKey.hardwareDecoding,
     defaultValue: Platform.isAndroid
-        ? HwDecType.androidDefault
+        ? DeviceUtils.sdkInt <= 28
+              ? HwDecType.androidLegacyDefault
+              : HwDecType.androidDefault
         : HwDecType.auto.hwdec,
   );
+
+  static HdrMode get hdrMode {
+    final value = _setting.get(
+      SettingBoxKey.hdrMode,
+      defaultValue: HdrMode.auto.name,
+    );
+    final name = value is String ? value : HdrMode.auto.name;
+    return HdrMode.values.firstWhere(
+      (mode) => mode.name == name,
+      orElse: () => HdrMode.auto,
+    );
+  }
 
   static String get videoSync =>
       _setting.get(SettingBoxKey.videoSync, defaultValue: 'display-resample');
@@ -1118,12 +1133,7 @@ abstract final class Pref {
   static bool get enableDocProvider =>
       _setting.get(SettingBoxKey.enableDocProvider, defaultValue: false);
 
-  static Map<String, String> get customAppFont => Map<String, String>.from(
-    _setting.get(
-      SettingBoxKey.customAppFont,
-      defaultValue: const <String, String>{},
-    ),
-  );
+  static String? get appFont => _setting.get(SettingBoxKey.appFont);
 
   static bool get enableLandscapeAutoFullscreen => _setting.get(
     SettingBoxKey.enableLandscapeAutoFullscreen,

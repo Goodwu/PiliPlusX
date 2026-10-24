@@ -1,4 +1,4 @@
-import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:piliplus/pages/dynamics/controller.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 

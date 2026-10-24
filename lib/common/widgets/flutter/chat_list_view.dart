@@ -6,7 +6,7 @@
 
 import 'dart:math' as math;
 
-import 'package:PiliPlus/common/widgets/sliver/sliver_constrained_cross_axis.dart';
+import 'package:piliplus/common/widgets/sliver/sliver_constrained_cross_axis.dart';
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart' hide RenderSliverList;
 import 'package:material_ui/material_ui.dart' hide ListView;
@@ -175,9 +175,8 @@ class RenderSliverChatList extends RenderSliverMultiBoxAdaptor
         parentUsesSize: true,
       );
       if (earliestUsefulChild == null) {
-        final childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
-        childParentData.layoutOffset = 0.0;
+        (firstChild!.parentData! as SliverMultiBoxAdaptorParentData)
+            .layoutOffset = 0.0;
 
         if (scrollOffset == 0.0) {
           firstChild!.layout(childConstraints, parentUsesSize: true);
@@ -198,15 +197,13 @@ class RenderSliverChatList extends RenderSliverMultiBoxAdaptor
         geometry = SliverGeometry(
           scrollOffsetCorrection: -firstChildScrollOffset,
         );
-        final childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
-        childParentData.layoutOffset = 0.0;
+        (firstChild!.parentData! as SliverMultiBoxAdaptorParentData)
+            .layoutOffset = 0.0;
         return;
       }
 
-      final childParentData =
-          earliestUsefulChild.parentData! as SliverMultiBoxAdaptorParentData;
-      childParentData.layoutOffset = firstChildScrollOffset;
+      (earliestUsefulChild.parentData! as SliverMultiBoxAdaptorParentData)
+          .layoutOffset = firstChildScrollOffset;
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
@@ -225,9 +222,8 @@ class RenderSliverChatList extends RenderSliverMultiBoxAdaptor
         assert(earliestUsefulChild != null);
         final double firstChildScrollOffset =
             earliestScrollOffset - paintExtentOf(firstChild!);
-        final childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
-        childParentData.layoutOffset = 0.0;
+        (firstChild!.parentData! as SliverMultiBoxAdaptorParentData)
+            .layoutOffset = 0.0;
 
         if (firstChildScrollOffset < -precisionErrorTolerance) {
           geometry = SliverGeometry(
@@ -278,8 +274,8 @@ class RenderSliverChatList extends RenderSliverMultiBoxAdaptor
       }
       assert(child != null);
       final childParentData =
-          child!.parentData! as SliverMultiBoxAdaptorParentData;
-      childParentData.layoutOffset = endScrollOffset;
+          (child!.parentData! as SliverMultiBoxAdaptorParentData)
+            ..layoutOffset = endScrollOffset;
       assert(childParentData.index == index);
       endScrollOffset = childScrollOffset(child!)! + paintExtentOf(child!);
       return true;

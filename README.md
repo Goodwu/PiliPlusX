@@ -1,17 +1,10 @@
 <div align="center">
     <img width="200" height="200" src="assets/images/logo/logo.png">
-</div>
-
-
-
-<div align="center">
     <h1>PiliPlusX</h1>
-<div align="center">
     
 ![GitHub repo size](https://img.shields.io/github/repo-size/cnctem/PiliPlusX) 
 ![GitHub Repo stars](https://img.shields.io/github/stars/cnctem/PiliPlusX) 
 ![GitHub all releases](https://img.shields.io/github/downloads/cnctem/PiliPlusX/total) 
-</div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
 <img src="assets/screenshots/510shots_so.png" width="32%" alt="home" />
@@ -22,8 +15,10 @@
 <br/>
 </div>
 
+## 开发与验收
 
-<br/>
+- [开发文档索引](docs/README.md)
+- [当前任务与验收状态](TASKS.md)
 
 ## 适配平台
 

@@ -1,9 +1,76 @@
 param(
-    [string]$platform = ""
+    [string]$platform = "",
+    [switch]$SdkOnly,
+    [switch]$PackagesOnly
 )
 
-git config --global user.name "ci"
-git config --global user.email "example@example.com"
+if ($SdkOnly -and $PackagesOnly) {
+    throw "SdkOnly and PackagesOnly cannot be combined"
+}
+
+function Apply-RequiredPatch {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PatchPath
+    )
+
+    git apply --check $PatchPath
+    if ($LASTEXITCODE -eq 0) {
+        git apply $PatchPath
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "$PatchPath applied"
+            return
+        }
+    }
+
+    git apply --reverse --check $PatchPath
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "$PatchPath already applied"
+        return
+    }
+    throw "Unable to apply required patch: $PatchPath"
+}
+
+function Get-PackageConfigRoot {
+    param(
+        [Parameter(Mandatory = $true)][string]$PackageName,
+        [Parameter(Mandatory = $true)][string]$Workspace,
+        [Parameter(Mandatory = $true)][string]$PrivatePubCache
+    )
+
+    $configPath = Join-Path $Workspace ".dart_tool/package_config.json"
+    if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+        throw "package_config.json is missing: $configPath"
+    }
+    $config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $matches = @($config.packages | Where-Object { $_.name -ceq $PackageName })
+    if ($matches.Count -ne 1) {
+        throw "package_config.json must resolve exactly one $PackageName package"
+    }
+    $uri = [Uri]::new($matches[0].rootUri)
+    if (-not $uri.IsFile) {
+        throw "$PackageName rootUri must be a file URI"
+    }
+    $root = [IO.Path]::GetFullPath($uri.LocalPath)
+    $cache = [IO.Path]::GetFullPath($PrivatePubCache).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    $prefix = $cache + [IO.Path]::DirectorySeparatorChar
+    if (-not $root.StartsWith($prefix, [StringComparison]::Ordinal)) {
+        throw "$PackageName package_config root escaped private PUB_CACHE"
+    }
+    $item = Get-Item -LiteralPath $root -Force
+    if (-not $item.PSIsContainer) {
+        throw "$PackageName package_config root is not a directory"
+    }
+    $current = $item
+    while ($current -and $current.FullName.StartsWith($cache, [StringComparison]::Ordinal)) {
+        if ($current.LinkType) {
+            throw "$PackageName package_config root traverses a symbolic link"
+        }
+        if ($current.FullName -eq $cache) { break }
+        $current = $current.Parent
+    }
+    $item.FullName
+}
 
 # TODO: remove
 # https://github.com/flutter/flutter/issues/182281
@@ -101,21 +168,17 @@ $MouseCursorPatch = "lib/scripts/mouse_cursor.patch"
 
 $GeetestIOSPatch = "lib/scripts/geetest_ios.patch"
 
-if ($platform.ToLower() -eq "ios") {
-    git apply $BottomSheetIOSPiliPlusPatch
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$BottomSheetIOSPiliPlusPatch applied"
-    } else {
-        throw "$LASTEXITCODE"
+if (-not $SdkOnly -and -not $PackagesOnly -and $platform.ToLower() -eq "ios") {
+    Apply-RequiredPatch $BottomSheetIOSPiliPlusPatch
+    if ($env:PILIPLUSX_SKIP_GEETEST_IOS_PATCH -ne "1") {
+        Apply-RequiredPatch $GeetestIOSPatch
     }
-    git apply $GeetestIOSPatch
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$GeetestIOSPatch applied"
-    } else {
-        throw "$LASTEXITCODE"
+    else {
+        Write-Host "Skipping obsolete iOS Geetest application patch"
     }
 }
 
+if (-not $PackagesOnly) {
 Set-Location $env:FLUTTER_ROOT
 
 $picks   = @()
@@ -176,15 +239,27 @@ foreach ($revert in $reverts) {
 }
 
 foreach ($patch in $patches) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
+}
+
+# The Flutter-OHOS toolchain uses a dedicated pointer-filter patch chain.
+# Standard Flutter 3.47 runners do not expose the old source shape, and the
+# application-level extended-nested-scroll-view patch is sufficient there.
+if ($env:PILIPLUSX_SKIP_POINTER_FILTER_PATCH -ne "1") {
+    $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
+    python3 "$repoRoot/scripts/prepare_ohos_flutter.py" --flutter-root $env:FLUTTER_ROOT --workspace $repoRoot --pointer-filter-only
+    if ($LASTEXITCODE -ne 0) { throw "Unable to prepare Flutter pointer filter API" }
 }
 
 Set-Location $env:GITHUB_WORKSPACE
+}
+
+Set-Location $env:GITHUB_WORKSPACE
+
+if ($SdkOnly) {
+    Write-Host "Flutter SDK patches complete; package resolution is deferred to the release transaction"
+    return
+}
 
 $BottomSheetAndroidPatchMaterial = "lib/scripts/material/bottom_sheet_android.patch"
 
@@ -202,6 +277,8 @@ $TextFieldPatchMaterial = "lib/scripts/material/text_field.patch"
 
 $ScaffoldPatchMaterial = "lib/scripts/material/scaffold.patch"
 
+$ScaffoldAndroidPatchMaterial = "lib/scripts/material/scaffold_android.patch"
+
 $RefreshIndicatorPatchMaterial = "lib/scripts/material/refresh_indicator.patch"
 
 $TabsPatchMaterial = "lib/scripts/material/tabs.patch"
@@ -210,11 +287,23 @@ $patches_material = @($ModalBarrierPatchMaterial, $NavigationDrawerPatchMaterial
                     $FABPatchMaterial, $TextFieldPatchMaterial, $ScaffoldPatchMaterial, $RefreshIndicatorPatchMaterial,
                     $TabsPatchMaterial)
 
-$PubCacheDir = "~/.pub-cache"
+$PubCacheDir = $env:PUB_CACHE
+if ([string]::IsNullOrWhiteSpace($PubCacheDir)) {
+    if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+        $PubCacheDir = Join-Path $env:LOCALAPPDATA "Pub/Cache"
+    } else {
+        $PubCacheDir = Join-Path $HOME ".pub-cache"
+    }
+}
+$PubCacheDir = [IO.Path]::GetFullPath($PubCacheDir)
+if (-not (Test-Path -LiteralPath $PubCacheDir -PathType Container)) {
+    throw "private PUB_CACHE directory is missing: $PubCacheDir"
+}
 
 switch ($platform.ToLower()) {
     "android" {
         $patches_material += $BottomSheetAndroidPatchMaterial
+        $patches_material += $ScaffoldAndroidPatchMaterial
     }
     "ios" {
         $patches_material += $BottomSheetIOSFlutterMaterialPatchMaterial
@@ -223,49 +312,33 @@ switch ($platform.ToLower()) {
     }
     "macos" {
     }
-    "windows" {
-        $PubCacheDir = "$env:LOCALAPPDATA/Pub/Cache"
-    }
+    "windows" {}
     default {}
 }
 
-try {
-    $MaterialUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
-        Where-Object { $_.Name -like "material_ui-*" } |
-        Select-Object -Last 1
-
-    if ($MaterialUiDir) {
-        Remove-Item -Path $MaterialUiDir.FullName -Recurse -Force
-    }
-} catch {
+flutter pub get --enforce-lockfile
+if ($LASTEXITCODE -ne 0) {
+    throw "flutter pub get failed with exit code $LASTEXITCODE"
 }
 
-flutter pub get
-
-$MaterialUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
-    Where-Object { $_.Name -like "material_ui-*" } |
-    Select-Object -Last 1
-
-if (-not $MaterialUiDir) {
-    throw "material_ui package not found in pub cache"
+if ($env:PILIPLUSX_SKIP_POINTER_FILTER_PATCH -ne "1") {
+    python3 "$env:GITHUB_WORKSPACE/scripts/prepare_ohos_package_patches.py" --workspace $env:GITHUB_WORKSPACE
+    if ($LASTEXITCODE -ne 0) { throw "Unable to prepare extended nested scroll view pointer boundary" }
 }
 
-Write-Host "material_ui dir: $($MaterialUiDir.FullName)"
+$MaterialUiDir = Get-PackageConfigRoot "material_ui" $env:GITHUB_WORKSPACE $PubCacheDir
+
+Write-Host "material_ui dir: $MaterialUiDir"
 
 Get-ChildItem -Path "$env:GITHUB_WORKSPACE/lib/scripts/material" -Filter *.patch | ForEach-Object {
     (Get-Content $_.FullName -Raw) -replace "`r`n", "`n" | 
         Set-Content -NoNewline $_.FullName
 }
 
-cd $MaterialUiDir.FullName
+Set-Location $MaterialUiDir
 
 foreach ($patch in $patches_material) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }
 
 $BottomSheetIOSFlutterPatchCupertino = "lib/scripts/cupertino/bottom_sheet_ios_flutter.patch"
@@ -287,28 +360,17 @@ switch ($platform.ToLower()) {
     default {}
 }
 
-$CupertinoUiDir = Get-ChildItem "$PubCacheDir/hosted/pub.dev" -Directory |
-    Where-Object { $_.Name -like "cupertino_ui-*" } |
-    Select-Object -Last 1
+$CupertinoUiDir = Get-PackageConfigRoot "cupertino_ui" $env:GITHUB_WORKSPACE $PubCacheDir
 
-if (-not $CupertinoUiDir) {
-    throw "cupertino_ui package not found in pub cache"
-}
-
-Write-Host "cupertino_ui dir: $($CupertinoUiDir.FullName)"
+Write-Host "cupertino_ui dir: $CupertinoUiDir"
 
 Get-ChildItem -Path "$env:GITHUB_WORKSPACE/lib/scripts/cupertino" -Filter *.patch | ForEach-Object {
     (Get-Content $_.FullName -Raw) -replace "`r`n", "`n" | 
         Set-Content -NoNewline $_.FullName
 }
 
-cd $CupertinoUiDir.FullName
+Set-Location $CupertinoUiDir
 
 foreach ($patch in $patches_cupertino) {
-    git apply "$env:GITHUB_WORKSPACE/$patch"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$patch applied"
-    } else {
-        throw "$LASTEXITCODE"
-    }
+    Apply-RequiredPatch "$env:GITHUB_WORKSPACE/$patch"
 }

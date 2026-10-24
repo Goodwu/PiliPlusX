@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/models_new/article/article_view/ops.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/vote.dart';
-import 'package:PiliPlus/utils/app_scheme.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
+import 'package:piliplus/common/style.dart';
+import 'package:piliplus/models_new/article/article_view/ops.dart';
+import 'package:piliplus/pages/dynamics/widgets/vote.dart';
+import 'package:piliplus/utils/app_scheme.dart';
+import 'package:piliplus/utils/extension/num_ext.dart';
+import 'package:piliplus/utils/image_utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';

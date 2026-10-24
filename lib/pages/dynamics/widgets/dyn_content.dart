@@ -1,8 +1,8 @@
-import 'package:PiliPlus/models/dynamics/result.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/additional_panel.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/blocked_item.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/content_panel.dart';
-import 'package:PiliPlus/pages/dynamics/widgets/module_panel.dart';
+import 'package:piliplus/models/dynamics/result.dart';
+import 'package:piliplus/pages/dynamics/widgets/additional_panel.dart';
+import 'package:piliplus/pages/dynamics/widgets/blocked_item.dart';
+import 'package:piliplus/pages/dynamics/widgets/content_panel.dart';
+import 'package:piliplus/pages/dynamics/widgets/module_panel.dart';
 import 'package:material_ui/material_ui.dart';
 
 List<Widget> dynContent(

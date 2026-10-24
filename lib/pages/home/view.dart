@@ -1,16 +1,16 @@
-import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/custom_height_widget.dart';
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart' show tabBarView;
-import 'package:PiliPlus/pages/common/common_page.dart';
-import 'package:PiliPlus/pages/home/controller.dart';
-import 'package:PiliPlus/pages/main/controller.dart';
-import 'package:PiliPlus/pages/mine/controller.dart';
-import 'package:PiliPlus/utils/extension/get_ext.dart';
-import 'package:PiliPlus/utils/extension/size_ext.dart';
-import 'package:PiliPlus/utils/feed_back.dart';
-import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:piliplus/common/style.dart';
+import 'package:piliplus/common/widgets/custom_height_widget.dart';
+import 'package:piliplus/common/widgets/image/network_img_layer.dart';
+import 'package:piliplus/common/widgets/scroll_physics.dart' show tabBarView;
+import 'package:piliplus/pages/common/common_page.dart';
+import 'package:piliplus/pages/home/controller.dart';
+import 'package:piliplus/pages/main/controller.dart';
+import 'package:piliplus/pages/mine/controller.dart';
+import 'package:piliplus/utils/extension/get_ext.dart';
+import 'package:piliplus/utils/extension/size_ext.dart';
+import 'package:piliplus/utils/feed_back.dart';
+import 'package:piliplus/utils/storage.dart';
+import 'package:piliplus/utils/storage_pref.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -203,12 +203,12 @@ class _HomePageState extends CommonPageState<HomePage>
                         final text = data!.text!;
                         if (Pref.recordSearchHistory &&
                             !Pref.clipboardSearchIncognito) {
-                          final List<String> historyList = List<String>.from(
-                            GStorage.historyWord.get('cacheList') ?? [],
-                          );
-                          historyList
-                            ..remove(text)
-                            ..insert(0, text);
+                          final List<String> historyList =
+                              List<String>.from(
+                                  GStorage.historyWord.get('cacheList') ?? [],
+                                )
+                                ..remove(text)
+                                ..insert(0, text);
                           GStorage.historyWord.put('cacheList', historyList);
                         }
                         Get.toNamed(

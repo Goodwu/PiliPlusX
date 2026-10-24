@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:PiliPlus/common/assets.dart';
-import 'package:PiliPlus/models_new/video/video_detail/page.dart';
-import 'package:PiliPlus/pages/video/controller.dart';
-import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/id_utils.dart';
+import 'package:piliplus/common/assets.dart';
+import 'package:piliplus/models_new/video/video_detail/page.dart';
+import 'package:piliplus/pages/video/controller.dart';
+import 'package:piliplus/pages/video/introduction/ugc/controller.dart';
+import 'package:piliplus/utils/extension/num_ext.dart';
+import 'package:piliplus/utils/id_utils.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';

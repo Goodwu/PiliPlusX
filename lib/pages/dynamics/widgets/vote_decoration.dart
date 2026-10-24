@@ -111,7 +111,8 @@ class _VoteDecorationPainter extends BoxPainter {
   }
 
   double _calculateAdjustedSide(BorderSide side) {
-    if (side.color.alpha == 255 && side.style == .solid) {
+    if ((side.color.a * 255.0).round().clamp(0, 255) == 255 &&
+        side.style == .solid) {
       return side.strokeInset;
     }
     return 0;

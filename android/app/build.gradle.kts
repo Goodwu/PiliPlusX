@@ -30,9 +30,10 @@ android {
     defaultConfig {
         applicationId = "com.example.piliplusx"
         minSdk = flutter.minSdkVersion
-        targetSdk = 37
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
     }
 
     packagingOptions.jniLibs.useLegacyPackaging = true
@@ -79,7 +80,8 @@ android {
 //            )
         }
         debug {
-            applicationIdSuffix = ".debug"
+            // Same applicationId as release so a debug build overwrites the
+            // installed release in place (keeps login state for diagnosis).
         }
     }
 
